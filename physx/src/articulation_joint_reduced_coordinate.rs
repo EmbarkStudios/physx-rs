@@ -12,7 +12,7 @@ use super::{
     articulation_joint_base::*, articulation_link::ArticulationDriveType, body::*, px_type::*,
 };
 use nalgebra_glm as glm;
-use ark::log::macros::*;
+use log::*;
 use physx_macros::*;
 use physx_sys::*;
 

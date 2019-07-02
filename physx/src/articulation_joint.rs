@@ -13,7 +13,7 @@ use super::articulation_joint_base::ArticulationJointBase;
 use super::px_type::*;
 use super::transform::na_to_px_q;
 use nalgebra_glm as glm;
-use ark::log::macros::*;
+use log::*;
 use physx_macros::*;
 use physx_sys::*;
 

@@ -10,7 +10,7 @@
 */
 
 use super::{foundation::*, px_type::*, traits::*};
-use ark::log::macros::*;
+use log::*;
 use enumflags2::BitFlags;
 use enumflags2_derive::EnumFlags;
 use physx_macros::*;
