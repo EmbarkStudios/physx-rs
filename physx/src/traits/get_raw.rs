@@ -1,0 +1,15 @@
+// Author: Tom Olsson <mail@tomolsson.se>
+// Copyright © 2019, Embark Studios, all rights reserved.
+// Created: 15 April 2019
+
+#![warn(clippy::all)]
+#![warn(rust_2018_idioms)]
+
+/*!
+Utility trait for dealing with wrapped inheritance
+ */
+
+pub trait GetRaw<T> {
+    fn get_raw(&self) -> *const T;
+    fn get_raw_mut(&mut self) -> *mut T;
+}

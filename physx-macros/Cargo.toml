@@ -1,0 +1,16 @@
+[package]
+name = "physx-macros"
+version = "0.1.0"
+authors = ["Embark <opensource@embark-studios.com>"]
+license = "Embark-Proprietary"
+edition = "2018"
+publish = false
+
+[lib]
+proc-macro = true
+doctest = false
+
+[dependencies]
+syn = { version = "0.15", features = ["full", "extra-traits", "parsing", "printing"] }
+quote = "0.6"
+proc-macro2 = "0.4"
