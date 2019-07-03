@@ -4,7 +4,8 @@ Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.c
 
 ## Examples
 
-[Ball](examples/ball.rs)
+### [Ball](examples/ball.rs)
+
 ```
  o
 
@@ -25,7 +26,8 @@ Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.c
          o                                o                 o oo         oooooooooo oo
 
 ```
-`cargo run --examples ball`
+
+A simple example to showcase how to use physx-sys. It can be run with `cargo run --examples ball`.
 
 ## License
 
