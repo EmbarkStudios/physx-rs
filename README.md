@@ -10,11 +10,11 @@ This repository contains 3 crates:
 
 | Name | Description | Links |
 | --- | --- | --- |
-| [`physx`](physx/) | High-level interface on top of `physx-sys` | [![Crates.io](https://img.shields.io/crates/v/physx.svg)](https://crates.io/crates/physx) [![Docs](https://docs.rs/physx/badge.svg)](https://docs.rs/physx) |
+| [`physx`](physx/) | High-level interface on top of `physx-sys` 🚧 | [![Crates.io](https://img.shields.io/crates/v/physx.svg)](https://crates.io/crates/physx) [![Docs](https://docs.rs/physx/badge.svg)](https://docs.rs/physx) |
 | [`physx-sys`](physx-sys/) | Unsafe bindings to the PhysX C++ API | [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys) [![Docs](https://docs.rs/physx-sys/badge.svg)](https://docs.rs/physx-sys) |
 | [`physx-macros`](physx-macros/) | Utility macros used internally by the `physx` crate | [![Crates.io](https://img.shields.io/crates/v/physx-macros.svg)](https://crates.io/crates/physx-macros) [![Docs](https://docs.rs/physx-macros/badge.svg)](https://docs.rs/physx-macros) |
 
-Our goal is that one should only use the safe Rust `physx` crate but it is still in early development and doesn't proivde full coverage yet. 
+Our goal is that one should only use the safe Rust `physx` crate but it is still in early development and doesn't provide full coverage yet 🚧 (tracked in #3). 
 
 So right now one for certain features one can use it in conjunction with the unsafe and cumbersome `physx-sys` crate.
 
