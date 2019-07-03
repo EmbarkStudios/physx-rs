@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
 
-A Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
+Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 
 This contains 3 crates:
 
@@ -13,8 +13,6 @@ This contains 3 crates:
 | [`physx-macros`](physx-macros/README.md) | Utility macros used internally by the `physx` crate | [![Crates.io](https://img.shields.io/crates/v/physx-macros.svg)](https://crates.io/crates/physx-macros) [![Docs](https://docs.rs/physx-macros/badge.svg)](https://docs.rs/physx-macros) |
 
 TODO: say that ideally only `physx` would be used, but it doesn't provide full coverage yet. can be used in conjunction with `physx-sys`.
-
-
 
 ## Why?
 
@@ -64,8 +62,7 @@ You can run the example with `cargo run`.
 
 ## How does it work?
 
-Some high-level info about how the wrapper is constructed, and how we wrap inheritance stuffs?
-
+TODO: Some high-level info about how the wrapper is constructed, and how we wrap inheritance stuffs?
 
 Uses `physx-sys` as a low-level blabla.
 
@@ -79,8 +76,6 @@ List of currently supported PhysX stuff at the high level?
 
 ## License
 
-TODO: figure out how NVIDIA's licensing of PhysX interacts with our wrapper. Probably hingent on @repi's mail with NV.
-
 Licensed under either of
 
 * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
@@ -89,8 +84,6 @@ Licensed under either of
 at your option.
 
 ### Contribution
-
-TODO: confirm.
 
 Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
