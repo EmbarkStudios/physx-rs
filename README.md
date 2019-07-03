@@ -67,17 +67,11 @@ unsafe {
 
 ## How does it work?
 
-TODO: Some high-level info about how the wrapper is constructed, and how we wrap inheritance stuffs?
-
-Uses `physx-sys` as a low-level blabla.
+TODO: Some high-level info about how the wrapper is constructed, and how we wrap inheritance stuffs? Uses `physx-sys` as a low-level blabla.
 
 ## Features
 
-List of currently supported PhysX stuff at the high level?
-
-## Known issues
-
-* blabla
+TODO: List of currently supported PhysX stuff at the high level?
 
 ## License
 
