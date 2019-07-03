@@ -11,6 +11,23 @@ readme = "README.md"
 keywords = [] # TODO: fill in before publishing
 categories = [] # TODO: fill in before publishing
 publish = false # not yet
+exclude = [
+    "PhysX/externals/clang-physxmetadata/**/*",
+    "PhysX/externals/glew/**/*",
+    "PhysX/externals/opengl-linux/**/*",
+    "PhysX/externals/targa/**/*",
+    "PhysX/externals/vswhere/**/*",
+    "PhysX/*demo/**/*",
+    "PhysX/physx/bin/**/*",
+    "PhysX/physx/buildtools/**/*",
+    "PhysX/physx/documentation/**/*",
+    "PhysX/physx/samples/**/*",
+    "PhysX/physx/snippets/**/*",
+    "PhysX/physx/tools/**/*",
+    "PhysX/**/*.sh",
+    "PhysX/**/*.bat",
+    "PhysX/**/*.html",
+]
 
 [lib]
 doctest = false
