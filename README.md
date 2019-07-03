@@ -58,7 +58,26 @@ unsafe {
 }
 ```
 
+You can run the example with `cargo run --example ball`, which should show the following output:
+
 ![Example](images/example-ball.png)
+
+We also provide a (Work-In-Progress :construction:) higher-level API to use Rust Patterns and leverage the safety of the language. With this API; the above code becomes:
+
+``` Rust
+    const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
+    let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
+
+    let mut physics = PhysicsBuilder::default()
+        .load_extensions(false) // switch this flag to load extensions during setup
+        .build(&mut foundation);
+
+    let mut scene = physics.create_scene(
+        SceneBuilder::default()
+            .set_gravity(glm::vec3(0.0, -9.81, 0.0))
+            .set_simulation_threading(SimulationThreadType::Dedicated(1)),
+    );
+```
 
 ## Prerequisites
 
