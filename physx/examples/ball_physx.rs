@@ -4,19 +4,18 @@ use physx::prelude::*;
 const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
 
 fn main() {
-    let mut physics_builder = PhysicsBuilder::default();
     let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
 
-    let mut physics = physics_builder
+    let mut physics = PhysicsBuilder::default()
         .load_extensions(false)
         .build(&mut foundation);
 
-    let mut scene_builder = SceneBuilder::default();
-    scene_builder
-        .set_gravity(glm::vec3(0.0, -9.81, 0.0))
-        .set_simulation_threading(SimulationThreadType::Dedicated(1));
+    let mut scene = physics.create_scene(
+        SceneBuilder::default()
+            .set_gravity(glm::vec3(0.0, -9.81, 0.0))
+            .set_simulation_threading(SimulationThreadType::Dedicated(1)),
+    );
 
-    let mut scene = physics.create_scene(&scene_builder);
     let material = physics.create_material(0.5, 0.5, 0.6);
     let ground_plane = physics.create_plane(glm::vec3(0.0, 1.0, 0.0), 0.0, material);
     scene.add_actor(ground_plane);
@@ -31,8 +30,8 @@ fn main() {
     );
 
     sphere_actor.set_angular_damping(0.5);
-
     let sphere_handle = scene.add_dynamic(sphere_actor);
+
     let heights_over_time = (0..100)
         .map(|_| {
             scene.simulate(0.1);
@@ -51,18 +50,16 @@ fn main() {
         .collect::<Vec<_>>();
 
     let max_h = 18;
-    let lines = (0..max_h).map(|h| {
-        let h = max_h - 1 - h;
-        heights_over_time
-            .iter()
-            .enumerate()
-            .map(|(_t, p)| if h == *p { 'o' } else { ' ' })
-            .collect::<String>()
-    });
-
-    for l in lines {
-        println!("{}", l);
-    }
+    (0..max_h)
+        .map(|h| {
+            let h = max_h - 1 - h;
+            heights_over_time
+                .iter()
+                .enumerate()
+                .map(|(_t, p)| if h == *p { 'o' } else { ' ' })
+                .collect::<String>()
+        })
+        .for_each(|line| println!("{}", line));
 
     scene.release();
     drop(physics); // todo: this looks weird...
