@@ -57,12 +57,13 @@ unsafe {
     let scene = PxPhysics_createScene_mut(physics, &scene_desc);
 }
 ```
+
 You can run the example with `cargo run`.
 
 ## Prerequisites
 
-* C++ compiler; TODO: figure out how other crates phrase this.
-* CMAKE? don't remember if we need it for this, or just the generator
+* C++ compiler
+* CMake
 
 ## How does it work?
 
