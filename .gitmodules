@@ -1,0 +1,4 @@
+[submodule "physx-sys/PhysX"]
+	path = physx-sys/PhysX
+	url = https://github.com/NVIDIAGameWorks/PhysX.git
+	ignore = untracked
