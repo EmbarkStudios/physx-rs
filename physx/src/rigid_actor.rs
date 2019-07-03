@@ -9,14 +9,17 @@
 Trait for RigidActor
  */
 
-use super::actor::Actor;
-use super::geometry::*;
-use super::px_type::*;
-use super::shape::CollisionLayer;
-use super::shape::Shape;
-use super::traits::*;
-use super::transform::{na_to_px_tf, px_to_na_tf};
-use super::user_data::UserData;
+use super::{
+    actor::Actor,
+    body::BodyHandle,
+    geometry::*,
+    px_type::*,
+    shape::CollisionLayer,
+    shape::Shape,
+    traits::*,
+    transform::{na_to_px_tf, px_to_na_tf, px_to_na_v3},
+    user_data::UserData,
+};
 use enumflags2::BitFlags;
 use nalgebra_glm as glm;
 use physx_macros::physx_type;
@@ -38,9 +41,19 @@ impl RigidActor {
         _self
     }
 
+    /// Get a handle which can later be converted back into this body via the Scene.
+    pub fn handle(&self) -> BodyHandle {
+        BodyHandle(self.get_raw() as usize)
+    }
+
     /// Get the global pose of this rigid actor
     pub fn get_global_pose(&self) -> glm::Mat4 {
         px_to_na_tf(unsafe { PxRigidActor_getGlobalPose(self.get_raw()) })
+    }
+
+    /// Get the global pose of this rigid actor
+    pub fn get_global_position(&self) -> glm::Vec3 {
+        px_to_na_v3(unsafe { PxRigidActor_getGlobalPose(self.get_raw()).p })
     }
 
     /// Set the global pose of this rigid actor

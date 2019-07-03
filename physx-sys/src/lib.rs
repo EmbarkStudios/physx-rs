@@ -9,7 +9,7 @@ include!("physx_generated.rs");
 use std::ffi::c_void;
 
 pub type CollisionCallback =
-    extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
+    unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
@@ -22,7 +22,7 @@ pub struct FilterShaderCallbackInfo {
     pub constantBlockSize: u32,
 }
 
-pub type SimulationFilterShader = extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
+pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
 
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;

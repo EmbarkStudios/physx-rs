@@ -20,44 +20,41 @@ use std::ptr::null_mut;
 pub const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
 
 #[no_mangle]
-pub extern "C" fn on_contact_callback(
+pub unsafe extern "C" fn on_contact_callback(
     userdata: *mut std::ffi::c_void,
     header: *const PxContactPairHeader,
     pairs: *const PxContactPair,
     count: u32,
 ) {
-    unsafe {
-        if let Some(header) = header.as_ref() {
-            let scene: &mut Scene = &mut *(userdata as *mut Scene);
-            let first_px_actor = header.actors[0];
-            let second_px_actor = header.actors[1];
-            let pairs = std::slice::from_raw_parts(pairs, count as usize);
-            scene.collide_raw_pair(first_px_actor, second_px_actor, pairs);
-        }
+    if let Some(header) = header.as_ref() {
+        let scene: &mut Scene = &mut *(userdata as *mut Scene);
+        let first_px_actor = header.actors[0];
+        let second_px_actor = header.actors[1];
+        let pairs = std::slice::from_raw_parts(pairs, count as usize);
+        scene.collide_raw_pair(first_px_actor, second_px_actor, pairs);
     }
 }
 
 #[no_mangle]
-pub extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) -> u16 {
-    unsafe {
-        if let Some(info) = info.as_ref() {
-            (*info.pairFlags).mBits |= (PxPairFlag::eSOLVE_CONTACT
-                | PxPairFlag::eNOTIFY_TOUCH_FOUND
-                | PxPairFlag::eNOTIFY_CONTACT_POINTS) as u16;
-            if (info.filterData0.word0 & info.filterData1.word1) == 0 {
-                PxFilterFlag::eSUPPRESS as u16
-            } else {
-                PxFilterFlag::eDEFAULT as u16
-            }
+pub unsafe extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) -> u16 {
+    if let Some(info) = info.as_ref() {
+        (*info.pairFlags).mBits |= (PxPairFlag::eSOLVE_CONTACT
+            | PxPairFlag::eNOTIFY_TOUCH_FOUND
+            | PxPairFlag::eNOTIFY_CONTACT_POINTS) as u16;
+        if (info.filterData0.word0 & info.filterData1.word1) == 0 {
+            PxFilterFlag::eSUPPRESS as u16
         } else {
             PxFilterFlag::eDEFAULT as u16
         }
+    } else {
+        PxFilterFlag::eDEFAULT as u16
     }
 }
 
 pub struct Physics {
     pub physics: *mut PxPhysics,
     pvd: Option<VisualDebugger>,
+    extensions_loaded: bool,
 }
 
 impl GetRaw<PxPhysics> for Physics {
@@ -92,18 +89,25 @@ impl Physics {
                 (None, physx_create_physics(foundation.get_raw_mut()))
             }
         };
-        if builder.load_extensions {
+
+        let extensions_loaded = if builder.load_extensions {
             unsafe {
                 phys_PxInitExtensions(
                     physics,
                     pvd.as_mut()
                         .map(|pv| pv.get_raw_mut())
                         .unwrap_or_else(null_mut),
-                );
+                )
             }
-        }
+        } else {
+            false
+        };
 
-        Self { physics, pvd }
+        Self {
+            physics,
+            pvd,
+            extensions_loaded,
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +146,7 @@ impl Physics {
         RigidStatic::new(px_rs)
     }
 
-    pub fn create_dynamic(
+    pub unsafe fn create_dynamic(
         &mut self,
         transform: glm::Mat4,
         geometry: *const PxGeometry,
@@ -150,46 +154,54 @@ impl Physics {
         density: f32,
         shape_transform: glm::Mat4,
     ) -> RigidDynamic {
-        let px_rs = unsafe {
-            phys_PxCreateDynamic(
-                self.get_raw_mut(),
-                &na_to_px_tf(transform),
-                geometry,
-                material,
-                density,
-                &na_to_px_tf(shape_transform),
-            )
-        };
+        let px_rs = phys_PxCreateDynamic(
+            self.get_raw_mut(),
+            &na_to_px_tf(transform),
+            geometry,
+            material,
+            density,
+            &na_to_px_tf(shape_transform),
+        );
 
-        RigidDynamic::from_ptr(px_rs)
+        RigidDynamic::new(px_rs)
     }
 
-    pub fn create_static(
+    pub unsafe fn create_static(
         &mut self,
         transform: glm::Mat4,
         geometry: *const PxGeometry,
         material: *mut PxMaterial,
         shape_transform: glm::Mat4,
     ) -> RigidStatic {
-        let px_rs = unsafe {
-            phys_PxCreateStatic(
-                self.get_raw_mut(),
-                &na_to_px_tf(transform),
-                geometry,
-                material,
-                &na_to_px_tf(shape_transform),
-            )
-        };
+        let px_rs = phys_PxCreateStatic(
+            self.get_raw_mut(),
+            &na_to_px_tf(transform),
+            geometry,
+            material,
+            &na_to_px_tf(shape_transform),
+        );
 
-        RigidStatic::from_ptr(px_rs)
+        RigidStatic::new(px_rs)
     }
 
-    pub fn create_plane(&mut self) -> RigidStatic {
+    /// Create an infinite plane with a normal pointing up, at origin, with a rough standard material.
+    pub fn create_surface(&mut self) -> RigidStatic {
         unsafe {
-            let plane = PxPlane_new_1(0.0, 1.0, 0.0, 4.0);
+            let plane = PxPlane_new_1(0.0, 1.0, 0.0, 0.0);
             let mtrl = PxPhysics_createMaterial_mut(phys_PxGetPhysics(), 0.9, 0.9, 0.0);
             RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, mtrl))
         }
+    }
+
+    /// Create an infinite plane, parametrized by a normal, an offset, and a material of the surface.
+    pub unsafe fn create_plane(
+        &mut self,
+        normal: glm::Vec3,
+        offset: f32,
+        material: *mut PxMaterial,
+    ) -> RigidStatic {
+        let plane = PxPlane_new_1(normal.x, normal.y, normal.z, offset);
+        RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, material))
     }
 
     pub fn get_tolerances_scale(&self) -> &PxTolerancesScale {
@@ -241,6 +253,9 @@ impl Physics {
 impl Drop for Physics {
     fn drop(&mut self) {
         unsafe {
+            if self.extensions_loaded {
+                phys_PxCloseExtensions();
+            }
             PxPhysics_release_mut(self.get_raw_mut());
         }
     }
