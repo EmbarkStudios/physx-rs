@@ -58,7 +58,7 @@ unsafe {
 }
 ```
 
-You can run the example with `cargo run`.
+![Example](images/example-ball.png)
 
 ## Prerequisites
 
