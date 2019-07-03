@@ -321,22 +321,25 @@ impl Scene {
     /// Retrieve a RigidActor based on the bodyhandle. Note: This API is unsafe
     /// and bypasses a lot of safety checks for lifetimes and ownership.
     pub unsafe fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
-        std::mem::transmute(handle)
+        // Clippy this is the right way to do it instead of a transmute...
+        &*(handle as *const BodyHandle as *const super::px_type::PxType<PxRigidActor>)
     }
 
     pub fn find_matching_rigid_actor_mut(
         &mut self,
         actor: *const PxRigidActor,
     ) -> Option<&mut RigidActor> {
-        if let Some(rigid) = self.statics.iter_mut().find(|elem| {
-            let actor_ptr = elem.get_raw() as *const PxRigidActor;
-            actor == actor_ptr
-        }) {
+        if let Some(rigid) = self
+            .statics
+            .iter_mut()
+            .find(|elem| actor == elem.get_raw() as *const PxRigidActor)
+        {
             return Some(rigid);
-        } else if let Some(rigid) = self.dynamics.iter_mut().find(|elem| {
-            let actor_ptr = elem.get_raw() as *const PxRigidActor;
-            actor == actor_ptr
-        }) {
+        } else if let Some(rigid) = self
+            .dynamics
+            .iter_mut()
+            .find(|elem| actor == elem.get_raw() as *const PxRigidActor)
+        {
             return Some(rigid);
         };
 
