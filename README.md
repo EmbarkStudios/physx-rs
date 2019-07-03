@@ -1,10 +1,12 @@
 # 🎳 physx-rs
 
+[![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
+
 A Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 
 This contains 3 crates:
 
-* [`physx`](physx/README.md) - A high-level interface on top of `physx-sys`
+* [`physx`](physx/README.md) - High-level interface on top of `physx-sys`
 * [`physx-sys`](physx-sys/README.md) - Unsafe bindings to the PhysX C++ API
 * [`physx-macros`](physx-macros/README.md) - Utility macros used internally by the `physx` crate
 
