@@ -1,4 +1,4 @@
-// Author: Tom Olsson <mail@tomolsson.se>
+// Author: Tom Olsson <tom.olsson@embark-studios.com>
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 12 April 2019
 
