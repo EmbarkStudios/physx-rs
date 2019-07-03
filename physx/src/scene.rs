@@ -279,50 +279,24 @@ impl Scene {
 
     /// Lookup and retrieve a RigidStatic reference for this handle
     pub fn get_static(&self, handle: BodyHandle) -> Option<&RigidStatic> {
-        self.statics.iter().find_map(|elem| {
-            let actor_handle = elem.handle();
-            if handle == actor_handle {
-                Some(elem)
-            } else {
-                None
-            }
-        })
+        self.statics.iter().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidStatic reference for this handle
     pub fn get_static_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidStatic> {
-        self.statics.iter_mut().find_map(|elem| {
-            let actor_handle = elem.handle();
-            if handle == actor_handle {
-                Some(elem)
-            } else {
-                None
-            }
-        })
+        self.statics.iter_mut().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidDynamic reference for this handle
     pub fn get_dynamic(&self, handle: BodyHandle) -> Option<&RigidDynamic> {
-        self.dynamics.iter().find_map(|elem| {
-            let actor_handle = elem.handle();
-            if handle == actor_handle {
-                Some(elem)
-            } else {
-                None
-            }
-        })
+        self.dynamics.iter().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidDynamic reference for this handle
     pub fn get_dynamic_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidDynamic> {
-        self.dynamics.iter_mut().find_map(|elem| {
-            let actor_handle = elem.handle();
-            if handle == actor_handle {
-                Some(elem)
-            } else {
-                None
-            }
-        })
+        self.dynamics
+            .iter_mut()
+            .find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidActor reference for this handle
@@ -332,38 +306,36 @@ impl Scene {
         } else if let Some(static_) = self.get_static(handle) {
             Some(static_)
         } else {
+            for body in &self.bodies {
+                let art_handle = body.handle();
+                let part_handle = PartHandle(art_handle.0, handle.0);
+                let part = body.part_from_handle(part_handle);
+                if part.is_some() {
+                    return part.map(|link| link.deref().deref());
+                }
+            }
             None
         }
     }
 
     /// Retrieve a RigidActor based on the bodyhandle. Note: This API is unsafe
     /// and bypasses a lot of safety checks for lifetimes and ownership.
-    pub fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
-        unsafe { std::mem::transmute(handle) }
+    pub unsafe fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
+        std::mem::transmute(handle)
     }
 
     pub fn find_matching_rigid_actor_mut(
         &mut self,
         actor: *const PxRigidActor,
     ) -> Option<&mut RigidActor> {
-        if let Some(rigid) = self.statics.iter_mut().find_map(|elem| {
+        if let Some(rigid) = self.statics.iter_mut().find(|elem| {
             let actor_ptr = elem.get_raw() as *const PxRigidActor;
-            if actor == actor_ptr {
-                Some(elem)
-            } else {
-                None
-            }
+            actor == actor_ptr
         }) {
             return Some(rigid);
-        };
-
-        if let Some(rigid) = self.dynamics.iter_mut().find_map(|elem| {
+        } else if let Some(rigid) = self.dynamics.iter_mut().find(|elem| {
             let actor_ptr = elem.get_raw() as *const PxRigidActor;
-            if actor == actor_ptr {
-                Some(elem)
-            } else {
-                None
-            }
+            actor == actor_ptr
         }) {
             return Some(rigid);
         };

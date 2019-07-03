@@ -41,8 +41,7 @@ fn main() {
 
             // in this case, we know the sphere still exists and is a
             // RigidActor-type so we can use the unchecked API
-            scene
-                .get_rigid_actor_unchecked(&sphere_handle)
+            unsafe { scene.get_rigid_actor_unchecked(&sphere_handle) }
                 .get_global_position()
                 .y as i32
                 - 10
