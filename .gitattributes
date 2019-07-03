@@ -1,0 +1,4 @@
+# configure GitHub linguist (language bar) https://github.com/github/linguist#overrides
+physx-sys/PhysX/* linguist-vendored
+physx-sys/pxbind/fmt/* linguist-vendored
+physx-sys/src/* linguist-generated=true
