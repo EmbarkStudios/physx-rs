@@ -289,9 +289,33 @@ impl Scene {
         })
     }
 
+    /// Lookup and retrieve a RigidStatic reference for this handle
+    pub fn get_static_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidStatic> {
+        self.statics.iter_mut().find_map(|elem| {
+            let actor_handle = elem.handle();
+            if handle == actor_handle {
+                Some(elem)
+            } else {
+                None
+            }
+        })
+    }
+
     /// Lookup and retrieve a RigidDynamic reference for this handle
     pub fn get_dynamic(&self, handle: BodyHandle) -> Option<&RigidDynamic> {
         self.dynamics.iter().find_map(|elem| {
+            let actor_handle = elem.handle();
+            if handle == actor_handle {
+                Some(elem)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Lookup and retrieve a RigidDynamic reference for this handle
+    pub fn get_dynamic_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidDynamic> {
+        self.dynamics.iter_mut().find_map(|elem| {
             let actor_handle = elem.handle();
             if handle == actor_handle {
                 Some(elem)
