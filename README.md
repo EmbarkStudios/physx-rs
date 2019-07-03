@@ -4,7 +4,9 @@
 
 Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 
-This contains 3 crates:
+Created and mantained by [Embark](http://embark.games) and _**not**_ officially supported by NVIDIA.
+
+This repository contains 3 crates:
 
 | Name | Description | Links |
 | --- | --- | --- |
