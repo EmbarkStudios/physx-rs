@@ -1,12 +1,12 @@
 # physx-rs
 
-A Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for computer games.
+A Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 
 This contains 3 crates:
 
-* [`physx`](physx/README.md) - A high-level interface on top `physx-sys`
+* [`physx`](physx/README.md) - A high-level interface on top of `physx-sys`
 * [`physx-sys`](physx-sys/README.md) - Unsafe bindings to the PhysX C++ API
-* [`physx-macros`](physx-macros/README.md) - Utility macros used internally by `physx`
+* [`physx-macros`](physx-macros/README.md) - Utility macros used internally by the `physx` crate
 
 TODO: say that ideally only `physx` would be used, but it doesn't provide full coverage yet. can be used in conjunction with `physx-sys`.
 
@@ -25,6 +25,7 @@ TODO: say that ideally only `physx` would be used, but it doesn't provide full c
 * [nphysics](https://github.com/rustsim/nphysics) a 2 and 3-dimensional physics engine for games and animations written in Rust. (TODO default to this unless you really want physx)
 
 ## How?
+
 The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html)
 
 ```Rust
