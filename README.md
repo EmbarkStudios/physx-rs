@@ -1,4 +1,4 @@
-# physx-rs
+# 🎳 physx-rs
 
 A Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 

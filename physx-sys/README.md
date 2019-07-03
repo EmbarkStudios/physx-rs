@@ -1,4 +1,4 @@
-# Rust bindings for NVIDIA PhysX
+# 🎳 Rust bindings for NVIDIA PhysX
 
 Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
 

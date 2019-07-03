@@ -1,4 +1,4 @@
-# physx
+# 🎳 physx
 
 Early Rust crate that is intended to be a safe and easy to use high-level wrapper for the unsafe `physx-sys` bindings
 
