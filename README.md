@@ -14,7 +14,7 @@ This repository contains 3 crates:
 | [`physx-sys`](physx-sys/) | Unsafe bindings to the PhysX C++ API | [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys) [![Docs](https://docs.rs/physx-sys/badge.svg)](https://docs.rs/physx-sys) |
 | [`physx-macros`](physx-macros/) | Utility macros used internally by the `physx` crate | [![Crates.io](https://img.shields.io/crates/v/physx-macros.svg)](https://crates.io/crates/physx-macros) [![Docs](https://docs.rs/physx-macros/badge.svg)](https://docs.rs/physx-macros) |
 
-Our goal is that one should only use the safe Rust `physx` crate but it is still in early development and doesn't provide full coverage yet 🚧 (tracked in #3). 
+Our goal is that one should only use the safe Rust `physx` crate but it is still in early development and doesn't provide full coverage yet 🚧 (tracked in [#3](https://github.com/EmbarkStudios/physx-rs/issues/3)). 
 
 So right now one for certain features one can use it in conjunction with the unsafe and cumbersome `physx-sys` crate.
 
