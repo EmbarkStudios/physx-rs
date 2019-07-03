@@ -12,9 +12,9 @@ use super::{
     cooking::{Cooking, HEIGHT_SCALE, XZ_SCALE},
     geometry::Geometry,
 };
-use nalgebra_glm as glm;
 use enumflags2::BitFlags;
 use enumflags2_derive::EnumFlags;
+use nalgebra_glm as glm;
 use ncollide3d::procedural::{quad_with_vertices, TriMesh};
 use physx_sys::*;
 

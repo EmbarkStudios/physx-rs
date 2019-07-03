@@ -13,9 +13,9 @@ use super::{
     traits::*,
     transform::{na_to_px_q, na_to_px_v3, px_to_na_q, px_to_na_v3},
 };
-use nalgebra_glm as glm;
 use enumflags2::BitFlags;
 use enumflags2_derive::EnumFlags;
+use nalgebra_glm as glm;
 use physx_sys::{
     PxArticulationCache, PxArticulationCacheFlags, PxArticulationRootLinkData, PxTransform_new_5,
 };

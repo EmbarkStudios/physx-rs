@@ -22,8 +22,8 @@ use super::{
     transform::*,
     user_data::UserData,
 };
-use nalgebra_glm as glm;
 use enumflags2::BitFlags;
+use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::*;
 use std::ptr::{null, null_mut};
