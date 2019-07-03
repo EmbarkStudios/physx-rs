@@ -14,6 +14,7 @@ use super::{
     body::*,
     physics::Physics,
     rigid_actor::RigidActor,
+    rigid_dynamic::RigidDynamic,
     rigid_static::*,
     traits::*,
     transform::{na_to_px_v3, px_to_na_v3},
@@ -32,6 +33,7 @@ pub struct Scene {
     px_scene: RwLock<Option<*mut PxScene>>,
     bodies: Vec<ArticulationReducedCoordinate>,
     statics: Vec<RigidStatic>,
+    dynamics: Vec<RigidDynamic>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
 }
 
@@ -42,6 +44,7 @@ impl Scene {
         let mut _self = Self {
             px_scene: RwLock::new(Some(scene)),
             bodies: Vec::new(),
+            dynamics: Vec::new(),
             statics: Vec::new(),
             simulation_callback: None,
         };
@@ -59,6 +62,10 @@ impl Scene {
 
     pub fn release(&mut self) {
         unsafe {
+            self.bodies.drain(..).for_each(|mut e| e.release());
+            self.statics.drain(..).for_each(|mut e| e.release());
+            self.dynamics.drain(..).for_each(|mut e| e.release());
+
             // destroy simulation callback if we have one
             if let Some(callback) = self.simulation_callback.take() {
                 destroy_contact_callback(callback);
@@ -93,6 +100,20 @@ impl Scene {
 
         let handle = BodyHandle(actor.get_raw() as usize);
         self.statics.push(actor);
+        handle
+    }
+
+    pub fn add_dynamic(&mut self, mut actor: RigidDynamic) -> BodyHandle {
+        unsafe {
+            PxScene_addActor_mut(
+                self.px_scene.write().unwrap().expect("accessing null ptr"),
+                actor.get_raw_mut() as *mut PxActor,
+                null(),
+            );
+        }
+
+        let handle = BodyHandle(actor.get_raw() as usize);
+        self.dynamics.push(actor);
         handle
     }
 
@@ -157,10 +178,16 @@ impl Scene {
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    pub fn fetch_results(&mut self, block: bool) {
+    pub fn fetch_results(&mut self, block: bool) -> Result<(), u32> {
         let scene = self.px_scene.write().unwrap();
         unsafe {
-            PxScene_fetchResults_mut(scene.expect("accessing null ptr"), block, null_mut());
+            let mut error: u32 = 0;
+            PxScene_fetchResults_mut(scene.expect("accessing null ptr"), block, &mut error);
+            if error == 0 {
+                Ok(())
+            } else {
+                Err(error)
+            }
         }
     }
     //    fn read(self) -> std::sync::RwLockReadGuard<Px>
@@ -250,11 +277,63 @@ impl Scene {
         }
     }
 
+    /// Lookup and retrieve a RigidStatic reference for this handle
+    pub fn get_static(&self, handle: BodyHandle) -> Option<&RigidStatic> {
+        self.statics.iter().find_map(|elem| {
+            let actor_handle = elem.handle();
+            if handle == actor_handle {
+                Some(elem)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Lookup and retrieve a RigidDynamic reference for this handle
+    pub fn get_dynamic(&self, handle: BodyHandle) -> Option<&RigidDynamic> {
+        self.dynamics.iter().find_map(|elem| {
+            let actor_handle = elem.handle();
+            if handle == actor_handle {
+                Some(elem)
+            } else {
+                None
+            }
+        })
+    }
+
+    /// Lookup and retrieve a RigidActor reference for this handle
+    pub fn get_rigid_actor(&self, handle: BodyHandle) -> Option<&RigidActor> {
+        if let Some(dynamic) = self.get_dynamic(handle) {
+            Some(dynamic)
+        } else if let Some(static_) = self.get_static(handle) {
+            Some(static_)
+        } else {
+            None
+        }
+    }
+
+    /// Retrieve a RigidActor based on the bodyhandle. Note: This API is unsafe
+    /// and bypasses a lot of safety checks for lifetimes and ownership.
+    pub fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
+        unsafe { std::mem::transmute(handle) }
+    }
+
     pub fn find_matching_rigid_actor_mut(
         &mut self,
         actor: *const PxRigidActor,
     ) -> Option<&mut RigidActor> {
         if let Some(rigid) = self.statics.iter_mut().find_map(|elem| {
+            let actor_ptr = elem.get_raw() as *const PxRigidActor;
+            if actor == actor_ptr {
+                Some(elem)
+            } else {
+                None
+            }
+        }) {
+            return Some(rigid);
+        };
+
+        if let Some(rigid) = self.dynamics.iter_mut().find_map(|elem| {
             let actor_ptr = elem.get_raw() as *const PxRigidActor;
             if actor == actor_ptr {
                 Some(elem)

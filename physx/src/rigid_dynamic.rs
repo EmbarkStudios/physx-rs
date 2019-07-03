@@ -14,4 +14,10 @@ use physx_macros::*;
 use physx_sys::PxRigidDynamic;
 
 #[physx_type(inherit = "RigidBody")]
-impl RigidDynamic {}
+impl RigidDynamic {
+    pub fn new(ptr: *mut PxRigidDynamic) -> Self {
+        let mut _self = Self { ptr };
+        _self.allocate_user_data();
+        _self
+    }
+}

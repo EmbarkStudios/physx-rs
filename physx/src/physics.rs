@@ -58,6 +58,7 @@ pub extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) 
 pub struct Physics {
     pub physics: *mut PxPhysics,
     pvd: Option<VisualDebugger>,
+    extensions_loaded: bool,
 }
 
 impl GetRaw<PxPhysics> for Physics {
@@ -92,18 +93,25 @@ impl Physics {
                 (None, physx_create_physics(foundation.get_raw_mut()))
             }
         };
-        if builder.load_extensions {
+
+        let extensions_loaded = if builder.load_extensions {
             unsafe {
                 phys_PxInitExtensions(
                     physics,
                     pvd.as_mut()
                         .map(|pv| pv.get_raw_mut())
                         .unwrap_or_else(null_mut),
-                );
+                )
             }
-        }
+        } else {
+            false
+        };
 
-        Self { physics, pvd }
+        Self {
+            physics,
+            pvd,
+            extensions_loaded,
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +169,7 @@ impl Physics {
             )
         };
 
-        RigidDynamic::from_ptr(px_rs)
+        RigidDynamic::new(px_rs)
     }
 
     pub fn create_static(
@@ -181,14 +189,26 @@ impl Physics {
             )
         };
 
-        RigidStatic::from_ptr(px_rs)
+        RigidStatic::new(px_rs)
     }
 
-    pub fn create_plane(&mut self) -> RigidStatic {
+    pub fn create_surface(&mut self) -> RigidStatic {
         unsafe {
             let plane = PxPlane_new_1(0.0, 1.0, 0.0, 4.0);
             let mtrl = PxPhysics_createMaterial_mut(phys_PxGetPhysics(), 0.9, 0.9, 0.0);
             RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, mtrl))
+        }
+    }
+
+    pub fn create_plane(
+        &mut self,
+        normal: glm::Vec3,
+        offset: f32,
+        material: *mut PxMaterial,
+    ) -> RigidStatic {
+        unsafe {
+            let plane = PxPlane_new_1(normal.x, normal.y, normal.z, offset);
+            RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, material))
         }
     }
 
@@ -241,6 +261,9 @@ impl Physics {
 impl Drop for Physics {
     fn drop(&mut self) {
         unsafe {
+            if self.extensions_loaded {
+                phys_PxCloseExtensions();
+            }
             PxPhysics_release_mut(self.get_raw_mut());
         }
     }
