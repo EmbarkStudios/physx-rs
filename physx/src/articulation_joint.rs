@@ -12,8 +12,8 @@
 use super::articulation_joint_base::ArticulationJointBase;
 use super::px_type::*;
 use super::transform::na_to_px_q;
-use nalgebra_glm as glm;
 use log::*;
+use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::*;
 

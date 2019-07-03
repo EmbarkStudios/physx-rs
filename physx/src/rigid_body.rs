@@ -9,9 +9,9 @@
 
 */
 use super::{px_type::*, rigid_actor::RigidActor, transform::*};
-use nalgebra_glm as glm;
 use enumflags2::*;
 use enumflags2_derive::*;
+use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::{
     PxForceMode, PxRigidBody, PxRigidBodyFlag, PxRigidBodyFlags, PxRigidBody_addForce_mut,

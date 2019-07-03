@@ -20,8 +20,8 @@ use super::{
     user_data::UserData,
     visual_debugger::*,
 };
-use nalgebra_glm as glm;
 use enumflags2_derive::EnumFlags;
+use nalgebra_glm as glm;
 
 use physx_sys::*;
 use std::ops::{Deref, DerefMut};

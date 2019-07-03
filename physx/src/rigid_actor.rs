@@ -17,8 +17,8 @@ use super::shape::Shape;
 use super::traits::*;
 use super::transform::{na_to_px_tf, px_to_na_tf};
 use super::user_data::UserData;
-use nalgebra_glm as glm;
 use enumflags2::BitFlags;
+use nalgebra_glm as glm;
 use physx_macros::physx_type;
 use physx_sys::{
     phys_PxGetPhysics, PxContactPair, PxContactPairPoint, PxContactPair_extractContacts,

@@ -15,8 +15,8 @@ glm::Mat4 as the corresponding type for a PxTransform which is a (Quaternion,
 Vector) pair.
 */
 
-use nalgebra_glm as glm;
 use nalgebra::Isometry3;
+use nalgebra_glm as glm;
 use physx_sys::{
     PxIdentity, PxQuat, PxQuat_new_3, PxTransform, PxTransform_new_2, PxTransform_new_4, PxVec3,
     PxVec3_new_3,

@@ -11,8 +11,8 @@
 use super::{
     articulation_joint_base::*, articulation_link::ArticulationDriveType, body::*, px_type::*,
 };
-use nalgebra_glm as glm;
 use log::*;
+use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::*;
 

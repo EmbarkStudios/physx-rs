@@ -10,9 +10,9 @@
 */
 
 use super::{foundation::*, px_type::*, traits::*};
-use log::*;
 use enumflags2::BitFlags;
 use enumflags2_derive::EnumFlags;
+use log::*;
 use physx_macros::*;
 use physx_sys::*;
 
