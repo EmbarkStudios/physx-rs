@@ -11,9 +11,9 @@ fn main() {
             y: -9.81,
             z: 0.0,
         };
-        let dispatcher = phys_PxDefaultCpuDispatcherCreate(2, null_mut());
+        let dispatcher = phys_PxDefaultCpuDispatcherCreate(1, null_mut());
         scene_desc.cpuDispatcher = dispatcher as *mut PxCpuDispatcher;
-        scene_desc.filterShader = phys_PxDefaultSimulationFilterShader as _;
+        scene_desc.filterShader = get_default_simulation_filter_shader();
         let scene = PxPhysics_createScene_mut(physics, &scene_desc);
         let material = PxPhysics_createMaterial_mut(physics, 0.5, 0.5, 0.6);
         let ground_plane =
@@ -33,12 +33,13 @@ fn main() {
             &PxTransform_new_2(PxIdentity),
         );
         PxRigidBody_setAngularDamping_mut(sphere as *mut PxRigidBody, 0.5);
-         PxScene_addActor_mut(scene, sphere as *mut PxActor, null_mut());
+        PxScene_addActor_mut(scene, sphere as *mut PxActor, null_mut());
         let heights_over_time = (0..100)
             .map(|_| {
                 PxScene_simulate_mut(scene, 0.1, null_mut(), null_mut(), 0, true);
                 let mut error: u32 = 0;
-                PxScene_fetchResults_mut(scene, true, &mut error as _);
+                PxScene_fetchResults_mut(scene, true, &mut error);
+                assert!(error == 0, "fetchResults has failed");
                 let pose = PxRigidActor_getGlobalPose(sphere as *mut PxRigidActor);
                 (pose.p.y) as i32 - 10
             })
