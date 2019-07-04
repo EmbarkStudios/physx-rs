@@ -58,8 +58,8 @@ You can run an example with `cargo run --example ball`, which should show the fo
 
 ## Prerequisites
 
-* C++ compiler
-* CMake
+* C++ compiler ([see the `cc` crate](https://crates.io/crates/cc) for requirements)
+* CMake ([see the `cmake` crate](https://crates.io/crates/cmake) for requirements)
 
 ## How does it work?
 
