@@ -61,14 +61,6 @@ You can run an example with `cargo run --example ball`, which should show the fo
 * C++ compiler ([see the `cc` crate](https://crates.io/crates/cc) for requirements)
 * CMake ([see the `cmake` crate](https://crates.io/crates/cmake) for requirements)
 
-## How does it work?
-
-TODO: Some high-level info about how the wrapper is constructed, and how we wrap inheritance stuffs? Uses `physx-sys` as a low-level blabla.
-
-## Features
-
-TODO: List of currently supported PhysX stuff at the high level?
-
 ## License
 
 Licensed under either of

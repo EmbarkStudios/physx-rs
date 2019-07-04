@@ -54,6 +54,10 @@ A simple example to showcase how to use physx-sys. It can be run with `cargo run
 
 ```
 
+## How does it work?
+
+TODO: Some high-level info about how the wrapper is constructed
+
 ## License
 
 Licensed under either of
