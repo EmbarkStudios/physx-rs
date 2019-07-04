@@ -65,6 +65,24 @@ is listed as an anti-pattern and rightly so, but after several iterations it is
 the only one that has worked well for us. We also leverage this type for blanket
 implementations to allow cross-type comparison and pointer comparisons.
 
+```Rust
+// `set_angular_damping` is not defined in `RigidDynamic`, it is defined in `RidigBody`.
+// This works because `Deref` is used to emulate inheritance.
+let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
+sphere_actor.set_angular_damping(0.5);
+```
+
+```Rust
+let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
+{
+    // `RidigDynamic` implements `Deref/DerefMut` to a `RigidBody`.
+    let sphere_actor: &mut RigidBody = &mut *sphere_actor;
+    sphere_actor.set_angular_damping(0.5);
+}
+```
+
+
+
 ## License
 
 Licensed under either of
