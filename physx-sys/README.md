@@ -2,9 +2,36 @@
 
 Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
 
+## Basic usage
+
+```Rust
+unsafe {
+    let foundation = physx_create_foundation();
+    let physics = physx_create_physics(foundation);
+
+    let mut scene_desc = PxSceneDesc_new(PxPhysics_getTolerancesScale(physics));
+    scene_desc.gravity = PxVec3 {
+        x: 0.0,
+        y: -9.81,
+        z: 0.0,
+    };
+
+    let dispatcher = PxDefaultCpuDispatcherCreate(2, null_mut());
+
+    scene_desc.cpuDispatcher = dispatcher as *mut PxCpuDispatcher;
+    scene_desc.filterShader = Some(PxDefaultSimulationFilterShader);
+
+    let scene = PxPhysics_createScene_mut(physics, &scene_desc);
+
+    // Your physics simulation goes here
+}
+```
+
 ## Examples
 
 ### [Ball](examples/ball.rs)
+
+A simple example to showcase how to use physx-sys. It can be run with `cargo run --examples ball`.
 
 ```
  o
@@ -26,8 +53,6 @@ Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.c
          o                                o                 o oo         oooooooooo oo
 
 ```
-
-A simple example to showcase how to use physx-sys. It can be run with `cargo run --examples ball`.
 
 ## License
 

@@ -3,7 +3,7 @@
 Early Rust crate that is intended to be a safe and easy to use high-level
 wrapper for the unsafe `physx-sys` bindings.
 
-This is a work in progress :construction:. This means that here be dragons; and
+This is a work in progress :construction:. This means that here be dragons, and
 things might change often. The goal of this is to make ownership clearer and
 leverage the safety of Rust even for an external package. At the same time, the
 usage of `unsafe` helps clarify *where* danger lies, which helps us make better
@@ -22,32 +22,36 @@ to the [`Physics`](source/physics.rs) builder.
 
 ## Example
 
+## Basic usage
+
 ``` rust
-    const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
-    let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
+const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
+let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
 
-    let mut physics = PhysicsBuilder::default()
-        .load_extensions(false) // switch this flag to load extensions during setup
-        .build(&mut foundation);
+let mut physics = PhysicsBuilder::default()
+    .load_extensions(false) // Flip this flag to load extensions during setup
+    .build(&mut foundation);
 
-    let mut scene = physics.create_scene(
-        SceneBuilder::default()
-            .set_gravity(glm::vec3(0.0, -9.81, 0.0))
-            .set_simulation_threading(SimulationThreadType::Dedicated(1)),
-    );
+let mut scene = physics.create_scene(
+    SceneBuilder::default()
+        .set_gravity(glm::vec3(0.0, -9.81, 0.0))
+        .set_simulation_threading(SimulationThreadType::Dedicated(1)),
+);
+
+// Your physics simulation goes here
 ```
 
-For a full example, look at the [bouncing ball example](examples/ball_physx.rs)
+For a full example, have a look at the [bouncing ball example](examples/ball_physx.rs)
 and compare it to the [raw sys example](../physx-sys/examples/ball.rs).
-
 
 ## How it works
 
-Wrapping a C++ API in Rust is not straightforward and requires some extra steps
-to work. At the core of this is the `physx-sys` API which maps to a C-API that
-wraps the actual C++ code. Since `PhysX` makes significant use of dynamic inheritance, there is no straightforward mapping to Rust code.
+Wrapping a C++ API in Rust is not straightforward, and requires some extra steps
+to work. The first, and most basic one is creating a C wrapper over the C++ API.
+Using C as an intermediary allows us to leverage a stable ABI through which C++
+and Rust can communicate. The `physx-sys` crate provides this interface.
 
-To simulate the inheritance, we have a pointer-wrapper called
+Since `PhysX` makes significant use of dynamic inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called
 [`PxType`](src/px_type.rs) which does most of our heavy-lifting. Through type
 specialization and macro-magic, we implement the functions on each wrapped type,
 so the API for `PxRigidActor` is implemented in the specialization
