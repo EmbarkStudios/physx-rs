@@ -1,0 +1,13 @@
+---
+BasedOnStyle: Mozilla
+IndentWidth: 4
+ContinuationIndentWidth: 4
+AlignAfterOpenBracket: AlwaysBreak
+AlwaysBreakAfterReturnType: None
+AlwaysBreakAfterDefinitionReturnType: None
+BreakBeforeBraces: Attach
+---
+Language: Cpp
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Left
