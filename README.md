@@ -50,7 +50,7 @@ let mut scene = physics.create_scene(
 );
 ```
 
-Please refer to `physx` crate docs for more information.
+Please refer to `physx` crate docs for more information. You can follow our progress and see where contributions are needed in our [tracking issue](#5).
 
 You can run an example with `cargo run --example ball`, which should show the following output:
 
