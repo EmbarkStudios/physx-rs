@@ -442,6 +442,15 @@ struct PodRecord {
     bool hasVtable = false;
     bool hasDefinition = false;
 
+    // Decide whether we should use "strugen" to calculate the exact layout of
+    // this C++ struct.
+    //
+    // Ideally we would do this for all types, but we must be able to name them,
+    // which is not feasible for anonymous types, or types which the generator
+    // doesn't support yet (their cppTypeName will be empty).
+    //
+    // Note that empty types are only refered to by pointers and references in
+    // PhysX, so we can generate dummy contents for them.
     bool shouldCalculateLayout() const {
         return hasDefinition && !cppTypeName.empty() &&
                "struct" == recordType && !fields.empty();
@@ -906,6 +915,9 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
 
             PodRecord rec;
             rec.typeName = remappedTypeName;
+
+            // TODO: handle template typedefs, e.g.
+            // typedef PxFlags<PxActorTypeFlag::Enum,PxU16> PxActorTypeFlags
             if (!isAnonymous &&
                 nullptr == decl.getTemplateInstantiationPattern()) {
                 rec.cppTypeName = qualifiedName;

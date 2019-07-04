@@ -54,9 +54,11 @@ A simple example to showcase how to use physx-sys. It can be run with `cargo run
 
 ```
 
-## How does it work?
+## How it works
 
-TODO: Some high-level info about how the wrapper is constructed
+The binding is generated using a custom C++ app written against clang's [libtooling](https://clang.llvm.org/docs/LibTooling.html). It queries the compiler's abstract syntax tree, and translates the C++ PhysX types to Rust using heuristics chosen specifically for this SDK. It is not a general C++ <-> Rust binding generator, and using it on other projects *will* likely crash and burn.
+
+TODO: Some high-level info about the two-stage generation and compilation.
 
 ## License
 
