@@ -8,11 +8,8 @@ include!("physx_generated.rs");
 
 use std::ffi::c_void;
 
-#[macro_export]
-macro_rules! version {
-    ($major: literal , $minor: literal , $patch: literal) => {
-        ($major << 24) + ($minor << 16) + ($patch << 8)
-    };
+pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
+    (major << 24) + (minor << 16) + (patch << 8)
 }
 
 pub type CollisionCallback =
