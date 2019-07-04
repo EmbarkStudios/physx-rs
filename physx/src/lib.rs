@@ -44,3 +44,4 @@ pub mod shape;
 pub mod visual_debugger;
 
 pub mod prelude;
+pub use physx_sys::version;

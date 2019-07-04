@@ -8,6 +8,13 @@ include!("physx_generated.rs");
 
 use std::ffi::c_void;
 
+#[macro_export]
+macro_rules! version {
+    ($major: literal , $minor: literal , $patch: literal) => {
+        ($major << 24) + ($minor << 16) + ($patch << 8)
+    };
+}
+
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 
