@@ -1,4 +1,4 @@
-# 🎳 physx-rs
+# physx-rs
 
 [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
 
@@ -14,7 +14,7 @@ This repository contains 3 crates:
 | [`physx-sys`](physx-sys/) | Unsafe bindings to the PhysX C++ API | [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys) [![Docs](https://docs.rs/physx-sys/badge.svg)](https://docs.rs/physx-sys) |
 | [`physx-macros`](physx-macros/) | Utility macros used internally by the `physx` crate | [![Crates.io](https://img.shields.io/crates/v/physx-macros.svg)](https://crates.io/crates/physx-macros) [![Docs](https://docs.rs/physx-macros/badge.svg)](https://docs.rs/physx-macros) |
 
-Our goal is that one should be able to only use the safe `physx` crate. It is still in early development hovewer, and doesn't provide full coverage yet 🚧 (tracked in [#3](https://github.com/EmbarkStudios/physx-rs/issues/3)). Right now to access certain features requires one to use it in conjunction with the unsafe and cumbersome `physx-sys` crate.
+[`physx`](physx/) is a high level wrapper of [`physx-sys`](physx-sys/). The intention is to expose a more pleasent interface for Rust. It is still in active development and [doesn't have full coverage](https://github.com/EmbarkStudios/physx-rs/issues/3) yet.
 
 ## Why?
 
@@ -24,11 +24,11 @@ Our goal is that one should be able to only use the safe `physx` crate. It is st
 
 * It's a large C++ codebase which requires a C++ toolchain, and comes with a non-trivial build system.
 
-* The high-level `physx` wrapper is work-in-progress, and only covers a part of PhysX functionality with a Rustified interface.
+* The high-level `physx` wrapper is work-in-progress, and only covers a part of PhysX functionality with a rust friendly interface.
 
 ### Alternatives
 
-* [nphysics](https://github.com/rustsim/nphysics) a 2 and 3-dimensional physics engine for games and animations written in Rust. (TODO default to this unless you really want physx)
+* [nphysics](https://github.com/rustsim/nphysics) a 2 and 3-dimensional physics engine for games and animations written in Rust.
 
 ## How?
 
