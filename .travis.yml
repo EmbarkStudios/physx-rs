@@ -42,7 +42,7 @@ matrix:
     #
     stage: test
     rust: stable
-    os: linux
+    dist: xenial
     script: .ci/lint.sh
 
   # We do the exact same checks on the beta channel, as both
@@ -51,7 +51,7 @@ matrix:
   - name: "beta lint"
     stage: test
     rust: beta
-    os: linux
+    dist: xenial
     script: .ci/lint.sh
 
   #  _______        _   
@@ -69,18 +69,19 @@ matrix:
   - name: "stable test linux"
     stage: test
     rust: stable
-    os: linux
+    dist: xenial
     script: .ci/test.sh
 
   - name: "beta test linux"
     stage: test
     rust: beta
-    os: linux
+    dist: xenial
     script: .ci/test.sh
 
   - name: "nightly test linux"
     stage: test
     rust: nightly
+    dist: xenial
     script: .ci/test.sh
     env:
     # We set this environment variable to indicate it is ok if this job fails
@@ -113,7 +114,7 @@ matrix:
   # can't just copy the value from another repo.
   - stage: deploy
     rust: stable
-    os: linux
+    dist: xenial
     script: echo "deploying $TRAVIS_TAG to crates.io"
     deploy:
       provider: cargo
