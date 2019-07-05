@@ -8,7 +8,7 @@ use enumflags2_derive::*;
 use physx_macros::physx_type;
 use physx_sys::{
     PxBase, PxBaseFlag, PxBaseFlags, PxBase_getBaseFlags, PxBase_getConcreteType,
-    PxBase_getConcreteTypeName, PxBase_isReleasable, PxBase_release_mut, PxBase_setBaseFlag_mut,
+    PxBase_getConcreteTypeName, PxBase_isReleasable, PxBase_setBaseFlag_mut,
     PxBase_setBaseFlags_mut,
 };
 
@@ -92,11 +92,6 @@ impl From<u16> for ConcreteType {
 
 #[physx_type]
 impl Base {
-    /// Release this object, invalidating the pointer
-    pub unsafe fn release(&mut self) {
-        PxBase_release_mut(self.get_raw_mut());
-    }
-
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
     pub fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
