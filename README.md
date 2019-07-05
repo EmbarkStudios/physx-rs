@@ -1,4 +1,4 @@
-# physx-rs
+# 🎳 physx-rs
 
 [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
 
