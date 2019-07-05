@@ -1,4 +1,4 @@
-# 🎳  physx
+# 🎳 physx
 This is a work in progress :construction:
 
 `physx` is intended to be an easy to use high-level wrapper for the `physx-sys` bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
