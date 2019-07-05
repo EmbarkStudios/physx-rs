@@ -43,6 +43,8 @@ matrix:
     stage: test
     rust: stable
     dist: xenial
+    env:
+    - CXX=g++
     script: .ci/lint.sh
 
   # We do the exact same checks on the beta channel, as both

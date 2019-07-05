@@ -137,7 +137,7 @@ fn main() {
 
     let structgen_compiler = physx_cc.get_compiler();
 
-    println!("ARGS {:#?}", structgen_compiler.args());
+    println!("COMPILER {:?} ARGS {:#?}", structgen_compiler.path(), structgen_compiler.args());
 
     let mut cmd = structgen_compiler.to_command();
     if structgen_compiler.is_like_msvc() {
