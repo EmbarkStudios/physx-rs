@@ -1,19 +1,8 @@
 # 🎳 physx
 
-Early Rust crate that is intended to be a safe and easy to use high-level
-wrapper for the unsafe `physx-sys` bindings.
+[**This is a work in progress** :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
 
-This is a work in progress :construction:. This means that here be dragons, and
-things might change often. The goal of this is to make ownership clearer and
-leverage the safety of Rust even for an external package. At the same time, the
-usage of `unsafe` helps clarify *where* danger lies, which helps us make better
-choices when writing software.
-
-Thus; the goal is not to remove all *unsafe* code, but rather to give us the
-choice. The `physx-sys` crate still lets you break out of the safe-mode, and
-this crate exposes some unsafe functionality where it makes sense. Some of these
-usages will go away over time as we add more abstractions, while some will
-get added to help build better software.
+`physx` is intended to be an easy to use high-level wrapper for the `physx-sys` bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
 
 The overall goal is to maintain a close mapping to the underlying PhysX API
 while improving safety and reliability of the code. This means, for example,
@@ -51,19 +40,9 @@ to work. The first, and most basic one is creating a C wrapper over the C++ API.
 Using C as an intermediary allows us to leverage a stable ABI through which C++
 and Rust can communicate. The `physx-sys` crate provides this interface.
 
-Since `PhysX` makes significant use of dynamic inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called
-[`PxType`](src/px_type.rs) which does most of our heavy-lifting. Through type
-specialization and macro-magic, we implement the functions on each wrapped type,
-so the API for `PxRigidActor` is implemented in the specialization
-`PxType<PxRgidiActor>`. Since this is a mouthful, we also define aliases for
-most types by droppping the `Px`, giving us `RigidActor` in the above case.
+Since `PhysX` makes significant use of inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called [`PxType<T>`](src/px_type.rs). We implement the functions on each wrapped `PxType<PxRgidiActor>` and expose an alias `RigidActor`.
 
-This gets us halfway there, but still doesn't help with inheritance. To allow
-calling the virtual functions, we also use the [*Deref
-Pattern*](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md). This
-is listed as an anti-pattern and rightly so, but after several iterations it is
-the only one that has worked well for us. We also leverage this type for blanket
-implementations to allow cross-type comparison and pointer comparisons.
+The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to simulate inheritance. For example `RigidBody::set_angular_damping`, can be called from the child `RigidDynamic` because `RigidDynamic` implements `Deref<Target = RigidBody>`.
 
 ```Rust
 // `set_angular_damping` is not defined in `RigidDynamic`, it is defined in `RidigBody`.
@@ -73,6 +52,7 @@ sphere_actor.set_angular_damping(0.5);
 ```
 
 ```Rust
+// The verbose example to show what happens behind the scenes.
 let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
 {
     // `RidigDynamic` implements `Deref/DerefMut` to a `RigidBody`.
