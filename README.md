@@ -22,7 +22,7 @@ This repository contains 3 crates:
 
 * It's a large C++ codebase which requires a C++ toolchain, and comes with a non-trivial build system.
 
-* The high-level `physx` wrapper is work-in-progress, and only covers a part of PhysX functionality with a rust friendly interface.
+* The high-level `physx` wrapper is work-in-progress, and only covers a part of PhysX functionality with a user friendly interface.
 
 ### Alternatives
 

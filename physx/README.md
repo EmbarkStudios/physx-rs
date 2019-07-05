@@ -1,9 +1,8 @@
 # 🎳 physx
 
-[This is a work in progress :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
+[**This is a work in progress** :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
 
 `physx` is intended to be an easy to use high-level wrapper for the `physx-sys` bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
-The goal is not to remove all *unsafe* code and this crate exposes some safe functionality where it makes sense. 
 
 The overall goal is to maintain a close mapping to the underlying PhysX API
 while improving safety and reliability of the code. This means, for example,
@@ -43,7 +42,7 @@ and Rust can communicate. The `physx-sys` crate provides this interface.
 
 Since `PhysX` makes significant use of inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called [`PxType<T>`](src/px_type.rs). We implement the functions on each wrapped `PxType<PxRgidiActor>` and expose an alias `RigidActor`.
 
-The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to simulate inheritance.
+The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to simulate inheritance. For example `RigidBody::set_angular_damping`, can be called from the child `RigidDynamic` because `RigidDynamic` implements `Deref<Target = RigidBody>`.
 
 ```Rust
 // `set_angular_damping` is not defined in `RigidDynamic`, it is defined in `RidigBody`.
@@ -53,6 +52,7 @@ sphere_actor.set_angular_damping(0.5);
 ```
 
 ```Rust
+// The verbose example to show what happens behind the scenes.
 let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
 {
     // `RidigDynamic` implements `Deref/DerefMut` to a `RigidBody`.
