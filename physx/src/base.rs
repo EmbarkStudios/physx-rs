@@ -93,10 +93,8 @@ impl From<u16> for ConcreteType {
 #[physx_type]
 impl Base {
     /// Release this object, invalidating the pointer
-    pub fn release(&mut self) {
-        unsafe {
-            PxBase_release_mut(self.get_raw_mut());
-        }
+    pub unsafe fn release(&mut self) {
+        PxBase_release_mut(self.get_raw_mut());
     }
 
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid

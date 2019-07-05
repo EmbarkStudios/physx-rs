@@ -19,7 +19,7 @@ use super::{
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
     shape::ShapeFlag,
-    traits::{Collidable, Releasable},
+    traits::{Collidable},
     user_data::UserData,
 };
 use log::*;
@@ -195,6 +195,16 @@ impl ArticulationLink {
     pub fn get_articulation(&self) -> ArticulationBase {
         unsafe { ArticulationBase::from_ptr(PxArticulationLink_getArticulation(self.get_raw())) }
     }
+    pub unsafe fn release(&mut self) {
+        Box::from_raw((*self.ptr).userData as *mut UserData);
+
+        for shape in self.get_shapes() {
+            for mtrl in shape.get_materials() {
+                PxMaterial_release_mut(mtrl);
+            }
+        }
+        PxArticulationLink_release_mut(self.get_raw_mut());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,20 +323,5 @@ impl ArticulationLinkBuilder {
         self.collider_transform = trans;
         self.collider = Some(coll);
         self
-    }
-}
-
-impl Releasable for ArticulationLink {
-    fn release(&mut self) {
-        unsafe {
-            Box::from_raw((*self.ptr).userData as *mut UserData);
-
-            for shape in self.get_shapes() {
-                for mtrl in shape.get_materials() {
-                    PxMaterial_release_mut(mtrl);
-                }
-            }
-            PxArticulationLink_release_mut(self.get_raw_mut());
-        }
     }
 }

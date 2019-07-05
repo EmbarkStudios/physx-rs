@@ -514,17 +514,12 @@ impl ArticulationReducedCoordinate {
             link.reset_collide()
         }
     }
-}
-
-impl Releasable for ArticulationReducedCoordinate {
-    fn release(&mut self) {
+    pub unsafe fn release(&mut self) {
         // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
         for mut link in self.links_mut().drain(..).rev() {
             link.release();
         }
 
-        unsafe {
-            PxArticulationReducedCoordinate_release_mut(self.get_raw_mut());
-        }
+        PxArticulationReducedCoordinate_release_mut(self.get_raw_mut());
     }
 }

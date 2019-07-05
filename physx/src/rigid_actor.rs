@@ -164,6 +164,10 @@ impl RigidActor {
     pub fn user_data_mut(&mut self) -> &mut UserData {
         unsafe { &mut *((*self.ptr).userData as *mut UserData) }
     }
+    pub unsafe fn release(&mut self) {
+        Box::from_raw((*self.ptr).userData as *mut UserData);
+        // TODO delete actual pxtype
+    }
 }
 
 impl Collidable for RigidActor {
@@ -231,14 +235,6 @@ impl Collidable for RigidActor {
         match self.user_data() {
             UserData::RigidActor(data) => data.collision_points.as_slice(),
             _ => unimplemented!(),
-        }
-    }
-}
-
-impl Releasable for RigidActor {
-    fn release(&mut self) {
-        unsafe {
-            Box::from_raw((*self.ptr).userData as *mut UserData);
         }
     }
 }

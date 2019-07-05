@@ -16,9 +16,8 @@ use physx_macros::*;
 use physx_sys::{
     PxActor, PxActorFlag, PxActorFlags, PxActorType, PxActor_getActorFlags, PxActor_getAggregate,
     PxActor_getDominanceGroup, PxActor_getOwnerClient, PxActor_getScene, PxActor_getType,
-    PxActor_getWorldBounds, PxActor_release_mut, PxActor_setActorFlag_mut,
-    PxActor_setActorFlags_mut, PxActor_setDominanceGroup_mut, PxActor_setOwnerClient_mut,
-    PxAggregate, PxScene,
+    PxActor_getWorldBounds, PxActor_setActorFlag_mut, PxActor_setActorFlags_mut,
+    PxActor_setDominanceGroup_mut, PxActor_setOwnerClient_mut, PxAggregate, PxScene,
 };
 
 /* TODO:
@@ -74,11 +73,6 @@ impl Actor {
     pub fn setName(&mut self, name: &str)  {PxActor_setName_mut(self.get_raw_mut(), name) }
     pub fn getName(&self) -> *const i8  {PxActor_getName(self.get_raw())}
      */
-
-    /// Release this actor
-    pub fn release(&mut self) {
-        unsafe { PxActor_release_mut(self.get_raw_mut()) }
-    }
 
     /// Get the actual type of the actor
     pub fn get_type(&self) -> PxActorType::Enum {

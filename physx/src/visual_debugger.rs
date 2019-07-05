@@ -106,23 +106,8 @@ impl VisualDebugger {
     pub fn get_raw_mut(&mut self) -> *mut PxPvd {
         self.pvd.get_raw_mut()
     }
-}
-
-impl Releasable for Pvd {
     /// Release the Pvd object, invalidating it
-    fn release(&mut self) {
-        unsafe {
-            PxPvd_release_mut(self.get_raw_mut());
-        }
-    }
-}
-
-impl Drop for VisualDebugger {
-    /// Release the Pvd object, invalidating it
-    fn drop(&mut self) {
-        unsafe {
-            self.pvd.release();
-            PxPvdTransport_release_mut(self.transport);
-        }
+    pub unsafe fn release(&mut self) {
+        PxPvd_release_mut(self.get_raw_mut());
     }
 }

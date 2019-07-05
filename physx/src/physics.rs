@@ -248,16 +248,11 @@ impl Physics {
     pub fn visual_debugger_mut(&mut self) -> Option<&mut VisualDebugger> {
         self.pvd.as_mut()
     }
-}
-
-impl Drop for Physics {
-    fn drop(&mut self) {
-        unsafe {
-            if self.extensions_loaded {
-                phys_PxCloseExtensions();
-            }
-            PxPhysics_release_mut(self.get_raw_mut());
+    pub unsafe fn release(&mut self) {
+        if self.extensions_loaded {
+            phys_PxCloseExtensions();
         }
+        PxPhysics_release_mut(self.get_raw_mut());
     }
 }
 
