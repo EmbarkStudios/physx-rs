@@ -1,6 +1,10 @@
-# 🎳 Rust bindings for NVIDIA PhysX 4.1
+# 🎳 physx-sys
 
-Unsafe automatically-generated Rust bindings for [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
+[![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
+
+Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
+
+Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing a work-in-progress safe wrapper.
 
 ## Basic usage
 
