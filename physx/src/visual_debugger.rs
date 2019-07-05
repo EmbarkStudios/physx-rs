@@ -46,6 +46,10 @@ impl Pvd {
     ) -> bool {
         unsafe { PxPvd_connect_mut(self.get_raw_mut(), transport, flags) }
     }
+
+    pub unsafe fn release(&mut self) {
+        PxPvd_release_mut(self.get_raw_mut());
+    }
 }
 
 #[physx_type]
@@ -106,8 +110,10 @@ impl VisualDebugger {
     pub fn get_raw_mut(&mut self) -> *mut PxPvd {
         self.pvd.get_raw_mut()
     }
+
     /// Release the Pvd object, invalidating it
     pub unsafe fn release(&mut self) {
-        PxPvd_release_mut(self.get_raw_mut());
+        self.pvd.release();
+        PxPvdTransport_release_mut(self.transport);
     }
 }

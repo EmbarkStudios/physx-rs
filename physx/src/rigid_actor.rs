@@ -164,6 +164,7 @@ impl RigidActor {
     pub fn user_data_mut(&mut self) -> &mut UserData {
         unsafe { &mut *((*self.ptr).userData as *mut UserData) }
     }
+
     pub unsafe fn release(&mut self) {
         Box::from_raw((*self.ptr).userData as *mut UserData);
         // TODO delete actual pxtype
