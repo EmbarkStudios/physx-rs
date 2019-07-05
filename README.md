@@ -14,8 +14,6 @@ This repository contains 3 crates:
 | [`physx-sys`](physx-sys/) | Unsafe bindings to the PhysX C++ API | [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys) [![Docs](https://docs.rs/physx-sys/badge.svg)](https://docs.rs/physx-sys) |
 | [`physx-macros`](physx-macros/) | Utility macros used internally by the `physx` crate | [![Crates.io](https://img.shields.io/crates/v/physx-macros.svg)](https://crates.io/crates/physx-macros) [![Docs](https://docs.rs/physx-macros/badge.svg)](https://docs.rs/physx-macros) |
 
-[`physx`](physx/) is a high level wrapper of [`physx-sys`](physx-sys/). The intention is to expose a more pleasent interface for Rust. It is still in active development and [doesn't have full coverage](https://github.com/EmbarkStudios/physx-rs/issues/3) yet.
-
 ## Why?
 
 * You want a feature-rich and performant physics engine to use in your project.
@@ -32,8 +30,7 @@ This repository contains 3 crates:
 
 ## How?
 
-The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html). The official C++ API maps very closely to the low-level interface provided by the `physx-sys` crate. We also provide a (work in progress :construction:) higher-level API which utilizes Rust patterns, and leverages safety of the language. For example, initialization code becomes:
-
+The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html).
 
 ``` Rust
 const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
@@ -50,9 +47,7 @@ let mut scene = physics.create_scene(
 );
 ```
 
-Please refer to `physx` crate docs for more information. You can follow our progress and see where contributions are needed in our [*Tracking Issue for High-Level API Completeness*](https://github.com/EmbarkStudios/physx-rs/issues/5).
-
-You can run an example with `cargo run --example ball`, which should show the following output:
+Please refer to `physx` crate docs for more information. You can run an example with `cargo run --example ball`, which should show the following output:
 
 ![Example](images/example-ball.png)
 

@@ -1,5 +1,6 @@
 # 🎳 physx
-This is a work in progress :construction:
+
+[This is a work in progress :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
 
 `physx` is intended to be an easy to use high-level wrapper for the `physx-sys` bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
 The goal is not to remove all *unsafe* code and this crate exposes some safe functionality where it makes sense. 
