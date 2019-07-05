@@ -8,6 +8,10 @@ include!("physx_generated.rs");
 
 use std::ffi::c_void;
 
+pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
+    (major << 24) + (minor << 16) + (patch << 8)
+}
+
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 

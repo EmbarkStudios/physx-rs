@@ -36,7 +36,7 @@ The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/
 
 
 ``` Rust
-const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
+const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
 let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
 
 let mut physics = PhysicsBuilder::default()
