@@ -30,7 +30,7 @@ This repository contains 3 crates:
 
 ## How?
 
-The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html).
+The PhysX user guide can be found [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html). The following code example shows how [physx](physx/) can be initialized.
 
 ``` Rust
 const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
