@@ -2,12 +2,14 @@
 
 [**This is a work in progress** :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
 
-`physx` is intended to be an easy to use high-level wrapper for the `physx-sys` bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
+`physx` is intended to be an easy to use high-level wrapper for the [`physx-sys`](https://crates.io/crates/physx) bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
 
 The overall goal is to maintain a close mapping to the underlying PhysX API
 while improving safety and reliability of the code. This means, for example,
 that we do not expose the `PxLoadExtensions()` function but rather attach this
 to the [`Physics`](source/physics.rs) builder.
+
+Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing an unsafe low-level binding.
 
 ## Example
 
