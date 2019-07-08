@@ -135,14 +135,6 @@ fn main() {
         .to_string_lossy()
         .into_owned();
 
-    let structgen_compiler = physx_cc.get_compiler();
-
-    println!(
-        "COMPILER {:?} ARGS {:#?}",
-        structgen_compiler.path(),
-        structgen_compiler.args()
-    );
-
     let mut cmd = structgen_compiler.to_command();
     if structgen_compiler.is_like_msvc() {
         let mut s = OsString::from("/Fe");
@@ -155,11 +147,10 @@ fn main() {
     cmd.arg("src/structgen/structgen.cpp");
     cmd.status().expect("c++ compiler failed to execute");
 
-    if std::fs::metadata(&structgen_path).is_ok() {
-        println!("structgen output path is {:?}", structgen_path);
-        panic!("YAY");
-    } else {
-        panic!("failed to compile structgen");
+    // The above status check has been shown to fail, ie, the compiler
+    // fails to output a binary, but reports success anyway
+    if !std::fs::metadata(&structgen_path).is_ok() {
+        panic!("failed to compile structgen even though compiler reported no failures");
     }
 
     let mut structgen = std::process::Command::new(&structgen_path);
