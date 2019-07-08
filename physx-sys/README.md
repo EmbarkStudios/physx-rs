@@ -1,6 +1,10 @@
 # 🎳 physx-sys
 
 [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
+[![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys)
+[![Docs](https://docs.rs/physx-sys/badge.svg)](https://docs.rs/physx-sys)
+[![Contributor Covenant](https://img.shields.io/badge/contributor%20covenant-v1.4%20adopted-ff69b4.svg)](../CODE_OF_CONDUCT.md)
+[![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](http://embark.games)
 
 Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
 
