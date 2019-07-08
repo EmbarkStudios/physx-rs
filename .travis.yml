@@ -44,7 +44,7 @@ matrix:
     rust: stable
     dist: xenial
     env:
-    - CXX=g++
+    - CXX=clang++
     script: .ci/lint.sh
 
   # We do the exact same checks on the beta channel, as both
