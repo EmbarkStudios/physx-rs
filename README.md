@@ -60,7 +60,6 @@ Information about all wrapper functionality can be found in the [physx](physx/) 
 
 If you require functionality not covered by the [physx](physx/) wrapper you can use the low level [physx-sys](physx-sys) crate, which closely maps to the official PhysX SDK. You can find the PhysX user guide [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html).
 
-
 ## Prerequisites
 
 * C++ compiler ([see the `cc` crate](https://crates.io/crates/cc) for requirements)
