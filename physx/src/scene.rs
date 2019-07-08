@@ -60,24 +60,22 @@ impl Scene {
         }
     }
 
-    pub fn release(&mut self) {
-        unsafe {
-            self.bodies.drain(..).for_each(|mut e| e.release());
-            self.statics.drain(..).for_each(|mut e| e.release());
-            self.dynamics.drain(..).for_each(|mut e| e.release());
+    pub unsafe fn release(&mut self) {
+        self.bodies.drain(..).for_each(|mut e| e.release());
+        self.statics.drain(..).for_each(|mut e| e.release());
+        self.dynamics.drain(..).for_each(|mut e| e.release());
 
-            // destroy simulation callback if we have one
-            if let Some(callback) = self.simulation_callback.take() {
-                destroy_contact_callback(callback);
-            }
-
-            // Release the scene object
-            let mut scene = self.px_scene.write().unwrap();
-            let scene = scene.take().expect("scene already released");
-            let b: Box<UserData> = Box::from_raw((*scene).userData as *mut _);
-            drop(b);
-            PxScene_release_mut(scene);
+        // destroy simulation callback if we have one
+        if let Some(callback) = self.simulation_callback.take() {
+            destroy_contact_callback(callback);
         }
+
+        // Release the scene object
+        let mut scene = self.px_scene.write().unwrap();
+        let scene = scene.take().expect("scene already released");
+        let b: Box<UserData> = Box::from_raw((*scene).userData as *mut _);
+        drop(b);
+        PxScene_release_mut(scene);
     }
 
     /// Get the visual debugger client

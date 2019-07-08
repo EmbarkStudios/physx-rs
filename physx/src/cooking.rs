@@ -33,8 +33,8 @@ impl Cooking {
         Self::from_ptr(px_cooking)
     }
 
-    pub fn release(&mut self) {
-        unsafe { PxCooking_release_mut(self.get_raw_mut()) }
+    pub unsafe fn release(&mut self) {
+        PxCooking_release_mut(self.get_raw_mut())
     }
 
     /// Validate that the provided description is valid

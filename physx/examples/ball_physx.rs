@@ -77,7 +77,9 @@ fn main() {
         })
         .for_each(|line| println!("{}", line));
 
-    scene.release();
-    drop(physics); // todo: this looks weird...
-    foundation.release();
+    unsafe {
+        scene.release();
+        physics.release();
+        foundation.release();
+    }
 }
