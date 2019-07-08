@@ -69,8 +69,6 @@ let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
 }
 ```
 
-
-
 ## License
 
 Licensed under either of
