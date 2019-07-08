@@ -138,10 +138,8 @@ fn main() {
         physx_cc.compiler("clang++");
     }
 
-    let structgen_path = output_dir_path
-        .join("structgen")
-        .to_string_lossy()
-        .into_owned();
+    let mut structgen_path = output_dir_path
+        .join("structgen");
 
     let structgen_compiler = physx_cc.get_compiler();
     let mut cmd = structgen_compiler.to_command();
@@ -158,6 +156,10 @@ fn main() {
 
     // The above status check has been shown to fail, ie, the compiler
     // fails to output a binary, but reports success anyway
+    if target_os == "windows" {
+        structgen_path.set_extension("exe");
+    }
+
     if !std::fs::metadata(&structgen_path).is_ok() {
         panic!("failed to compile structgen even though compiler reported no failures");
     }
