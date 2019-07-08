@@ -13,7 +13,7 @@
 //! [![Contributor Covenant](https://img.shields.io/badge/contributor%20covenant-v1.4%20adopted-ff69b4.svg)](../CODE_OF_CONDUCT.md)
 //! [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](http://embark.games)
 //! 
-//! [**This is a work in progress** :construction:](https://github.com/EmbarkStudios/physx-rs/issues/3)
+//! [**This is a work in progress** 🚧](https://github.com/EmbarkStudios/physx-rs/issues/3)
 //! 
 //! `physx` is intended to be an easy to use high-level wrapper for the [`physx-sys`](https://crates.io/crates/physx) bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
 //! 
