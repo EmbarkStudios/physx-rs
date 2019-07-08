@@ -111,8 +111,8 @@ fn main() {
         println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
     }
 
-    let mut physx_cc = cc::Build::new();
-    let physx_cc = physx_cc
+    let mut cc_builder = cc::Build::new();
+    let physx_cc = cc_builder
         .cpp(true)
         .opt_level(3)
         .debug(false)
@@ -129,6 +129,14 @@ fn main() {
         } else {
             "-std=c++14"
         });
+
+    // We force clang++ on linux hosts since it appears some distros
+    // *COUGH* UBUNTU *COUGH* use way too old versions of g++ which will
+    // generally be picked up as the default C++ compiler over clang.
+    // This should be host_os, but we don't cross compile
+    if target_os == "linux" {
+        physx_cc.compiler("clang++");
+    }
 
     let structgen_path = output_dir_path
         .join("structgen")
