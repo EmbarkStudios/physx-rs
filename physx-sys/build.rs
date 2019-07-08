@@ -111,8 +111,8 @@ fn main() {
         println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
     }
 
-    let mut physx_cc = cc::Build::new();
-    let physx_cc = physx_cc
+    let mut cc_builder = cc::Build::new();
+    let physx_cc = cc_builder
         .cpp(true)
         .opt_level(3)
         .debug(false)
@@ -130,13 +130,17 @@ fn main() {
             "-std=c++14"
         });
 
-    let structgen_path = output_dir_path
-        .join("structgen")
-        .to_string_lossy()
-        .into_owned();
+    // We force clang++ on linux hosts since it appears some distros
+    // *COUGH* UBUNTU *COUGH* use way too old versions of g++ which will
+    // generally be picked up as the default C++ compiler over clang.
+    // This should be host_os, but we don't cross compile
+    if target_os == "linux" {
+        physx_cc.compiler("clang++");
+    }
+
+    let mut structgen_path = output_dir_path.join("structgen");
 
     let structgen_compiler = physx_cc.get_compiler();
-
     let mut cmd = structgen_compiler.to_command();
     if structgen_compiler.is_like_msvc() {
         let mut s = OsString::from("/Fe");
@@ -148,6 +152,16 @@ fn main() {
 
     cmd.arg("src/structgen/structgen.cpp");
     cmd.status().expect("c++ compiler failed to execute");
+
+    // The above status check has been shown to fail, ie, the compiler
+    // fails to output a binary, but reports success anyway
+    if target_os == "windows" {
+        structgen_path.set_extension("exe");
+    }
+
+    if !std::fs::metadata(&structgen_path).is_ok() {
+        panic!("failed to compile structgen even though compiler reported no failures");
+    }
 
     let mut structgen = std::process::Command::new(&structgen_path);
     structgen.current_dir(&output_dir_path);
