@@ -135,6 +135,7 @@ fn main() {
         .to_string_lossy()
         .into_owned();
 
+    let structgen_compiler = physx_cc.get_compiler();
     let mut cmd = structgen_compiler.to_command();
     if structgen_compiler.is_like_msvc() {
         let mut s = OsString::from("/Fe");
