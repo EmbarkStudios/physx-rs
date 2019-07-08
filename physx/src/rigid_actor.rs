@@ -27,8 +27,8 @@ use physx_sys::{
     phys_PxGetPhysics, PxContactPair, PxContactPairPoint, PxContactPair_extractContacts,
     PxPhysics_createMaterial_mut, PxRigidActor, PxRigidActorExt_createExclusiveShape_mut_1,
     PxRigidActor_detachShape_mut, PxRigidActor_getGlobalPose, PxRigidActor_getNbShapes,
-    PxRigidActor_getShapes, PxRigidActor_setGlobalPose_mut, PxShapeExt_getGlobalPose_mut,
-    PxShapeFlag, PxShapeFlags, PxShape_setLocalPose_mut,
+    PxRigidActor_getShapes, PxRigidActor_release_mut, PxRigidActor_setGlobalPose_mut,
+    PxShapeExt_getGlobalPose_mut, PxShapeFlag, PxShapeFlags, PxShape_setLocalPose_mut,
 };
 
 use std::ptr::null_mut;
@@ -167,7 +167,7 @@ impl RigidActor {
 
     pub unsafe fn release(&mut self) {
         Box::from_raw((*self.ptr).userData as *mut UserData);
-        // TODO delete actual pxtype
+        PxRigidActor_release_mut(self.ptr);
     }
 }
 
