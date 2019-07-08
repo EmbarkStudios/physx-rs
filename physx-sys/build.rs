@@ -138,8 +138,7 @@ fn main() {
         physx_cc.compiler("clang++");
     }
 
-    let mut structgen_path = output_dir_path
-        .join("structgen");
+    let mut structgen_path = output_dir_path.join("structgen");
 
     let structgen_compiler = physx_cc.get_compiler();
     let mut cmd = structgen_compiler.to_command();
