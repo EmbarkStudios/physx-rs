@@ -6,8 +6,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/EmbarkStudios/physx-rs"
 edition = "2018"
 readme = "README.md"
-keywords = [] # TODO: fill in before publishing
-categories = [] # TODO: fill in before publishing
+keywords = ["physics"]
+categories = ["api-bindings", "simulation", "game-engines"]
 publish = false # not yet
 
 [lib]
