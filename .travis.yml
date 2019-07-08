@@ -48,11 +48,11 @@ matrix:
   # We do the exact same checks on the beta channel, as both
   # rustfmt and clippy can change their behavior between releases
   # and introduce new diffs/lints compared to stable
-  # - name: "beta lint"
-  #   stage: test
-  #   rust: beta
-  #   dist: xenial
-  #   script: .ci/lint.sh
+  - name: "beta lint"
+    stage: test
+    rust: beta
+    dist: xenial
+    script: .ci/lint.sh
 
   #  _______        _   
   # |__   __|      | |  
@@ -72,20 +72,20 @@ matrix:
     dist: xenial
     script: .ci/test.sh
 
-  # - name: "beta test linux"
-  #   stage: test
-  #   rust: beta
-  #   dist: xenial
-  #   script: .ci/test.sh
+  - name: "beta test linux"
+    stage: test
+    rust: beta
+    dist: xenial
+    script: .ci/test.sh
 
-  # - name: "nightly test linux"
-  #   stage: test
-  #   rust: nightly
-  #   dist: xenial
-  #   script: .ci/test.sh
-  #   env:
-  #   # We set this environment variable to indicate it is ok if this job fails
-  #   - NIGHTLY=1
+  - name: "nightly test linux"
+    stage: test
+    rust: nightly
+    dist: xenial
+    script: .ci/test.sh
+    env:
+    # We set this environment variable to indicate it is ok if this job fails
+    - NIGHTLY=1
 
   - name: "stable test osx"
     rust: stable
