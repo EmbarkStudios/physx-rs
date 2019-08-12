@@ -27,6 +27,7 @@ exclude = [
     "PhysX/**/*.sh",
     "PhysX/**/*.bat",
     "PhysX/**/*.html",
+    "structgen.obj",
 ]
 
 [lib]

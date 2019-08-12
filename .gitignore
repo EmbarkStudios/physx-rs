@@ -1,2 +1,3 @@
 **/target
 Cargo.lock
+physx-sys/structgen.obj
