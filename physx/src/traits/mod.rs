@@ -12,6 +12,9 @@
 mod collidable;
 pub use collidable::Collidable;
 
+mod releasable;
+pub use releasable::Releasable;
+
 mod to_flags;
 pub use to_flags::ToFlags;
 

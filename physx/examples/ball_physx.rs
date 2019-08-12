@@ -79,7 +79,9 @@ fn main() {
 
     unsafe {
         scene.release();
-        physics.release();
-        foundation.release();
     }
+
+    drop(physics);
+
+    foundation.release();
 }

@@ -68,8 +68,10 @@ impl Foundation {
     pub fn set_report_allocation_names(&mut self, value: bool) {
         unsafe { PxFoundation_setReportAllocationNames_mut(self.get_raw_mut(), value) }
     }
+}
 
-    pub unsafe fn release(&mut self) {
-        PxFoundation_release_mut(self.get_raw_mut())
+impl Releasable for Foundation {
+    fn release(&mut self) {
+        unsafe { PxFoundation_release_mut(self.get_raw_mut()) }
     }
 }

@@ -33,10 +33,6 @@ impl Cooking {
         Self::from_ptr(px_cooking)
     }
 
-    pub unsafe fn release(&mut self) {
-        PxCooking_release_mut(self.get_raw_mut())
-    }
-
     /// Validate that the provided description is valid
     pub fn validate_triangle_mesh(&self, mesh_desc: &PxTriangleMeshDesc) -> bool {
         unsafe { PxCooking_validateTriangleMesh(self.get_raw(), mesh_desc) }

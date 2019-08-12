@@ -10,10 +10,17 @@ A link of a reduced coordinate multibody.
  */
 
 use super::{
-    articulation_base::ArticulationBase, articulation_joint_base::*,
-    articulation_reduced_coordinate::ArticulationReducedCoordinate, body::PartHandle, geometry::*,
-    px_type::*, rigid_actor::RigidActor, rigid_body::RigidBody, shape::ShapeFlag,
-    traits::Collidable, user_data::UserData,
+    articulation_base::ArticulationBase,
+    articulation_joint_base::*,
+    articulation_reduced_coordinate::ArticulationReducedCoordinate,
+    body::PartHandle,
+    geometry::*,
+    px_type::*,
+    rigid_actor::RigidActor,
+    rigid_body::RigidBody,
+    shape::ShapeFlag,
+    traits::{Collidable, Releasable},
+    user_data::UserData,
 };
 use log::*;
 use nalgebra_glm as glm;
@@ -188,17 +195,6 @@ impl ArticulationLink {
     pub fn get_articulation(&self) -> ArticulationBase {
         unsafe { ArticulationBase::from_ptr(PxArticulationLink_getArticulation(self.get_raw())) }
     }
-
-    pub unsafe fn release(&mut self) {
-        Box::from_raw((*self.ptr).userData as *mut UserData);
-
-        for shape in self.get_shapes() {
-            for mtrl in shape.get_materials() {
-                PxMaterial_release_mut(mtrl);
-            }
-        }
-        PxArticulationLink_release_mut(self.get_raw_mut());
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -317,5 +313,20 @@ impl ArticulationLinkBuilder {
         self.collider_transform = trans;
         self.collider = Some(coll);
         self
+    }
+}
+
+impl Releasable for ArticulationLink {
+    fn release(&mut self) {
+        unsafe {
+            Box::from_raw((*self.ptr).userData as *mut UserData);
+
+            for shape in self.get_shapes() {
+                for mtrl in shape.get_materials() {
+                    PxMaterial_release_mut(mtrl);
+                }
+            }
+            PxArticulationLink_release_mut(self.get_raw_mut());
+        }
     }
 }
