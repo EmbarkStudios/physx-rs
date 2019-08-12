@@ -9,7 +9,6 @@ edition = "2018"
 readme = "README.md"
 keywords = ["physics"]
 categories = ["api-bindings", "simulation", "game-engines"]
-publish = false # not yet
 
 [lib]
 doctest = false

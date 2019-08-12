@@ -9,7 +9,6 @@ edition = "2018"
 readme = "README.md"
 keywords = ["physics"]
 categories = [] 
-publish = false # not yet
 
 [lib]
 proc-macro = true
