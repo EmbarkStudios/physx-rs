@@ -502,15 +502,15 @@ impl SceneBuilder {
 
     /// Set the number of threads to use for simulation
     ///
-    /// Default: 1
+    /// Default: not set
     pub fn set_simulation_threading(&mut self, _type: SimulationThreadType) -> &mut Self {
         self.simulation_threading = Some(_type);
         self
     }
 
-    /// Set the number of threads to use for simulation
+    /// Set collision detection type
     ///
-    /// Default: 1
+    /// Default: Sweep and prune
     pub fn set_broad_phase_type(&mut self, _type: BroadPhaseType) -> &mut Self {
         self.broad_phase_type = _type;
         self
