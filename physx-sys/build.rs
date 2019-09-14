@@ -1,10 +1,11 @@
 use cmake::Config;
 use std::env;
 use std::ffi::OsString;
+use std::path::PathBuf;
 
 #[cfg(debug_assertions)]
 fn get_bin_dir() -> (&'static str, &'static str) {
-    match build_helper::target::triple().os() {
+    match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
         "linux" => ("linux", "bin/linux.clang/debug"),
         "windows" => ("windows", "bin/win.x86_64.vc141.md/debug"),
         "darwin" => ("mac", "bin/mac.x86_64/debug"),
@@ -14,7 +15,7 @@ fn get_bin_dir() -> (&'static str, &'static str) {
 
 #[cfg(not(debug_assertions))]
 fn get_bin_dir() -> (&'static str, &'static str) {
-    match build_helper::target::triple().os() {
+    match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
         "linux" => ("linux", "bin/linux.clang/profile"),
         "windows" => ("windows", "bin/win.x86_64.vc141.md/profile"),
         "darwin" => ("mac", "bin/mac.x86_64/profile"),
@@ -54,8 +55,8 @@ fn main() {
     );
     env::set_var("PM_PATHS", env::var("PM_opengllinux_PATH").unwrap());
 
-    let output_dir_path = build_helper::out_dir();
-    let output_dir = output_dir_path.to_string_lossy().into_owned();
+    let output_dir = env::var("OUT_DIR").unwrap();
+    let output_dir_path: PathBuf = output_dir.clone().into();
 
     let build_mode = if cfg!(debug_assertions) {
         "debug"
@@ -172,13 +173,13 @@ fn main() {
         .file("src/physx.cpp")
         .compile("physx_api");
 
-    build_helper::rerun_if_changed("src/structgen/structgen.cpp");
-    build_helper::rerun_if_changed("src/structgen/structgen.hpp");
-    build_helper::rerun_if_changed("src/lib.rs");
-    build_helper::rerun_if_changed("src/physx_generated.hpp");
-    build_helper::rerun_if_changed("src/physx_generated.rs");
-    build_helper::rerun_if_changed("src/physx.cpp");
+    println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
+    println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=src/physx_generated.hpp");
+    println!("cargo:rerun-if-changed=src/physx_generated.rs");
+    println!("cargo:rerun-if-changed=src/physx.cpp");
 
     // TODO: use the cloned git revision number instead
-    build_helper::rerun_if_changed("PhysX/physx/include/PxPhysicsVersion.h");
+    println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
 }
