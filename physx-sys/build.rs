@@ -147,6 +147,11 @@ fn main() {
         let mut s = OsString::from("/Fe");
         s.push(&structgen_path);
         cmd.arg(s);
+
+        let mut s = OsString::from("/Fo");
+        s.push(&structgen_path);
+        s.push(".obj");
+        cmd.arg(s);
     } else {
         cmd.arg("-o").arg(&structgen_path);
     }
