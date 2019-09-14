@@ -8,7 +8,7 @@ fn get_bin_dir() -> (&'static str, &'static str) {
     match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
         "linux" => ("linux", "bin/linux.clang/debug"),
         "windows" => ("windows", "bin/win.x86_64.vc141.md/debug"),
-        "darwin" => ("mac", "bin/mac.x86_64/debug"),
+        "macos" => ("mac", "bin/mac.x86_64/debug"),
         p @ _ => panic!("Unsupported platform: {}", p),
     }
 }
@@ -18,7 +18,7 @@ fn get_bin_dir() -> (&'static str, &'static str) {
     match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
         "linux" => ("linux", "bin/linux.clang/profile"),
         "windows" => ("windows", "bin/win.x86_64.vc141.md/profile"),
-        "darwin" => ("mac", "bin/mac.x86_64/profile"),
+        "macos" => ("mac", "bin/mac.x86_64/profile"),
         p @ _ => panic!("Unsupported platform: {}", p),
     }
 }
