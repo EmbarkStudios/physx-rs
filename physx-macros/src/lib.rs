@@ -129,7 +129,7 @@ impl MacroArgs {
                         }
                     }
                 }
-                NestedMeta::Lit(lit) => eprintln!("lit {:?}", lit),
+                NestedMeta::Lit(_) => panic!("Expected ident but found literal"),
             }
         }
         margs
