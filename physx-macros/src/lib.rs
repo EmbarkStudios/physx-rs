@@ -122,12 +122,15 @@ impl MacroArgs {
             match item {
                 NestedMeta::Meta(meta) => {
                     if let Meta::NameValue(namevalue) = meta {
-                        if namevalue.ident == "inherit" {
-                            margs.inherit = visit_literal_to_string(&namevalue.lit);
+                        match meta.path().get_ident() {
+                            Some(ident) if ident == "inherit" => {
+                                margs.inherit = visit_literal_to_string(&namevalue.lit)
+                            }
+                            _ => (),
                         }
                     }
                 }
-                NestedMeta::Literal(lit) => eprintln!("lit {:?}", lit),
+                NestedMeta::Lit(_) => panic!("Expected ident but found literal"),
             }
         }
         margs
