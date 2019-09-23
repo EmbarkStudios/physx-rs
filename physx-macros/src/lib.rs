@@ -121,13 +121,15 @@ impl MacroArgs {
         for item in args.iter() {
             match item {
                 NestedMeta::Meta(meta) => {
-                    if let Meta::NameValue(namevalue) = meta {
-                        if namevalue.ident == "inherit" {
-                            margs.inherit = visit_literal_to_string(&namevalue.lit);
+                    if let Some(ident) = meta.path().get_ident() {
+                        if ident == "inherit" {
+                            if let Meta::NameValue(namevalue) = meta {
+                                margs.inherit = visit_literal_to_string(&namevalue.lit);
+                            }
                         }
                     }
                 }
-                NestedMeta::Literal(lit) => eprintln!("lit {:?}", lit),
+                NestedMeta::Lit(lit) => eprintln!("lit {:?}", lit),
             }
         }
         margs
