@@ -13,8 +13,8 @@
 
 use physx_sys::*;
 
-use nalgebra_glm as glm;
-pub type Point3 = glm::Vec3;
+use glam::Vec3;
+pub type Point3 = Vec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(i32)]

@@ -14,13 +14,11 @@ categories = ["api-bindings", "simulation", "game-engines"]
 doctest = false
 
 [dependencies]
-physx-macros = { version = "0.1.0", path = "../physx-macros" }
-physx-sys = { version = "0.1.2", path = "../physx-sys" }
+physx-macros = { version = "0.1", path = "../physx-macros" }
+physx-sys = { version = "0.1", path = "../physx-sys" }
 
 enumflags2 = "0.5"
 enumflags2_derive = "0.5"
 log = "0.4"
-nalgebra = "0.18.0"
-nalgebra-glm = "0.4"
-ncollide3d = "0.20.1" # TODO: Remove, tracked in https://github.com/EmbarkStudios/physx-rs/issues/17
+glam = "0.7"
 parking_lot = "0.9.0"

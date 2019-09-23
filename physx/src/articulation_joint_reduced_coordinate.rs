@@ -11,8 +11,8 @@
 use super::{
     articulation_joint_base::*, articulation_link::ArticulationDriveType, body::*, px_type::*,
 };
+use glam::{Mat4, Vec3};
 use log::*;
-use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::*;
 
@@ -237,8 +237,8 @@ impl ArticulationJointReducedCoordinate {
 // todo[tolsson]
 pub struct JointBuilder {
     joint_type: ArticulationJointType,
-    axis: glm::Vec3,
-    joint_frame: glm::Mat4,
+    axis: Vec3,
+    joint_frame: Mat4,
     joint_limit: [f32; 2],
 }
 
@@ -246,8 +246,8 @@ impl Default for JointBuilder {
     fn default() -> Self {
         Self {
             joint_type: ArticulationJointType::Undefined,
-            axis: glm::Vec3::x_axis().into_inner(), // fixme[tolsson]: maybe store a unit...
-            joint_frame: glm::Mat4::identity(),
+            axis: Vec3::unit_x(),
+            joint_frame: Mat4::identity(),
             joint_limit: [-std::f32::consts::PI, std::f32::consts::PI],
         }
     }
@@ -255,7 +255,7 @@ impl Default for JointBuilder {
 
 impl JointBuilder {
     pub fn build(&self, part: PartHandle) -> ArticulationJointReducedCoordinate {
-        let z_axis = self.axis == glm::Vec3::z_axis().into_inner();
+        let z_axis = self.axis == Vec3::unit_z();
         let link = part.1 as *mut PxArticulationLink;
 
         unsafe {
@@ -264,7 +264,7 @@ impl JointBuilder {
             let mut joint = ArticulationJointReducedCoordinate::from_ptr(
                 joint as *mut PxArticulationJointReducedCoordinate,
             );
-            joint.set_child_pose(glm::Mat4::identity());
+            joint.set_child_pose(Mat4::identity());
             joint.set_parent_pose(self.joint_frame);
 
             joint.set_type(self.joint_type);
@@ -296,12 +296,12 @@ impl JointBuilder {
         self
     }
 
-    pub fn axis(mut self, axis: glm::Vec3) -> Self {
+    pub fn axis(mut self, axis: Vec3) -> Self {
         self.axis = axis;
         self
     }
 
-    pub fn transform_from_parent(mut self, transform: glm::Mat4) -> Self {
+    pub fn transform_from_parent(mut self, transform: Mat4) -> Self {
         self.joint_frame = transform;
         self
     }
@@ -315,7 +315,7 @@ impl JointBuilder {
         self.joint_type
     }
 
-    pub fn joint_transform(&self) -> glm::Mat4 {
+    pub fn joint_transform(&self) -> Mat4 {
         self.joint_frame
     }
 }

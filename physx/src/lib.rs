@@ -38,7 +38,7 @@
 //!
 //! let mut scene = physics.create_scene(
 //!     SceneBuilder::default()
-//!         .set_gravity(glm::vec3(0.0, -9.81, 0.0))
+//!         .set_gravity(Vec3::new(0.0, -9.81, 0.0))
 //!         .set_simulation_threading(SimulationThreadType::Dedicated(1)),
 //! );
 //!

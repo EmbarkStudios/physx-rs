@@ -17,12 +17,12 @@ use super::{
     rigid_dynamic::RigidDynamic,
     rigid_static::*,
     traits::*,
-    transform::{na_to_px_v3, px_to_na_v3},
+    transform::{gl_to_px_v3, px_to_gl_v3},
     user_data::UserData,
     visual_debugger::*,
 };
 use enumflags2_derive::EnumFlags;
-use nalgebra_glm as glm;
+use glam::Vec3;
 
 use physx_sys::*;
 use std::ops::{Deref, DerefMut};
@@ -203,10 +203,10 @@ impl Scene {
 
     pub fn sample_height(
         &self,
-        position: glm::Vec3,
+        position: Vec3,
         ignored: Option<&RigidActor>,
         ignore_dynamic: bool,
-    ) -> Option<glm::Vec3> {
+    ) -> Option<Vec3> {
         // todo[tolsson]: clean this up
         let ignored_body = if let Some(body) = ignored {
             body.get_raw()
@@ -214,7 +214,7 @@ impl Scene {
             null_mut()
         };
 
-        let down = -glm::Vec3::y_axis();
+        let down = -Vec3::unit_y();
         let max_dist = 1e5;
 
         unsafe {
@@ -227,29 +227,31 @@ impl Scene {
             }
 
             let filter_callback = create_raycast_filter_callback(ignored_body);
-            let mut hit: PxRaycastHit = std::mem::uninitialized();
+            let mut hit = std::mem::MaybeUninit::uninit();
 
             let hit_anything = PxSceneQueryExt_raycastSingle_mut(
                 self.px_scene
                     .read()
                     .expect("failed reading from scene")
                     .expect("accessing null ptr"),
-                &na_to_px_v3(position),
-                &na_to_px_v3(down.into_inner()),
+                &gl_to_px_v3(position),
+                &gl_to_px_v3(down),
                 max_dist,
                 PxSceneQueryFlags {
                     mBits: PxHitFlag::ePOSITION as u16,
                 },
-                &mut hit,
+                hit.as_mut_ptr(),
                 &filter_data as *const PxQueryFilterData as *const PxSceneQueryFilterData,
                 filter_callback as *mut PxQueryFilterCallback as *mut PxSceneQueryFilterCallback,
                 null_mut(),
             );
 
+            let hit = hit.assume_init();
+
             PxQueryFilterCallback_delete(filter_callback);
 
             if hit_anything {
-                Some(px_to_na_v3(hit.position))
+                Some(px_to_gl_v3(hit.position))
             } else {
                 None
             }
@@ -462,7 +464,7 @@ pub enum SimulationThreadType {
 }
 
 pub struct SceneBuilder {
-    pub(crate) gravity: glm::Vec3,
+    pub(crate) gravity: Vec3,
     pub(crate) simulation_filter_shader: Option<SimulationFilterShader>,
     pub(crate) simulation_threading: Option<SimulationThreadType>,
     pub(crate) broad_phase_type: BroadPhaseType,
@@ -471,7 +473,7 @@ pub struct SceneBuilder {
 impl Default for SceneBuilder {
     fn default() -> Self {
         Self {
-            gravity: glm::vec3(0.0, -9.80665, 0.0), // standard gravity value
+            gravity: Vec3::new(0.0, -9.80665, 0.0), // standard gravity value
             simulation_filter_shader: None,
             simulation_threading: None,
             broad_phase_type: BroadPhaseType::SweepAndPrune,
@@ -483,7 +485,7 @@ impl SceneBuilder {
     /// Set the gravity for the scene.
     ///
     /// Default: [0.0, -9.80665, 0.0] (standard gravity)
-    pub fn set_gravity(&mut self, gravity: glm::Vec3) -> &mut Self {
+    pub fn set_gravity(&mut self, gravity: Vec3) -> &mut Self {
         self.gravity = gravity;
         self
     }
@@ -533,7 +535,7 @@ impl SceneBuilder {
             };
 
             scene_desc.cpuDispatcher = dispatcher;
-            scene_desc.gravity = na_to_px_v3(self.gravity);
+            scene_desc.gravity = gl_to_px_v3(self.gravity);
 
             if let Some(filter_shader) = self.simulation_filter_shader {
                 physx_sys::enable_custom_filter_shader(

@@ -11,11 +11,11 @@
 use super::{
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     traits::*,
-    transform::{na_to_px_q, na_to_px_v3, px_to_na_q, px_to_na_v3},
+    transform::{gl_to_px_q, gl_to_px_v3, px_to_gl_q, px_to_gl_v3},
 };
 use enumflags2::BitFlags;
 use enumflags2_derive::EnumFlags;
-use nalgebra_glm as glm;
+use glam::{Quat, Vec3};
 use physx_sys::{
     PxArticulationCache, PxArticulationCacheFlags, PxArticulationRootLinkData, PxTransform_new_5,
 };
@@ -55,21 +55,21 @@ macro_rules! ptr_to_slice {
 }
 
 pub struct ArticulationRootLinkData {
-    pub transform: (glm::Quat, glm::Vec3),
-    pub world_lin_vel: glm::Vec3,
-    pub world_ang_vel: glm::Vec3,
-    pub world_lin_accel: glm::Vec3,
-    pub world_ang_accel: glm::Vec3,
+    pub transform: (Quat, Vec3),
+    pub world_lin_vel: Vec3,
+    pub world_ang_vel: Vec3,
+    pub world_lin_accel: Vec3,
+    pub world_ang_accel: Vec3,
 }
 
 impl From<PxArticulationRootLinkData> for ArticulationRootLinkData {
     fn from(data: PxArticulationRootLinkData) -> Self {
         Self {
-            transform: (px_to_na_q(data.transform.q), px_to_na_v3(data.transform.p)),
-            world_lin_vel: px_to_na_v3(data.worldLinVel),
-            world_ang_vel: px_to_na_v3(data.worldAngVel),
-            world_lin_accel: px_to_na_v3(data.worldLinAccel),
-            world_ang_accel: px_to_na_v3(data.worldAngAccel),
+            transform: (px_to_gl_q(data.transform.q), px_to_gl_v3(data.transform.p)),
+            world_lin_vel: px_to_gl_v3(data.worldLinVel),
+            world_ang_vel: px_to_gl_v3(data.worldAngVel),
+            world_lin_accel: px_to_gl_v3(data.worldLinAccel),
+            world_ang_accel: px_to_gl_v3(data.worldAngAccel),
         }
     }
 }
@@ -79,14 +79,14 @@ impl Into<PxArticulationRootLinkData> for ArticulationRootLinkData {
         PxArticulationRootLinkData {
             transform: unsafe {
                 PxTransform_new_5(
-                    &na_to_px_v3(self.transform.1),
-                    &na_to_px_q(self.transform.0),
+                    &gl_to_px_v3(self.transform.1),
+                    &gl_to_px_q(self.transform.0),
                 )
             },
-            worldLinVel: na_to_px_v3(self.world_lin_vel),
-            worldAngVel: na_to_px_v3(self.world_ang_vel),
-            worldLinAccel: na_to_px_v3(self.world_lin_accel),
-            worldAngAccel: na_to_px_v3(self.world_ang_accel),
+            worldLinVel: gl_to_px_v3(self.world_lin_vel),
+            worldAngVel: gl_to_px_v3(self.world_ang_vel),
+            worldLinAccel: gl_to_px_v3(self.world_lin_accel),
+            worldAngAccel: gl_to_px_v3(self.world_ang_accel),
         }
     }
 }

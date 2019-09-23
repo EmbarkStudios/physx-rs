@@ -13,41 +13,45 @@ use super::{
     rigid_dynamic::*, rigid_static::*, scene::*, traits::GetRaw, transform::*, visual_debugger::*,
 };
 
-use nalgebra_glm as glm;
+use glam::{Mat4, Vec3};
 use physx_sys::*;
 use std::ptr::null_mut;
 
 pub const PX_PHYSICS_VERSION: u32 = (4 << 24) + (1 << 16);
 
 #[no_mangle]
-pub unsafe extern "C" fn on_contact_callback(
+pub extern "C" fn on_contact_callback(
     userdata: *mut std::ffi::c_void,
     header: *const PxContactPairHeader,
     pairs: *const PxContactPair,
     count: u32,
 ) {
-    if let Some(header) = header.as_ref() {
-        let scene: &mut Scene = &mut *(userdata as *mut Scene);
-        let first_px_actor = header.actors[0];
-        let second_px_actor = header.actors[1];
-        let pairs = std::slice::from_raw_parts(pairs, count as usize);
-        scene.collide_raw_pair(first_px_actor, second_px_actor, pairs);
+    unsafe {
+        if let Some(header) = header.as_ref() {
+            let scene: &mut Scene = &mut *(userdata as *mut Scene);
+            let first_px_actor = header.actors[0];
+            let second_px_actor = header.actors[1];
+            let pairs = std::slice::from_raw_parts(pairs, count as usize);
+            scene.collide_raw_pair(first_px_actor, second_px_actor, pairs);
+        }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) -> u16 {
-    if let Some(info) = info.as_ref() {
-        (*info.pairFlags).mBits |= (PxPairFlag::eSOLVE_CONTACT
-            | PxPairFlag::eNOTIFY_TOUCH_FOUND
-            | PxPairFlag::eNOTIFY_CONTACT_POINTS) as u16;
-        if (info.filterData0.word0 & info.filterData1.word1) == 0 {
-            PxFilterFlag::eSUPPRESS as u16
+pub extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) -> u16 {
+    unsafe {
+        if let Some(info) = info.as_ref() {
+            (*info.pairFlags).mBits |= (PxPairFlag::eSOLVE_CONTACT
+                | PxPairFlag::eNOTIFY_TOUCH_FOUND
+                | PxPairFlag::eNOTIFY_CONTACT_POINTS) as u16;
+            if (info.filterData0.word0 & info.filterData1.word1) == 0 {
+                PxFilterFlag::eSUPPRESS as u16
+            } else {
+                PxFilterFlag::eDEFAULT as u16
+            }
         } else {
             PxFilterFlag::eDEFAULT as u16
         }
-    } else {
-        PxFilterFlag::eDEFAULT as u16
     }
 }
 
@@ -139,28 +143,28 @@ impl Physics {
         scene.remove_articulation(handle);
     }
 
-    pub fn create_rigid_static(&mut self, transform: glm::Mat4) -> RigidStatic {
+    pub fn create_rigid_static(&mut self, transform: Mat4) -> RigidStatic {
         let px_rs =
-            unsafe { PxPhysics_createRigidStatic_mut(self.get_raw_mut(), &na_to_px_tf(transform)) };
+            unsafe { PxPhysics_createRigidStatic_mut(self.get_raw_mut(), &gl_to_px_tf(transform)) };
 
         RigidStatic::new(px_rs)
     }
 
     pub unsafe fn create_dynamic(
         &mut self,
-        transform: glm::Mat4,
+        transform: Mat4,
         geometry: *const PxGeometry,
         material: *mut PxMaterial,
         density: f32,
-        shape_transform: glm::Mat4,
+        shape_transform: Mat4,
     ) -> RigidDynamic {
         let px_rs = phys_PxCreateDynamic(
             self.get_raw_mut(),
-            &na_to_px_tf(transform),
+            &gl_to_px_tf(transform),
             geometry,
             material,
             density,
-            &na_to_px_tf(shape_transform),
+            &gl_to_px_tf(shape_transform),
         );
 
         RigidDynamic::new(px_rs)
@@ -168,17 +172,17 @@ impl Physics {
 
     pub unsafe fn create_static(
         &mut self,
-        transform: glm::Mat4,
+        transform: Mat4,
         geometry: *const PxGeometry,
         material: *mut PxMaterial,
-        shape_transform: glm::Mat4,
+        shape_transform: Mat4,
     ) -> RigidStatic {
         let px_rs = phys_PxCreateStatic(
             self.get_raw_mut(),
-            &na_to_px_tf(transform),
+            &gl_to_px_tf(transform),
             geometry,
             material,
-            &na_to_px_tf(shape_transform),
+            &gl_to_px_tf(shape_transform),
         );
 
         RigidStatic::new(px_rs)
@@ -196,11 +200,11 @@ impl Physics {
     /// Create an infinite plane, parametrized by a normal, an offset, and a material of the surface.
     pub unsafe fn create_plane(
         &mut self,
-        normal: glm::Vec3,
+        normal: Vec3,
         offset: f32,
         material: *mut PxMaterial,
     ) -> RigidStatic {
-        let plane = PxPlane_new_1(normal.x, normal.y, normal.z, offset);
+        let plane = PxPlane_new_1(normal.x(), normal.y(), normal.z(), offset);
         RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, material))
     }
 

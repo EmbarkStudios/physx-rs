@@ -17,11 +17,11 @@ use super::{
     shape::CollisionLayer,
     shape::Shape,
     traits::*,
-    transform::{na_to_px_tf, px_to_na_tf, px_to_na_v3},
+    transform::{gl_to_px_tf, px_to_gl_tf, px_to_gl_v3},
     user_data::UserData,
 };
 use enumflags2::BitFlags;
-use nalgebra_glm as glm;
+use glam::{Angle, Mat4, Vec3};
 use physx_macros::physx_type;
 use physx_sys::{
     phys_PxGetPhysics, PxContactPair, PxContactPairPoint, PxContactPair_extractContacts,
@@ -47,19 +47,19 @@ impl RigidActor {
     }
 
     /// Get the global pose of this rigid actor
-    pub fn get_global_pose(&self) -> glm::Mat4 {
-        px_to_na_tf(unsafe { PxRigidActor_getGlobalPose(self.get_raw()) })
+    pub fn get_global_pose(&self) -> Mat4 {
+        px_to_gl_tf(unsafe { PxRigidActor_getGlobalPose(self.get_raw()) })
     }
 
     /// Get the global pose of this rigid actor
-    pub fn get_global_position(&self) -> glm::Vec3 {
-        px_to_na_v3(unsafe { PxRigidActor_getGlobalPose(self.get_raw()).p })
+    pub fn get_global_position(&self) -> Vec3 {
+        px_to_gl_v3(unsafe { PxRigidActor_getGlobalPose(self.get_raw()).p })
     }
 
     /// Set the global pose of this rigid actor
-    pub fn set_global_pose(&mut self, pose: glm::Mat4, autowake: bool) {
+    pub fn set_global_pose(&mut self, pose: Mat4, autowake: bool) {
         unsafe {
-            PxRigidActor_setGlobalPose_mut(self.get_raw_mut(), &na_to_px_tf(pose), autowake);
+            PxRigidActor_setGlobalPose_mut(self.get_raw_mut(), &gl_to_px_tf(pose), autowake);
         }
     }
 
@@ -69,7 +69,7 @@ impl RigidActor {
     }
 
     /// Get transform for shape with index
-    pub fn get_shape_transform(&self, index: u32) -> glm::Mat4 {
+    pub fn get_shape_transform(&self, index: u32) -> Mat4 {
         assert!(
             index < self.get_nb_shapes(),
             "shape index out of bounds: {} >= {}",
@@ -82,7 +82,7 @@ impl RigidActor {
             let mut buffer = [null_mut(); 1];
             PxRigidActor_getShapes(self.get_raw(), buffer.as_mut_ptr(), 1, index);
 
-            px_to_na_tf(PxShapeExt_getGlobalPose_mut(buffer[0], self.get_raw()))
+            px_to_gl_tf(PxShapeExt_getGlobalPose_mut(buffer[0], self.get_raw()))
         }
     }
 
@@ -123,8 +123,8 @@ impl RigidActor {
     pub fn create_exclusive_shape(
         &mut self,
         geometry: PhysicsGeometry,
-        orientation: glm::Mat4,
-        translation: glm::Mat4,
+        orientation: Mat4,
+        translation: Mat4,
     ) {
         let shapeflags = PxShapeFlags {
             mBits: (PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSIMULATION_SHAPE) as u8,
@@ -134,9 +134,9 @@ impl RigidActor {
             let mtrl = PxPhysics_createMaterial_mut(phys_PxGetPhysics(), 0.9, 0.9, 0.0);
             let angle: f32 = -90.0;
             let rotation = if geometry.get_type() == GeometryType::Capsule {
-                glm::rotate_y(&glm::Mat4::identity(), angle.to_radians())
+                Mat4::from_axis_angle(Vec3::unit_y(), Angle::from_degrees(angle))
             } else {
-                glm::Mat4::identity()
+                Mat4::identity()
             };
 
             let shape = PxRigidActorExt_createExclusiveShape_mut_1(
@@ -146,7 +146,7 @@ impl RigidActor {
                 shapeflags,
             );
 
-            PxShape_setLocalPose_mut(shape, &na_to_px_tf((translation * orientation) * rotation));
+            PxShape_setLocalPose_mut(shape, &gl_to_px_tf((translation * orientation) * rotation));
         };
     }
 
