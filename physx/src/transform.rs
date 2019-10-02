@@ -48,8 +48,8 @@ pub fn gl_to_px_tf(trans: Mat4) -> PxTransform {
 /// Convert a reference to a Mat4 to a PxTransform
 pub fn gl_to_px_tf_ref(trans: &Mat4) -> PxTransform {
     let quat: PxQuatWrap = Quat::from_rotation_mat4(&trans).into();
-    let trans = trans.w_axis().truncate();
-    unsafe { PxTransform_new_4(trans.x(), trans.y(), trans.z(), quat.0) }
+    let (x, y, z, _) = trans.w_axis().into();
+    unsafe { PxTransform_new_4(x, y, z, quat.0) }
 }
 
 /// Convert a PxTransform to a Mat4
@@ -80,5 +80,6 @@ pub fn px_to_gl_v3(pos: PxVec3) -> Vec3 {
 /// Convert a PxVec3 to a Vec3
 #[inline(always)]
 pub fn gl_to_px_v3(pos: Vec3) -> PxVec3 {
-    unsafe { PxVec3_new_3(pos.x(), pos.y(), pos.z()) }
+    let (x, y, z) = pos.into();
+    unsafe { PxVec3_new_3(x, y, z) }
 }
