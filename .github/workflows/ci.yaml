@@ -30,7 +30,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-2016, macOS-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v1
