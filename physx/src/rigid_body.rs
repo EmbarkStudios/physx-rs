@@ -10,7 +10,6 @@
 */
 use super::{px_type::*, rigid_actor::RigidActor, transform::*};
 use enumflags2::*;
-use enumflags2_derive::*;
 use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::{
@@ -36,7 +35,7 @@ use physx_sys::{
  * Section ENUMERATIONS                                                        *
  ******************************************************************************/
 
-#[derive(Debug, Copy, Clone, EnumFlags)]
+#[derive(Debug, Copy, Clone, BitFlags)]
 #[repr(u8)]
 pub enum RigidBodyFlag {
     Kinematic = 1,
