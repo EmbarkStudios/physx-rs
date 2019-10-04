@@ -65,6 +65,13 @@ If you require functionality not covered by the [physx](physx/) wrapper you can 
 * C++ compiler ([see the `cc` crate](https://crates.io/crates/cc) for requirements)
 * CMake ([see the `cmake` crate](https://crates.io/crates/cmake) for requirements)
 
+## How to build
+
+```
+git submodule update --init
+cargo build --release
+```
+
 ## Contributing
 
 We welcome community contributions to this project.
