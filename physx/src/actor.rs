@@ -11,7 +11,6 @@ Trait for PxActor
 
 use super::{base::Base, math::*, px_type::*};
 use enumflags2::*;
-use enumflags2_derive::*;
 use physx_macros::*;
 use physx_sys::{
     PxActor, PxActorFlag, PxActorFlags, PxActorType, PxActor_getActorFlags, PxActor_getAggregate,
@@ -30,7 +29,7 @@ use physx_sys::{
  * Section ENUMS                                                               *
  ******************************************************************************/
 
-#[derive(Debug, Copy, Clone, EnumFlags)]
+#[derive(Debug, Copy, Clone, BitFlags)]
 #[repr(u8)]
 pub enum ActorFlag {
     Visualization = 1,

@@ -12,11 +12,10 @@ Wrapper for PxFoundation class
 use super::px_type::*;
 use super::traits::*;
 use enumflags2::BitFlags;
-use enumflags2_derive::EnumFlags;
 use physx_macros::*;
 use physx_sys::*;
 
-#[derive(EnumFlags, Copy, Clone, Debug, PartialEq)]
+#[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum ErrorCode {
     DebugInfo = 1u32,
