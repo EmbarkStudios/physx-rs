@@ -15,6 +15,7 @@ use super::{
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     body::PartHandle,
     geometry::*,
+    math::Isometry,
     px_type::*,
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
@@ -22,8 +23,8 @@ use super::{
     traits::{Collidable, Releasable},
     user_data::UserData,
 };
+use glam::{Mat4, Quat, Vec3};
 use log::*;
-use nalgebra_glm as glm;
 use physx_macros::*;
 use physx_sys::*;
 
@@ -202,13 +203,13 @@ impl ArticulationLink {
 ////////////////////////////////////////////////////////////////////////////////
 
 pub struct ArticulationLinkBuilder {
-    pub(super) parent_offset: glm::Vec3,
-    pub(super) parent_rotation: glm::Vec3,
+    pub(super) parent_offset: Vec3,
+    pub(super) parent_rotation: Quat,
     pub(super) name: String,
     mass: f32,
 
     inertia_tensor: [f32; 6],
-    pub collider_transform: glm::Mat4,
+    pub collider_transform: Mat4,
     pub collider: Option<ColliderDesc>,
 }
 
@@ -217,13 +218,13 @@ pub struct ArticulationLinkBuilder {
 impl Default for ArticulationLinkBuilder {
     fn default() -> Self {
         Self {
-            parent_offset: glm::Vec3::zeros(),
-            parent_rotation: glm::Vec3::zeros(),
+            parent_offset: Vec3::zero(),
+            parent_rotation: Quat::identity(),
             name: String::from(""),
             mass: 1.0,
             inertia_tensor: [0.0; 6],
 
-            collider_transform: glm::Mat4::identity(),
+            collider_transform: Mat4::identity(),
 
             collider: None,
         }
@@ -235,16 +236,12 @@ impl ArticulationLinkBuilder {
         &self,
         body: &mut ArticulationReducedCoordinate,
         parent: PartHandle,
-        joint_transform: Option<glm::Mat4>,
+        joint_transform: Option<Mat4>,
     ) -> PartHandle {
-        let parent_quat = nalgebra::UnitQuaternion::from_euler_angles(
-            self.parent_rotation.x,
-            self.parent_rotation.y,
-            self.parent_rotation.z,
-        );
+        let parent_quat = self.parent_rotation;
 
-        let transform = nalgebra::Isometry3::from_parts(self.parent_offset.into(), parent_quat);
-        let raw_link = body.create_link(parent, Some(transform.into()), joint_transform);
+        let transform = Mat4::from_rotation_translation(parent_quat, self.parent_offset);
+        let raw_link = body.create_link(parent, Some(transform), joint_transform);
 
         let mut link = ArticulationLink::new(raw_link);
         if let UserData::RigidActor(data) = link.user_data_mut() {
@@ -253,11 +250,10 @@ impl ArticulationLinkBuilder {
 
         if let Some(ref collider) = self.collider {
             let geometry: PhysicsGeometry = collider.into();
-            let collider_pose: nalgebra::Isometry3<f32> =
-                glm::try_convert(self.collider_transform).unwrap();
+            let collider_pose = Isometry::from_mat4(&self.collider_transform);
 
-            let collider_orientation: glm::Mat4 = collider_pose.rotation.into();
-            let collider_translation: glm::Mat4 = collider_pose.translation.into();
+            let collider_orientation: Mat4 = collider_pose.rotation;
+            let collider_translation: Mat4 = collider_pose.translation;
 
             link.create_exclusive_shape(geometry, collider_orientation, collider_translation);
         } else {
@@ -280,12 +276,12 @@ impl ArticulationLinkBuilder {
         self
     }
 
-    pub fn parent_shift(mut self, parent_offset: glm::Vec3) -> Self {
+    pub fn parent_shift(mut self, parent_offset: Vec3) -> Self {
         self.parent_offset = parent_offset;
         self
     }
 
-    pub fn parent_rotation(mut self, parent_rotation: glm::Vec3) -> Self {
+    pub fn parent_rotation(mut self, parent_rotation: Quat) -> Self {
         self.parent_rotation = parent_rotation;
         self
     }
@@ -309,7 +305,7 @@ impl ArticulationLinkBuilder {
     }
 
     /// Add geometry with "transform" relative to link origin
-    pub fn add_geometry(mut self, trans: glm::Mat4, coll: ColliderDesc) -> Self {
+    pub fn add_geometry(mut self, trans: Mat4, coll: ColliderDesc) -> Self {
         self.collider_transform = trans;
         self.collider = Some(coll);
         self
