@@ -21,7 +21,7 @@ use super::{
     user_data::UserData,
     visual_debugger::*,
 };
-use enumflags2_derive::EnumFlags;
+use enumflags2::BitFlags;
 use glam::Vec3;
 
 use physx_sys::*;
@@ -437,7 +437,7 @@ impl Scene {
     }
 }
 
-#[derive(Debug, Clone, Copy, EnumFlags)]
+#[derive(Debug, Clone, Copy, BitFlags)]
 #[repr(u32)]
 pub enum BroadPhaseType {
     SweepAndPrune = 1,

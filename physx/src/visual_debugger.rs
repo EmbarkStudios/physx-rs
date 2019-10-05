@@ -11,12 +11,11 @@
 
 use super::{foundation::*, px_type::*, traits::*};
 use enumflags2::BitFlags;
-use enumflags2_derive::EnumFlags;
 use log::*;
 use physx_macros::*;
 use physx_sys::*;
 
-#[derive(EnumFlags, Copy, Clone, Debug, PartialEq)]
+#[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 pub enum VisualDebuggerSceneFlag {
     TransmitContacts = 1,

@@ -4,7 +4,6 @@ Wrapper for PxBase.
 
 use super::px_type::*;
 use enumflags2::BitFlags;
-use enumflags2_derive::*;
 use physx_macros::physx_type;
 use physx_sys::{
     PxBase, PxBaseFlag, PxBaseFlags, PxBase_getBaseFlags, PxBase_getConcreteType,
@@ -16,7 +15,7 @@ use physx_sys::{
  * Section ENUMERATIONS                                                        *
  ******************************************************************************/
 
-#[derive(Copy, Clone, EnumFlags, Debug)]
+#[derive(Copy, Clone, BitFlags, Debug)]
 #[repr(u16)]
 pub enum BaseFlag {
     OwnsMemory = 1,

@@ -14,7 +14,6 @@ use super::{
     transform::{gl_to_px_q, gl_to_px_v3, px_to_gl_q, px_to_gl_v3},
 };
 use enumflags2::BitFlags;
-use enumflags2_derive::EnumFlags;
 use glam::{Quat, Vec3};
 use physx_sys::{
     PxArticulationCache, PxArticulationCacheFlags, PxArticulationRootLinkData, PxTransform_new_5,
@@ -24,7 +23,7 @@ use physx_sys::{
 // Section ENUMS
 ////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, Clone, Copy, EnumFlags)]
+#[derive(Debug, Clone, Copy, BitFlags)]
 #[repr(u8)]
 pub enum ArticulationCacheFlag {
     Velocity = 1,

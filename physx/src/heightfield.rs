@@ -13,7 +13,6 @@ use super::{
     geometry::Geometry,
 };
 use enumflags2::BitFlags;
-use enumflags2_derive::EnumFlags;
 use glam::Vec3;
 use physx_sys::*;
 
@@ -23,7 +22,7 @@ pub enum HeightfieldFormat {
     S16TM = 1,
 }
 
-#[derive(EnumFlags, Debug, Copy, Clone)]
+#[derive(BitFlags, Debug, Copy, Clone)]
 #[repr(u16)]
 pub enum HeightfieldFlag {
     NoboundaryEdges = 1,

@@ -11,7 +11,6 @@ Wrapper for PxShape
 
 use super::{base::Base, px_type::*, traits::*};
 use enumflags2::BitFlags;
-use enumflags2_derive::EnumFlags;
 use physx_macros::*;
 use physx_sys::{
     PxFilterData, PxFilterData_new_1, PxMaterial, PxMaterial_release_mut, PxShape, PxShapeFlag,
@@ -21,7 +20,7 @@ use physx_sys::{
 };
 
 /// Layers used for collision/querying of shapes
-#[derive(Debug, Copy, Clone, EnumFlags)]
+#[derive(Debug, Copy, Clone, BitFlags)]
 #[repr(u32)]
 pub enum CollisionLayer {
     Ghost = 1,
@@ -31,7 +30,7 @@ pub enum CollisionLayer {
 }
 
 /// Layers used for collision/querying of shapes
-#[derive(Debug, Copy, Clone, EnumFlags)]
+#[derive(Debug, Copy, Clone, BitFlags)]
 #[repr(u32)]
 pub enum ShapeFlag {
     SimulationShape = 1u32,
