@@ -58,9 +58,9 @@ mod tests {
     use glam::f32::{Mat4, Vec3};
     #[test]
     fn isometry() {
-        let rot_z = Mat4::from_rotation_z(40.0);
-        let rot_y = Mat4::from_rotation_y(30.0);
-        let rot_x = Mat4::from_rotation_x(20.0);
+        let rot_z = Mat4::from_rotation_z(f32::to_radians(40.0));
+        let rot_y = Mat4::from_rotation_y(f32::to_radians(30.0));
+        let rot_x = Mat4::from_rotation_x(f32::to_radians(20.0));
         let rot = rot_y * rot_x * rot_z;
         let trans = Mat4::from_translation(Vec3::new(1.0, 2.0, 3.0));
         let m = trans * rot;
