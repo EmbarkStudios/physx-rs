@@ -43,7 +43,7 @@ impl Isometry {
         );
         assert!(x.w() == 0.0 && y.w() == 0.0 && z.w() == 0.0, "Unable to extract the rotation matrix because one of the W components of the axis wasn't 0.0");
 
-        let rotation = Mat4::new(x, y, z, Vec4::unit_w());
+        let rotation = Mat4::from_cols(x, y, z, Vec4::unit_w());
         let translation = Mat4::from_translation(m.w_axis().truncate());
         Self {
             rotation,
@@ -55,12 +55,12 @@ impl Isometry {
 #[cfg(test)]
 mod tests {
     use super::Isometry;
-    use glam::f32::{deg, Mat4, Vec3};
+    use glam::f32::{Mat4, Vec3};
     #[test]
     fn isometry() {
-        let rot_z = Mat4::from_rotation_z(deg(40.0));
-        let rot_y = Mat4::from_rotation_y(deg(30.0));
-        let rot_x = Mat4::from_rotation_x(deg(20.0));
+        let rot_z = Mat4::from_rotation_z(40.0);
+        let rot_y = Mat4::from_rotation_y(30.0);
+        let rot_x = Mat4::from_rotation_x(20.0);
         let rot = rot_y * rot_x * rot_z;
         let trans = Mat4::from_translation(Vec3::new(1.0, 2.0, 3.0));
         let m = trans * rot;
