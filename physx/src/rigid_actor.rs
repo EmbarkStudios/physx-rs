@@ -21,7 +21,7 @@ use super::{
     user_data::UserData,
 };
 use enumflags2::BitFlags;
-use glam::{Angle, Mat4, Vec3};
+use glam::{Mat4, Vec3};
 use physx_macros::physx_type;
 use physx_sys::{
     phys_PxGetPhysics, PxContactPair, PxContactPairPoint, PxContactPair_extractContacts,
@@ -132,9 +132,9 @@ impl RigidActor {
 
         unsafe {
             let mtrl = PxPhysics_createMaterial_mut(phys_PxGetPhysics(), 0.9, 0.9, 0.0);
-            let angle: f32 = -90.0;
+            let angle = f32::to_radians(-90.0);
             let rotation = if geometry.get_type() == GeometryType::Capsule {
-                Mat4::from_axis_angle(Vec3::unit_y(), Angle::from_degrees(angle))
+                Mat4::from_axis_angle(Vec3::unit_y(), angle)
             } else {
                 Mat4::identity()
             };
