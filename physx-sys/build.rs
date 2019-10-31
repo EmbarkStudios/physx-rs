@@ -101,16 +101,8 @@ fn main() {
     println!("cargo:rustc-link-lib=static=PhysXPvdSDK_static_64");
     println!("cargo:rustc-link-lib=static=PhysXCommon_static_64");
     println!("cargo:rustc-link-lib=static=PhysXFoundation_static_64");
-
-    if "mac" == target_os {
-        // PhysX's lib names don't include the "static" segment on Mac, even though they are indeed static.
-        // See `PHYSXEXTENSIONS_LIBTYPE` in PhysX's cmake definitions for more details.
-        println!("cargo:rustc-link-lib=static=PhysXCharacterKinematic_64");
-        println!("cargo:rustc-link-lib=static=PhysXExtensions_64");
-    } else {
-        println!("cargo:rustc-link-lib=static=PhysXCharacterKinematic_static_64");
-        println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
-    }
+    println!("cargo:rustc-link-lib=static=PhysXCharacterKinematic_static_64");
+    println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
 
     let mut cc_builder = cc::Build::new();
     let physx_cc = cc_builder
