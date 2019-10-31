@@ -37,7 +37,7 @@ This repository contains 3 crates:
 The following code example shows how [`physx`](physx/) can be initialized.
 
 ``` Rust
-const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
+const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 1);
 let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
 
 let mut physics = PhysicsBuilder::default()
