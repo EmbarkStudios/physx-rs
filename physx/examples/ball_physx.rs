@@ -5,7 +5,7 @@
 use glam::{Mat4, Vec3};
 use physx::prelude::*;
 
-const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
+const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 1);
 
 /// This is a WIP example for how the rustified wrappers lets your reduced the
 /// amount of unsafe in your code, and make it clearer where we cannot abstract

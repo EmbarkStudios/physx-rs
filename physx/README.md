@@ -22,7 +22,7 @@ Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) cont
 ## Basic usage
 
 ``` rust
-const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 0);
+const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 1);
 let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
 
 let mut physics = PhysicsBuilder::default()
