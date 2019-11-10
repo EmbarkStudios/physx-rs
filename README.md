@@ -32,6 +32,12 @@ This repository contains 3 crates:
 
 * [nphysics](https://github.com/rustsim/nphysics): a 2- and 3-dimensional physics engine for games and animations written in Rust. It is a good option for projects which do not require the full feature set of PhysX or prefer a native Rust solution.
 
+## Presentation
+
+[Tomasz Stachowiak](https://github.com/h3r2tic) did a presentation at the Stockholm Rust Meetup on October 2019 about this project that goes through the tecnical details of how C++ to Rust bindings of `physx-sys` works:
+
+[![](http://img.youtube.com/vi/RxtXGeDHu0w/0.jpg)](http://www.youtube.com/watch?v=RxtXGeDHu0w "An unholy fusion of Rust and C++ in physx-rs (Stockholm Rust Meetup, October 2019)")
+
 ## Usage
 
 The following code example shows how [`physx`](physx/) can be initialized.
