@@ -10,6 +10,12 @@ Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://gith
 
 Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing a work-in-progress safe wrapper.
 
+## Presentation
+
+[Tomasz Stachowiak](https://github.com/h3r2tic) did a presentation at the Stockholm Rust Meetup on October 2019 about this project that goes through the tecnical details of how C++ to Rust bindings of `physx-sys` works:
+
+[![](http://img.youtube.com/vi/RxtXGeDHu0w/0.jpg)](http://www.youtube.com/watch?v=RxtXGeDHu0w "An unholy fusion of Rust and C++ in physx-rs (Stockholm Rust Meetup, October 2019)")
+
 ## Basic usage
 
 ```Rust
