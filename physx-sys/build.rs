@@ -127,7 +127,7 @@ fn main() {
     // https://github.com/NVIDIAGameWorks/PhysX/pull/181
     // https://github.com/NVIDIAGameWorks/PhysX/issues/164
     if target_os == "windows" {
-        physx_cc = physx_cc.include("physx_hacks/VisualStudio");
+        physx_cc = physx_cc.include("physx-hacks/VisualStudio");
     }
 
     // We force clang++ on linux hosts since it appears some distros
