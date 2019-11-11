@@ -105,7 +105,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
 
     let mut cc_builder = cc::Build::new();
-    let physx_cc = cc_builder
+    let mut physx_cc = cc_builder
         .cpp(true)
         .opt_level(3)
         .debug(false)
@@ -122,6 +122,13 @@ fn main() {
         } else {
             "-std=c++14"
         });
+
+    // Visual Studio 2019 compile workaround for:
+    // https://github.com/NVIDIAGameWorks/PhysX/pull/181
+    // https://github.com/NVIDIAGameWorks/PhysX/issues/164
+    if target_os == "windows" {
+        physx_cc = physx_cc.include("physx_hacks/VisualStudio");
+    }
 
     // We force clang++ on linux hosts since it appears some distros
     // *COUGH* UBUNTU *COUGH* use way too old versions of g++ which will
