@@ -87,8 +87,16 @@ fn main() {
         .define("CMAKE_C_COMPILER", "clang")
         .define("CMAKE_CXX_COMPILER", "clang++")
         .define("CMAKE_BUILD_TYPE", build_mode)
-        .profile(build_mode)
-        .build();
+        .profile(build_mode);
+
+    // Visual Studio 2019 compile workaround for:
+    // https://github.com/NVIDIAGameWorks/PhysX/pull/181
+    // https://github.com/NVIDIAGameWorks/PhysX/issues/164
+    if target_os == "windows" {
+        physx.cxxflag("-Iphysx-hacks/VisualStudio");
+    }
+
+    let physx = physx.build();
 
     println!(
         "cargo:rustc-link-search=native={}",
