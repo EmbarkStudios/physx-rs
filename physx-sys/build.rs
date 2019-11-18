@@ -45,7 +45,7 @@ fn most_recent_modification_time_in_dir(path: &PathBuf) -> Option<std::time::Sys
 fn locate_output_lib_dir(mut cmake_build_out: PathBuf, build_profile: &str) -> String {
     use std::fs;
 
-    // Always witin the "bin" folder of the CMAKE output
+    // Always within the "bin" folder of the CMAKE output
     cmake_build_out.push("bin");
 
     if let Ok(entries) = fs::read_dir(&cmake_build_out) {
