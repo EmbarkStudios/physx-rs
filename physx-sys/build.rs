@@ -66,7 +66,10 @@ fn locate_output_lib_dir(mut cmake_build_out: PathBuf, build_profile: &str) -> S
             .max_by_key(|(_, m)| m.clone())
             .map(|(d, _)| d);
 
-        out_dir.expect("could not locate output directory for PhysX static libs").display().to_string()
+        out_dir
+            .expect("could not locate output directory for PhysX static libs")
+            .display()
+            .to_string()
     } else {
         panic!("Could not inspect cmake build output directory");
     }
