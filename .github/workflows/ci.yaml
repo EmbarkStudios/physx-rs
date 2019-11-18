@@ -30,7 +30,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2016, macOS-latest]
+        os: [ubuntu-latest, windows-2016, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.1.app
     runs-on: ${{ matrix.os }}
