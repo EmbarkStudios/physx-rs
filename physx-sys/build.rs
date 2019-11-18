@@ -235,4 +235,7 @@ fn main() {
 
     // TODO: use the cloned git revision number instead
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
+
+    // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
+    let _ = std::fs::remove_file(physx_root_dir.join("include/PxConfig.h"));
 }
