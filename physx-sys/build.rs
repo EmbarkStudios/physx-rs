@@ -3,23 +3,72 @@ use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
-#[cfg(debug_assertions)]
-fn get_bin_dir() -> (&'static str, &'static str) {
-    match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
-        "linux" => ("linux", "bin/linux.clang/debug"),
-        "windows" => ("windows", "bin/win.x86_64.vc141.md/debug"),
-        "macos" => ("mac", "bin/mac.x86_64/debug"),
-        p @ _ => panic!("Unsupported platform: {}", p),
-    }
+fn get_target_os() -> String {
+    env::var("CARGO_CFG_TARGET_OS").unwrap()
 }
 
-#[cfg(not(debug_assertions))]
-fn get_bin_dir() -> (&'static str, &'static str) {
-    match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
-        "linux" => ("linux", "bin/linux.clang/profile"),
-        "windows" => ("windows", "bin/win.x86_64.vc141.md/profile"),
-        "macos" => ("mac", "bin/mac.x86_64/profile"),
-        p @ _ => panic!("Unsupported platform: {}", p),
+// Find the time of the most recent modification among all the files in a directory
+fn most_recent_modification_time_in_dir(path: &PathBuf) -> Option<std::time::SystemTime> {
+    use std::fs;
+
+    fs::read_dir(&path).ok().and_then(|entries| {
+        entries
+            .filter_map(std::result::Result::ok)
+            .filter_map(|entry| {
+                let meta = entry.metadata().ok();
+                let modified = meta.and_then(|meta| {
+                    if meta.is_dir() {
+                        None
+                    } else {
+                        meta.modified().ok()
+                    }
+                });
+
+                modified
+            })
+            .max()
+    })
+}
+
+// Get the sub-directory of the CMAKE build result which contains static libs.
+// The CMAKE files in PhysX compute a compiler-dependent path, which can look like some of the following:
+//
+// "bin/linux.clang/debug"
+// "bin/win.x86_64.vc141.md/debug"
+// "bin/win.x86_64.vc142.md/profile"
+// "bin/mac.x86_64/debug"
+//
+// In order not to have to replicate the CMAKE logic, we will inspect all paths with the structure
+// "bin/*/debug" or "bin/*/profile", depending on the build profile passed to CMAKE.
+// Among those directories, we choose the one containing the most recently modified files.
+// This is to ensure that we find the correct folder even if it contains stale results from different compilers.
+fn locate_output_lib_dir(mut cmake_build_out: PathBuf, build_profile: &str) -> String {
+    use std::fs;
+
+    // Always witin the "bin" folder of the CMAKE output
+    cmake_build_out.push("bin");
+
+    if let Ok(entries) = fs::read_dir(&cmake_build_out) {
+        // Get all sub-directories in "bin"
+        let out_dirs = entries
+            .filter_map(std::result::Result::ok)
+            .filter(|entry| entry.metadata().map(|m| m.is_dir()).unwrap_or(false));
+
+        // Find the ones containing "debug" or "profile", and pick the most recently modified.
+        let out_dir = out_dirs
+            .filter_map(|out_dir| {
+                let mut out_dir = out_dir.path();
+                out_dir.push(build_profile);
+
+                let newest_in_dir = most_recent_modification_time_in_dir(&out_dir)?;
+                Some((out_dir, newest_in_dir))
+            })
+            .max_by_key(|(_, m)| m.clone())
+            .map(|(d, _)| d);
+
+        out_dir.expect("could not locate output directory for PhysX static libs").display().to_string()
+    } else {
+        panic!("Could not inspect cmake build output directory");
     }
 }
 
@@ -64,8 +113,8 @@ fn main() {
         "profile"
     };
 
-    let (target_os, bin_dir) = get_bin_dir();
-
+    let target_os = get_target_os();
+    let target_os = target_os.as_str();
     let mut physx_cfg = Config::new("PhysX/physx/source/compiler/cmake");
 
     match target_os {
@@ -90,10 +139,8 @@ fn main() {
         .profile(build_mode)
         .build();
 
-    println!(
-        "cargo:rustc-link-search=native={}",
-        (physx.join(bin_dir)).display()
-    );
+    let lib_dir = locate_output_lib_dir(physx, build_mode);
+    println!("cargo:rustc-link-search=native={}", lib_dir);
 
     println!("cargo:rustc-link-lib=static=PhysXVehicle_static_64");
     println!("cargo:rustc-link-lib=static=PhysX_static_64");
