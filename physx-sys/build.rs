@@ -3,8 +3,14 @@ use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
 
-fn get_target_os() -> String {
-    env::var("CARGO_CFG_TARGET_OS").unwrap()
+fn get_physx_target_os_name() -> String {
+    let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
+    match os.as_str() {
+        // CARGO_CFG_TARGET_OS uses "linux", "windows", and "macos"
+        // PhysX uses "linux", "windows", and "mac"
+        "macos" => "mac".to_owned(),
+        _ => os,
+    }
 }
 
 // Find the time of the most recent modification among all the files in a directory
@@ -116,7 +122,7 @@ fn main() {
         "profile"
     };
 
-    let target_os = get_target_os();
+    let target_os = get_physx_target_os_name();
     let target_os = target_os.as_str();
     let mut physx_cfg = Config::new("PhysX/physx/source/compiler/cmake");
 
