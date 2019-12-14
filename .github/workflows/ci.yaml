@@ -26,6 +26,12 @@ jobs:
           command: clippy
           args: --all-features -- -D warnings
 
+  cargo-deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: EmbarkStudios/cargo-deny-action@master # we use latest master as this is our own tool that we maintain
+
   test:
     name: Test
     strategy:

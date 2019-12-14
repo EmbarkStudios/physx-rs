@@ -1,0 +1,41 @@
+[bans]
+multiple-versions = "deny"
+deny = [
+    { name = "openssl" },   
+
+    # library choices we've made
+    { name = "nalgebra" },          # we use glam as math library, not nalgebra 
+    { name = "nalgebra-glm" },      # we use glam as math library, not nalgebra 
+    { name = "ncollide3d"},         # we use PhysX, not nphysics/nalgebra 
+    { name = "nphysics"},           # we use PhysX, not nphysics/nalgebra 
+
+    # deprecated/abandoned
+    { name = "term" },              # term is not fully maintained, and termcolor is replacing it
+    { name = "quickersort" },       # explicitly deprecated
+    { name = "build-helper" },      # abandoned, and doesn't add much value
+    { name = "app_dirs" },          # abandoned, use app_dirs2 instead
+    { name = "colored" },           # not actively maintained? slow to merge update fixes in and has lots of old dependencies
+    { name = "floating-duration"},  # not needed with Rust 1.38, and very few users and commits
+    { name = "mopa"},               # abandoned, have not been updated for 4 years
+]
+skip = [
+]
+skip-tree = [
+]
+
+[licenses]
+unlicensed = "deny"
+allow-osi-fsf-free = "neither"
+# We want really high confidence when inferring licenses from text
+confidence-threshold = 0.92
+allow = [
+    "LicenseRef-Embark-Proprietary",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "MPL-2.0",
+    "Zlib",
+]
