@@ -62,7 +62,7 @@ pub fn px_to_gl_tf(trans: PxTransform) -> Mat4 {
 /// Convert a PxQuat to a Quat
 #[inline(always)]
 pub fn px_to_gl_q(quat: PxQuat) -> Quat {
-    Quat::new(quat.x, quat.y, quat.z, quat.w)
+    Quat::from_xyzw(quat.x, quat.y, quat.z, quat.w)
 }
 
 /// Convert a PxQuat to a Quat
