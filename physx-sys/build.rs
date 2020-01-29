@@ -133,6 +133,12 @@ fn main() {
         _ => {}
     }
 
+    let linkage = env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or(String::new());
+    let crt_static = linkage.contains("crt-static");
+    if crt_static {
+        physx_cfg.define("NV_USE_STATIC_WINCRT", "True");
+    }
+
     let physx = physx_cfg
         .define("PX_OUTPUT_LIB_DIR", &output_dir)
         .define("PX_OUTPUT_BIN_DIR", &output_dir)

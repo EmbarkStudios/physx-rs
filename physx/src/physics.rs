@@ -7,6 +7,7 @@ Wrapper interface for Physics
  */
 
 #![allow(clippy::not_unsafe_ptr_arg_deref)]
+#![allow(clippy::missing_safety_doc)]
 
 use super::{
     articulation_link::*, articulation_reduced_coordinate::*, body::*, cooking::*, foundation::*,
