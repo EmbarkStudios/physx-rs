@@ -22,15 +22,13 @@ fn most_recent_modification_time_in_dir(path: &PathBuf) -> Option<std::time::Sys
             .filter_map(std::result::Result::ok)
             .filter_map(|entry| {
                 let meta = entry.metadata().ok();
-                let modified = meta.and_then(|meta| {
+                meta.and_then(|meta| {
                     if meta.is_dir() {
                         None
                     } else {
                         meta.modified().ok()
                     }
-                });
-
-                modified
+                })
             })
             .max()
     })
@@ -69,7 +67,7 @@ fn locate_output_lib_dir(mut cmake_build_out: PathBuf, build_profile: &str) -> S
                 let newest_in_dir = most_recent_modification_time_in_dir(&out_dir)?;
                 Some((out_dir, newest_in_dir))
             })
-            .max_by_key(|(_, m)| m.clone())
+            .max_by_key(|(_, m)| *m)
             .map(|(d, _)| d);
 
         out_dir
@@ -126,14 +124,11 @@ fn main() {
     let target_os = target_os.as_str();
     let mut physx_cfg = Config::new("PhysX/physx/source/compiler/cmake");
 
-    match target_os {
-        "linux" => {
-            physx_cfg.define("CMAKE_LIBRARY_ARCHITECTURE", "x86_64-unknown-linux-gnu");
-        }
-        _ => {}
+    if target_os == "linux" {
+        physx_cfg.define("CMAKE_LIBRARY_ARCHITECTURE", "x86_64-unknown-linux-gnu");
     }
 
-    let linkage = env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or(String::new());
+    let linkage = env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or_default();
     let crt_static = linkage.contains("crt-static");
     if crt_static {
         physx_cfg.define("NV_USE_STATIC_WINCRT", "True");
@@ -219,9 +214,8 @@ fn main() {
         structgen_path.set_extension("exe");
     }
 
-    if !std::fs::metadata(&structgen_path).is_ok() {
-        panic!("failed to compile structgen even though compiler reported no failures");
-    }
+    std::fs::metadata(&structgen_path)
+        .expect("failed to compile structgen even though compiler reported no failures");
 
     let mut structgen = std::process::Command::new(&structgen_path);
     structgen.current_dir(&output_dir_path);
