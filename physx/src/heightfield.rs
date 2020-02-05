@@ -28,10 +28,10 @@ pub enum HeightfieldFlag {
     NoboundaryEdges = 1,
 }
 
-pub type HeightfieldSampler = dyn Fn(usize, usize) -> f32;
+pub type HeightfieldSampler<'a> = dyn Fn(usize, usize) -> f32 + 'a;
 
 pub struct HeightfieldBuilder<'a> {
-    sampler: &'a HeightfieldSampler,
+    sampler: &'a HeightfieldSampler<'a>,
     size: (usize, usize),
     edge_threshold: f32,
     format: HeightfieldFormat,
@@ -51,7 +51,7 @@ impl<'a> Default for HeightfieldBuilder<'a> {
 }
 
 impl<'a> HeightfieldBuilder<'a> {
-    pub fn sampler(self, sampler: &'a HeightfieldSampler) -> Self {
+    pub fn sampler(self, sampler: &'a HeightfieldSampler<'a>) -> Self {
         Self { sampler, ..self }
     }
 
