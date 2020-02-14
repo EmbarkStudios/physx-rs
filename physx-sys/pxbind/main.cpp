@@ -1119,6 +1119,10 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
             bool hasSelf = !cmd->isStatic();
             QualType selfType = QualType(cmd->getParent()->getTypeForDecl(), 0);
 
+            const bool needsAllocatingCtor =
+                cmd->getParent()->isPolymorphic() ||
+                !cmd->getParent()->hasSimpleDestructor();
+
             // constructor
             if (const CXXConstructorDecl* ccd =
                     dyn_cast<CXXConstructorDecl>(cmd)) {
@@ -1129,8 +1133,7 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
 
                 hasSelf = false;
 
-                if (cmd->getParent()->isPolymorphic() ||
-                    !cmd->getParent()->hasSimpleDestructor()) {
+                if (needsAllocatingCtor) {
                     fn.name = className + "_new_alloc";
                     const auto retValueType = convertType(selfType, policy);
                     fn.valueExpr = shared_ptr<CppNewResult>(
@@ -1143,15 +1146,14 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
                         new CppCtorResult(fn.returnType.getCppType()));
                 }
             } else if (isa<CXXDestructorDecl>(cmd)) {
-                if (cmd->getParent()->hasIrrelevantDestructor() ||
-                    hasReleaseMethod(*cmd->getParent())) {
-                    return;
-                }
+                if (needsAllocatingCtor &&
+                    !hasReleaseMethod(*cmd->getParent())) {
 
-                fn.name = className + "_delete";
-                fn.valueExpr = nullptr;
-                fn.returnType = CppType("void", "void", "()");
-                fn.bodyPreamble += "delete self_;\n";
+                    fn.name = className + "_delete";
+                    fn.valueExpr = nullptr;
+                    fn.returnType = CppType("void", "void", "()");
+                    fn.bodyPreamble += "delete self_;\n";
+                }
             } else {
                 fn.name = className + "_" + cmd->getNameAsString();
                 if (!cmd->isConst()) {
