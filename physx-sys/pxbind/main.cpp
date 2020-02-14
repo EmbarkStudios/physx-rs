@@ -1153,6 +1153,8 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
                     fn.valueExpr = nullptr;
                     fn.returnType = CppType("void", "void", "()");
                     fn.bodyPreamble += "delete self_;\n";
+                } else {
+                    return;
                 }
             } else {
                 fn.name = className + "_" + cmd->getNameAsString();

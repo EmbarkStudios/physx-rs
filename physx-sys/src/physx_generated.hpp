@@ -9597,11 +9597,6 @@ bool returnValue = self_->isValid();
 return returnValue;
 }
 
-void PxJointLinearLimit_delete(physx_PxJointLinearLimit_Pod* self__pod) {
-physx::PxJointLinearLimit* self_ = reinterpret_cast<physx::PxJointLinearLimit*>(self__pod);
-delete self_;
-}
-
 physx_PxJointLinearLimitPair_Pod PxJointLinearLimitPair_new(physx_PxTolerancesScale_Pod const* scale_pod, float lowerLimit, float upperLimit, float contactDist) {
 physx::PxTolerancesScale const& scale = reinterpret_cast<physx::PxTolerancesScale const&>(*scale_pod);
 physx::PxJointLinearLimitPair returnValue(scale, lowerLimit, upperLimit, contactDist);
@@ -9622,11 +9617,6 @@ bool PxJointLinearLimitPair_isValid(physx_PxJointLinearLimitPair_Pod const* self
 physx::PxJointLinearLimitPair const* self_ = reinterpret_cast<physx::PxJointLinearLimitPair const*>(self__pod);
 bool returnValue = self_->isValid();
 return returnValue;
-}
-
-void PxJointLinearLimitPair_delete(physx_PxJointLinearLimitPair_Pod* self__pod) {
-physx::PxJointLinearLimitPair* self_ = reinterpret_cast<physx::PxJointLinearLimitPair*>(self__pod);
-delete self_;
 }
 
 physx_PxJointAngularLimitPair_Pod PxJointAngularLimitPair_new(float lowerLimit, float upperLimit, float contactDist) {
@@ -9650,11 +9640,6 @@ bool returnValue = self_->isValid();
 return returnValue;
 }
 
-void PxJointAngularLimitPair_delete(physx_PxJointAngularLimitPair_Pod* self__pod) {
-physx::PxJointAngularLimitPair* self_ = reinterpret_cast<physx::PxJointAngularLimitPair*>(self__pod);
-delete self_;
-}
-
 physx_PxJointLimitCone_Pod PxJointLimitCone_new(float yLimitAngle, float zLimitAngle, float contactDist) {
 physx::PxJointLimitCone returnValue(yLimitAngle, zLimitAngle, contactDist);
 physx_PxJointLimitCone_Pod returnValue_pod;
@@ -9676,11 +9661,6 @@ bool returnValue = self_->isValid();
 return returnValue;
 }
 
-void PxJointLimitCone_delete(physx_PxJointLimitCone_Pod* self__pod) {
-physx::PxJointLimitCone* self_ = reinterpret_cast<physx::PxJointLimitCone*>(self__pod);
-delete self_;
-}
-
 physx_PxJointLimitPyramid_Pod PxJointLimitPyramid_new(float yLimitAngleMin, float yLimitAngleMax, float zLimitAngleMin, float zLimitAngleMax, float contactDist) {
 physx::PxJointLimitPyramid returnValue(yLimitAngleMin, yLimitAngleMax, zLimitAngleMin, zLimitAngleMax, contactDist);
 physx_PxJointLimitPyramid_Pod returnValue_pod;
@@ -9700,11 +9680,6 @@ bool PxJointLimitPyramid_isValid(physx_PxJointLimitPyramid_Pod const* self__pod)
 physx::PxJointLimitPyramid const* self_ = reinterpret_cast<physx::PxJointLimitPyramid const*>(self__pod);
 bool returnValue = self_->isValid();
 return returnValue;
-}
-
-void PxJointLimitPyramid_delete(physx_PxJointLimitPyramid_Pod* self__pod) {
-physx::PxJointLimitPyramid* self_ = reinterpret_cast<physx::PxJointLimitPyramid*>(self__pod);
-delete self_;
 }
 
 physx_PxPrismaticJoint_Pod* phys_PxPrismaticJointCreate(physx_PxPhysics_Pod* physics_pod, physx_PxRigidActor_Pod* actor0_pod, physx_PxTransform_Pod const* localFrame0_pod, physx_PxRigidActor_Pod* actor1_pod, physx_PxTransform_Pod const* localFrame1_pod) {
@@ -11246,11 +11221,6 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-void PxVehicleEngineData_delete(physx_PxVehicleEngineData_Pod* self__pod) {
-physx::PxVehicleEngineData* self_ = reinterpret_cast<physx::PxVehicleEngineData*>(self__pod);
-delete self_;
-}
-
 physx_PxVehicleGearsData_Pod PxVehicleGearsData_new() {
 physx::PxVehicleGearsData returnValue;
 physx_PxVehicleGearsData_Pod returnValue_pod;
@@ -12142,11 +12112,6 @@ physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream
 PxVehicleDriveSimData::getBinaryMetaData(stream);
 }
 
-void PxVehicleDriveSimData_delete(physx_PxVehicleDriveSimData_Pod* self__pod) {
-physx::PxVehicleDriveSimData* self_ = reinterpret_cast<physx::PxVehicleDriveSimData*>(self__pod);
-delete self_;
-}
-
 void PxVehicleDriveDynData_setToRestState_mut(physx_PxVehicleDriveDynData_Pod* self__pod) {
 physx::PxVehicleDriveDynData* self_ = reinterpret_cast<physx::PxVehicleDriveDynData*>(self__pod);
 self_->setToRestState();
@@ -12361,11 +12326,6 @@ return returnValue_pod;
 void PxVehicleDriveSimData4W_getBinaryMetaData_mut(physx_PxOutputStream_Pod* stream_pod) {
 physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream_pod);
 PxVehicleDriveSimData4W::getBinaryMetaData(stream);
-}
-
-void PxVehicleDriveSimData4W_delete(physx_PxVehicleDriveSimData4W_Pod* self__pod) {
-physx::PxVehicleDriveSimData4W* self_ = reinterpret_cast<physx::PxVehicleDriveSimData4W*>(self__pod);
-delete self_;
 }
 
 physx_PxVehicleDrive4W_Pod* PxVehicleDrive4W_allocate_mut(uint32_t nbWheels) {
@@ -12655,11 +12615,6 @@ return returnValue_pod;
 void PxVehicleDriveSimDataNW_getBinaryMetaData_mut(physx_PxOutputStream_Pod* stream_pod) {
 physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream_pod);
 PxVehicleDriveSimDataNW::getBinaryMetaData(stream);
-}
-
-void PxVehicleDriveSimDataNW_delete(physx_PxVehicleDriveSimDataNW_Pod* self__pod) {
-physx::PxVehicleDriveSimDataNW* self_ = reinterpret_cast<physx::PxVehicleDriveSimDataNW*>(self__pod);
-delete self_;
 }
 
 physx_PxVehicleDriveNW_Pod* PxVehicleDriveNW_allocate_mut(uint32_t nbWheels) {
