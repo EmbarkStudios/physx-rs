@@ -145,11 +145,11 @@ fn main() {
         .define("TARGET_BUILD_PLATFORM", target_os)
         .define(
             "CMAKE_C_COMPILER",
-            env::var("CC").unwrap_or("clang".to_owned()),
+            env::var("CC").unwrap_or_else(|| "clang".to_owned()),
         )
         .define(
             "CMAKE_CXX_COMPILER",
-            env::var("CXX").unwrap_or("clang++".to_owned()),
+            env::var("CXX").unwrap_or_else(|| "clang++".to_owned()),
         )
         .define("CMAKE_BUILD_TYPE", build_mode)
         .profile(build_mode)
@@ -191,7 +191,7 @@ fn main() {
     // generally be picked up as the default C++ compiler over clang.
     // This should be host_os, but we don't cross compile
     if target_os == "linux" {
-        physx_cc.compiler(env::var("CXX").unwrap_or("clang++".to_owned()));
+        physx_cc.compiler(env::var("CXX").unwrap_or_else(|| "clang++".to_owned()));
     }
 
     let mut structgen_path = output_dir_path.join("structgen");
