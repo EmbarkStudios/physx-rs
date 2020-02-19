@@ -8,12 +8,9 @@
 /*!
 
 */
-use super::{
-    cooking::{Cooking, HEIGHT_SCALE, XZ_SCALE},
-    geometry::Geometry,
-};
+use super::{cooking::Cooking, geometry::Geometry};
 use enumflags2::BitFlags;
-use glam::Vec3;
+
 use physx_sys::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -31,38 +28,55 @@ pub enum HeightfieldFlag {
 pub type HeightfieldSampler<'a> = dyn Fn(usize, usize) -> f32 + 'a;
 
 pub struct HeightfieldBuilder<'a> {
-    sampler: &'a HeightfieldSampler<'a>,
-    size: (usize, usize),
+    samples: &'a [f32],
+    x_samples: usize,
+    y_samples: usize,
     edge_threshold: f32,
     format: HeightfieldFormat,
     flags: BitFlags<HeightfieldFlag>,
+    width: f32,
+    length: f32,
+    height: f32,
 }
 
-impl<'a> Default for HeightfieldBuilder<'a> {
+impl Default for HeightfieldBuilder<'_> {
     fn default() -> Self {
         Self {
-            sampler: &|_, _| 0.0,
-            size: (1, 1),
+            samples: &[0.0; 1],
+            x_samples: 1,
+            y_samples: 1,
             edge_threshold: 1.0,
             format: HeightfieldFormat::S16TM,
             flags: BitFlags::empty(),
+            width: 1.0,
+            length: 1.0,
+            height: 1.0,
         }
     }
 }
 
 impl<'a> HeightfieldBuilder<'a> {
-    pub fn sampler(self, sampler: &'a HeightfieldSampler<'a>) -> Self {
-        Self { sampler, ..self }
-    }
-
-    pub fn size(self, xsiz: usize, ysiz: usize) -> Self {
-        let size = (xsiz, ysiz);
-        Self { size, ..self }
-    }
-
     pub fn edge_threshold(self, edge_threshold: f32) -> Self {
         Self {
             edge_threshold,
+            ..self
+        }
+    }
+
+    pub fn set_samples(self, x_samples: usize, y_samples: usize, samples: &'a [f32]) -> Self {
+        Self {
+            x_samples,
+            y_samples,
+            samples,
+            ..self
+        }
+    }
+
+    pub fn set_scale(self, width: f32, length: f32, height: f32) -> Self {
+        Self {
+            width,
+            length,
+            height,
             ..self
         }
     }
@@ -75,41 +89,28 @@ impl<'a> HeightfieldBuilder<'a> {
         Self { flags, ..self }
     }
 
-    pub fn generate_heights(&self) -> Vec<f32> {
-        let mut heights = vec![0.0; self.size.0 * self.size.1];
-        for y in 0..self.size.1 {
-            for x in 0..self.size.0 {
-                heights[y * self.size.0 + x] = (self.sampler)(x, y);
-            }
+    pub fn generate_heights(&self) -> Vec<PxHeightFieldSample> {
+        let mut heights = Vec::new();
+        for &s in self.samples {
+            heights.push(PxHeightFieldSample {
+                height: (s * 2.0_f32.powf(15.0)) as i16,
+                materialIndex0: PxBitAndByte { mData: 0 },
+                materialIndex1: PxBitAndByte { mData: 0 },
+            });
         }
+
         heights
     }
 
     ////////////////////////////////////////////////////////////////////////////////
 
-    pub fn generate_vertices(&self, heights: &[f32]) -> Vec<Vec3> {
-        let mut vertices: Vec<Vec3> = Vec::new();
-        vertices.reserve(heights.len());
-        for y in 0..self.size.1 {
-            for x in 0..self.size.0 {
-                let index = y * self.size.0 + x;
-                vertices.push(Vec3::new(
-                    x as f32 * XZ_SCALE,
-                    heights[index] * HEIGHT_SCALE,
-                    y as f32 * XZ_SCALE,
-                ));
-            }
-        }
-        vertices
-    }
-
     ////////////////////////////////////////////////////////////////////////////////
 
     /// Convert an array of heights to a height field description we can give to PhysX
-    fn create_desc(&self, heights: &[f32]) -> PxHeightFieldDesc {
+    fn create_desc(&self, heights: &[PxHeightFieldSample]) -> PxHeightFieldDesc {
         let mut heightfield_desc = unsafe { PxHeightFieldDesc_new() };
-        heightfield_desc.nbRows = self.size.1 as u32;
-        heightfield_desc.nbColumns = self.size.0 as u32;
+        heightfield_desc.nbRows = self.x_samples as u32;
+        heightfield_desc.nbColumns = self.y_samples as u32;
         heightfield_desc.format = self.format as u32;
         heightfield_desc.flags = PxHeightFieldFlags {
             mBits: self.flags.bits(),
@@ -126,6 +127,12 @@ impl<'a> HeightfieldBuilder<'a> {
     pub fn build(&self, cooking: &mut Cooking) -> Geometry {
         let heights = self.generate_heights();
         let heightfield_desc = self.create_desc(&heights);
-        cooking.create_heightfield(heightfield_desc, false)
+        cooking.create_heightfield(
+            heightfield_desc,
+            false,
+            self.width,
+            self.length,
+            self.height,
+        )
     }
 }

@@ -71,8 +71,13 @@ impl Cooking {
         &self,
         heightfield_desc: PxHeightFieldDesc,
         double_sided: bool,
+        width: f32,
+        length: f32,
+        height: f32,
     ) -> Geometry {
         unsafe {
+            let x_scale = width;
+            let y_scale = length;
             let insertion_callback = PxPhysics_getPhysicsInsertionCallback_mut(phys_PxGetPhysics());
 
             let heightfield =
@@ -88,9 +93,9 @@ impl Cooking {
                 PxMeshGeometryFlags {
                     mBits: mesh_flags as u8,
                 },
-                HEIGHT_SCALE,
-                XZ_SCALE,
-                XZ_SCALE,
+                height / 2.0_f32.powf(15.0),
+                x_scale,
+                y_scale,
             );
 
             Geometry::HeightField(heightfield_geom)
