@@ -116,6 +116,7 @@ pub mod articulation_link;
 pub mod articulation_reduced_coordinate;
 pub mod base;
 pub mod body;
+pub mod controller;
 pub mod cooking;
 pub mod foundation;
 pub mod geometry;

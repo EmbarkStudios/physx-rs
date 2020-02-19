@@ -13,6 +13,7 @@ Wrapper for PhysX Scene
 use super::{
     articulation_reduced_coordinate::*,
     body::*,
+    controller::*,
     physics::Physics,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
@@ -36,6 +37,7 @@ pub struct Scene {
     statics: Vec<RigidStatic>,
     dynamics: Vec<RigidDynamic>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
+    controller_manager: Option<*mut PxControllerManager>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +50,7 @@ impl Scene {
             dynamics: Vec::new(),
             statics: Vec::new(),
             simulation_callback: None,
+            controller_manager: None,
         };
         _self.allocate_user_data();
         _self
@@ -86,6 +89,38 @@ impl Scene {
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
             )
         })
+    }
+
+    pub fn add_capsule_controller(
+        &mut self,
+        material: *mut PxMaterial,
+        height: f32,
+        radius: f32,
+    ) -> Controller {
+        unsafe {
+            if self.controller_manager.is_none() {
+                self.controller_manager = Some(phys_PxCreateControllerManager(
+                    self.px_scene.write().unwrap().expect("accessing null ptr"),
+                    false,
+                ));
+            }
+
+            let c = PxCapsuleControllerDesc_new_alloc();
+            (*c).height = height;
+            (*c).radius = radius;
+            (*c).stepOffset = 0.1;
+            (*c).material = material;
+
+            if !PxCapsuleControllerDesc_isValid(c) {
+                panic!("Bad controller");
+            }
+            let controller = PxControllerManager_createController_mut(
+                self.controller_manager.unwrap(),
+                c as *mut PxControllerDesc,
+            );
+
+            Controller::new(controller)
+        }
     }
 
     pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
