@@ -20,6 +20,7 @@ pub use super::articulation_link::ArticulationLink;
 pub use super::articulation_reduced_coordinate::ArticulationReducedCoordinate;
 pub use super::base::Base;
 pub use super::body::*;
+pub use super::controller::Controller;
 pub use super::cooking::*;
 pub use super::foundation::*;
 pub use super::geometry::*;
