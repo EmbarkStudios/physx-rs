@@ -28,9 +28,9 @@ pub enum HeightfieldFlag {
 pub type HeightfieldSampler<'a> = dyn Fn(usize, usize) -> f32 + 'a;
 
 pub struct HeightfieldBuilder<'a> {
-    samples: &'a [f32],
-    x_samples: usize,
-    y_samples: usize,
+    sampler: &'a HeightfieldSampler<'a>,
+    size: (usize, usize),
+
     edge_threshold: f32,
     format: HeightfieldFormat,
     flags: BitFlags<HeightfieldFlag>,
@@ -42,9 +42,8 @@ pub struct HeightfieldBuilder<'a> {
 impl Default for HeightfieldBuilder<'_> {
     fn default() -> Self {
         Self {
-            samples: &[0.0; 1],
-            x_samples: 1,
-            y_samples: 1,
+            sampler: &|_, _| 0.0,
+            size: (1,1),
             edge_threshold: 1.0,
             format: HeightfieldFormat::S16TM,
             flags: BitFlags::empty(),
@@ -63,16 +62,16 @@ impl<'a> HeightfieldBuilder<'a> {
         }
     }
 
-    pub fn set_samples(self, x_samples: usize, y_samples: usize, samples: &'a [f32]) -> Self {
-        Self {
-            x_samples,
-            y_samples,
-            samples,
-            ..self
-        }
+    pub fn sampler(self, sampler: &'a HeightfieldSampler<'a>) -> Self {
+        Self { sampler, ..self }
     }
 
-    pub fn set_scale(self, width: f32, length: f32, height: f32) -> Self {
+    pub fn size(self, xsiz: usize, ysiz: usize) -> Self {
+        let size = (xsiz, ysiz);
+        Self { size, ..self }
+    }
+
+    pub fn scale(self, width: f32, length: f32, height: f32) -> Self {
         Self {
             width,
             length,
@@ -91,14 +90,16 @@ impl<'a> HeightfieldBuilder<'a> {
 
     pub fn generate_heights(&self) -> Vec<PxHeightFieldSample> {
         let mut heights = Vec::new();
-        for &s in self.samples {
-            heights.push(PxHeightFieldSample {
-                height: (s * 2.0_f32.powf(15.0)) as i16,
-                materialIndex0: PxBitAndByte { mData: 0 },
-                materialIndex1: PxBitAndByte { mData: 0 },
-            });
+        for y in 0..self.size.1 {
+            for x in 0..self.size.0 {
+                let s = (self.sampler)(x, y);
+                heights.push(PxHeightFieldSample {
+                    height: (s * 2.0_f32.powf(15.0)) as i16,
+                    materialIndex0: PxBitAndByte { mData: 0 },
+                    materialIndex1: PxBitAndByte { mData: 0 },
+                });
+            }
         }
-
         heights
     }
 
@@ -109,8 +110,8 @@ impl<'a> HeightfieldBuilder<'a> {
     /// Convert an array of heights to a height field description we can give to PhysX
     fn create_desc(&self, heights: &[PxHeightFieldSample]) -> PxHeightFieldDesc {
         let mut heightfield_desc = unsafe { PxHeightFieldDesc_new() };
-        heightfield_desc.nbRows = self.x_samples as u32;
-        heightfield_desc.nbColumns = self.y_samples as u32;
+        heightfield_desc.nbRows = self.size.0 as u32;
+        heightfield_desc.nbColumns = self.size.1 as u32;
         heightfield_desc.format = self.format as u32;
         heightfield_desc.flags = PxHeightFieldFlags {
             mBits: self.flags.bits(),
