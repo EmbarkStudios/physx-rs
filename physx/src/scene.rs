@@ -37,7 +37,7 @@ pub struct Scene {
     statics: Vec<RigidStatic>,
     dynamics: Vec<RigidDynamic>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
-    controller_manager: Option<*mut PxControllerManager>,
+    controller_manager: Option<ControllerManager>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,31 +97,23 @@ impl Scene {
         height: f32,
         radius: f32,
         step_offset: f32,
-    ) -> Controller {
-        unsafe {
-            if self.controller_manager.is_none() {
-                self.controller_manager = Some(phys_PxCreateControllerManager(
-                    self.px_scene.write().unwrap().expect("accessing null ptr"),
-                    false,
-                ));
-            }
-
-            let c = PxCapsuleControllerDesc_new_alloc();
-            (*c).height = height;
-            (*c).radius = radius;
-            (*c).stepOffset = step_offset;
-            (*c).material = material;
-
-            if !PxCapsuleControllerDesc_isValid(c) {
-                panic!("Bad controller");
-            }
-            let controller = PxControllerManager_createController_mut(
-                self.controller_manager.unwrap(),
-                c as *mut PxControllerDesc,
-            );
-
-            Controller::new(controller)
+    ) -> Result<Controllable, String> {
+        if self.controller_manager.is_none() {
+            self.controller_manager = Some(ControllerManager::new(
+                self.px_scene.write().unwrap().expect("accessing null ptr"),
+            ))
         }
+
+        let mut c = CapsuleControllerDesc::new(height, radius, step_offset, material)?;
+
+        let mut controller = self
+            .controller_manager
+            .as_ref()
+            .unwrap()
+            .create_controller(&mut c);
+        c.release();
+
+        Ok(Controllable::new(Controller::new(controller.get_raw_mut())))
     }
 
     pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
