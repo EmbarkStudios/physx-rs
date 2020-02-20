@@ -96,6 +96,7 @@ impl Scene {
         material: *mut PxMaterial,
         height: f32,
         radius: f32,
+        step_offset: f32,
     ) -> Controller {
         unsafe {
             if self.controller_manager.is_none() {
@@ -108,7 +109,7 @@ impl Scene {
             let c = PxCapsuleControllerDesc_new_alloc();
             (*c).height = height;
             (*c).radius = radius;
-            (*c).stepOffset = 0.1;
+            (*c).stepOffset = step_offset;
             (*c).material = material;
 
             if !PxCapsuleControllerDesc_isValid(c) {
