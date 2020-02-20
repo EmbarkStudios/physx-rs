@@ -11,8 +11,8 @@
 use super::{cooking::Cooking, geometry::Geometry};
 use enumflags2::BitFlags;
 
-use physx_sys::*;
 use glam::f32::Vec3;
+use physx_sys::*;
 
 #[derive(Debug, Copy, Clone)]
 #[repr(u32)]
@@ -44,7 +44,7 @@ impl Default for HeightfieldBuilder<'_> {
     fn default() -> Self {
         Self {
             sampler: &|_, _| 0.0,
-            size: (1,1),
+            size: (1, 1),
             edge_threshold: 1.0,
             format: HeightfieldFormat::S16TM,
             flags: BitFlags::empty(),
