@@ -12,6 +12,7 @@ use super::{cooking::Cooking, geometry::Geometry};
 use enumflags2::BitFlags;
 
 use physx_sys::*;
+use glam::f32::Vec3;
 
 #[derive(Debug, Copy, Clone)]
 #[repr(u32)]
@@ -88,19 +89,45 @@ impl<'a> HeightfieldBuilder<'a> {
         Self { flags, ..self }
     }
 
-    pub fn generate_heights(&self) -> Vec<PxHeightFieldSample> {
+    pub fn generate_heights(&self) -> Vec<f32> {
+        let mut heights = vec![0.0; self.size.0 * self.size.1];
+        for y in 0..self.size.1 {
+            for x in 0..self.size.0 {
+                heights[y * self.size.0 + x] = (self.sampler)(x, y);
+            }
+        }
+        heights
+    }
+
+    pub fn generate_heightfield(&self) -> Vec<PxHeightFieldSample> {
         let mut heights = Vec::new();
         for y in 0..self.size.1 {
             for x in 0..self.size.0 {
                 let s = (self.sampler)(x, y);
                 heights.push(PxHeightFieldSample {
-                    height: (s * 2.0_f32.powf(15.0)) as i16,
+                    height: (s * std::i16::MAX as f32) as i16,
                     materialIndex0: PxBitAndByte { mData: 0 },
                     materialIndex1: PxBitAndByte { mData: 0 },
                 });
             }
         }
         heights
+    }
+
+    pub fn generate_vertices(&self, heights: &[f32]) -> Vec<Vec3> {
+        let mut vertices: Vec<Vec3> = Vec::new();
+        vertices.reserve(heights.len());
+        for y in 0..self.size.1 {
+            for x in 0..self.size.0 {
+                let index = y * self.size.0 + x;
+                vertices.push(Vec3::new(
+                    x as f32 * self.width,
+                    heights[index] * self.height,
+                    y as f32 * self.length,
+                ));
+            }
+        }
+        vertices
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +153,7 @@ impl<'a> HeightfieldBuilder<'a> {
 
     /// Build the heightfield into a PhysX geometry
     pub fn build(&self, cooking: &mut Cooking) -> Geometry {
-        let heights = self.generate_heights();
+        let heights = self.generate_heightfield();
         let heightfield_desc = self.create_desc(&heights);
         cooking.create_heightfield(
             heightfield_desc,
