@@ -1,26 +1,42 @@
 #![warn(clippy::all)]
 #![warn(rust_2018_idioms)]
 
+use crate::transform::gl_to_px_v3;
 use glam::Vec3;
+use physx_sys::PxControllerFilterCallback;
 use physx_sys::{
-    PxController, PxController_getPosition, PxController_release_mut, PxController_setPosition_mut,
-    PxExtendedVec3,
+    PxController, PxControllerFilters, PxControllerFilters_new, PxController_getActor,
+    PxController_getPosition, PxController_move_mut, PxController_release_mut,
+    PxController_setPosition_mut, PxExtendedVec3, PxQueryFilterCallback, PxRigidDynamic,
 };
+use std::ptr::null;
 
 pub struct Controller {
     controller: *mut PxController,
+    filters: PxControllerFilters,
 }
 
 impl Controller {
     pub fn new(controller: *mut PxController) -> Self {
-        Self { controller }
+        unsafe {
+            let filters = PxControllerFilters_new(
+                null(),
+                null::<PxQueryFilterCallback>() as *mut PxQueryFilterCallback,
+                null::<PxControllerFilterCallback>() as *mut PxControllerFilterCallback,
+            );
+
+            Self {
+                controller,
+                filters,
+            }
+        }
     }
 
     pub fn get_raw_mut(&mut self) -> *mut PxController {
         self.controller
     }
 
-    pub fn get_raw(&mut self) -> *const PxController {
+    pub fn get_raw(&self) -> *const PxController {
         self.controller
     }
 
@@ -30,9 +46,27 @@ impl Controller {
         }
     }
 
-    pub fn get_position(&mut self) -> Vec3 {
-        unsafe { from_extended(*PxController_getPosition(self.get_raw_mut())) }
+    pub fn move_by(&mut self, disp: &Vec3, min_distance: f32, elapsed_time: f32) {
+        unsafe {
+            PxController_move_mut(
+                self.get_raw_mut(),
+                &gl_to_px_v3(*disp),
+                min_distance,
+                elapsed_time,
+                &self.filters,
+                null(),
+            );
+        }
     }
+
+    pub fn get_position(&self) -> Vec3 {
+        unsafe { from_extended(*PxController_getPosition(self.get_raw())) }
+    }
+
+    pub fn get_actor(&self) -> *mut PxRigidDynamic {
+        unsafe { PxController_getActor(self.controller) }
+    }
+
     pub fn release(&mut self) {
         unsafe {
             PxController_release_mut(self.get_raw_mut());
