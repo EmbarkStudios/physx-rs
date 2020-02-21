@@ -98,7 +98,7 @@ impl Scene {
 
     pub fn add_capsule_controller(
         &mut self,
-        desc: &mut CapsuleControllerDesc,
+        desc: &CapsuleControllerDesc,
     ) -> Result<Controller, ControllerError> {
         if self.controller_manager.is_none() {
             return Err(ControllerError::NoControllerManager);
@@ -462,10 +462,11 @@ impl Scene {
         }
     }
 
-    fn add_controller_manager(&mut self) {
+    fn add_controller_manager(&mut self, locking_enabled: bool) {
         if self.controller_manager.is_none() {
             self.controller_manager = Some(ControllerManager::new(
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
+                locking_enabled,
             ))
         }
     }
@@ -503,6 +504,7 @@ pub struct SceneBuilder {
     pub(crate) simulation_threading: Option<SimulationThreadType>,
     pub(crate) broad_phase_type: BroadPhaseType,
     pub(crate) use_controller_manager: bool,
+    pub(crate) controller_manager_locking: bool,
 }
 
 impl Default for SceneBuilder {
@@ -513,6 +515,7 @@ impl Default for SceneBuilder {
             simulation_threading: None,
             broad_phase_type: BroadPhaseType::SweepAndPrune,
             use_controller_manager: false,
+            controller_manager_locking: false,
         }
     }
 }
@@ -538,8 +541,13 @@ impl SceneBuilder {
         self
     }
 
-    pub fn use_controller_manager(&mut self, use_controller_manager: bool) -> &mut Self {
+    pub fn use_controller_manager(
+        &mut self,
+        use_controller_manager: bool,
+        locking_enabled: bool,
+    ) -> &mut Self {
         self.use_controller_manager = use_controller_manager;
+        self.controller_manager_locking = locking_enabled;
         self
     }
 
@@ -590,7 +598,7 @@ impl SceneBuilder {
             let mut scene = Scene::new(px_physics);
 
             if self.use_controller_manager {
-                scene.add_controller_manager();
+                scene.add_controller_manager(self.controller_manager_locking);
             }
             scene
         }

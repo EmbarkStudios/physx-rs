@@ -21,12 +21,12 @@ impl ControllerDesc {}
 
 #[physx_type]
 impl ControllerManager {
-    pub fn new(scene: *mut PxScene) -> Self {
-        let ptr = unsafe { phys_PxCreateControllerManager(scene, false) };
+    pub fn new(scene: *mut PxScene, locking_enabled: bool) -> Self {
+        let ptr = unsafe { phys_PxCreateControllerManager(scene, locking_enabled) };
         ControllerManager { ptr }
     }
 
-    pub fn create_controller(&self, desc: &mut ControllerDesc) -> Controller {
+    pub fn create_controller(&self, desc: &ControllerDesc) -> Controller {
         let controller =
             unsafe { PxControllerManager_createController_mut(self.ptr, desc.get_raw()) };
         Controller::new(controller)
@@ -56,7 +56,11 @@ impl CapsuleControllerDesc {
                 Ok(CapsuleControllerDesc { ptr: c })
             } else {
                 PxCapsuleControllerDesc_delete(c);
-                Err(ControllerError::InvalidDescription())
+                Err(ControllerError::InvalidDescription {
+                    height,
+                    radius,
+                    step_offset,
+                })
             }
         }
     }
@@ -83,7 +87,7 @@ impl Controller {
     }
 
     pub fn get_actor(&self) -> RigidDynamic {
-        unsafe { RigidDynamic::new(PxController_getActor(self.ptr)) }
+        unsafe { RigidDynamic::from_ptr(PxController_getActor(self.ptr)) }
     }
 
     pub fn release(&mut self) {
@@ -107,8 +111,17 @@ fn from_extended(vec: PxExtendedVec3) -> Vec3 {
 
 #[derive(Error, Debug)]
 pub enum ControllerError {
-    #[error("Controller description is invalid")]
-    InvalidDescription(),
+    #[error(
+        "Controller description is invalid. height={}, radius={}, step_offset={}",
+        height,
+        radius,
+        step_offset
+    )]
+    InvalidDescription {
+        height: f32,
+        radius: f32,
+        step_offset: f32,
+    },
 
     #[error("No controller manager present")]
     NoControllerManager,
