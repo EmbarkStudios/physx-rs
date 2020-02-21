@@ -14,6 +14,7 @@ use physx_sys::{
     PxControllerManager_release_mut, PxController_getActor, PxController_getPosition,
     PxController_release_mut, PxController_setPosition_mut, PxExtendedVec3, PxMaterial, PxScene,
 };
+use thiserror::Error;
 
 #[physx_type]
 impl ControllerDesc {}
@@ -27,7 +28,7 @@ impl ControllerManager {
 
     pub fn create_controller(&self, desc: &mut ControllerDesc) -> Controller {
         let controller =
-            unsafe { PxControllerManager_createController_mut(self.ptr, desc.get_raw_mut()) };
+            unsafe { PxControllerManager_createController_mut(self.ptr, desc.get_raw()) };
         Controller::new(controller)
     }
 
@@ -43,7 +44,7 @@ impl CapsuleControllerDesc {
         radius: f32,
         step_offset: f32,
         material: *mut PxMaterial,
-    ) -> Result<Self, String> {
+    ) -> Result<Self, ControllerError> {
         unsafe {
             let c = PxCapsuleControllerDesc_new_alloc();
             (*c).height = height;
@@ -54,10 +55,8 @@ impl CapsuleControllerDesc {
             if PxCapsuleControllerDesc_isValid(c) {
                 Ok(CapsuleControllerDesc { ptr: c })
             } else {
-                Err(format!(
-                    "Controller description is invalid. height={}, radius={}, step_offset={}",
-                    height, radius, step_offset
-                ))
+                PxCapsuleControllerDesc_delete(c);
+                Err(ControllerError::InvalidDescription())
             }
         }
     }
@@ -104,4 +103,13 @@ fn to_extended(vec: &Vec3) -> PxExtendedVec3 {
 
 fn from_extended(vec: PxExtendedVec3) -> Vec3 {
     Vec3::new(vec.x as f32, vec.y as f32, vec.z as f32)
+}
+
+#[derive(Error, Debug)]
+pub enum ControllerError {
+    #[error("Controller description is invalid")]
+    InvalidDescription(),
+
+    #[error("No controller manager present")]
+    NoControllerManager,
 }

@@ -98,23 +98,17 @@ impl Scene {
 
     pub fn add_capsule_controller(
         &mut self,
-        material: *mut PxMaterial,
-        height: f32,
-        radius: f32,
-        step_offset: f32,
-    ) -> Result<Controller, String> {
+        desc: &mut CapsuleControllerDesc,
+    ) -> Result<Controller, ControllerError> {
         if self.controller_manager.is_none() {
-            return Err("No controller manager on scene".to_string());
+            return Err(ControllerError::NoControllerManager);
         }
-
-        let mut c = CapsuleControllerDesc::new(height, radius, step_offset, material)?;
 
         let mut controller = self
             .controller_manager
             .as_ref()
             .unwrap()
-            .create_controller(&mut c);
-        c.release();
+            .create_controller(desc);
 
         Ok(Controller::new(controller.get_raw_mut()))
     }
