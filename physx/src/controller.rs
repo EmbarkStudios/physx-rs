@@ -4,19 +4,16 @@
 use crate::px_type::*;
 use crate::rigid_dynamic::RigidDynamic;
 
-use crate::transform::gl_to_px_v3;
 use glam::Vec3;
 use physx_macros::*;
-use physx_sys::PxControllerFilterCallback;
+
 use physx_sys::{
     phys_PxCreateControllerManager, PxCapsuleControllerDesc, PxCapsuleControllerDesc_delete,
     PxCapsuleControllerDesc_isValid, PxCapsuleControllerDesc_new_alloc, PxController,
-    PxControllerDesc, PxControllerFilters, PxControllerFilters_new, PxControllerManager,
-    PxControllerManager_createController_mut, PxController_getActor, PxController_getPosition,
-    PxController_move_mut, PxController_release_mut, PxController_setPosition_mut, PxExtendedVec3,
-    PxMaterial, PxQueryFilterCallback, PxScene,
+    PxControllerDesc, PxControllerManager, PxControllerManager_createController_mut,
+    PxController_getActor, PxController_getPosition, PxController_release_mut,
+    PxController_setPosition_mut, PxExtendedVec3, PxMaterial, PxScene,
 };
-use std::ptr::null;
 
 #[physx_type]
 impl ControllerDesc {}
@@ -66,11 +63,6 @@ impl CapsuleControllerDesc {
     }
 }
 
-pub struct Controllable {
-    controller: Controller,
-    filters: PxControllerFilters,
-}
-
 #[physx_type]
 impl Controller {
     pub fn new(controller: *mut PxController) -> Self {
@@ -95,48 +87,6 @@ impl Controller {
         unsafe {
             PxController_release_mut(self.get_raw_mut());
         }
-    }
-}
-
-impl Controllable {
-    pub fn new(controller: Controller) -> Self {
-        let filters = unsafe {
-            PxControllerFilters_new(
-                null(),
-                null::<PxQueryFilterCallback>() as *mut PxQueryFilterCallback,
-                null::<PxControllerFilterCallback>() as *mut PxControllerFilterCallback,
-            )
-        };
-        Controllable {
-            controller,
-            filters,
-        }
-    }
-
-    pub fn move_by(&mut self, disp: Vec3, min_distance: f32, elapsed_time: f32) {
-        unsafe {
-            PxController_move_mut(
-                self.controller.get_raw_mut(),
-                &gl_to_px_v3(disp),
-                min_distance,
-                elapsed_time,
-                &self.filters,
-                null(),
-            );
-        }
-    }
-}
-
-impl Deref for Controllable {
-    type Target = Controller;
-    fn deref(&self) -> &Controller {
-        &self.controller
-    }
-}
-
-impl DerefMut for Controllable {
-    fn deref_mut(&mut self) -> &mut Controller {
-        &mut self.controller
     }
 }
 

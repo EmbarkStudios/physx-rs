@@ -97,7 +97,7 @@ impl Scene {
         height: f32,
         radius: f32,
         step_offset: f32,
-    ) -> Result<Controllable, String> {
+    ) -> Result<Controller, String> {
         if self.controller_manager.is_none() {
             self.controller_manager = Some(ControllerManager::new(
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
@@ -113,7 +113,7 @@ impl Scene {
             .create_controller(&mut c);
         c.release();
 
-        Ok(Controllable::new(Controller::new(controller.get_raw_mut())))
+        Ok(Controller::new(controller.get_raw_mut()))
     }
 
     pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
