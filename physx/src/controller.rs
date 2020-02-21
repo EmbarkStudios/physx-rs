@@ -11,8 +11,8 @@ use physx_sys::{
     phys_PxCreateControllerManager, PxCapsuleControllerDesc, PxCapsuleControllerDesc_delete,
     PxCapsuleControllerDesc_isValid, PxCapsuleControllerDesc_new_alloc, PxController,
     PxControllerDesc, PxControllerManager, PxControllerManager_createController_mut,
-    PxController_getActor, PxController_getPosition, PxController_release_mut,
-    PxController_setPosition_mut, PxExtendedVec3, PxMaterial, PxScene,
+    PxControllerManager_release_mut, PxController_getActor, PxController_getPosition,
+    PxController_release_mut, PxController_setPosition_mut, PxExtendedVec3, PxMaterial, PxScene,
 };
 
 #[physx_type]
@@ -29,6 +29,10 @@ impl ControllerManager {
         let controller =
             unsafe { PxControllerManager_createController_mut(self.ptr, desc.get_raw_mut()) };
         Controller::new(controller)
+    }
+
+    pub unsafe fn release(self: Self) {
+        PxControllerManager_release_mut(self.ptr);
     }
 }
 

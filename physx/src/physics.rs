@@ -213,14 +213,9 @@ impl Physics {
         unsafe { &*PxPhysics_getTolerancesScale(self.get_raw()) as &PxTolerancesScale }
     }
 
-    pub fn create_scene_raw(&mut self, scene_builder: &SceneBuilder) -> *mut PxScene {
-        let desc = scene_builder.build(self);
-        unsafe { PxPhysics_createScene_mut(self.get_raw_mut(), &desc) }
-    }
-
     pub fn create_scene(&mut self, scene_builder: &SceneBuilder) -> Box<Scene> {
-        let scene = self.create_scene_raw(scene_builder);
-        let mut scene = Box::new(Scene::new(scene));
+        let scene = scene_builder.build(self);
+        let mut scene = Box::new(scene);
         let scene_ptr = scene.as_mut() as *mut Scene;
         scene.set_simulation_event_callback(on_contact_callback, scene_ptr);
         scene
