@@ -11,7 +11,7 @@
 use super::{cooking::Cooking, geometry::Geometry};
 use enumflags2::BitFlags;
 
-use glam::f32::Vec3;
+use glam::Vec3;
 use physx_sys::*;
 
 #[derive(Debug, Copy, Clone)]
