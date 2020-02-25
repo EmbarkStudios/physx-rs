@@ -106,7 +106,7 @@ impl ArticulationReducedCoordinate {
         }
 
         if let Some(ref collider) = builder.collider {
-            let geometry = cooking.make_geometry(collider.clone(), Vec3::new(1.0, 1.0, 1.0));
+            let geometry = cooking.make_geometry(collider.clone());
             link.create_exclusive_shape(geometry, Mat4::identity(), Mat4::identity());
         }
 
