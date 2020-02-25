@@ -11,6 +11,7 @@
 
 /* Stolen from world/physics.rs */
 
+use glam::Vec3;
 use physx_sys::*;
 
 pub type Point3 = PxVec3;
@@ -72,6 +73,7 @@ pub enum ColliderDesc {
     TriMesh {
         vertices: Vec<Point3>,
         indices: Vec<u32>,
+        mesh_scale: Vec3,
     },
 }
 

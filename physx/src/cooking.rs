@@ -100,7 +100,7 @@ impl Cooking {
         }
     }
 
-    pub fn make_geometry(&mut self, desc: ColliderDesc, mesh_scale: Vec3) -> PhysicsGeometry {
+    pub fn make_geometry(&mut self, desc: ColliderDesc) -> PhysicsGeometry {
         let geometry: Geometry = unsafe {
             match desc {
                 ColliderDesc::Sphere(radius) => Geometry::Sphere(PxSphereGeometry_new_1(radius)),
@@ -111,7 +111,11 @@ impl Cooking {
                 ColliderDesc::Cylinder(r, h) => {
                     Geometry::Capsule(PxCapsuleGeometry_new_1(r, h / 2.0))
                 }
-                ColliderDesc::TriMesh { vertices, indices } => {
+                ColliderDesc::TriMesh {
+                    vertices,
+                    indices,
+                    mesh_scale,
+                } => {
                     let mut mesh_desc = PxTriangleMeshDesc_new();
 
                     mesh_desc.points.count = vertices.len() as u32;
