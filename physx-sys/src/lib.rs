@@ -155,10 +155,12 @@ extern "C" {
     /// Deallocates the PxSimulationEventCallback that has previously been created
     pub fn destroy_contact_callback(callback: *mut PxSimulationEventCallback);
 
-    /// Sets a trampoline which will invoke *both* the default filter shader for the pair flags
-    /// *as well as* the custom filter shader which can add pair flags and set the collision handler flag
+    /// Sets a trampoline which will, if call_default_filter_shader_first is true, invoke *both* the default
+    /// filter shader for the pair flags *as well as* the custom filter shader which can add pair flags and
+    /// set the collision handler flag. Or if it's false, just the latter.
     pub fn enable_custom_filter_shader(
         scene_desc: *mut PxSceneDesc,
         shader: SimulationFilterShader,
+        call_default_filter_shader_first: u32,
     );
 }
