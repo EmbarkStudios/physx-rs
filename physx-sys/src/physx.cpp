@@ -169,7 +169,7 @@ extern "C"
         /* Note: This is a workaround to PhysX copying the filter data */
         static FilterCallbackData filterShaderData = {
             filter,
-            call_default_filter_shader_first
+            call_default_filter_shader_first != 0
         };
         desc->filterShader = FilterShaderTrampoline;
         // printf("Setting pointer to %p\n", filter);
