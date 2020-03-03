@@ -556,7 +556,11 @@ impl SceneBuilder {
                 physx_sys::enable_custom_filter_shader(
                     &mut scene_desc as *mut PxSceneDesc,
                     filter_shader,
-                    if self.call_default_filter_shader_first { 1 } else { 0 },
+                    if self.call_default_filter_shader_first {
+                        1
+                    } else {
+                        0
+                    },
                 );
             } else {
                 scene_desc.filterShader = get_default_simulation_filter_shader();
