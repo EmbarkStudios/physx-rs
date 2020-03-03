@@ -469,12 +469,14 @@ pub struct SceneBuilder {
     pub(crate) simulation_filter_shader: Option<SimulationFilterShader>,
     pub(crate) simulation_threading: Option<SimulationThreadType>,
     pub(crate) broad_phase_type: BroadPhaseType,
+    pub(crate) call_default_filter_shader_first: bool,
 }
 
 impl Default for SceneBuilder {
     fn default() -> Self {
         Self {
             gravity: Vec3::new(0.0, -9.80665, 0.0), // standard gravity value
+            call_default_filter_shader_first: true,
             simulation_filter_shader: None,
             simulation_threading: None,
             broad_phase_type: BroadPhaseType::SweepAndPrune,
@@ -500,6 +502,18 @@ impl SceneBuilder {
         simulation_filter_shader: SimulationFilterShader,
     ) -> &mut Self {
         self.simulation_filter_shader = Some(simulation_filter_shader);
+        self
+    }
+
+    /// Sets whether the filter should begin by calling the default filter shader
+    /// PxDefaultSimulationFilterShader that emulates the PhysX 2.8 rules.
+    ///
+    /// Default: true
+    pub fn set_call_default_filter_shader_first(
+        &mut self,
+        call_default_filter_shader_first: bool,
+    ) -> &mut Self {
+        self.call_default_filter_shader_first = call_default_filter_shader_first;
         self
     }
 
@@ -542,6 +556,11 @@ impl SceneBuilder {
                 physx_sys::enable_custom_filter_shader(
                     &mut scene_desc as *mut PxSceneDesc,
                     filter_shader,
+                    if self.call_default_filter_shader_first {
+                        1
+                    } else {
+                        0
+                    },
                 );
             } else {
                 scene_desc.filterShader = get_default_simulation_filter_shader();
