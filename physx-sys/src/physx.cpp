@@ -22,6 +22,7 @@ extern "C" typedef PxU16 (*SimulationShaderFilter)(FilterShaderCallbackInfo *);
 struct FilterCallbackData {
     SimulationShaderFilter filter;
     bool call_default_filter_shader_first;
+    void *userdata;
 };
 
 PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
@@ -44,8 +45,9 @@ PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
     SimulationShaderFilter shaderfilter = data->filter;
 
     // This is a bit expensive since we're putting things on the stack but with LTO this should optimize OK,
-    // and I was having issues with corrupted values when passing by value
-    FilterShaderCallbackInfo info{attributes0, attributes1, filterData0, filterData1, &pairFlags, nullptr, 0};
+    // and I was having issues with corrupted values when passing by value.
+    // Let's sneak in the userdata pointer in the constantBlock member here.
+    FilterShaderCallbackInfo info{attributes0, attributes1, filterData0, filterData1, &pairFlags, data->userdata, 0};
 
     // We return a u16 since PxFilterFlags is a complex type and C++ wants it to be returned on the stack,
     // but Rust thinks it's simple due to the codegen and wants to return it in EAX.
@@ -164,12 +166,13 @@ extern "C"
         delete reinterpret_cast<CollisionFilterTrampoline *>(callback);
     }
 
-    void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter, uint32_t call_default_filter_shader_first)
+    void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter, uint32_t call_default_filter_shader_first, void *userdata)
     {
         /* Note: This is a workaround to PhysX copying the filter data */
         static FilterCallbackData filterShaderData = {
             filter,
-            call_default_filter_shader_first != 0
+            call_default_filter_shader_first != 0,
+            userdata,
         };
         desc->filterShader = FilterShaderTrampoline;
         // printf("Setting pointer to %p\n", filter);

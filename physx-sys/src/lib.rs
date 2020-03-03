@@ -162,5 +162,6 @@ extern "C" {
         scene_desc: *mut PxSceneDesc,
         shader: SimulationFilterShader,
         call_default_filter_shader_first: u32,
+        userdata: *mut std::ffi::c_void,
     );
 }

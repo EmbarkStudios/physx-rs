@@ -470,6 +470,7 @@ pub struct SceneBuilder {
     pub(crate) simulation_threading: Option<SimulationThreadType>,
     pub(crate) broad_phase_type: BroadPhaseType,
     pub(crate) call_default_filter_shader_first: bool,
+    pub(crate) filter_shader_user_data: *mut std::ffi::c_void,
 }
 
 impl Default for SceneBuilder {
@@ -480,6 +481,7 @@ impl Default for SceneBuilder {
             simulation_filter_shader: None,
             simulation_threading: None,
             broad_phase_type: BroadPhaseType::SweepAndPrune,
+            filter_shader_user_data: std::ptr::null_mut(),
         }
     }
 }
@@ -514,6 +516,15 @@ impl SceneBuilder {
         call_default_filter_shader_first: bool,
     ) -> &mut Self {
         self.call_default_filter_shader_first = call_default_filter_shader_first;
+        self
+    }
+
+    /// Sets a userdata pointer that will be carried into the filter shader callback function,
+    /// through the constantBlock parameter.
+    ///
+    /// Default: null
+    pub fn set_filter_shader_userdata(&mut self, user_data: *mut std::ffi::c_void) -> &mut Self {
+        self.filter_shader_user_data = user_data;
         self
     }
 
@@ -561,6 +572,7 @@ impl SceneBuilder {
                     } else {
                         0
                     },
+                    self.filter_shader_user_data,
                 );
             } else {
                 scene_desc.filterShader = get_default_simulation_filter_shader();
