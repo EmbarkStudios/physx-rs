@@ -19,6 +19,11 @@ struct FilterShaderCallbackInfo
 typedef void (*CollisionCallback)(void *, PxContactPairHeader const *, PxContactPair const *, PxU32);
 extern "C" typedef PxU16 (*SimulationShaderFilter)(FilterShaderCallbackInfo *);
 
+struct FilterCallbackData {
+    SimulationShaderFilter filter;
+    bool call_default_filter_shader_first;
+};
+
 PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
                                      PxFilterData filterData0,
                                      PxFilterObjectAttributes attributes1,
@@ -27,12 +32,16 @@ PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
                                      const void *constantBlock,
                                      PxU32 constantBlockSize)
 {
-    // Let the default handler set the pair flags, but ignore the collision filtering
-    PxDefaultSimulationFilterShader(attributes0, filterData0, attributes1, filterData1, pairFlags, constantBlock,
-                                    constantBlockSize);
+    const FilterCallbackData *data = static_cast<const FilterCallbackData *>(constantBlock);
+
+    if (data->call_default_filter_shader_first) {
+        // Let the default handler set the pair flags, but ignore the collision filtering
+        PxDefaultSimulationFilterShader(attributes0, filterData0, attributes1, filterData1, pairFlags, constantBlock,
+                                        constantBlockSize);
+    }
 
     // Get the filter shader from the constant block
-    SimulationShaderFilter shaderfilter = *(SimulationShaderFilter *)constantBlock;
+    SimulationShaderFilter shaderfilter = data->filter;
 
     // This is a bit expensive since we're putting things on the stack but with LTO this should optimize OK,
     // and I was having issues with corrupted values when passing by value
@@ -125,7 +134,8 @@ extern "C"
 
     // fixme[tolsson]: this might be iffy on Windows with DLLs if we have multiple packages
     // linking against the raw interface
-    PxErrorCallback* get_default_error_callback() {
+    PxErrorCallback* get_default_error_callback()
+    {
         return &gErrorCallback;
     }
 
@@ -154,13 +164,16 @@ extern "C"
         delete reinterpret_cast<CollisionFilterTrampoline *>(callback);
     }
 
-    void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter)
+    void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter, uint32_t call_default_filter_shader_first)
     {
         /* Note: This is a workaround to PhysX copying the filter data */
-        static SimulationShaderFilter filterShaderData[] = {filter};
-        desc->filterShader                               = FilterShaderTrampoline;
+        static FilterCallbackData filterShaderData = {
+            filter,
+            call_default_filter_shader_first != 0
+        };
+        desc->filterShader = FilterShaderTrampoline;
         // printf("Setting pointer to %p\n", filter);
-        desc->filterShaderData     = (void *)filterShaderData;
-        desc->filterShaderDataSize = sizeof(filter);
+        desc->filterShaderData     = (void *)&filterShaderData;
+        desc->filterShaderDataSize = sizeof(FilterCallbackData);
     }
 }
