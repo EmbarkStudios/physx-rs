@@ -213,6 +213,15 @@ impl Physics {
         unsafe { &*PxPhysics_getTolerancesScale(self.get_raw()) as &PxTolerancesScale }
     }
 
+    /// Creates a raw `*mut PxScene` scene without a `Scene` wrapper. Useful for applications
+    /// where the `Scene` wrapper isn't appropriate.
+    /// Does not support the `ControllerManager` wrapper.
+    pub fn create_scene_raw(&mut self, scene_builder: &SceneBuilder) -> *mut PxScene {
+        let desc = scene_builder.build_desc(self);
+        unsafe { PxPhysics_createScene_mut(self.get_raw_mut(), &desc) }
+    }
+
+    /// The recommended way to create a new scene.
     pub fn create_scene(&mut self, scene_builder: &SceneBuilder) -> Box<Scene> {
         let scene = scene_builder.build(self);
         let mut scene = Box::new(scene);

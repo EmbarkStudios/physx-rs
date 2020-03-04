@@ -584,8 +584,7 @@ impl SceneBuilder {
         self
     }
 
-    /// Build a new Scene from the provided parameters
-    pub(super) fn build(&self, physics: &mut Physics) -> Scene {
+    pub(super) fn build_desc(&self, physics: &mut Physics) -> PxSceneDesc {
         unsafe {
             let tolerances = physics.get_tolerances_scale();
             let mut scene_desc = PxSceneDesc_new(tolerances);
@@ -616,8 +615,16 @@ impl SceneBuilder {
             } else {
                 scene_desc.filterShader = get_default_simulation_filter_shader();
             }
-            let px_physics = PxPhysics_createScene_mut(physics.get_raw_mut(), &scene_desc);
-            let mut scene = Scene::new(px_physics);
+            scene_desc
+        }
+    }
+
+    /// Build a new Scene from the provided parameters
+    pub(super) fn build(&self, physics: &mut Physics) -> Scene {
+        unsafe {
+            let scene_desc = self.build_desc(physics);
+            let px_scene = PxPhysics_createScene_mut(physics.get_raw_mut(), &scene_desc);
+            let mut scene = Scene::new(px_scene);
 
             if self.use_controller_manager {
                 scene.add_controller_manager(self.controller_manager_locking);
