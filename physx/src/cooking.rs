@@ -38,10 +38,14 @@ impl Cooking {
         unsafe { PxCooking_validateTriangleMesh(self.get_raw(), mesh_desc) }
     }
 
-    pub fn create_triangle_mesh(&self, mesh_desc: &PxTriangleMeshDesc) -> Result<Geometry, ()> {
+    pub fn create_triangle_mesh(
+        &self,
+        mesh_desc: &PxTriangleMeshDesc,
+        mesh_scale: Vec3,
+    ) -> Result<Geometry, ()> {
         let mut cooking_result = PxTriangleMeshCookingResult::eSUCCESS;
         unsafe {
-            if self.validate_triangle_mesh(mesh_desc) {
+            if !self.validate_triangle_mesh(mesh_desc) {
                 Err(())
             } else {
                 let insertion_callback =
@@ -54,7 +58,6 @@ impl Cooking {
                     &mut cooking_result,
                 );
 
-                let mesh_scale = Vec3::new(XZ_SCALE, HEIGHT_SCALE, XZ_SCALE);
                 let mesh_scale = PxMeshScale_new_2(&gl_to_px_v3(mesh_scale));
 
                 Ok(Geometry::TriangleMesh(PxTriangleMeshGeometry_new_1(
@@ -108,7 +111,11 @@ impl Cooking {
                 ColliderDesc::Cylinder(r, h) => {
                     Geometry::Capsule(PxCapsuleGeometry_new_1(r, h / 2.0))
                 }
-                ColliderDesc::TriMesh { vertices, indices } => {
+                ColliderDesc::TriMesh {
+                    vertices,
+                    indices,
+                    mesh_scale,
+                } => {
                     let mut mesh_desc = PxTriangleMeshDesc_new();
 
                     mesh_desc.points.count = vertices.len() as u32;
@@ -119,7 +126,7 @@ impl Cooking {
                     mesh_desc.triangles.stride = (3 * std::mem::size_of::<u32>()) as u32;
                     mesh_desc.triangles.data = indices.as_ptr() as *const std::ffi::c_void;
 
-                    self.create_triangle_mesh(&mesh_desc)
+                    self.create_triangle_mesh(&mesh_desc, mesh_scale)
                         .expect("failed creating triangle mesh")
                 }
             }

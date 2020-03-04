@@ -11,10 +11,10 @@
 
 /* Stolen from world/physics.rs */
 
+use glam::Vec3;
 use physx_sys::*;
 
-use glam::Vec3;
-pub type Point3 = Vec3;
+pub type Point3 = PxVec3;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(i32)]
@@ -63,7 +63,7 @@ impl Into<PxGeometryType::Enum> for GeometryType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum ColliderDesc {
     Sphere(f32),
     Box(f32, f32, f32),
@@ -73,6 +73,7 @@ pub enum ColliderDesc {
     TriMesh {
         vertices: Vec<Point3>,
         indices: Vec<u32>,
+        mesh_scale: Vec3,
     },
 }
 
