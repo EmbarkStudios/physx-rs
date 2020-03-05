@@ -506,6 +506,8 @@ pub struct SceneBuilder {
     pub(crate) use_controller_manager: bool,
     pub(crate) controller_manager_locking: bool,
     pub(crate) call_default_filter_shader_first: bool,
+    pub(crate) use_ccd: bool,
+    pub(crate) enable_ccd_resweep: bool,
 }
 
 impl Default for SceneBuilder {
@@ -518,6 +520,8 @@ impl Default for SceneBuilder {
             broad_phase_type: BroadPhaseType::SweepAndPrune,
             use_controller_manager: false,
             controller_manager_locking: false,
+            use_ccd: false,
+            enable_ccd_resweep: false,
         }
     }
 }
@@ -571,16 +575,32 @@ impl SceneBuilder {
     /// Set the number of threads to use for simulation
     ///
     /// Default: not set
-    pub fn set_simulation_threading(&mut self, _type: SimulationThreadType) -> &mut Self {
-        self.simulation_threading = Some(_type);
+    pub fn set_simulation_threading(
+        &mut self,
+        simulation_threading: SimulationThreadType,
+    ) -> &mut Self {
+        self.simulation_threading = Some(simulation_threading);
         self
     }
 
     /// Set collision detection type
     ///
     /// Default: Sweep and prune
-    pub fn set_broad_phase_type(&mut self, _type: BroadPhaseType) -> &mut Self {
-        self.broad_phase_type = _type;
+    pub fn set_broad_phase_type(&mut self, broad_phase_type: BroadPhaseType) -> &mut Self {
+        self.broad_phase_type = broad_phase_type;
+        self
+    }
+
+    /// Set if CCD (continuous collision detection) should be available for use in the scene.
+    /// Doesn't automatically enable it for all rigid bodies, they still need to be flagged.
+    ///
+    /// If you don't set enable_ccd_resweep to true, eDISABLE_CCD_RESWEEP is set, which improves performance
+    /// at the cost of accuracy right after bounces.
+    ///
+    /// Default: false, false
+    pub fn set_use_ccd(&mut self, use_ccd: bool, enable_ccd_resweep: bool) -> &mut Self {
+        self.use_ccd = use_ccd;
+        self.enable_ccd_resweep = enable_ccd_resweep;
         self
     }
 
@@ -601,7 +621,12 @@ impl SceneBuilder {
 
             scene_desc.cpuDispatcher = dispatcher;
             scene_desc.gravity = gl_to_px_v3(self.gravity);
-
+            if self.use_ccd {
+                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_CCD;
+                if !self.enable_ccd_resweep {
+                    scene_desc.flags.mBits |= PxSceneFlag::eDISABLE_CCD_RESWEEP;
+                }
+            }
             if let Some(filter_shader) = self.simulation_filter_shader {
                 physx_sys::enable_custom_filter_shader(
                     &mut scene_desc as *mut PxSceneDesc,
