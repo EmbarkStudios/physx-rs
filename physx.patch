@@ -1,0 +1,228 @@
+/physx-sys/PhysX/
+diff --git a/physx/include/PxFoundation.h b/physx/include/PxFoundation.h
+index 4a4a14df..aab169f4 100644
+--- a/physx/include/PxFoundation.h
++++ b/physx/include/PxFoundation.h
+@@ -128,16 +128,16 @@ PxCreateFoundation(physx::PxU32 version, physx::PxAllocatorCallback& allocator,
+ @see PxCreateFoundation()
+ */
+ #if PX_CLANG
+-#if PX_LINUX
++//#if PX_LINUX
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+-#endif // PX_LINUX
++//#endif // PX_LINUX
+ #endif // PX_CLANG
+ PX_C_EXPORT PX_FOUNDATION_API physx::PxFoundation& PX_CALL_CONV PxGetFoundation();
+ #if PX_CLANG
+-#if PX_LINUX
++//#if PX_LINUX
+ #pragma clang diagnostic pop
+-#endif // PX_LINUX
++//#endif // PX_LINUX
+ #endif // PX_CLANG
+ 
+ namespace physx
+diff --git a/physx/source/compiler/cmake/CMakeLists.txt b/physx/source/compiler/cmake/CMakeLists.txt
+index 4c70f65e..5e01ce5d 100644
+--- a/physx/source/compiler/cmake/CMakeLists.txt
++++ b/physx/source/compiler/cmake/CMakeLists.txt
+@@ -136,4 +136,11 @@ IF(PX_GENERATE_SOURCE_DISTRO)
+ 	FOREACH(FILE_NAME ${SOURCE_DISTRO_FILE_LIST})
+ 		FILE(APPEND "${CMAKE_CURRENT_BINARY_DIR}/source_distro_list.txt" "${FILE_NAME}\n")
+ 	ENDFOREACH()
+-ENDIF()
+\ No newline at end of file
++ENDIF()
++
++IF(DEFINED ENV{PHYSX_AR})
++	SET(CMAKE_CXX_ARCHIVE_CREATE "$ENV{PHYSX_AR} /nologo /out:<TARGET> <OBJECTS>")
++	# Ranlib is only relevant for gcc, can't figure out how to get cmake to just...not
++	# so setting it to use true just always succeeds and we move on with life
++	SET(CMAKE_CXX_ARCHIVE_FINISH "true")
++ENDIF()
+diff --git a/physx/source/compiler/cmake/windows/CMakeLists.txt b/physx/source/compiler/cmake/windows/CMakeLists.txt
+index c772333b..cf69303a 100644
+--- a/physx/source/compiler/cmake/windows/CMakeLists.txt
++++ b/physx/source/compiler/cmake/windows/CMakeLists.txt
+@@ -41,7 +41,7 @@ ELSE()
+ 	SET(PHYSX_FP_MODE "/fp:fast")	
+ ENDIF()
+ IF(CMAKE_CL_64)
+-	SET(PHYSX_CXX_FLAGS "/d2Zi+ /MP /WX /W4 /GF /GS- /GR- /Gd ${PHYSX_FP_MODE} /Oy ${PHYSX_WARNING_DISABLES}" CACHE INTERNAL "PhysX CXX")
++	SET(PHYSX_CXX_FLAGS "/d2Zi+ /WX /W4 /GF /GS- /GR- /Gd ${PHYSX_FP_MODE} /Oy ${PHYSX_WARNING_DISABLES}" CACHE INTERNAL "PhysX CXX")
+ ELSE()
+ 	SET(PHYSX_CXX_FLAGS "/arch:SSE2 /d2Zi+ /MP /WX /W4 /GF /GS- /GR- /Gd ${PHYSX_FP_MODE} /Oy ${PHYSX_WARNING_DISABLES}" CACHE INTERNAL "PhysX CXX")	
+ ENDIF()
+diff --git a/physx/source/foundation/include/PsAoS.h b/physx/source/foundation/include/PsAoS.h
+index ff7d0848..02d748f4 100644
+--- a/physx/source/foundation/include/PsAoS.h
++++ b/physx/source/foundation/include/PsAoS.h
+@@ -32,9 +32,9 @@
+ 
+ #include "foundation/Px.h"
+ 
+-#if PX_WINDOWS && !PX_NEON
++#if PX_WINDOWS && !PX_NEON && !PX_CLANG
+ #include "windows/PsWindowsAoS.h"
+-#elif(PX_UNIX_FAMILY || PX_PS4 || PX_SWITCH || (PX_UWP && PX_NEON))
++#elif(PX_UNIX_FAMILY || PX_PS4 || PX_SWITCH || (PX_UWP && PX_NEON) || PX_CLANG)
+ #include "unix/PsUnixAoS.h"
+ #elif PX_XBOXONE
+ #include "XboxOne/PsXboxOneAoS.h"
+diff --git a/physx/source/foundation/include/PsInlineAoS.h b/physx/source/foundation/include/PsInlineAoS.h
+index bb90084d..40c13f15 100644
+--- a/physx/source/foundation/include/PsInlineAoS.h
++++ b/physx/source/foundation/include/PsInlineAoS.h
+@@ -32,10 +32,10 @@
+ 
+ #include "foundation/PxPreprocessor.h"
+ 
+-#if PX_WINDOWS
++#if PX_WINDOWS && !PX_CLANG
+ #include "windows/PsWindowsTrigConstants.h"
+ #include "windows/PsWindowsInlineAoS.h"
+-#elif(PX_UNIX_FAMILY || PX_PS4 || PX_SWITCH || (PX_UWP && PX_NEON))
++#elif(PX_UNIX_FAMILY || PX_PS4 || PX_SWITCH || (PX_UWP && PX_NEON) || PX_CLANG)
+ #include "unix/PsUnixTrigConstants.h"
+ #include "unix/PsUnixInlineAoS.h"
+ #elif PX_XBOXONE
+diff --git a/physx/source/foundation/include/PsUtilities.h b/physx/source/foundation/include/PsUtilities.h
+index ff57e058..eeed3e82 100644
+--- a/physx/source/foundation/include/PsUtilities.h
++++ b/physx/source/foundation/include/PsUtilities.h
+@@ -127,7 +127,7 @@ __attribute__((noreturn))
+ #endif
+     PX_INLINE void debugBreak()
+ {
+-#if PX_WINDOWS || PX_XBOXONE
++#if (PX_WINDOWS || PX_XBOXONE) && !PX_CLANG
+ 	__debugbreak();
+ #elif PX_ANDROID
+ 	raise(SIGTRAP); // works better than __builtin_trap. Proper call stack and can be continued.
+diff --git a/physx/source/foundation/include/unix/sse2/PsUnixSse2AoS.h b/physx/source/foundation/include/unix/sse2/PsUnixSse2AoS.h
+index 07829635..bd539ccc 100644
+--- a/physx/source/foundation/include/unix/sse2/PsUnixSse2AoS.h
++++ b/physx/source/foundation/include/unix/sse2/PsUnixSse2AoS.h
+@@ -43,7 +43,7 @@ namespace shdfnd
+ namespace aos
+ {
+ 
+-#if PX_EMSCRIPTEN
++#if PX_EMSCRIPTEN || PX_WINDOWS
+ typedef int8_t   __int8_t;
+ typedef int16_t  __int16_t;
+ typedef int32_t  __int32_t;
+diff --git a/physx/source/foundation/include/windows/PsWindowsIntrinsics.h b/physx/source/foundation/include/windows/PsWindowsIntrinsics.h
+index 9ae435d7..b6dd1f7e 100644
+--- a/physx/source/foundation/include/windows/PsWindowsIntrinsics.h
++++ b/physx/source/foundation/include/windows/PsWindowsIntrinsics.h
+@@ -73,7 +73,14 @@ namespace shdfnd
+ */
+ PX_FORCE_INLINE void memoryBarrier()
+ {
++	#if PX_CLANG
++		#pragma clang diagnostic push
++		#pragma clang diagnostic ignored "-Wdeprecated-declarations"
++	#endif
+ 	_ReadWriteBarrier();
++	#if PX_CLANG
++		#pragma clang diagnostic pop
++	#endif
+ 	/* long Barrier;
+ 	__asm {
+ 	    xchg Barrier, eax
+diff --git a/physx/source/foundation/src/windows/PsWindowsSocket.cpp b/physx/source/foundation/src/windows/PsWindowsSocket.cpp
+index a225d984..4b18080d 100644
+--- a/physx/source/foundation/src/windows/PsWindowsSocket.cpp
++++ b/physx/source/foundation/src/windows/PsWindowsSocket.cpp
+@@ -34,7 +34,7 @@
+ #include "PsThread.h"
+ #include "PsArray.h"
+ 
+-#include <Winsock2.h>
++#include <WinSock2.h>
+ #pragma comment(lib, "Ws2_32")
+ 
+ namespace physx
+diff --git a/pxshared/include/foundation/PxPreprocessor.h b/pxshared/include/foundation/PxPreprocessor.h
+index bdd6cc7b..82de7f92 100644
+--- a/pxshared/include/foundation/PxPreprocessor.h
++++ b/pxshared/include/foundation/PxPreprocessor.h
+@@ -53,34 +53,43 @@ All definitions have a value of 1 or 0, use '#if' instead of '#ifdef'.
+ Compiler defines, see http://sourceforge.net/p/predef/wiki/Compilers/
+ */
+ #if defined(_MSC_VER)
+-#if _MSC_VER >= 1910
+-#define PX_VC 15
+-#elif _MSC_VER >= 1900
+-#define PX_VC 14
+-#elif _MSC_VER >= 1800
+-#define PX_VC 12
+-#elif _MSC_VER >= 1700
+-#define PX_VC 11
+-#elif _MSC_VER >= 1600
+-#define PX_VC 10
+-#elif _MSC_VER >= 1500
+-#define PX_VC 9
+-#else
+-#error "Unknown VC version"
+-#endif
+-#elif defined(__clang__)
+-#define PX_CLANG 1
++	#if _MSC_VER >= 1910
++		#define PX_VC 15
++	#elif _MSC_VER >= 1900
++		#define PX_VC 14
++	#elif _MSC_VER >= 1800
++		#define PX_VC 12
++	#elif _MSC_VER >= 1700
++		#define PX_VC 11
++	#elif _MSC_VER >= 1600
++		#define PX_VC 10
++	#elif _MSC_VER >= 1500
++		#define PX_VC 9
++	#else
++		#error "Unknown VC version"
++	#endif
++#endif // _MSC_VER
++
++#if defined(__clang__)
++	#define PX_CLANG 1
+ 	#if defined (__clang_major__) 
+ 		#define PX_CLANG_MAJOR __clang_major__
+ 	#elif defined (_clang_major)
+ 		#define PX_CLANG_MAJOR _clang_major
+ 	#else
+ 		#define PX_CLANG_MAJOR 0
+-	#endif	
+-#elif defined(__GNUC__) // note: __clang__ implies __GNUC__
+-#define PX_GCC 1
+-#else
+-#error "Unknown compiler"
++	#endif
++#endif // __clang__
++
++#if defined(__GNUC__) // note: __clang__ implies __GNUC__
++	#define PX_GCC 1
++#endif // __GNUC__
++
++// Ensure we have at least 1 known compiler, note that in a cross compilation
++// scenario targeting windows with clang-cl, both PX_CLANG and the PX_VC version
++// will be set, at least if clang-cl has been instructed to use msvc compatibility
++#if !_MSC_VER && !PX_CLANG && !PX_GCC
++	#error "Unknown compiler"
+ #endif
+ 
+ /**
+@@ -467,7 +476,7 @@ PX_CUDA_CALLABLE PX_INLINE void PX_UNUSED(T const&)
+ // This assert works on win32/win64, but may need further specialization on other platforms.
+ // Some GCC compilers need the compiler flag -malign-double to be set.
+ // Apparently the apple-clang-llvm compiler doesn't support malign-double.
+-#if PX_PS4 || PX_APPLE_FAMILY || (PX_CLANG && !PX_ARM)
++#if PX_PS4 || PX_APPLE_FAMILY || (PX_CLANG && !PX_ARM && !PX_WINDOWS)
+ struct PxPackValidation
+ {
+ 	char _;
+----8<----8<----8<----8<----
