@@ -79,6 +79,8 @@ fn locate_output_lib_dir(mut cmake_build_out: PathBuf, build_profile: &str) -> S
     }
 }
 
+fn compile_physx() {}
+
 fn main() {
     let physx_root_dir = env::current_dir().unwrap().join("PhysX/physx");
     let physx_parent_dir = physx_root_dir.parent().unwrap();
@@ -143,11 +145,60 @@ fn main() {
         .define("PX_GENERATE_STATIC_LIBRARIES", "True")
         .define("PX_GENERATE_GPU_PROJECTS", "False")
         .define("TARGET_BUILD_PLATFORM", target_os)
-        .define("CMAKE_C_COMPILER", "clang")
-        .define("CMAKE_CXX_COMPILER", "clang++")
         .define("CMAKE_BUILD_TYPE", build_mode)
-        .profile(build_mode)
-        .build();
+        .define("CMAKE_C_COMPILER_WORKS", "1")
+        .define("CMAKE_CXX_COMPILER_WORKS", "1")
+        .profile(build_mode);
+
+    //if env::var("CARGO_FEATURE_NINJA").is_ok() {
+    physx.generator("Ninja");
+    //}
+
+    let mut using_clang_cl = false;
+
+    // If the user has explicitly specified the C/C++/linker variable(s), use
+    // them instead of the defaults for the host platform. This is important,
+    // especially for cross-compilation scenarios (eg clang-cl on linux to
+    // compile for Windows)
+    if let Ok(cxx) = env::var("CXX") {
+        physx.define("CMAKE_CXX_COMPILER", &cxx);
+
+        // If using clang-cl to pretend like we're using MSVC, physx uses a
+        // CMAKE_CL_64 define for some reason, which cmake will faceplant on
+        // when not using "actual" cl.exe, so force set it. If you're using the
+        // 32-bit version of cl.exe....uhh fix this I guess? Note that this
+        // (supposedly) is the arch of the actual cl.exe, not the host nor
+        // target arch you are actually compiling on/for.
+        if cxx.contains("clang-cl") && target_os == "windows" {
+            physx
+                .define("CMAKE_CL_64", "1")
+                .define("PHYSX_AR", "llvm-lib");
+
+            using_clang_cl = true;
+        }
+    }
+
+    if let Ok(cc) = env::var("CC") {
+        physx.define("CMAKE_C_COMPILER", &cc);
+    }
+
+    if let Ok(linker) = env::var("RUSTC_LINKER") {
+        physx.define("CMAKE_LINKER", linker);
+    }
+
+    if let Ok(cxx_flags) = env::var("TARGET_CFLAGS") {
+        physx.define("CMAKE_C_FLAGS", &cxx_flags);
+    }
+
+    if let Ok(cxx_flags) = env::var("TARGET_CXXFLAGS") {
+        physx.define("PHYSX_CXX_FLAGS", &cxx_flags);
+    }
+
+    if let Ok(ar) = env::var("TARGET_AR") {
+        physx.env("PHYSX_AR", ar);
+    }
+
+    let physx = physx.build();
 
     let lib_dir = locate_output_lib_dir(physx, build_mode);
     println!("cargo:rustc-link-search=native={}", lib_dir);
@@ -161,6 +212,15 @@ fn main() {
     println!("cargo:rustc-link-lib=static=PhysXCharacterKinematic_static_64");
     println!("cargo:rustc-link-lib=static=PhysXExtensions_static_64");
 
+    let host = env::var("HOST").expect("HOST not set");
+
+    // If we're cross compiling, we need to unset some environment variables, as
+    // structgen is meant to be compiled and run on the current host only
+    env::set_var("TARGET", &host);
+    env::remove_var("CXX");
+    env::remove_var("TARGET_CXXFLAGS");
+    env::remove_var("TARGET_AR");
+
     let mut cc_builder = cc::Build::new();
     let physx_cc = cc_builder
         .cpp(true)
@@ -173,18 +233,20 @@ fn main() {
         .define("PX_PHYSX_STATIC_LIB", None)
         .include("PhysX/physx/include")
         .include("PhysX/pxshared/include")
-        .include("PhysX/physx/source/foundation/include")
-        .flag(if "windows" == target_os {
-            "/std:c++14"
-        } else {
-            "-std=c++14"
-        });
+        .include("PhysX/physx/source/foundation/include");
+
+    physx_cc.flag(if physx_cc.get_compiler().is_like_msvc() {
+        "/std:c++14"
+    } else {
+        "-std=c++14"
+    });
 
     // We force clang++ on linux hosts since it appears some distros
     // *COUGH* UBUNTU *COUGH* use way too old versions of g++ which will
     // generally be picked up as the default C++ compiler over clang.
-    // This should be host_os, but we don't cross compile
-    if target_os == "linux" {
+    // We only set this if CXX is _NOT_ set, as presumably the user will be
+    // pointing at the compiler they actually want
+    if (env::var("CXX").is_err() || using_clang_cl) && host.contains("-linux-") {
         physx_cc.compiler("clang++");
     }
 
@@ -206,11 +268,15 @@ fn main() {
     }
 
     cmd.arg("src/structgen/structgen.cpp");
+    eprintln!("RUNNING {:#?}", cmd);
     cmd.status().expect("c++ compiler failed to execute");
 
     // The above status check has been shown to fail, ie, the compiler
     // fails to output a binary, but reports success anyway
-    if target_os == "windows" {
+    if env::var("HOST")
+        .map(|hs| hs.contains("-windows-"))
+        .unwrap_or(false)
+    {
         structgen_path.set_extension("exe");
     }
 
