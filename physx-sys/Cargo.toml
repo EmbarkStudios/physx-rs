@@ -34,12 +34,11 @@ doctest = false
 [dependencies]
 
 [build-dependencies]
-cc = "1.0"
-cmake = "0.1.35"
+cc = { version = "1.0", features = ["parallel"] }
+cmake = { version = "0.1.35", optional = true }
 
 [features]
-# If this is set, cmake will be instructed to generate and build with ninja,
-# this can be useful in cross-compilation scenarios where the cmake defaults
-# for each target platform won't be suitable. It also tends to be faster than
-# other generators.
-ninja = []
+# Enable this feature to use the visual debugger in physx
+visual-debugger = []
+structgen = []
+use-cmake = ["cmake"]

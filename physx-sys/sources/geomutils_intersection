@@ -1,0 +1,10 @@
+[
+    "GuIntersectionBoxBox",
+    "GuIntersectionCapsuleTriangle",
+    "GuIntersectionEdgeEdge",
+    "GuIntersectionRayBox",
+    "GuIntersectionRayCapsule",
+    "GuIntersectionRaySphere",
+    "GuIntersectionSphereBox",
+    "GuIntersectionTriangleBox",
+]

@@ -1,0 +1,11 @@
+[
+    "PxProfileEventImpl",
+    "PxPvd",
+    "PxPvdDataStream",
+    "PxPvdDefaultFileTransport",
+    "PxPvdImpl",
+    "PxPvdMemClient",
+    "PxPvdObjectRegistrar",
+    "PxPvdProfileZoneClient",
+    "PxPvdUserRenderer.cpp",
+]
