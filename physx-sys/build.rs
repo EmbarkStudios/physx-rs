@@ -222,9 +222,12 @@ fn add_common(ctx: &mut Context) {
         .map(|inc| root.join(inc)),
     );
 
-    // If we're targetting msvc, just silence all the annoying CRT warnings
+    // If we're targetting msvc, just silence all the annoying warnings
     if ccenv.target_env.as_ref().map(|s| s.as_str()) == Some("msvc") {
-        builder.define("_CRT_SECURE_NO_WARNINGS", None);
+        builder
+            .define("_CRT_SECURE_NO_WARNINGS", None)
+            .define("_WINSOCK_DEPRECATED_NO_WARNINGS", None)
+            .define("_ITERATOR_DEBUG_LEVEL", "0");
     }
 
     // Always build as a static library

@@ -139,7 +139,7 @@ include!("generated/x86_64-unknown-linux/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
-    target_os = "darwin",
+    target_os = "macos",
     target_arch = "x86_64",
 ))]
 include!("generated/x86_64-apple-darwin/structgen.rs");
