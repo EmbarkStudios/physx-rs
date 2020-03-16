@@ -95,7 +95,7 @@ jobs:
         shell: bash
         run: |
           # Copy the structgen output to a deterministic location
-          out=$(find -name structgen_out.rs)
+          out=$(find target/ -name structgen_out.rs)
 
           mkdir ./structgen
           cp $out ./structgen/output.rs
