@@ -15,12 +15,12 @@
 //!
 //! [**This is a work in progress** 🚧](https://github.com/EmbarkStudios/physx-rs/issues/3)
 //!
-//! `physx` is intended to be an easy to use high-level wrapper for the [`physx-sys`](https://crates.io/crates/physx) bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
+//! `physx` is intended to be an easy to use high-level wrapper for the [`physx-sys`](https://crates.io/crates/physx)
+//! bindings. The goal of this is to make ownership clearer and leverage the safety of Rust.
 //!
-//! The overall goal is to maintain a close mapping to the underlying PhysX API
-//! while improving safety and reliability of the code. This means, for example,
-//! that we do not expose the `PxLoadExtensions()` function but rather attach this
-//! to the [`Physics`](source/physics.rs) builder.
+//! The overall goal is to maintain a close mapping to the underlying PhysX API while improving safety and reliability
+//! of the code. This means, for example, that we do not expose the `PxLoadExtensions()` function but rather attach
+//! this to the [`Physics`](source/physics.rs) builder.
 //!
 //! Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing an unsafe low-level binding.
 //!
@@ -55,9 +55,13 @@
 //! Using C as an intermediary allows us to leverage a stable ABI through which C++
 //! and Rust can communicate. The `physx-sys` crate provides this interface.
 //!
-//! Since `PhysX` makes significant use of inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called [`PxType<T>`](src/px_type.rs). We implement the functions on each wrapped `PxType<PxRgidiActor>` and expose an alias `RigidActor`.
+//! Since `PhysX` makes significant use of inheritance, there is no straightforward mapping to Rust code. To simulate
+//! the inheritance, we have a pointer-wrapper called [`PxType<T>`](src/px_type.rs). We implement the functions on each
+//! wrapped `PxType<PxRgidiActor>` and expose an alias `RigidActor`.
 //!
-//! The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to simulate inheritance. For example `RigidBody::set_angular_damping`, can be called from the child `RigidDynamic` because `RigidDynamic` implements `Deref<Target = RigidBody>`.
+//! The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to
+//! simulate inheritance. For example `RigidBody::set_angular_damping`, can be called from the child `RigidDynamic`
+//! because `RigidDynamic` implements `Deref<Target = RigidBody>`.
 //!
 //! ```Rust
 //! // `set_angular_damping` is not defined in `RigidDynamic`, it is defined in `RidigBody`.
@@ -85,7 +89,9 @@
 //!
 //! at your option.
 //!
-//! Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has it's [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
+//! Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has it's
+//! [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and
+//! depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
 //!
 //! ### Contribution
 //!
