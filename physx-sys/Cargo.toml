@@ -38,7 +38,5 @@ cc = { version = "1.0", features = ["parallel"] }
 cmake = { version = "0.1.35", optional = true }
 
 [features]
-# Enable this feature to use the visual debugger in physx
-visual-debugger = []
 structgen = []
 use-cmake = ["cmake"]

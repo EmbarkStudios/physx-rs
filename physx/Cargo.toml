@@ -23,6 +23,5 @@ glam = "0.8"
 thiserror = "1.0.11"
 
 [features]
-visual-debugger = ["physx-sys/visual-debugger"]
 structgen = ["physx-sys/structgen"]
 use-cmake = ["physx-sys/use-cmake"]

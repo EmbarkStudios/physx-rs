@@ -3,9 +3,11 @@
     "PxPvd",
     "PxPvdDataStream",
     "PxPvdDefaultFileTransport",
+    "PxPvdDefaultSocketTransport",
     "PxPvdImpl",
     "PxPvdMemClient",
+    "PxPvdObjectModelMetaData",
     "PxPvdObjectRegistrar",
     "PxPvdProfileZoneClient",
-    "PxPvdUserRenderer.cpp",
+    "PxPvdUserRenderer",
 ]

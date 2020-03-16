@@ -147,18 +147,20 @@ fn geomutils(ctx: &mut Context) {
 }
 
 fn cooking(ctx: &mut Context) {
-    let sources = [
-        "Adjacencies",
-        "Cooking",
-        "CookingUtils",
-        "EdgeList",
-        "MeshCleaner",
-        "Quantizer",
-        "BVHStructureBuilder",
-    ];
-
+    // root
+    let sources = include!("sources/cooking");
     ctx.add_sources("source/physxcooking/src", &sources);
+    ctx.add_includes("source/include", &["cooking"]);
 
+    // mesh
+    let sources = include!("sources/cooking_mesh");
+    ctx.add_sources("source/physxcooking/src/mesh", &sources);
+
+    // convex
+    let sources = include!("sources/cooking_convex");
+    ctx.add_sources("source/physxcooking/src/convex", &sources);
+
+    // physx gates various cooking functionality with this define
     ctx.builder.define("PX_COOKING", None);
 }
 
@@ -210,9 +212,14 @@ fn add_common(ctx: &mut Context) {
     // These includes are used by pretty much everything so just add them first
     ctx.includes.push(shared_root.join("include"));
     ctx.includes.extend(
-        ["include", "source/foundation/include", "source/common/src"]
-            .iter()
-            .map(|inc| root.join(inc)),
+        [
+            "include",
+            "source/foundation/include",
+            "source/common/src",
+            "source/filebuf/include", // only used by pvd
+        ]
+        .iter()
+        .map(|inc| root.join(inc)),
     );
 
     // If we're targetting msvc, just silence all the annoying CRT warnings
@@ -391,17 +398,11 @@ fn compile_physx(target_env: Environment) {
     physxcharacterkinematic(&mut ctx);
     common(&mut ctx);
     geomutils(&mut ctx);
-    //cooking(&mut ctx);
+    cooking(&mut ctx);
+    pvd(&mut ctx);
     physx(&mut ctx);
     scenequery(&mut ctx);
     simulationcontroller(&mut ctx);
-
-    // Only build the visual debugger sources if the feature is enabled, note
-    // that we still need to add the pvd include directory as files are still
-    // included from it regardless of whether the visual debugger is built
-    if env::var("CARGO_CFG_FEATURE_VISUAL_DEBUGGER").ok().is_some() {
-        pvd(&mut ctx);
-    }
 
     ctx.includes.push(ctx.root.join("source/pvd/include"));
 
@@ -540,5 +541,5 @@ fn main() {
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
 
     // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
-    let _ = std::fs::remove_file(physx_root_dir.join("include/PxConfig.h"));
+    //let _ = std::fs::remove_file(physx_root_dir.join("include/PxConfig.h"));
 }
