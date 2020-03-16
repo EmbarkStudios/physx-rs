@@ -56,7 +56,12 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-      - name: Ball
+      - name: Ball All
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example ball --all-features
+      - name: Ball None
         uses: actions-rs/cargo@v1
         with:
           command: run
