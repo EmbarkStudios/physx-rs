@@ -244,16 +244,7 @@ fn add_common(ctx: &mut Context) {
         builder.define("NDEBUG", "1");
     }
 
-    // physx has 4 modes, but we only have 2, so just condition the visual
-    // debugger on the cargo feature instead
-    builder.define(
-        "PX_SUPPORT_PVD",
-        if env::var("CARGO_CFG_FEATURE_VISUAL_DEBUGGER").ok().is_some() {
-            "1"
-        } else {
-            "0"
-        },
-    );
+    builder.define("PX_SUPPORT_PVD", "1");
 
     // If we're on linux, we already require clang++ for structgen, for reasons,
     // so just force clang++ for the normal compile as well...except in the case
@@ -326,6 +317,16 @@ fn add_common(ctx: &mut Context) {
     // doesn't support it
     if builder.get_compiler().is_like_clang() && ccenv.target_os == "windows" {
         builder.pic(false);
+    }
+
+    if ccenv.target_env.as_ref().map(|s| s.as_str()) == Some("msvc") {
+        if builder.get_compiler().is_like_msvc() {
+            if ccenv.mode == "release" {
+                builder.flag("/MD");
+            } else if ccenv.mode == "debug" {
+                builder.flag("/MDd");
+            }
+        }
     }
 }
 
