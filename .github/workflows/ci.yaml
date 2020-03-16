@@ -101,5 +101,5 @@ jobs:
           cp $out ./structgen/output.rs
       - uses: actions/upload-artifact@v1
         with:
-          name: structgen
+          name: structgen-${{ matrix.os }}
           path: structgen
