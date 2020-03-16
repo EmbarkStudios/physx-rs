@@ -127,7 +127,9 @@
 //! license, shall be dual licensed as above, without any additional terms or
 //! conditions.  
 
+#[cfg(feature = "structgen")]
 include!(concat!(env!("OUT_DIR"), "/structgen_out.rs"));
+
 include!("physx_generated.rs");
 
 use std::ffi::c_void;
