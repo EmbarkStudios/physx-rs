@@ -130,6 +130,28 @@
 #[cfg(feature = "structgen")]
 include!(concat!(env!("OUT_DIR"), "/structgen_out.rs"));
 
+#[cfg(all(
+    not(feature = "structgen"),
+    target_os = "linux",
+    target_arch = "x86_64",
+))]
+include!("generated/x86_64-unknown-linux/structgen.rs");
+
+#[cfg(all(
+    not(feature = "structgen"),
+    target_os = "darwin",
+    target_arch = "x86_64",
+))]
+include!("generated/x86_64-apple-darwin/structgen.rs");
+
+#[cfg(all(
+    not(feature = "structgen"),
+    target_os = "windows",
+    target_arch = "x86_64",
+    target_env = "msvc",
+))]
+include!("generated/x86_64-pc-windows-msvc/structgen.rs");
+
 include!("physx_generated.rs");
 
 use std::ffi::c_void;

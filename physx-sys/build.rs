@@ -461,10 +461,6 @@ fn main() {
         });
     }
 
-    if env::var("CARGO_FEATURE_STRUCTGEN").is_err() {
-        return;
-    }
-
     let mut cc_builder = cc::Build::new();
     let physx_cc = cc_builder
         .cpp(true)
@@ -492,41 +488,61 @@ fn main() {
     use std::ffi::OsString;
     let output_dir_path =
         PathBuf::from(env::var("OUT_DIR").expect("output directory not specified"));
-    let mut structgen_path = output_dir_path.join("structgen");
 
-    let structgen_compiler = physx_cc.get_compiler();
-    let mut cmd = structgen_compiler.to_command();
-    if structgen_compiler.is_like_msvc() {
-        let mut s = OsString::from("/Fe");
-        s.push(&structgen_path);
-        cmd.arg(s);
+    let include_path = if env::var("CARGO_FEATURE_STRUCTGEN").is_ok() {
+        let mut structgen_path = output_dir_path.join("structgen");
 
-        let mut s = OsString::from("/Fo");
-        s.push(&structgen_path);
-        s.push(".obj");
-        cmd.arg(s);
+        let structgen_compiler = physx_cc.get_compiler();
+        let mut cmd = structgen_compiler.to_command();
+        if structgen_compiler.is_like_msvc() {
+            let mut s = OsString::from("/Fe");
+            s.push(&structgen_path);
+            cmd.arg(s);
+
+            let mut s = OsString::from("/Fo");
+            s.push(&structgen_path);
+            s.push(".obj");
+            cmd.arg(s);
+        } else {
+            cmd.arg("-o").arg(&structgen_path);
+        }
+
+        cmd.arg("src/structgen/structgen.cpp");
+        cmd.status().expect("c++ compiler failed to execute");
+
+        // The above status check has been shown to fail, ie, the compiler
+        // fails to output a binary, but reports success anyway
+        if host.contains("-windows-") {
+            structgen_path.set_extension("exe");
+        }
+
+        std::fs::metadata(&structgen_path)
+            .expect("failed to compile structgen even though compiler reported no failures");
+
+        let mut structgen = std::process::Command::new(&structgen_path);
+        structgen.current_dir(&output_dir_path);
+        structgen.status().expect("structgen failed to execute");
+
+        output_dir_path
     } else {
-        cmd.arg("-o").arg(&structgen_path);
-    }
+        let target = env::var("TARGET").expect("TARGET not specified");
+        let mut include = PathBuf::from("src/generated");
 
-    cmd.arg("src/structgen/structgen.cpp");
-    cmd.status().expect("c++ compiler failed to execute");
+        match target.as_str() {
+            "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" => {
+                include.push(target);
+            }
+            nix if nix.starts_with("x86_64-unknown-linux") => {
+                include.push("x86_64-unknown-linux");
+            }
+            _ => panic!("unknown TARGET triple '{}'", target),
+        }
 
-    // The above status check has been shown to fail, ie, the compiler
-    // fails to output a binary, but reports success anyway
-    if host.contains("-windows-") {
-        structgen_path.set_extension("exe");
-    }
-
-    std::fs::metadata(&structgen_path)
-        .expect("failed to compile structgen even though compiler reported no failures");
-
-    let mut structgen = std::process::Command::new(&structgen_path);
-    structgen.current_dir(&output_dir_path);
-    structgen.status().expect("structgen failed to execute");
+        include
+    };
 
     physx_cc
-        .include(output_dir_path)
+        .include(include_path)
         .file("src/physx.cpp")
         .compile("physx_api");
 
