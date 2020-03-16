@@ -95,10 +95,12 @@ jobs:
         shell: bash
         run: |
           # Copy the structgen output to a deterministic location
-          out=$(find target/ -name structgen_out.rs)
+          rs=$(find target/ -name structgen_out.rs)
+          hpp=$(find target/ -name structgen_out.hpp)
 
           mkdir ./structgen
-          cp $out ./structgen/output.rs
+          cp $rs ./structgen/structgen.rs
+          cp $hpp ./structgen/structgen_out.hpp
       - uses: actions/upload-artifact@v1
         with:
           name: structgen-${{ matrix.os }}
