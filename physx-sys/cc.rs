@@ -335,17 +335,17 @@ fn add_common(ctx: &mut Context) {
         let mut flags = vec!["-nologo"];
 
         if ccenv.static_crt {
-            flags.push("-MT");
+            flags.push("/MT");
         } else {
-            flags.push("-MD");
+            flags.push("/MD");
         }
 
         if ccenv.emit_debug_info {
-            flags.push("-Z7");
+            flags.push("/Z7");
         }
 
         if ccenv.mode.as_str() == "profile" {
-            flags.push("-O2");
+            flags.push("/O2");
         }
 
         flags.extend(["/WX", "/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
