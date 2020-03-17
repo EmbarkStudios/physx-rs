@@ -277,6 +277,7 @@ fn add_common(ctx: &mut Context) {
 
     let flags = if builder.get_compiler().is_like_clang() {
         vec![
+            "-std=c++14",
             "-ferror-limit=0",
             "-Wall",
             "-Wextra",
