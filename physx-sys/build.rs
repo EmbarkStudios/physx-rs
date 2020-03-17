@@ -39,10 +39,7 @@ fn main() {
 
     {
         let target_compiler = env::var("CXX").ok();
-        //let target_linker = env::var("RUSTC_LINKER").ok();
         let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target os not specified");
-        //let target_arch =
-        //env::var("CARGO_CFG_TARGET_ARCH").expect("target architecture not specified");
         let target_env = env::var("CARGO_CFG_TARGET_ENV").ok();
 
         let environment = Environment {

@@ -264,8 +264,14 @@ fn add_common(ctx: &mut Context) {
 
     // If we're on linux, we already require clang++ for structgen, for reasons,
     // so just force clang++ for the normal compile as well...except in the case
-    // where a user has expliclity set CXX
-    if ccenv.host.contains("-linux-") && ccenv.target_compiler.is_none() {
+    // where a user has expliclity set CXX....
+    // We _also_ set it explicitly for mac hosts, due to cc-rs's current
+    // compiler detection, as macos uses cc still, but it's actually a symlink
+    // to clang++, but that means that cc rs will by default think the compiler
+    // is gcc
+    if (ccenv.host.contains("-linux-") || ccenv.host == "x86_64-apple-darwin")
+        && ccenv.target_compiler.is_none()
+    {
         builder.compiler("clang++");
     }
 
@@ -337,13 +343,13 @@ fn add_common(ctx: &mut Context) {
         builder.pic(false);
     }
 
-    if ccenv.target_env.as_deref() == Some("msvc") && builder.get_compiler().is_like_msvc() {
-        if ccenv.mode == "profile" {
-            builder.flag("/MD");
-        } else if ccenv.mode == "debug" {
-            builder.flag("/MDd");
-        }
-    }
+    // if ccenv.target_env.as_deref() == Some("msvc") && builder.get_compiler().is_like_msvc() {
+    //     if ccenv.mode == "profile" {
+    //         builder.flag("/MD");
+    //     } else if ccenv.mode == "debug" {
+    //         builder.flag("/MDd");
+    //     }
+    // }
 }
 
 fn cc_compile(target_env: Environment) {
