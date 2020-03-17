@@ -263,16 +263,6 @@ fn add_common(ctx: &mut Context) {
         builder.define("PX_DEBUG", None).define("PX_CHECKED", None);
     }
 
-    match ccenv.mode.as_str() {
-        "debug" => {
-            builder.define("_DEBUG", "1");
-        }
-        "profile" => {
-            builder.define("NDEBUG", "1");
-        }
-        o => panic!("unknown mode '{}'", o),
-    }
-
     builder.define("PX_SUPPORT_PVD", "1");
 
     // If we're on linux, we already require clang++ for structgen, for reasons,
@@ -353,8 +343,6 @@ fn add_common(ctx: &mut Context) {
             flags.push("/MD");
         }
 
-        //flags.push("/MT");
-
         if ccenv.emit_debug_info {
             flags.push("/Z7");
         }
@@ -382,6 +370,18 @@ fn add_common(ctx: &mut Context) {
 
     for flag in flags {
         builder.flag(flag);
+    }
+
+    if !builder.get_compiler().is_like_msvc() {
+        match ccenv.mode.as_str() {
+            "debug" => {
+                builder.define("_DEBUG", "1");
+            }
+            "profile" => {
+                builder.define("NDEBUG", "1");
+            }
+            o => panic!("unknown mode '{}'", o),
+        }
     }
 
     // cc sets PIC by default for most targets, but if we're compiling with
@@ -436,7 +436,7 @@ fn cc_compile(target_env: Environment) {
 
     ctx.builder.compile("physx");
 
-    if ctx.builder.get_compiler().is_like_msvc() {
-        panic!("OK, WHAT HAVE WE HERE THEN");
-    }
+    // if ctx.builder.get_compiler().is_like_msvc() {
+    //     panic!("OK, WHAT HAVE WE HERE THEN");
+    // }
 }
