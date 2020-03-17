@@ -435,4 +435,8 @@ fn cc_compile(target_env: Environment) {
     }
 
     ctx.builder.compile("physx");
+
+    if ctx.builder.get_compiler().is_like_msvc() {
+        panic!("OK, WHAT HAVE WE HERE THEN");
+    }
 }

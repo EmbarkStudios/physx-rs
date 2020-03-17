@@ -150,10 +150,6 @@ fn main() {
         include
     };
 
-    // if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
-    //     physx_cc.flag("/MT");
-    // }
-
     physx_cc
         .include(include_path)
         .file("src/physx_api.cpp")
