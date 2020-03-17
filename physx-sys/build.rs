@@ -147,7 +147,7 @@ fn main() {
 
     physx_cc
         .include(include_path)
-        .file("src/physx.cpp")
+        .file("src/physx_api.cpp")
         .compile("physx_api");
 
     // if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
@@ -159,7 +159,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/physx_generated.hpp");
     println!("cargo:rerun-if-changed=src/physx_generated.rs");
-    println!("cargo:rerun-if-changed=src/physx.cpp");
+    println!("cargo:rerun-if-changed=src/physx_apicpp");
 
     // TODO: use the cloned git revision number instead
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
