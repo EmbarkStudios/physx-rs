@@ -252,12 +252,17 @@ fn add_common(ctx: &mut Context) {
     builder.define("DISABLE_CUDA_PHYSX", None);
 
     if ccenv.emit_debug_info {
-        builder
-            .define("_DEBUG", "1")
-            .define("PX_DEBUG", None)
-            .define("PX_CHECKED", None);
-    } else {
-        builder.define("NDEBUG", "1");
+        builder.define("PX_DEBUG", None).define("PX_CHECKED", None);
+    }
+
+    match ccenv.mode.as_str() {
+        "debug" => {
+            builder.define("_DEBUG", "1");
+        }
+        "profile" => {
+            builder.define("NDEBUG", "1");
+        }
+        o => panic!("unknown mode '{}'", o),
     }
 
     builder.define("PX_SUPPORT_PVD", "1");
