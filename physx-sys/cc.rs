@@ -329,8 +329,36 @@ fn add_common(ctx: &mut Context) {
         ]
     } else if builder.get_compiler().is_like_gnu() {
         vec!["-Wall -Werror -Wno-invalid-offsetof -Wno-uninitialized"]
-    // } else if builder.get_compiler().is_like_msvc() {
-    //     vec![]
+    } else if builder.get_compiler().is_like_msvc() {
+        // Disable defaults and force certain flags
+        builder.no_default_flags(true);
+        let mut flags = vec!["-nologo"];
+
+        if ccenv.static_crt {
+            flags.push("-MT");
+        } else {
+            flags.push("-MD");
+        }
+
+        if ccenv.emit_debug_info {
+            flags.push("-Z7");
+        }
+
+        if ccenv.mode.as_str() == "profile" {
+            flags.push("-O2");
+        }
+
+        flags.extend(["/WX", "/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
+
+        // Disable some warnings
+        flags.extend(
+            [
+                "/wd4514", "/wd4820", "/wd4127", "/wd4710", "/wd4711", "/wd4577", "/wd4996",
+            ]
+            .iter(),
+        );
+
+        flags
     } else {
         vec![]
     };

@@ -9,6 +9,7 @@ struct Environment {
     mode: String,
     target_compiler: Option<String>,
     //target_linker: Option<String>,
+    static_crt: bool,
 }
 
 struct Context {
@@ -43,6 +44,9 @@ fn main() {
         let target_compiler = env::var("CXX").ok();
         let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target os not specified");
         let target_env = env::var("CARGO_CFG_TARGET_ENV").ok();
+        let static_crt = env::var("CARGO_CFG_TARGET_FEATURE")
+            .unwrap_or_default()
+            .contains("crt-static");
 
         let environment = Environment {
             emit_debug_info: env::var("DEBUG")
@@ -56,6 +60,7 @@ fn main() {
             target_compiler,
             mode: build_mode.to_owned(),
             host: host.clone(),
+            static_crt,
         };
 
         if use_cmake {

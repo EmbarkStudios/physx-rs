@@ -118,9 +118,7 @@ fn cmake_compile(target_env: Environment) {
         physx_cfg.define("CMAKE_LIBRARY_ARCHITECTURE", "x86_64-unknown-linux-gnu");
     }
 
-    let linkage = env::var("CARGO_CFG_TARGET_FEATURE").unwrap_or_default();
-    let crt_static = linkage.contains("crt-static");
-    if crt_static {
+    if target_env.static_crt {
         physx_cfg.define("NV_USE_STATIC_WINCRT", "True");
     }
 
