@@ -151,7 +151,7 @@ fn main() {
     };
 
     if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
-        physx_cc.flag("-MD");
+        physx_cc.flag("/MD");
     }
 
     physx_cc
@@ -159,9 +159,9 @@ fn main() {
         .file("src/physx_api.cpp")
         .compile("physx_api");
 
-    // if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
-    //     panic!("If -MD isn't in the compile options....");
-    // }
+    if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
+        panic!("If /MD isn't in the compile options....");
+    }
 
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
     println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
