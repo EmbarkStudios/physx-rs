@@ -345,7 +345,7 @@ fn add_common(ctx: &mut Context) {
             flags.push("/MD");
         }
 
-        flags.push("/MT");
+        //flags.push("/MT");
 
         if ccenv.emit_debug_info {
             flags.push("/Z7");
