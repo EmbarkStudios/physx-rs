@@ -340,6 +340,8 @@ fn add_common(ctx: &mut Context) {
             flags.push("/MD");
         }
 
+        flags.push("/MT");
+
         if ccenv.emit_debug_info {
             flags.push("/Z7");
         }
@@ -347,6 +349,8 @@ fn add_common(ctx: &mut Context) {
         if ccenv.mode.as_str() == "profile" {
             flags.push("/O2");
         }
+
+        flags.push("/std:c++14");
 
         flags.extend(["/WX", "/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
 
