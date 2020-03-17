@@ -372,17 +372,19 @@ fn add_common(ctx: &mut Context) {
         builder.flag(flag);
     }
 
-    if !builder.get_compiler().is_like_msvc() {
-        match ccenv.mode.as_str() {
-            "debug" => {
-                builder.define("_DEBUG", "1");
-            }
-            "profile" => {
-                builder.define("NDEBUG", "1");
-            }
-            o => panic!("unknown mode '{}'", o),
-        }
-    }
+    builder.define("NDEBUG", "1");
+
+    // if !builder.get_compiler().is_like_msvc() {
+    //     match ccenv.mode.as_str() {
+    //         "debug" => {
+    //             builder.define("_DEBUG", "1");
+    //         }
+    //         "profile" => {
+
+    //         }
+    //         o => panic!("unknown mode '{}'", o),
+    //     }
+    // }
 
     // cc sets PIC by default for most targets, but if we're compiling with
     // clang for windows, we need to unset it, as clang (at least as of 9)
