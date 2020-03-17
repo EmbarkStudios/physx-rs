@@ -150,9 +150,9 @@ fn main() {
         .file("src/physx.cpp")
         .compile("physx_api");
 
-    if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
-        panic!("If -MD isn't in the compile options....");
-    }
+    // if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
+    //     panic!("If -MD isn't in the compile options....");
+    // }
 
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
     println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
@@ -165,7 +165,6 @@ fn main() {
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
 
     // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
-
     if use_cmake {
         let _ = std::fs::remove_file(
             env::current_dir()
