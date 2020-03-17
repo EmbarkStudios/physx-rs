@@ -35,6 +35,8 @@ fn main() {
         _ => "profile",
     };
 
+    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
+
     let host = env::var("HOST").expect("HOST not specified");
 
     {
@@ -56,7 +58,7 @@ fn main() {
             host: host.clone(),
         };
 
-        match env::var("CARGO_FEATURE_USE_CMAKE") {
+        match use_cmake {
             Ok(_) => {
                 cmake_compile(environment);
             }
@@ -151,6 +153,10 @@ fn main() {
         .file("src/physx.cpp")
         .compile("physx_api");
 
+    if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
+        panic!("If -MD isn't in the compile options....");
+    }
+
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
     println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
     println!("cargo:rerun-if-changed=src/lib.rs");
@@ -163,7 +169,7 @@ fn main() {
 
     // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
 
-    if env::var("CARGO_FEATURE_USE_CMAKE").is_ok() {
+    if use_cmake {
         let _ = std::fs::remove_file(
             env::current_dir()
                 .unwrap()

@@ -390,8 +390,4 @@ fn cc_compile(target_env: Environment) {
     }
 
     ctx.builder.compile("physx");
-
-    if ctx.builder.get_compiler().is_like_msvc() {
-        panic!("If -MD isn't in the compile options....");
-    }
 }
