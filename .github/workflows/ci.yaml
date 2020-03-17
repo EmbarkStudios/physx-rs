@@ -47,25 +47,35 @@ jobs:
           toolchain: stable
           override: true
       - run: git submodule update --init
-      - name: All features
+      - name: cmake + structgen
         uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features
-      - name: No features
+      - name: no features
         uses: actions-rs/cargo@v1
         with:
           command: test
-      - name: Ball All
+      - name: ball cmake + structgen
         uses: actions-rs/cargo@v1
         with:
           command: run
           args: --example ball --all-features
-      - name: Ball None
+      - name: ball no features
         uses: actions-rs/cargo@v1
         with:
           command: run
           args: --example ball
+      - name: ball just cmake
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
+      - name: ball just structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features structgen
 
   package:
     name: Package
