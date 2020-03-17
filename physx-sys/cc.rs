@@ -329,6 +329,8 @@ fn add_common(ctx: &mut Context) {
         ]
     } else if builder.get_compiler().is_like_gnu() {
         vec!["-Wall -Werror -Wno-invalid-offsetof -Wno-uninitialized"]
+    // } else if builder.get_compiler().is_like_msvc() {
+    //     vec![]
     } else {
         vec![]
     };
@@ -343,14 +345,6 @@ fn add_common(ctx: &mut Context) {
     if builder.get_compiler().is_like_clang() && ccenv.target_os == "windows" {
         builder.pic(false);
     }
-
-    // if ccenv.target_env.as_deref() == Some("msvc") && builder.get_compiler().is_like_msvc() {
-    //     if ccenv.mode == "profile" {
-    //         builder.flag("/MD");
-    //     } else if ccenv.mode == "debug" {
-    //         builder.flag("/MDd");
-    //     }
-    // }
 }
 
 fn cc_compile(target_env: Environment) {
@@ -396,4 +390,8 @@ fn cc_compile(target_env: Environment) {
     }
 
     ctx.builder.compile("physx");
+
+    if ctx.builder.get_compiler().is_like_msvc() {
+        panic!("If -MD isn't in the compile options....");
+    }
 }
