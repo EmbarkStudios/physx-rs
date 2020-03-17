@@ -58,13 +58,10 @@ fn main() {
             host: host.clone(),
         };
 
-        match use_cmake {
-            Ok(_) => {
-                cmake_compile(environment);
-            }
-            Err(_) => {
-                cc_compile(environment);
-            }
+        if use_cmake {
+            cmake_compile(environment);
+        } else {
+            cc_compile(environment)
         }
     }
 
