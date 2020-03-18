@@ -372,19 +372,14 @@ fn add_common(ctx: &mut Context) {
         builder.flag(flag);
     }
 
+    // Physx requires either _DEBUG or NDEBUG be set, fine. Except, NEVER set
+    // _DEBUG on windows, or at least for clang-cl, because it will then think
+    // it should link the debug version of the CRT, which will _never_ work
+    // for rust because rust _always_ links the release version of the CRT
+    // (either static or dynamic depending on the crt-static target feature),
+    // there is some internal code in physx that uses _DEBUG but I don't know
+    // if we will ever actually care. That being said, this is all terrible.
     builder.define("NDEBUG", "1");
-
-    // if !builder.get_compiler().is_like_msvc() {
-    //     match ccenv.mode.as_str() {
-    //         "debug" => {
-    //             builder.define("_DEBUG", "1");
-    //         }
-    //         "profile" => {
-
-    //         }
-    //         o => panic!("unknown mode '{}'", o),
-    //     }
-    // }
 
     // cc sets PIC by default for most targets, but if we're compiling with
     // clang for windows, we need to unset it, as clang (at least as of 9)

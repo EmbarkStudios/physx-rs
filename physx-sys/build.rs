@@ -3,12 +3,10 @@ use std::{env, path::PathBuf};
 struct Environment {
     host: String,
     emit_debug_info: bool,
+    target_compiler: Option<String>,
     target_os: String,
-    //target_arch: String,
     target_env: Option<String>,
     mode: String,
-    target_compiler: Option<String>,
-    //target_linker: Option<String>,
     static_crt: bool,
 }
 
@@ -37,11 +35,23 @@ fn main() {
     };
 
     let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
-
+    let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
+    // Acquire the user-specified c++ compiler if one has been set, in the same
+    // order and manner that cc-rs will do it
+    let compiler = {
+        env::var(&format!("CXX_{}", target))
+            .or_else(|_| {
+                let target_under = target.replace("-", "_");
+                env::var(&format!("CXX_{}", target_under))
+            })
+            .or_else(|_| env::var("TARGET_CXX"))
+            .or_else(|_| env::var("CXX"))
+            .ok()
+    };
+
     {
-        let target_compiler = env::var("CXX").ok();
         let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target os not specified");
         let target_env = env::var("CARGO_CFG_TARGET_ENV").ok();
         let static_crt = env::var("CARGO_CFG_TARGET_FEATURE")
@@ -53,11 +63,9 @@ fn main() {
                 .ok()
                 .and_then(|s| s.parse::<bool>().ok())
                 .unwrap_or(false),
-            //target_arch,
-            //target_linker,
+            target_compiler: compiler.clone(),
             target_os,
             target_env,
-            target_compiler,
             mode: build_mode.to_owned(),
             host: host.clone(),
             static_crt,
@@ -84,7 +92,7 @@ fn main() {
         .include("PhysX/pxshared/include")
         .include("PhysX/physx/source/foundation/include");
 
-    if env::var("CXX").is_err() && host.contains("-linux-") {
+    if compiler.is_none() && host.contains("-linux-") {
         physx_cc.compiler("clang++");
     }
 
@@ -134,7 +142,6 @@ fn main() {
 
         output_dir_path
     } else {
-        let target = env::var("TARGET").expect("TARGET not specified");
         let mut include = PathBuf::from("src/generated");
 
         match target.as_str() {
@@ -154,10 +161,6 @@ fn main() {
         .include(include_path)
         .file("src/physx_api.cpp")
         .compile("physx_api");
-
-    // if physx_cc.get_compiler().is_like_msvc() && !use_cmake {
-    //     panic!("If /MD isn't in the compile options....");
-    // }
 
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
     println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
