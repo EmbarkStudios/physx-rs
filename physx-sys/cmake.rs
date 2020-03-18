@@ -122,7 +122,9 @@ fn cmake_compile(target_env: Environment) {
         physx_cfg.define("NV_USE_STATIC_WINCRT", "True");
     }
 
-    let compiler = target_env.target_compiler.unwrap_or_else("clang++");
+    let compiler = target_env
+        .target_compiler
+        .unwrap_or_else(|| "clang++".to_owned());
 
     let physx = physx_cfg
         .define("PX_OUTPUT_LIB_DIR", &output_dir)
