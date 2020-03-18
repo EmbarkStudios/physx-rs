@@ -122,6 +122,8 @@ fn cmake_compile(target_env: Environment) {
         physx_cfg.define("NV_USE_STATIC_WINCRT", "True");
     }
 
+    let compiler = target_env.target_compiler.unwrap_or_else("clang++");
+
     let physx = physx_cfg
         .define("PX_OUTPUT_LIB_DIR", &output_dir)
         .define("PX_OUTPUT_BIN_DIR", &output_dir)
@@ -131,8 +133,9 @@ fn cmake_compile(target_env: Environment) {
         .define("PX_GENERATE_STATIC_LIBRARIES", "True")
         .define("PX_GENERATE_GPU_PROJECTS", "False")
         .define("TARGET_BUILD_PLATFORM", target_os)
-        .define("CMAKE_C_COMPILER", "clang")
-        .define("CMAKE_CXX_COMPILER", "clang++")
+        // We don't care about the C compiler as it is never used for PhysX
+        //.define("CMAKE_C_COMPILER", "clang")
+        .define("CMAKE_CXX_COMPILER", compiler)
         .define("CMAKE_BUILD_TYPE", &target_env.mode)
         .profile(&target_env.mode)
         .build();
