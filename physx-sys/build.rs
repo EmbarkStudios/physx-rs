@@ -167,7 +167,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/physx_generated.hpp");
     println!("cargo:rerun-if-changed=src/physx_generated.rs");
-    println!("cargo:rerun-if-changed=src/physx_apicpp");
+    println!("cargo:rerun-if-changed=src/physx_api.cpp");
 
     // TODO: use the cloned git revision number instead
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
