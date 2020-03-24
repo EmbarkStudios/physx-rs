@@ -1,0 +1,18 @@
+[
+    "PxVehicleComponents",
+    "PxVehicleDrive",
+    "PxVehicleDrive4W",
+    "PxVehicleDriveNW",
+    "PxVehicleDriveTank",
+    "PxVehicleMetaData",
+    "PxVehicleNoDrive",
+    "PxVehicleSDK",
+    "PxVehicleSerialization",
+    "PxVehicleSuspWheelTire4",
+    "PxVehicleTireFriction",
+    "PxVehicleUpdate",
+    "PxVehicleWheels",
+    "VehicleUtilControl",
+    "VehicleUtilSetup",
+    "VehicleUtilTelemetry",
+]

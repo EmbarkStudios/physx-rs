@@ -1,0 +1,9 @@
+[
+    "PsAllocator",
+    "PsAssert",
+    "PsFoundation",
+    "PsMathUtils",
+    "PsString",
+    "PsTempAllocator",
+    "PsUtilities",
+]

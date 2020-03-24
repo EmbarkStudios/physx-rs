@@ -30,8 +30,6 @@
 //! license, shall be dual licensed as above, without any additional terms or
 //! conditions.
 
-extern crate proc_macro;
-
 use proc_macro2::{Ident, Span, TokenStream, TokenTree};
 use quote::quote;
 use syn::{parse_macro_input, AttributeArgs, Lit, Meta, NestedMeta};

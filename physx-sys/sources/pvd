@@ -1,0 +1,13 @@
+[
+    "PxProfileEventImpl",
+    "PxPvd",
+    "PxPvdDataStream",
+    "PxPvdDefaultFileTransport",
+    "PxPvdDefaultSocketTransport",
+    "PxPvdImpl",
+    "PxPvdMemClient",
+    "PxPvdObjectModelMetaData",
+    "PxPvdObjectRegistrar",
+    "PxPvdProfileZoneClient",
+    "PxPvdUserRenderer",
+]

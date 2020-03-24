@@ -1,0 +1,12 @@
+[
+    "SnBinaryDeserialization",
+    "SnBinarySerialization",
+    "SnConvX",
+    "SnConvX_Align",
+    "SnConvX_Convert",
+    "SnConvX_Error",
+    "SnConvX_MetaData",
+    "SnConvX_Output",
+    "SnConvX_Union",
+    "SnSerializationContext",
+]
