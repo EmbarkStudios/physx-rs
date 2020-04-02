@@ -173,7 +173,7 @@ struct physx_PxDebugText_Pod: public physx::PxDebugText {
         structGen.addField("physx_PxVec3_Pod position", "position", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxDebugText_Pod, position));
         structGen.addField("float size", "size", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxDebugText_Pod, size));
         structGen.addField("uint32_t color", "color", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxDebugText_Pod, color));
-        structGen.addField("char* string", "string", "*const i8",sizeof(const char *), unsafe_offsetof(physx_PxDebugText_Pod, string));
+        structGen.addField("unsigned char* string", "string", "*const u8",sizeof(const char *), unsafe_offsetof(physx_PxDebugText_Pod, string));
         structGen.endStruct(sizeof(physx::PxDebugText));
     }
 };
@@ -747,6 +747,18 @@ struct physx_PxSpatialForce_Pod: public physx::PxSpatialForce {
 };
 physx_PxSpatialForce_Pod::dumpLayout(structGen);
 
+struct physx_PxSpatialVelocity_Pod: public physx::PxSpatialVelocity {
+    static void dumpLayout(PodStructGen& structGen) {
+        structGen.beginStruct("physx_PxSpatialVelocity_Pod", "PxSpatialVelocity");
+        structGen.addField("physx_PxVec3_Pod linear", "linear", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxSpatialVelocity_Pod, linear));
+        structGen.addField("float pad0", "pad0", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxSpatialVelocity_Pod, pad0));
+        structGen.addField("physx_PxVec3_Pod angular", "angular", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxSpatialVelocity_Pod, angular));
+        structGen.addField("float pad1", "pad1", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxSpatialVelocity_Pod, pad1));
+        structGen.endStruct(sizeof(physx::PxSpatialVelocity));
+    }
+};
+physx_PxSpatialVelocity_Pod::dumpLayout(structGen);
+
 struct physx_PxArticulationRootLinkData_Pod: public physx::PxArticulationRootLinkData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxArticulationRootLinkData_Pod", "PxArticulationRootLinkData");
@@ -770,6 +782,8 @@ struct physx_PxArticulationCache_Pod: public physx::PxArticulationCache {
         structGen.addField("float* jointAcceleration", "jointAcceleration", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointAcceleration));
         structGen.addField("float* jointPosition", "jointPosition", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointPosition));
         structGen.addField("float* jointForce", "jointForce", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointForce));
+        structGen.addField("physx_PxSpatialVelocity_Pod* linkVelocity", "linkVelocity", "*mut PxSpatialVelocity",sizeof(physx::PxSpatialVelocity *), unsafe_offsetof(physx_PxArticulationCache_Pod, linkVelocity));
+        structGen.addField("physx_PxSpatialVelocity_Pod* linkAcceleration", "linkAcceleration", "*mut PxSpatialVelocity",sizeof(physx::PxSpatialVelocity *), unsafe_offsetof(physx_PxArticulationCache_Pod, linkAcceleration));
         structGen.addField("physx_PxArticulationRootLinkData_Pod* rootLinkData", "rootLinkData", "*mut PxArticulationRootLinkData",sizeof(physx::PxArticulationRootLinkData *), unsafe_offsetof(physx_PxArticulationCache_Pod, rootLinkData));
         structGen.addField("float* coefficientMatrix", "coefficientMatrix", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, coefficientMatrix));
         structGen.addField("float* lambda", "lambda", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, lambda));
@@ -1179,7 +1193,7 @@ physx_PxPruningStructure_Pod::dumpLayout(structGen);
 
 structGen.passThroughC("struct physx_PxDeletionEventFlags_Pod {\n    unsigned char mBits;\n};\n");
 structGen.passThroughC("struct physx_PxPvd_Pod {\n    void* vtable_;\n};\n");
-structGen.passThroughC("struct physx_PxRigidDynamicLockFlags_Pod {\n    uint16_t mBits;\n};\n");
+structGen.passThroughC("struct physx_PxRigidDynamicLockFlags_Pod {\n    unsigned char mBits;\n};\n");
 struct physx_PxSimulationStatistics_Pod: public physx::PxSimulationStatistics {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxSimulationStatistics_Pod", "PxSimulationStatistics");
@@ -1688,7 +1702,7 @@ struct physx_PxBVH34MidphaseDesc_Pod: public physx::PxBVH34MidphaseDesc {
 };
 physx_PxBVH34MidphaseDesc_Pod::dumpLayout(structGen);
 
-structGen.passThroughC("struct Anonymous216_Pod {\n    physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;\n    physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;\n};\n");
+structGen.passThroughC("struct Anonymous217_Pod {\n    physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;\n    physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;\n};\n");
 struct physx_PxMidphaseDesc_Pod: public physx::PxMidphaseDesc {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxMidphaseDesc_Pod", "PxMidphaseDesc");
@@ -2047,7 +2061,7 @@ structGen.passThroughC("struct physx_PxSceneQueryFlags_Pod {\n    uint16_t mBits
 struct physx_PxRepXObject_Pod: public physx::PxRepXObject {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxRepXObject_Pod", "PxRepXObject");
-        structGen.addField("char* typeName", "typeName", "*const i8",sizeof(const char *), unsafe_offsetof(physx_PxRepXObject_Pod, typeName));
+        structGen.addField("unsigned char* typeName", "typeName", "*const u8",sizeof(const char *), unsafe_offsetof(physx_PxRepXObject_Pod, typeName));
         structGen.addField("void* serializable", "serializable", "*const std::ffi::c_void",sizeof(const void *), unsafe_offsetof(physx_PxRepXObject_Pod, serializable));
         structGen.addField("uint64_t id", "id", "usize",sizeof(physx::PxSerialObjectId), unsafe_offsetof(physx_PxRepXObject_Pod, id));
         structGen.endStruct(sizeof(physx::PxRepXObject));
@@ -2243,6 +2257,7 @@ struct physx_PxVehicleWheelsSimData_Pod: public physx::PxVehicleWheelsSimData {
 };
 physx_PxVehicleWheelsSimData_Pod::dumpLayout(structGen);
 
+structGen.passThroughC("struct physx_PxVehicleWheelsSimFlags_Pod {\n    uint32_t mBits;\n};\n");
 structGen.passThroughC("struct physx_PxVehicleWheels4DynData_Pod;\n");
 structGen.passThroughC("struct physx_PxVehicleTireForceCalculator_Pod;\n");
 struct physx_PxVehicleWheelsDynData_Pod: public physx::PxVehicleWheelsDynData {
@@ -2539,7 +2554,7 @@ struct physx_PxVehicleGraphChannelDesc_Pod: public physx::PxVehicleGraphChannelD
         structGen.addField("float mMidY", "mMidY", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleGraphChannelDesc_Pod, mMidY));
         structGen.addField("physx_PxVec3_Pod mColorLow", "mColorLow", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxVehicleGraphChannelDesc_Pod, mColorLow));
         structGen.addField("physx_PxVec3_Pod mColorHigh", "mColorHigh", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxVehicleGraphChannelDesc_Pod, mColorHigh));
-        structGen.addField("char* mTitle", "mTitle", "*mut i8",sizeof(char *), unsafe_offsetof(physx_PxVehicleGraphChannelDesc_Pod, mTitle));
+        structGen.addField("unsigned char* mTitle", "mTitle", "*mut u8",sizeof(char *), unsafe_offsetof(physx_PxVehicleGraphChannelDesc_Pod, mTitle));
         structGen.endStruct(sizeof(physx::PxVehicleGraphChannelDesc));
     }
 };
@@ -2572,7 +2587,7 @@ struct physx_PxProfileScoped_Pod: public physx::PxProfileScoped {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxProfileScoped_Pod", "PxProfileScoped");
         structGen.addField("physx_PxProfilerCallback_Pod* mCallback", "mCallback", "*mut PxProfilerCallback",sizeof(physx::PxProfilerCallback *), unsafe_offsetof(physx_PxProfileScoped_Pod, mCallback));
-        structGen.addField("char* mEventName", "mEventName", "*const i8",sizeof(const char *), unsafe_offsetof(physx_PxProfileScoped_Pod, mEventName));
+        structGen.addField("unsigned char* mEventName", "mEventName", "*const u8",sizeof(const char *), unsafe_offsetof(physx_PxProfileScoped_Pod, mEventName));
         structGen.addField("void* mProfilerData", "mProfilerData", "*mut std::ffi::c_void",sizeof(void *), unsafe_offsetof(physx_PxProfileScoped_Pod, mProfilerData));
         structGen.addField("uint64_t mContextId", "mContextId", "usize",sizeof(uint64_t), unsafe_offsetof(physx_PxProfileScoped_Pod, mContextId));
         structGen.addField("bool mDetached", "mDetached", "bool",sizeof(bool), unsafe_offsetof(physx_PxProfileScoped_Pod, mDetached));

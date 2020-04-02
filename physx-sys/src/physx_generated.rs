@@ -45,17 +45,23 @@ pub const eVELOCITY: Enum = 1u64 as u32;
 pub const eACCELERATION: Enum = 2u64 as u32;
 pub const ePOSITION: Enum = 4u64 as u32;
 pub const eFORCE: Enum = 8u64 as u32;
-pub const eROOT: Enum = 16u64 as u32;
-pub const eALL: Enum = 23u64 as u32;
+pub const eLINKVELOCITY: Enum = 16u64 as u32;
+pub const eLINKACCELERATION: Enum = 32u64 as u32;
+pub const eROOT: Enum = 64u64 as u32;
+pub const eALL: Enum = 119u64 as u32;
 }
 pub mod PxArticulationDriveType{
 pub type Enum = u32;
 pub const eFORCE: Enum = 0u64 as u32;
 pub const eACCELERATION: Enum = 1u64 as u32;
+pub const eTARGET: Enum = 2u64 as u32;
+pub const eVELOCITY: Enum = 3u64 as u32;
+pub const eNONE: Enum = 4u64 as u32;
 }
 pub mod PxArticulationFlag{
 pub type Enum = u32;
 pub const eFIX_BASE: Enum = 1u64 as u32;
+pub const eDRIVE_LIMITS_ARE_FORCES: Enum = 2u64 as u32;
 }
 pub mod PxArticulationJointDriveType{
 pub type Enum = u32;
@@ -866,6 +872,10 @@ pub const eNORM_TIRE_LAT_FORCE: Enum = 9u64 as u32;
 pub const eNORM_TIRE_ALIGNING_MOMENT: Enum = 10u64 as u32;
 pub const eMAX_NB_WHEEL_CHANNELS: Enum = 11u64 as u32;
 }
+pub mod PxVehicleWheelsSimFlag{
+pub type Enum = u32;
+pub const eLIMIT_SUSPENSION_EXPANSION_VELOCITY: Enum = 1u64 as u32;
+}
 pub mod PxVisualizationParameter{
 pub type Enum = u32;
 pub const eSCALE: Enum = 0u64 as u32;
@@ -1222,7 +1232,7 @@ pub struct PxPvd{
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRigidDynamicLockFlags{
-    pub mBits: u16,
+    pub mBits: u8,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1377,7 +1387,7 @@ pub struct PxTypedStridedData_physx_PxMaterialTableIndex_{
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub union Anonymous216{
+pub union Anonymous217{
     pub mBVH33Desc: PxBVH33MidphaseDesc,
     pub mBVH34Desc: PxBVH34MidphaseDesc,
 }
@@ -1480,6 +1490,11 @@ pub struct PxVehicleWheels4SimData{
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
+pub struct PxVehicleWheelsSimFlags{
+    pub mBits: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
 pub struct PxVehicleWheels4DynData{
     pxbind_dummy: u8
 }
@@ -1507,7 +1522,7 @@ pub struct PxPvdInstrumentationFlags{
 }
 extern "C" {
 pub fn PxAllocatorCallback_delete(self_: *mut PxAllocatorCallback, ) -> ();
-pub fn PxAllocatorCallback_allocate_mut(self_: *mut PxAllocatorCallback, size: usize, typeName: *const i8, filename: *const i8, line: i32, ) -> *mut std::ffi::c_void;
+pub fn PxAllocatorCallback_allocate_mut(self_: *mut PxAllocatorCallback, size: usize, typeName: *const u8, filename: *const u8, line: i32, ) -> *mut std::ffi::c_void;
 pub fn PxAllocatorCallback_deallocate_mut(self_: *mut PxAllocatorCallback, ptr: *mut std::ffi::c_void, ) -> ();
 pub fn PxAssertHandler_delete(self_: *mut PxAssertHandler, ) -> ();
 pub fn phys_PxGetAssertHandler() -> *mut PxAssertHandler;
@@ -1695,7 +1710,7 @@ pub fn PxBounds3_transformSafe_mut_3(transform: *const PxTransform, bounds: *con
 pub fn PxBounds3_transformFast_mut_3(transform: *const PxTransform, bounds: *const PxBounds3, ) -> PxBounds3;
 pub fn PxBounds3_isValid_1(self_: *const PxBounds3, ) -> bool;
 pub fn PxErrorCallback_delete(self_: *mut PxErrorCallback, ) -> ();
-pub fn PxErrorCallback_reportError_mut(self_: *mut PxErrorCallback, code: PxErrorCode::Enum, message: *const i8, file: *const i8, line: i32, ) -> ();
+pub fn PxErrorCallback_reportError_mut(self_: *mut PxErrorCallback, code: PxErrorCode::Enum, message: *const u8, file: *const u8, line: i32, ) -> ();
 pub fn PxInputStream_read_mut(self_: *mut PxInputStream, dest: *mut std::ffi::c_void, count: u32, ) -> u32;
 pub fn PxInputStream_delete(self_: *mut PxInputStream, ) -> ();
 pub fn PxInputData_getLength(self_: *const PxInputData, ) -> u32;
@@ -1776,7 +1791,7 @@ pub fn PxDebugPoint_new(p: *const PxVec3, c: *const u32, ) -> PxDebugPoint;
 pub fn PxDebugLine_new(p0: *const PxVec3, p1: *const PxVec3, c: *const u32, ) -> PxDebugLine;
 pub fn PxDebugTriangle_new(p0: *const PxVec3, p1: *const PxVec3, p2: *const PxVec3, c: *const u32, ) -> PxDebugTriangle;
 pub fn PxDebugText_new() -> PxDebugText;
-pub fn PxDebugText_new_1(p: *const PxVec3, s: *const f32, c: *const u32, str: *const i8, ) -> PxDebugText;
+pub fn PxDebugText_new_1(p: *const PxVec3, s: *const f32, c: *const u32, str: *const u8, ) -> PxDebugText;
 pub fn PxRenderBuffer_delete(self_: *mut PxRenderBuffer, ) -> ();
 pub fn PxRenderBuffer_getNbPoints(self_: *const PxRenderBuffer, ) -> u32;
 pub fn PxRenderBuffer_getPoints(self_: *const PxRenderBuffer, ) -> *const PxDebugPoint;
@@ -1794,9 +1809,9 @@ pub fn PxSerializationContext_registerReference_mut(self_: *mut PxSerializationC
 pub fn PxSerializationContext_getCollection(self_: *const PxSerializationContext, ) -> *const PxCollection;
 pub fn PxSerializationContext_writeData_mut(self_: *mut PxSerializationContext, data: *const std::ffi::c_void, size: u32, ) -> ();
 pub fn PxSerializationContext_alignData_mut(self_: *mut PxSerializationContext, alignment: u32, ) -> ();
-pub fn PxSerializationContext_writeName_mut(self_: *mut PxSerializationContext, name: *const i8, ) -> ();
+pub fn PxSerializationContext_writeName_mut(self_: *mut PxSerializationContext, name: *const u8, ) -> ();
 pub fn PxDeserializationContext_resolveReference(self_: *const PxDeserializationContext, kind: u32, reference: usize, ) -> *mut PxBase;
-pub fn PxDeserializationContext_readName_mut(self_: *mut PxDeserializationContext, name: *mut *const i8, ) -> ();
+pub fn PxDeserializationContext_readName_mut(self_: *mut PxDeserializationContext, name: *mut *const u8, ) -> ();
 pub fn PxDeserializationContext_alignExtraData_mut(self_: *mut PxDeserializationContext, alignment: u32, ) -> ();
 pub fn PxSerializationRegistry_registerSerializer_mut(self_: *mut PxSerializationRegistry, _type: u16, serializer: *mut PxSerializer, ) -> ();
 pub fn PxSerializationRegistry_unregisterSerializer_mut(self_: *mut PxSerializationRegistry, _type: u16, ) -> *mut PxSerializer;
@@ -1804,7 +1819,7 @@ pub fn PxSerializationRegistry_registerBinaryMetaDataCallback_mut(self_: *mut Px
 pub fn PxSerializationRegistry_getSerializer(self_: *const PxSerializationRegistry, _type: u16, ) -> *const PxSerializer;
 pub fn PxSerializationRegistry_registerRepXSerializer_mut(self_: *mut PxSerializationRegistry, _type: u16, serializer: *mut PxRepXSerializer, ) -> ();
 pub fn PxSerializationRegistry_unregisterRepXSerializer_mut(self_: *mut PxSerializationRegistry, _type: u16, ) -> *mut PxRepXSerializer;
-pub fn PxSerializationRegistry_getRepXSerializer(self_: *const PxSerializationRegistry, typeName: *const i8, ) -> *mut PxRepXSerializer;
+pub fn PxSerializationRegistry_getRepXSerializer(self_: *const PxSerializationRegistry, typeName: *const u8, ) -> *mut PxRepXSerializer;
 pub fn PxSerializationRegistry_release_mut(self_: *mut PxSerializationRegistry, ) -> ();
 pub fn PxCollection_add_mut(self_: *mut PxCollection, object: *mut PxBase, id: usize, ) -> ();
 pub fn PxCollection_remove_mut(self_: *mut PxCollection, object: *mut PxBase, ) -> ();
@@ -1823,7 +1838,7 @@ pub fn PxCollection_getId(self_: *const PxCollection, object: *const PxBase, ) -
 pub fn PxCollection_release_mut(self_: *mut PxCollection, ) -> ();
 pub fn phys_PxCreateCollection() -> *mut PxCollection;
 pub fn PxBase_release_mut(self_: *mut PxBase, ) -> ();
-pub fn PxBase_getConcreteTypeName(self_: *const PxBase, ) -> *const i8;
+pub fn PxBase_getConcreteTypeName(self_: *const PxBase, ) -> *const u8;
 pub fn PxBase_getConcreteType(self_: *const PxBase, ) -> u16;
 pub fn PxBase_setBaseFlag_mut(self_: *mut PxBase, flag: PxBaseFlag::Enum, value: bool, ) -> ();
 pub fn PxBase_setBaseFlags_mut(self_: *mut PxBase, inFlags: PxBaseFlags, ) -> ();
@@ -1833,7 +1848,7 @@ pub fn PxTolerancesScale_new() -> PxTolerancesScale;
 pub fn PxTolerancesScale_isValid(self_: *const PxTolerancesScale, ) -> bool;
 pub fn PxTolerancesScale_new_1() -> PxTolerancesScale;
 pub fn PxTolerancesScale_isValid_1(self_: *const PxTolerancesScale, ) -> bool;
-pub fn PxStringTable_allocateStr_mut(self_: *mut PxStringTable, inSrc: *const i8, ) -> *const i8;
+pub fn PxStringTable_allocateStr_mut(self_: *mut PxStringTable, inSrc: *const u8, ) -> *const u8;
 pub fn PxStringTable_release_mut(self_: *mut PxStringTable, ) -> ();
 pub fn PxFoundation_release_mut(self_: *mut PxFoundation, ) -> ();
 pub fn PxFoundation_getErrorCallback_mut(self_: *mut PxFoundation, ) -> *mut PxErrorCallback;
@@ -1846,7 +1861,7 @@ pub fn phys_PxCreateFoundation(version: u32, allocator: *mut PxAllocatorCallback
 pub fn phys_PxGetFoundation() -> *mut PxFoundation;
 pub fn phys_PxGetProfilerCallback() -> *mut PxProfilerCallback;
 pub fn phys_PxSetProfilerCallback(profiler: *mut PxProfilerCallback, ) -> ();
-pub fn PxSerializer_getConcreteTypeName(self_: *const PxSerializer, ) -> *const i8;
+pub fn PxSerializer_getConcreteTypeName(self_: *const PxSerializer, ) -> *const u8;
 pub fn PxSerializer_requiresObjects(self_: *const PxSerializer, anonymous_arg0: *mut PxBase, anonymous_arg1: *mut PxProcessPxBaseCallback, ) -> ();
 pub fn PxSerializer_isSubordinate(self_: *const PxSerializer, ) -> bool;
 pub fn PxSerializer_exportExtraData(self_: *const PxSerializer, anonymous_arg0: *mut PxBase, anonymous_arg1: *mut PxSerializationContext, ) -> ();
@@ -1862,8 +1877,8 @@ pub fn PxTaskManager_resetDependencies_mut(self_: *mut PxTaskManager, ) -> ();
 pub fn PxTaskManager_startSimulation_mut(self_: *mut PxTaskManager, ) -> ();
 pub fn PxTaskManager_stopSimulation_mut(self_: *mut PxTaskManager, ) -> ();
 pub fn PxTaskManager_taskCompleted_mut(self_: *mut PxTaskManager, task: *mut PxTask, ) -> ();
-pub fn PxTaskManager_getNamedTask_mut(self_: *mut PxTaskManager, name: *const i8, ) -> u32;
-pub fn PxTaskManager_submitNamedTask_mut(self_: *mut PxTaskManager, task: *mut PxTask, name: *const i8, _type: PxTaskType::Enum, ) -> u32;
+pub fn PxTaskManager_getNamedTask_mut(self_: *mut PxTaskManager, name: *const u8, ) -> u32;
+pub fn PxTaskManager_submitNamedTask_mut(self_: *mut PxTaskManager, task: *mut PxTask, name: *const u8, _type: PxTaskType::Enum, ) -> u32;
 pub fn PxTaskManager_submitUnnamedTask_mut(self_: *mut PxTaskManager, task: *mut PxTask, _type: PxTaskType::Enum, ) -> u32;
 pub fn PxTaskManager_getTaskFromID_mut(self_: *mut PxTaskManager, id: u32, ) -> *mut PxTask;
 pub fn PxTaskManager_release_mut(self_: *mut PxTaskManager, ) -> ();
@@ -1872,7 +1887,7 @@ pub fn PxCpuDispatcher_submitTask_mut(self_: *mut PxCpuDispatcher, task: *mut Px
 pub fn PxCpuDispatcher_getWorkerCount(self_: *const PxCpuDispatcher, ) -> u32;
 pub fn PxCpuDispatcher_delete(self_: *mut PxCpuDispatcher, ) -> ();
 pub fn PxBaseTask_run_mut(self_: *mut PxBaseTask, ) -> ();
-pub fn PxBaseTask_getName(self_: *const PxBaseTask, ) -> *const i8;
+pub fn PxBaseTask_getName(self_: *const PxBaseTask, ) -> *const u8;
 pub fn PxBaseTask_addReference_mut(self_: *mut PxBaseTask, ) -> ();
 pub fn PxBaseTask_removeReference_mut(self_: *mut PxBaseTask, ) -> ();
 pub fn PxBaseTask_getReference(self_: *const PxBaseTask, ) -> i32;
@@ -1906,7 +1921,7 @@ pub fn PxBVHStructure_sweep(self_: *const PxBVHStructure, aabb: *const PxBounds3
 pub fn PxBVHStructure_overlap(self_: *const PxBVHStructure, aabb: *const PxBounds3, maxHits: u32, overlapHits: *mut u32, ) -> u32;
 pub fn PxBVHStructure_getBounds(self_: *const PxBVHStructure, ) -> *const PxBounds3;
 pub fn PxBVHStructure_getNbBounds(self_: *const PxBVHStructure, ) -> u32;
-pub fn PxBVHStructure_getConcreteTypeName(self_: *const PxBVHStructure, ) -> *const i8;
+pub fn PxBVHStructure_getConcreteTypeName(self_: *const PxBVHStructure, ) -> *const u8;
 pub fn PxCapsuleGeometry_new() -> PxCapsuleGeometry;
 pub fn PxCapsuleGeometry_new_1(radius_: f32, halfHeight_: f32, ) -> PxCapsuleGeometry;
 pub fn PxCapsuleGeometry_isValid(self_: *const PxCapsuleGeometry, ) -> bool;
@@ -1922,7 +1937,7 @@ pub fn PxConvexMesh_getReferenceCount(self_: *const PxConvexMesh, ) -> u32;
 pub fn PxConvexMesh_acquireReference_mut(self_: *mut PxConvexMesh, ) -> ();
 pub fn PxConvexMesh_getMassInformation(self_: *const PxConvexMesh, mass: *mut f32, localInertia: *mut PxMat33, localCenterOfMass: *mut PxVec3, ) -> ();
 pub fn PxConvexMesh_getLocalBounds(self_: *const PxConvexMesh, ) -> PxBounds3;
-pub fn PxConvexMesh_getConcreteTypeName(self_: *const PxConvexMesh, ) -> *const i8;
+pub fn PxConvexMesh_getConcreteTypeName(self_: *const PxConvexMesh, ) -> *const u8;
 pub fn PxConvexMesh_isGpuCompatible(self_: *const PxConvexMesh, ) -> bool;
 pub fn PxMeshScale_new() -> PxMeshScale;
 pub fn PxMeshScale_new_1(r: f32, ) -> PxMeshScale;
@@ -2009,7 +2024,7 @@ pub fn PxHeightField_getTriangleMaterialIndex(self_: *const PxHeightField, trian
 pub fn PxHeightField_getTriangleNormal(self_: *const PxHeightField, triangleIndex: u32, ) -> PxVec3;
 pub fn PxHeightField_getSample(self_: *const PxHeightField, row: u32, column: u32, ) -> *const PxHeightFieldSample;
 pub fn PxHeightField_getTimestamp(self_: *const PxHeightField, ) -> u32;
-pub fn PxHeightField_getConcreteTypeName(self_: *const PxHeightField, ) -> *const i8;
+pub fn PxHeightField_getConcreteTypeName(self_: *const PxHeightField, ) -> *const u8;
 pub fn PxHeightFieldDesc_new() -> PxHeightFieldDesc;
 pub fn PxHeightFieldDesc_setToDefault_mut(self_: *mut PxHeightFieldDesc, ) -> ();
 pub fn PxHeightFieldDesc_isValid(self_: *const PxHeightFieldDesc, ) -> bool;
@@ -2050,8 +2065,8 @@ pub fn PxTriangleMesh_acquireReference_mut(self_: *mut PxTriangleMesh, ) -> ();
 pub fn PxActor_release_mut(self_: *mut PxActor, ) -> ();
 pub fn PxActor_getType(self_: *const PxActor, ) -> PxActorType::Enum;
 pub fn PxActor_getScene(self_: *const PxActor, ) -> *mut PxScene;
-pub fn PxActor_setName_mut(self_: *mut PxActor, name: *const i8, ) -> ();
-pub fn PxActor_getName(self_: *const PxActor, ) -> *const i8;
+pub fn PxActor_setName_mut(self_: *mut PxActor, name: *const u8, ) -> ();
+pub fn PxActor_getName(self_: *const PxActor, ) -> *const u8;
 pub fn PxActor_getWorldBounds(self_: *const PxActor, inflation: f32, ) -> PxBounds3;
 pub fn PxActor_setActorFlag_mut(self_: *mut PxActor, flag: PxActorFlag::Enum, value: bool, ) -> ();
 pub fn PxActor_setActorFlags_mut(self_: *mut PxActor, inFlags: PxActorFlags, ) -> ();
@@ -2071,7 +2086,7 @@ pub fn PxAggregate_getMaxNbActors(self_: *const PxAggregate, ) -> u32;
 pub fn PxAggregate_getActors(self_: *const PxAggregate, userBuffer: *mut *mut PxActor, bufferSize: u32, startIndex: u32, ) -> u32;
 pub fn PxAggregate_getScene_mut(self_: *mut PxAggregate, ) -> *mut PxScene;
 pub fn PxAggregate_getSelfCollision(self_: *const PxAggregate, ) -> bool;
-pub fn PxAggregate_getConcreteTypeName(self_: *const PxAggregate, ) -> *const i8;
+pub fn PxAggregate_getConcreteTypeName(self_: *const PxAggregate, ) -> *const u8;
 pub fn PxArticulationBase_getScene(self_: *const PxArticulationBase, ) -> *mut PxScene;
 pub fn PxArticulationBase_setSolverIterationCounts_mut(self_: *mut PxArticulationBase, minPositionIters: u32, minVelocityIters: u32, ) -> ();
 pub fn PxArticulationBase_getSolverIterationCounts(self_: *const PxArticulationBase, minPositionIters: *mut u32, minVelocityIters: *mut u32, ) -> ();
@@ -2087,8 +2102,8 @@ pub fn PxArticulationBase_putToSleep_mut(self_: *mut PxArticulationBase, ) -> ()
 pub fn PxArticulationBase_createLink_mut(self_: *mut PxArticulationBase, parent: *mut PxArticulationLink, pose: *const PxTransform, ) -> *mut PxArticulationLink;
 pub fn PxArticulationBase_getNbLinks(self_: *const PxArticulationBase, ) -> u32;
 pub fn PxArticulationBase_getLinks(self_: *const PxArticulationBase, userBuffer: *mut *mut PxArticulationLink, bufferSize: u32, startIndex: u32, ) -> u32;
-pub fn PxArticulationBase_setName_mut(self_: *mut PxArticulationBase, name: *const i8, ) -> ();
-pub fn PxArticulationBase_getName(self_: *const PxArticulationBase, ) -> *const i8;
+pub fn PxArticulationBase_setName_mut(self_: *mut PxArticulationBase, name: *const u8, ) -> ();
+pub fn PxArticulationBase_getName(self_: *const PxArticulationBase, ) -> *const u8;
 pub fn PxArticulationBase_getWorldBounds(self_: *const PxArticulationBase, inflation: f32, ) -> PxBounds3;
 pub fn PxArticulationBase_getAggregate(self_: *const PxArticulationBase, ) -> *mut PxAggregate;
 pub fn PxArticulationBase_getImpl_mut(self_: *mut PxArticulationBase, ) -> *mut PxArticulationImpl;
@@ -2164,6 +2179,8 @@ pub fn PxArticulationReducedCoordinate_getNbLoopJoints(self_: *const PxArticulat
 pub fn PxArticulationReducedCoordinate_getLoopJoints(self_: *const PxArticulationReducedCoordinate, userBuffer: *mut *mut PxJoint, bufferSize: u32, startIndex: u32, ) -> u32;
 pub fn PxArticulationReducedCoordinate_getCoefficientMatrixSize(self_: *const PxArticulationReducedCoordinate, ) -> u32;
 pub fn PxArticulationReducedCoordinate_teleportRootLink_mut(self_: *mut PxArticulationReducedCoordinate, pose: *const PxTransform, autowake: bool, ) -> ();
+pub fn PxArticulationReducedCoordinate_getLinkVelocity_mut(self_: *mut PxArticulationReducedCoordinate, linkId: u32, ) -> PxSpatialVelocity;
+pub fn PxArticulationReducedCoordinate_getLinkAcceleration_mut(self_: *mut PxArticulationReducedCoordinate, linkId: u32, ) -> PxSpatialVelocity;
 pub fn PxArticulationJointBase_getParentArticulationLink(self_: *const PxArticulationJointBase, ) -> *mut PxArticulationLink;
 pub fn PxArticulationJointBase_setParentPose_mut(self_: *mut PxArticulationJointBase, pose: *const PxTransform, ) -> ();
 pub fn PxArticulationJointBase_getParentPose(self_: *const PxArticulationJointBase, ) -> PxTransform;
@@ -2202,7 +2219,7 @@ pub fn PxArticulationJoint_setTwistLimitEnabled_mut(self_: *mut PxArticulationJo
 pub fn PxArticulationJoint_getTwistLimitEnabled(self_: *const PxArticulationJoint, ) -> bool;
 pub fn PxArticulationJoint_setTwistLimitContactDistance_mut(self_: *mut PxArticulationJoint, contactDistance: f32, ) -> ();
 pub fn PxArticulationJoint_getTwistLimitContactDistance(self_: *const PxArticulationJoint, ) -> f32;
-pub fn PxArticulationJoint_getConcreteTypeName(self_: *const PxArticulationJoint, ) -> *const i8;
+pub fn PxArticulationJoint_getConcreteTypeName(self_: *const PxArticulationJoint, ) -> *const u8;
 pub fn PxArticulationJointReducedCoordinate_setJointType_mut(self_: *mut PxArticulationJointReducedCoordinate, jointType: PxArticulationJointType::Enum, ) -> ();
 pub fn PxArticulationJointReducedCoordinate_getJointType(self_: *const PxArticulationJointReducedCoordinate, ) -> PxArticulationJointType::Enum;
 pub fn PxArticulationJointReducedCoordinate_setMotion_mut(self_: *mut PxArticulationJointReducedCoordinate, axis: PxArticulationAxis::Enum, motion: PxArticulationMotion::Enum, ) -> ();
@@ -2217,7 +2234,7 @@ pub fn PxArticulationJointReducedCoordinate_getDriveTarget_mut(self_: *mut PxArt
 pub fn PxArticulationJointReducedCoordinate_getDriveVelocity_mut(self_: *mut PxArticulationJointReducedCoordinate, axis: PxArticulationAxis::Enum, ) -> f32;
 pub fn PxArticulationJointReducedCoordinate_setFrictionCoefficient_mut(self_: *mut PxArticulationJointReducedCoordinate, coefficient: f32, ) -> ();
 pub fn PxArticulationJointReducedCoordinate_getFrictionCoefficient(self_: *const PxArticulationJointReducedCoordinate, ) -> f32;
-pub fn PxArticulationJointReducedCoordinate_getConcreteTypeName(self_: *const PxArticulationJointReducedCoordinate, ) -> *const i8;
+pub fn PxArticulationJointReducedCoordinate_getConcreteTypeName(self_: *const PxArticulationJointReducedCoordinate, ) -> *const u8;
 pub fn PxArticulationJointReducedCoordinate_setMaxJointVelocity_mut(self_: *mut PxArticulationJointReducedCoordinate, maxJointV: f32, ) -> ();
 pub fn PxArticulationJointReducedCoordinate_getMaxJointVelocity(self_: *const PxArticulationJointReducedCoordinate, ) -> f32;
 pub fn PxShape_release_mut(self_: *mut PxShape, ) -> ();
@@ -2256,9 +2273,9 @@ pub fn PxShape_setFlag_mut(self_: *mut PxShape, flag: PxShapeFlag::Enum, value: 
 pub fn PxShape_setFlags_mut(self_: *mut PxShape, inFlags: PxShapeFlags, ) -> ();
 pub fn PxShape_getFlags(self_: *const PxShape, ) -> PxShapeFlags;
 pub fn PxShape_isExclusive(self_: *const PxShape, ) -> bool;
-pub fn PxShape_setName_mut(self_: *mut PxShape, name: *const i8, ) -> ();
-pub fn PxShape_getName(self_: *const PxShape, ) -> *const i8;
-pub fn PxShape_getConcreteTypeName(self_: *const PxShape, ) -> *const i8;
+pub fn PxShape_setName_mut(self_: *mut PxShape, name: *const u8, ) -> ();
+pub fn PxShape_getName(self_: *const PxShape, ) -> *const u8;
+pub fn PxShape_getConcreteTypeName(self_: *const PxShape, ) -> *const u8;
 pub fn PxRigidActor_release_mut(self_: *mut PxRigidActor, ) -> ();
 pub fn PxRigidActor_getGlobalPose(self_: *const PxRigidActor, ) -> PxTransform;
 pub fn PxRigidActor_setGlobalPose_mut(self_: *mut PxRigidActor, pose: *const PxTransform, autowake: bool, ) -> ();
@@ -2310,7 +2327,7 @@ pub fn PxArticulationLink_getInboundJointDof(self_: *const PxArticulationLink, )
 pub fn PxArticulationLink_getNbChildren(self_: *const PxArticulationLink, ) -> u32;
 pub fn PxArticulationLink_getLinkIndex(self_: *const PxArticulationLink, ) -> u32;
 pub fn PxArticulationLink_getChildren(self_: *const PxArticulationLink, userBuffer: *mut *mut PxArticulationLink, bufferSize: u32, startIndex: u32, ) -> u32;
-pub fn PxArticulationLink_getConcreteTypeName(self_: *const PxArticulationLink, ) -> *const i8;
+pub fn PxArticulationLink_getConcreteTypeName(self_: *const PxArticulationLink, ) -> *const u8;
 pub fn PxFilterData_new(anonymous_arg0: PxEMPTY, ) -> PxFilterData;
 pub fn PxFilterData_new_1() -> PxFilterData;
 pub fn PxFilterData_new_2(w0: u32, w1: u32, w2: u32, w3: u32, ) -> PxFilterData;
@@ -2362,7 +2379,7 @@ pub fn PxConstraint_setMinResponseThreshold_mut(self_: *mut PxConstraint, thresh
 pub fn PxConstraint_getMinResponseThreshold(self_: *const PxConstraint, ) -> f32;
 pub fn PxConstraint_getExternalReference_mut(self_: *mut PxConstraint, typeID: *mut u32, ) -> *mut std::ffi::c_void;
 pub fn PxConstraint_setConstraintFunctions_mut(self_: *mut PxConstraint, connector: *mut PxConstraintConnector, shaders: *const PxConstraintShaderTable, ) -> ();
-pub fn PxConstraint_getConcreteTypeName(self_: *const PxConstraint, ) -> *const i8;
+pub fn PxConstraint_getConcreteTypeName(self_: *const PxConstraint, ) -> *const u8;
 pub fn PxContactStreamIterator_new(contactPatches: *const u8, contactPoints: *const u8, contactFaceIndices: *const u32, nbPatches: u32, nbContacts: u32, ) -> PxContactStreamIterator;
 pub fn PxContactStreamIterator_hasNextPatch(self_: *const PxContactStreamIterator, ) -> bool;
 pub fn PxContactStreamIterator_getTotalContactCount(self_: *const PxContactStreamIterator, ) -> u32;
@@ -2438,7 +2455,7 @@ pub fn PxMaterial_setFrictionCombineMode_mut(self_: *mut PxMaterial, combMode: P
 pub fn PxMaterial_getFrictionCombineMode(self_: *const PxMaterial, ) -> PxCombineMode::Enum;
 pub fn PxMaterial_setRestitutionCombineMode_mut(self_: *mut PxMaterial, combMode: PxCombineMode::Enum, ) -> ();
 pub fn PxMaterial_getRestitutionCombineMode(self_: *const PxMaterial, ) -> PxCombineMode::Enum;
-pub fn PxMaterial_getConcreteTypeName(self_: *const PxMaterial, ) -> *const i8;
+pub fn PxMaterial_getConcreteTypeName(self_: *const PxMaterial, ) -> *const u8;
 pub fn PxPhysics_release_mut(self_: *mut PxPhysics, ) -> ();
 pub fn PxPhysics_getFoundation_mut(self_: *mut PxPhysics, ) -> *mut PxFoundation;
 pub fn PxPhysics_createAggregate_mut(self_: *mut PxPhysics, maxSize: u32, enableSelfCollision: bool, ) -> *mut PxAggregate;
@@ -2500,8 +2517,8 @@ pub fn PxRigidDynamic_setSolverIterationCounts_mut(self_: *mut PxRigidDynamic, m
 pub fn PxRigidDynamic_getSolverIterationCounts(self_: *const PxRigidDynamic, minPositionIters: *mut u32, minVelocityIters: *mut u32, ) -> ();
 pub fn PxRigidDynamic_getContactReportThreshold(self_: *const PxRigidDynamic, ) -> f32;
 pub fn PxRigidDynamic_setContactReportThreshold_mut(self_: *mut PxRigidDynamic, threshold: f32, ) -> ();
-pub fn PxRigidDynamic_getConcreteTypeName(self_: *const PxRigidDynamic, ) -> *const i8;
-pub fn PxRigidStatic_getConcreteTypeName(self_: *const PxRigidStatic, ) -> *const i8;
+pub fn PxRigidDynamic_getConcreteTypeName(self_: *const PxRigidDynamic, ) -> *const u8;
+pub fn PxRigidStatic_getConcreteTypeName(self_: *const PxRigidStatic, ) -> *const u8;
 pub fn PxBroadPhaseCallback_delete(self_: *mut PxBroadPhaseCallback, ) -> ();
 pub fn PxBroadPhaseCallback_onObjectOutOfBounds_mut(self_: *mut PxBroadPhaseCallback, shape: *mut PxShape, actor: *mut PxActor, ) -> ();
 pub fn PxBroadPhaseCallback_onObjectOutOfBounds_mut_1(self_: *mut PxBroadPhaseCallback, aggregate: *mut PxAggregate, ) -> ();
@@ -2526,7 +2543,7 @@ pub fn PxSimulationStatistics_new() -> PxSimulationStatistics;
 pub fn PxPvdSceneClient_setScenePvdFlag_mut(self_: *mut PxPvdSceneClient, flag: PxPvdSceneFlag::Enum, value: bool, ) -> ();
 pub fn PxPvdSceneClient_setScenePvdFlags_mut(self_: *mut PxPvdSceneClient, flags: PxPvdSceneFlags, ) -> ();
 pub fn PxPvdSceneClient_getScenePvdFlags(self_: *const PxPvdSceneClient, ) -> PxPvdSceneFlags;
-pub fn PxPvdSceneClient_updateCamera_mut(self_: *mut PxPvdSceneClient, name: *const i8, origin: *const PxVec3, up: *const PxVec3, target: *const PxVec3, ) -> ();
+pub fn PxPvdSceneClient_updateCamera_mut(self_: *mut PxPvdSceneClient, name: *const u8, origin: *const PxVec3, up: *const PxVec3, target: *const PxVec3, ) -> ();
 pub fn PxPvdSceneClient_drawPoints_mut(self_: *mut PxPvdSceneClient, points: *const PvdDebugPoint, count: u32, ) -> ();
 pub fn PxPvdSceneClient_drawLines_mut(self_: *mut PxPvdSceneClient, lines: *const PvdDebugLine, count: u32, ) -> ();
 pub fn PxPvdSceneClient_drawTriangles_mut(self_: *mut PxPvdSceneClient, triangles: *const PvdDebugTriangle, count: u32, ) -> ();
@@ -2631,9 +2648,9 @@ pub fn PxScene_getBroadPhaseRegions(self_: *const PxScene, userBuffer: *mut PxBr
 pub fn PxScene_addBroadPhaseRegion_mut(self_: *mut PxScene, region: *const PxBroadPhaseRegion, populateRegion: bool, ) -> u32;
 pub fn PxScene_removeBroadPhaseRegion_mut(self_: *mut PxScene, handle: u32, ) -> bool;
 pub fn PxScene_getTaskManager(self_: *const PxScene, ) -> *mut PxTaskManager;
-pub fn PxScene_lockRead_mut(self_: *mut PxScene, file: *const i8, line: u32, ) -> ();
+pub fn PxScene_lockRead_mut(self_: *mut PxScene, file: *const u8, line: u32, ) -> ();
 pub fn PxScene_unlockRead_mut(self_: *mut PxScene, ) -> ();
-pub fn PxScene_lockWrite_mut(self_: *mut PxScene, file: *const i8, line: u32, ) -> ();
+pub fn PxScene_lockWrite_mut(self_: *mut PxScene, file: *const u8, line: u32, ) -> ();
 pub fn PxScene_unlockWrite_mut(self_: *mut PxScene, ) -> ();
 pub fn PxScene_setNbContactDataBlocks_mut(self_: *mut PxScene, numBlocks: u32, ) -> ();
 pub fn PxScene_getNbContactDataBlocksUsed(self_: *const PxScene, ) -> u32;
@@ -2646,9 +2663,9 @@ pub fn PxScene_getSolverArticulationBatchSize(self_: *const PxScene, ) -> u32;
 pub fn PxScene_getWakeCounterResetValue(self_: *const PxScene, ) -> f32;
 pub fn PxScene_shiftOrigin_mut(self_: *mut PxScene, shift: *const PxVec3, ) -> ();
 pub fn PxScene_getScenePvdClient_mut(self_: *mut PxScene, ) -> *mut PxPvdSceneClient;
-pub fn PxSceneReadLock_new_alloc(scene: *mut PxScene, file: *const i8, line: u32, ) -> *mut PxSceneReadLock;
+pub fn PxSceneReadLock_new_alloc(scene: *mut PxScene, file: *const u8, line: u32, ) -> *mut PxSceneReadLock;
 pub fn PxSceneReadLock_delete(self_: *mut PxSceneReadLock, ) -> ();
-pub fn PxSceneWriteLock_new_alloc(scene: *mut PxScene, file: *const i8, line: u32, ) -> *mut PxSceneWriteLock;
+pub fn PxSceneWriteLock_new_alloc(scene: *mut PxScene, file: *const u8, line: u32, ) -> *mut PxSceneWriteLock;
 pub fn PxSceneWriteLock_delete(self_: *mut PxSceneWriteLock, ) -> ();
 pub fn PxContactPairExtraDataItem_new() -> PxContactPairExtraDataItem;
 pub fn PxContactPairVelocity_new() -> PxContactPairVelocity;
@@ -2677,7 +2694,7 @@ pub fn PxSimulationEventCallback_delete(self_: *mut PxSimulationEventCallback, )
 pub fn PxPruningStructure_release_mut(self_: *mut PxPruningStructure, ) -> ();
 pub fn PxPruningStructure_getRigidActors(self_: *const PxPruningStructure, userBuffer: *mut *mut PxRigidActor, bufferSize: u32, startIndex: u32, ) -> u32;
 pub fn PxPruningStructure_getNbRigidActors(self_: *const PxPruningStructure, ) -> u32;
-pub fn PxPruningStructure_getConcreteTypeName(self_: *const PxPruningStructure, ) -> *const i8;
+pub fn PxPruningStructure_getConcreteTypeName(self_: *const PxPruningStructure, ) -> *const u8;
 pub fn PxExtendedVec3_new() -> PxExtendedVec3;
 pub fn PxExtendedVec3_new_1(_x: f64, _y: f64, _z: f64, ) -> PxExtendedVec3;
 pub fn PxExtendedVec3_isZero(self_: *const PxExtendedVec3, ) -> bool;
@@ -2842,11 +2859,11 @@ pub fn PxDefaultMemoryInputData_getLength(self_: *const PxDefaultMemoryInputData
 pub fn PxDefaultMemoryInputData_seek_mut(self_: *mut PxDefaultMemoryInputData, pos: u32, ) -> ();
 pub fn PxDefaultMemoryInputData_tell(self_: *const PxDefaultMemoryInputData, ) -> u32;
 pub fn PxDefaultMemoryInputData_delete(self_: *mut PxDefaultMemoryInputData, ) -> ();
-pub fn PxDefaultFileOutputStream_new_alloc(name: *const i8, ) -> *mut PxDefaultFileOutputStream;
+pub fn PxDefaultFileOutputStream_new_alloc(name: *const u8, ) -> *mut PxDefaultFileOutputStream;
 pub fn PxDefaultFileOutputStream_delete(self_: *mut PxDefaultFileOutputStream, ) -> ();
 pub fn PxDefaultFileOutputStream_write_mut(self_: *mut PxDefaultFileOutputStream, src: *const std::ffi::c_void, count: u32, ) -> u32;
 pub fn PxDefaultFileOutputStream_isValid_mut(self_: *mut PxDefaultFileOutputStream, ) -> bool;
-pub fn PxDefaultFileInputData_new_alloc(name: *const i8, ) -> *mut PxDefaultFileInputData;
+pub fn PxDefaultFileInputData_new_alloc(name: *const u8, ) -> *mut PxDefaultFileInputData;
 pub fn PxDefaultFileInputData_delete(self_: *mut PxDefaultFileInputData, ) -> ();
 pub fn PxDefaultFileInputData_read_mut(self_: *mut PxDefaultFileInputData, dest: *mut std::ffi::c_void, count: u32, ) -> u32;
 pub fn PxDefaultFileInputData_seek_mut(self_: *mut PxDefaultFileInputData, pos: u32, ) -> ();
@@ -2874,8 +2891,8 @@ pub fn PxJoint_getInvMassScale1(self_: *const PxJoint, ) -> f32;
 pub fn PxJoint_setInvInertiaScale1_mut(self_: *mut PxJoint, invInertiaScale: f32, ) -> ();
 pub fn PxJoint_getInvInertiaScale1(self_: *const PxJoint, ) -> f32;
 pub fn PxJoint_getConstraint(self_: *const PxJoint, ) -> *mut PxConstraint;
-pub fn PxJoint_setName_mut(self_: *mut PxJoint, name: *const i8, ) -> ();
-pub fn PxJoint_getName(self_: *const PxJoint, ) -> *const i8;
+pub fn PxJoint_setName_mut(self_: *mut PxJoint, name: *const u8, ) -> ();
+pub fn PxJoint_getName(self_: *const PxJoint, ) -> *const u8;
 pub fn PxJoint_release_mut(self_: *mut PxJoint, ) -> ();
 pub fn PxJoint_getScene(self_: *const PxJoint, ) -> *mut PxScene;
 pub fn PxJoint_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
@@ -2896,8 +2913,8 @@ pub fn PxDistanceJoint_getDamping(self_: *const PxDistanceJoint, ) -> f32;
 pub fn PxDistanceJoint_setDistanceJointFlags_mut(self_: *mut PxDistanceJoint, flags: PxDistanceJointFlags, ) -> ();
 pub fn PxDistanceJoint_setDistanceJointFlag_mut(self_: *mut PxDistanceJoint, flag: PxDistanceJointFlag::Enum, value: bool, ) -> ();
 pub fn PxDistanceJoint_getDistanceJointFlags(self_: *const PxDistanceJoint, ) -> PxDistanceJointFlags;
-pub fn PxDistanceJoint_getConcreteTypeName(self_: *const PxDistanceJoint, ) -> *const i8;
-pub fn PxDefaultAllocator_allocate_mut(self_: *mut PxDefaultAllocator, size: usize, anonymous_arg1: *const i8, anonymous_arg2: *const i8, anonymous_arg3: i32, ) -> *mut std::ffi::c_void;
+pub fn PxDistanceJoint_getConcreteTypeName(self_: *const PxDistanceJoint, ) -> *const u8;
+pub fn PxDefaultAllocator_allocate_mut(self_: *mut PxDefaultAllocator, size: usize, anonymous_arg1: *const u8, anonymous_arg2: *const u8, anonymous_arg3: i32, ) -> *mut std::ffi::c_void;
 pub fn PxDefaultAllocator_deallocate_mut(self_: *mut PxDefaultAllocator, ptr: *mut std::ffi::c_void, ) -> ();
 pub fn PxDefaultAllocator_delete(self_: *mut PxDefaultAllocator, ) -> ();
 pub fn phys_PxContactJointCreate(physics: *mut PxPhysics, actor0: *mut PxRigidActor, localFrame0: *const PxTransform, actor1: *mut PxRigidActor, localFrame1: *const PxTransform, ) -> *mut PxContactJoint;
@@ -2913,7 +2930,7 @@ pub fn PxContactJoint_getResititution(self_: *const PxContactJoint, ) -> f32;
 pub fn PxContactJoint_setResititution_mut(self_: *mut PxContactJoint, resititution: f32, ) -> ();
 pub fn PxContactJoint_getBounceThreshold(self_: *const PxContactJoint, ) -> f32;
 pub fn PxContactJoint_setBounceThreshold_mut(self_: *mut PxContactJoint, bounceThreshold: f32, ) -> ();
-pub fn PxContactJoint_getConcreteTypeName(self_: *const PxContactJoint, ) -> *const i8;
+pub fn PxContactJoint_getConcreteTypeName(self_: *const PxContactJoint, ) -> *const u8;
 pub fn PxContactJoint_computeJacobians(self_: *const PxContactJoint, jacobian: *mut PxJacobianRow, ) -> ();
 pub fn PxContactJoint_getNbJacobianRows(self_: *const PxContactJoint, ) -> u32;
 pub fn phys_PxFixedJointCreate(physics: *mut PxPhysics, actor0: *mut PxRigidActor, localFrame0: *const PxTransform, actor1: *mut PxRigidActor, localFrame1: *const PxTransform, ) -> *mut PxFixedJoint;
@@ -2921,7 +2938,7 @@ pub fn PxFixedJoint_setProjectionLinearTolerance_mut(self_: *mut PxFixedJoint, t
 pub fn PxFixedJoint_getProjectionLinearTolerance(self_: *const PxFixedJoint, ) -> f32;
 pub fn PxFixedJoint_setProjectionAngularTolerance_mut(self_: *mut PxFixedJoint, tolerance: f32, ) -> ();
 pub fn PxFixedJoint_getProjectionAngularTolerance(self_: *const PxFixedJoint, ) -> f32;
-pub fn PxFixedJoint_getConcreteTypeName(self_: *const PxFixedJoint, ) -> *const i8;
+pub fn PxFixedJoint_getConcreteTypeName(self_: *const PxFixedJoint, ) -> *const u8;
 pub fn PxJointLimitParameters_new_alloc() -> *mut PxJointLimitParameters;
 pub fn PxJointLimitParameters_isValid(self_: *const PxJointLimitParameters, ) -> bool;
 pub fn PxJointLimitParameters_isSoft(self_: *const PxJointLimitParameters, ) -> bool;
@@ -2957,7 +2974,7 @@ pub fn PxPrismaticJoint_setProjectionLinearTolerance_mut(self_: *mut PxPrismatic
 pub fn PxPrismaticJoint_getProjectionLinearTolerance(self_: *const PxPrismaticJoint, ) -> f32;
 pub fn PxPrismaticJoint_setProjectionAngularTolerance_mut(self_: *mut PxPrismaticJoint, tolerance: f32, ) -> ();
 pub fn PxPrismaticJoint_getProjectionAngularTolerance(self_: *const PxPrismaticJoint, ) -> f32;
-pub fn PxPrismaticJoint_getConcreteTypeName(self_: *const PxPrismaticJoint, ) -> *const i8;
+pub fn PxPrismaticJoint_getConcreteTypeName(self_: *const PxPrismaticJoint, ) -> *const u8;
 pub fn phys_PxRevoluteJointCreate(physics: *mut PxPhysics, actor0: *mut PxRigidActor, localFrame0: *const PxTransform, actor1: *mut PxRigidActor, localFrame1: *const PxTransform, ) -> *mut PxRevoluteJoint;
 pub fn PxRevoluteJoint_getAngle(self_: *const PxRevoluteJoint, ) -> f32;
 pub fn PxRevoluteJoint_getVelocity(self_: *const PxRevoluteJoint, ) -> f32;
@@ -2976,7 +2993,7 @@ pub fn PxRevoluteJoint_setProjectionLinearTolerance_mut(self_: *mut PxRevoluteJo
 pub fn PxRevoluteJoint_getProjectionLinearTolerance(self_: *const PxRevoluteJoint, ) -> f32;
 pub fn PxRevoluteJoint_setProjectionAngularTolerance_mut(self_: *mut PxRevoluteJoint, tolerance: f32, ) -> ();
 pub fn PxRevoluteJoint_getProjectionAngularTolerance(self_: *const PxRevoluteJoint, ) -> f32;
-pub fn PxRevoluteJoint_getConcreteTypeName(self_: *const PxRevoluteJoint, ) -> *const i8;
+pub fn PxRevoluteJoint_getConcreteTypeName(self_: *const PxRevoluteJoint, ) -> *const u8;
 pub fn phys_PxSphericalJointCreate(physics: *mut PxPhysics, actor0: *mut PxRigidActor, localFrame0: *const PxTransform, actor1: *mut PxRigidActor, localFrame1: *const PxTransform, ) -> *mut PxSphericalJoint;
 pub fn PxSphericalJoint_getLimitCone(self_: *const PxSphericalJoint, ) -> PxJointLimitCone;
 pub fn PxSphericalJoint_setLimitCone_mut(self_: *mut PxSphericalJoint, limit: *const PxJointLimitCone, ) -> ();
@@ -2987,7 +3004,7 @@ pub fn PxSphericalJoint_setSphericalJointFlag_mut(self_: *mut PxSphericalJoint, 
 pub fn PxSphericalJoint_getSphericalJointFlags(self_: *const PxSphericalJoint, ) -> PxSphericalJointFlags;
 pub fn PxSphericalJoint_setProjectionLinearTolerance_mut(self_: *mut PxSphericalJoint, tolerance: f32, ) -> ();
 pub fn PxSphericalJoint_getProjectionLinearTolerance(self_: *const PxSphericalJoint, ) -> f32;
-pub fn PxSphericalJoint_getConcreteTypeName(self_: *const PxSphericalJoint, ) -> *const i8;
+pub fn PxSphericalJoint_getConcreteTypeName(self_: *const PxSphericalJoint, ) -> *const u8;
 pub fn phys_PxD6JointCreate(physics: *mut PxPhysics, actor0: *mut PxRigidActor, localFrame0: *const PxTransform, actor1: *mut PxRigidActor, localFrame1: *const PxTransform, ) -> *mut PxD6Joint;
 pub fn PxD6JointDrive_new() -> PxD6JointDrive;
 pub fn PxD6JointDrive_new_1(driveStiffness: f32, driveDamping: f32, driveForceLimit: f32, isAcceleration: bool, ) -> PxD6JointDrive;
@@ -3020,7 +3037,7 @@ pub fn PxD6Joint_setProjectionLinearTolerance_mut(self_: *mut PxD6Joint, toleran
 pub fn PxD6Joint_getProjectionLinearTolerance(self_: *const PxD6Joint, ) -> f32;
 pub fn PxD6Joint_setProjectionAngularTolerance_mut(self_: *mut PxD6Joint, tolerance: f32, ) -> ();
 pub fn PxD6Joint_getProjectionAngularTolerance(self_: *const PxD6Joint, ) -> f32;
-pub fn PxD6Joint_getConcreteTypeName(self_: *const PxD6Joint, ) -> *const i8;
+pub fn PxD6Joint_getConcreteTypeName(self_: *const PxD6Joint, ) -> *const u8;
 pub fn PxGroupsMask_new_alloc() -> *mut PxGroupsMask;
 pub fn PxGroupsMask_delete(self_: *mut PxGroupsMask, ) -> ();
 pub fn phys_PxDefaultSimulationFilterShader(attributes0: u32, filterData0: PxFilterData, attributes1: u32, filterData1: PxFilterData, pairFlags: *mut PxPairFlags, constantBlock: *const std::ffi::c_void, constantBlockSize: u32, ) -> PxFilterFlags;
@@ -3038,7 +3055,7 @@ pub fn phys_PxGetGroupsMask(actor: *const PxActor, ) -> PxGroupsMask;
 pub fn phys_PxSetGroupsMask(actor: *mut PxActor, mask: *const PxGroupsMask, ) -> ();
 pub fn PxDefaultErrorCallback_new_alloc() -> *mut PxDefaultErrorCallback;
 pub fn PxDefaultErrorCallback_delete(self_: *mut PxDefaultErrorCallback, ) -> ();
-pub fn PxDefaultErrorCallback_reportError_mut(self_: *mut PxDefaultErrorCallback, code: PxErrorCode::Enum, message: *const i8, file: *const i8, line: i32, ) -> ();
+pub fn PxDefaultErrorCallback_reportError_mut(self_: *mut PxDefaultErrorCallback, code: PxErrorCode::Enum, message: *const u8, file: *const u8, line: i32, ) -> ();
 pub fn PxRigidActorExt_createExclusiveShape_mut(actor: *mut PxRigidActor, geometry: *const PxGeometry, materials: *const *mut PxMaterial, materialCount: u16, shapeFlags: PxShapeFlags, ) -> *mut PxShape;
 pub fn PxRigidActorExt_createExclusiveShape_mut_1(actor: *mut PxRigidActor, geometry: *const PxGeometry, material: *const PxMaterial, shapeFlags: PxShapeFlags, ) -> *mut PxShape;
 pub fn PxRigidActorExt_getRigidActorShapeLocalBoundsList_mut(actor: *const PxRigidActor, numBounds: *mut u32, ) -> *mut PxBounds3;
@@ -3129,10 +3146,10 @@ pub fn PxBinaryConverter_setReportMode_mut(self_: *mut PxBinaryConverter, mode: 
 pub fn PxBinaryConverter_setMetaData_mut(self_: *mut PxBinaryConverter, srcMetaData: *mut PxInputStream, dstMetaData: *mut PxInputStream, ) -> bool;
 pub fn PxBinaryConverter_compareMetaData(self_: *const PxBinaryConverter, ) -> bool;
 pub fn PxBinaryConverter_convert_mut(self_: *mut PxBinaryConverter, srcStream: *mut PxInputStream, srcSize: u32, targetStream: *mut PxOutputStream, ) -> bool;
-pub fn PxRepXObject_new(inTypeName: *const i8, inSerializable: *const std::ffi::c_void, inId: usize, ) -> PxRepXObject;
+pub fn PxRepXObject_new(inTypeName: *const u8, inSerializable: *const std::ffi::c_void, inId: usize, ) -> PxRepXObject;
 pub fn PxRepXObject_isValid(self_: *const PxRepXObject, ) -> bool;
 pub fn PxRepXInstantiationArgs_new(inPhysics: *mut PxPhysics, inCooking: *mut PxCooking, inStringTable: *mut PxStringTable, ) -> PxRepXInstantiationArgs;
-pub fn PxRepXSerializer_getTypeName_mut(self_: *mut PxRepXSerializer, ) -> *const i8;
+pub fn PxRepXSerializer_getTypeName_mut(self_: *mut PxRepXSerializer, ) -> *const u8;
 pub fn PxRepXSerializer_objectToFile_mut(self_: *mut PxRepXSerializer, inLiveObject: *const PxRepXObject, inCollection: *mut PxCollection, inWriter: *mut XmlWriter, inTempBuffer: *mut MemoryBuffer, inArgs: *mut PxRepXInstantiationArgs, ) -> ();
 pub fn PxRepXSerializer_fileToObject_mut(self_: *mut PxRepXSerializer, inReader: *mut XmlReader, inAllocator: *mut XmlMemoryAllocator, inArgs: *mut PxRepXInstantiationArgs, inCollection: *mut PxCollection, ) -> PxRepXObject;
 pub fn phys_PxCreateRepXObject(inType: *const PxBase, inId: usize, ) -> PxRepXObject;
@@ -3220,6 +3237,8 @@ pub fn PxVehicleWheelsSimData_enableWheel_mut(self_: *mut PxVehicleWheelsSimData
 pub fn PxVehicleWheelsSimData_getIsWheelDisabled(self_: *const PxVehicleWheelsSimData, wheel: u32, ) -> bool;
 pub fn PxVehicleWheelsSimData_setSubStepCount_mut(self_: *mut PxVehicleWheelsSimData, thresholdLongitudinalSpeed: f32, lowForwardSpeedSubStepCount: u32, highForwardSpeedSubStepCount: u32, ) -> ();
 pub fn PxVehicleWheelsSimData_setMinLongSlipDenominator_mut(self_: *mut PxVehicleWheelsSimData, minLongSlipDenominator: f32, ) -> ();
+pub fn PxVehicleWheelsSimData_setFlags_mut(self_: *mut PxVehicleWheelsSimData, flags: PxVehicleWheelsSimFlags, ) -> ();
+pub fn PxVehicleWheelsSimData_getFlags(self_: *const PxVehicleWheelsSimData, ) -> PxVehicleWheelsSimFlags;
 pub fn PxVehicleWheelsSimData_new_alloc(anonymous_arg0: PxEMPTY, ) -> *mut PxVehicleWheelsSimData;
 pub fn PxVehicleWheelsSimData_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
 pub fn PxVehicleWheelsSimData_getNbWheels4(self_: *const PxVehicleWheelsSimData, ) -> u32;
@@ -3270,8 +3289,8 @@ pub fn PxVehicleWheels_getRigidDynamicActor(self_: *const PxVehicleWheels, ) -> 
 pub fn PxVehicleWheels_computeForwardSpeed(self_: *const PxVehicleWheels, ) -> f32;
 pub fn PxVehicleWheels_computeSidewaysSpeed(self_: *const PxVehicleWheels, ) -> f32;
 pub fn PxVehicleWheels_requiresObjects_mut(self_: *mut PxVehicleWheels, c: *mut PxProcessPxBaseCallback, ) -> ();
-pub fn PxVehicleWheels_getConcreteTypeName(self_: *const PxVehicleWheels, ) -> *const i8;
-pub fn PxVehicleWheels_isKindOf(self_: *const PxVehicleWheels, name: *const i8, ) -> bool;
+pub fn PxVehicleWheels_getConcreteTypeName(self_: *const PxVehicleWheels, ) -> *const u8;
+pub fn PxVehicleWheels_isKindOf(self_: *const PxVehicleWheels, name: *const u8, ) -> bool;
 pub fn PxVehicleWheels_preExportDataReset_mut(self_: *mut PxVehicleWheels, ) -> ();
 pub fn PxVehicleWheels_exportExtraData_mut(self_: *mut PxVehicleWheels, anonymous_arg0: *mut PxSerializationContext, ) -> ();
 pub fn PxVehicleWheels_importExtraData_mut(self_: *mut PxVehicleWheels, anonymous_arg0: *mut PxDeserializationContext, ) -> ();
@@ -3322,7 +3341,7 @@ pub fn PxVehicleDriveDynData_setGearSwitchTime_mut(self_: *mut PxVehicleDriveDyn
 pub fn PxVehicleDriveDynData_setAutoBoxSwitchTime_mut(self_: *mut PxVehicleDriveDynData, autoBoxSwitchTime: f32, ) -> ();
 pub fn PxVehicleDrive_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
 pub fn PxVehicleDrive_new_alloc(baseFlags: PxBaseFlags, ) -> *mut PxVehicleDrive;
-pub fn PxVehicleDrive_getConcreteTypeName(self_: *const PxVehicleDrive, ) -> *const i8;
+pub fn PxVehicleDrive_getConcreteTypeName(self_: *const PxVehicleDrive, ) -> *const u8;
 pub fn PxVehicleDriveSimData4W_new() -> PxVehicleDriveSimData4W;
 pub fn PxVehicleDriveSimData4W_getDiffData(self_: *const PxVehicleDriveSimData4W, ) -> *const PxVehicleDifferential4WData;
 pub fn PxVehicleDriveSimData4W_getAckermannGeometryData(self_: *const PxVehicleDriveSimData4W, ) -> *const PxVehicleAckermannGeometryData;
@@ -3339,7 +3358,7 @@ pub fn PxVehicleDrive4W_setToRestState_mut(self_: *mut PxVehicleDrive4W, ) -> ()
 pub fn PxVehicleDrive4W_createObject_mut(address: *mut *mut u8, context: *mut PxDeserializationContext, ) -> *mut PxVehicleDrive4W;
 pub fn PxVehicleDrive4W_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
 pub fn PxVehicleDrive4W_new_alloc(baseFlags: PxBaseFlags, ) -> *mut PxVehicleDrive4W;
-pub fn PxVehicleDrive4W_getConcreteTypeName(self_: *const PxVehicleDrive4W, ) -> *const i8;
+pub fn PxVehicleDrive4W_getConcreteTypeName(self_: *const PxVehicleDrive4W, ) -> *const u8;
 pub fn PxVehicleDriveTank_allocate_mut(nbWheels: u32, ) -> *mut PxVehicleDriveTank;
 pub fn PxVehicleDriveTank_free_mut(self_: *mut PxVehicleDriveTank, ) -> ();
 pub fn PxVehicleDriveTank_setup_mut(self_: *mut PxVehicleDriveTank, physics: *mut PxPhysics, vehActor: *mut PxRigidDynamic, wheelsData: *const PxVehicleWheelsSimData, driveData: *const PxVehicleDriveSimData, nbDrivenWheels: u32, ) -> ();
@@ -3350,8 +3369,8 @@ pub fn PxVehicleDriveTank_setToRestState_mut(self_: *mut PxVehicleDriveTank, ) -
 pub fn PxVehicleDriveTank_new_alloc(baseFlags: PxBaseFlags, ) -> *mut PxVehicleDriveTank;
 pub fn PxVehicleDriveTank_createObject_mut(address: *mut *mut u8, context: *mut PxDeserializationContext, ) -> *mut PxVehicleDriveTank;
 pub fn PxVehicleDriveTank_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
-pub fn PxVehicleDriveTank_getConcreteTypeName(self_: *const PxVehicleDriveTank, ) -> *const i8;
-pub fn PxVehicleDriveTank_isKindOf(self_: *const PxVehicleDriveTank, name: *const i8, ) -> bool;
+pub fn PxVehicleDriveTank_getConcreteTypeName(self_: *const PxVehicleDriveTank, ) -> *const u8;
+pub fn PxVehicleDriveTank_isKindOf(self_: *const PxVehicleDriveTank, name: *const u8, ) -> bool;
 pub fn PxVehicleDrivableSurfaceToTireFrictionPairs_allocate_mut(maxNbTireTypes: u32, maxNbSurfaceTypes: u32, ) -> *mut PxVehicleDrivableSurfaceToTireFrictionPairs;
 pub fn PxVehicleDrivableSurfaceToTireFrictionPairs_setup_mut(self_: *mut PxVehicleDrivableSurfaceToTireFrictionPairs, nbTireTypes: u32, nbSurfaceTypes: u32, drivableSurfaceMaterials: *mut *const PxMaterial, drivableSurfaceTypes: *const PxVehicleDrivableSurfaceType, ) -> ();
 pub fn PxVehicleDrivableSurfaceToTireFrictionPairs_release_mut(self_: *mut PxVehicleDrivableSurfaceToTireFrictionPairs, ) -> ();
@@ -3384,8 +3403,8 @@ pub fn PxVehicleDriveNW_new_alloc(baseFlags: PxBaseFlags, ) -> *mut PxVehicleDri
 pub fn PxVehicleDriveNW_new_alloc_1() -> *mut PxVehicleDriveNW;
 pub fn PxVehicleDriveNW_createObject_mut(address: *mut *mut u8, context: *mut PxDeserializationContext, ) -> *mut PxVehicleDriveNW;
 pub fn PxVehicleDriveNW_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
-pub fn PxVehicleDriveNW_getConcreteTypeName(self_: *const PxVehicleDriveNW, ) -> *const i8;
-pub fn PxVehicleDriveNW_isKindOf(self_: *const PxVehicleDriveNW, name: *const i8, ) -> bool;
+pub fn PxVehicleDriveNW_getConcreteTypeName(self_: *const PxVehicleDriveNW, ) -> *const u8;
+pub fn PxVehicleDriveNW_isKindOf(self_: *const PxVehicleDriveNW, name: *const u8, ) -> bool;
 pub fn PxVehicleDrive4WRawInputData_new_alloc() -> *mut PxVehicleDrive4WRawInputData;
 pub fn PxVehicleDrive4WRawInputData_delete(self_: *mut PxVehicleDrive4WRawInputData, ) -> ();
 pub fn PxVehicleDrive4WRawInputData_setDigitalAccel_mut(self_: *mut PxVehicleDrive4WRawInputData, accelKeyPressed: bool, ) -> ();
@@ -3457,7 +3476,7 @@ pub fn PxVehicleGraph_clearRecordedChannelData_mut(self_: *mut PxVehicleGraph, )
 pub fn PxVehicleGraph_getBackgroundColor(self_: *const PxVehicleGraph, ) -> *const PxVec3;
 pub fn PxVehicleGraph_getBackgroundAlpha(self_: *const PxVehicleGraph, ) -> f32;
 pub fn PxVehicleGraph_getBackgroundCoords(self_: *const PxVehicleGraph, xMin: *mut f32, yMin: *mut f32, xMax: *mut f32, yMax: *mut f32, ) -> ();
-pub fn PxVehicleGraph_computeGraphChannel(self_: *const PxVehicleGraph, channel: u32, xy: *mut f32, colors: *mut PxVec3, title: *mut i8, ) -> ();
+pub fn PxVehicleGraph_computeGraphChannel(self_: *const PxVehicleGraph, channel: u32, xy: *mut f32, colors: *mut PxVec3, title: *mut u8, ) -> ();
 pub fn PxVehicleGraph_getLatestValue(self_: *const PxVehicleGraph, channel: u32, ) -> f32;
 pub fn PxVehicleTelemetryData_allocate_mut(nbWheels: u32, ) -> *mut PxVehicleTelemetryData;
 pub fn PxVehicleTelemetryData_free_mut(self_: *mut PxVehicleTelemetryData, ) -> ();
@@ -3484,14 +3503,14 @@ pub fn PxVehicleNoDrive_exportExtraData_mut(self_: *mut PxVehicleNoDrive, anonym
 pub fn PxVehicleNoDrive_importExtraData_mut(self_: *mut PxVehicleNoDrive, anonymous_arg0: *mut PxDeserializationContext, ) -> ();
 pub fn PxVehicleNoDrive_createObject_mut(address: *mut *mut u8, context: *mut PxDeserializationContext, ) -> *mut PxVehicleNoDrive;
 pub fn PxVehicleNoDrive_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
-pub fn PxVehicleNoDrive_getConcreteTypeName(self_: *const PxVehicleNoDrive, ) -> *const i8;
-pub fn PxVehicleNoDrive_isKindOf(self_: *const PxVehicleNoDrive, name: *const i8, ) -> bool;
+pub fn PxVehicleNoDrive_getConcreteTypeName(self_: *const PxVehicleNoDrive, ) -> *const u8;
+pub fn PxVehicleNoDrive_isKindOf(self_: *const PxVehicleNoDrive, name: *const u8, ) -> bool;
 pub fn PxVehicleNoDrive_getNbSteerAngle(self_: *const PxVehicleNoDrive, ) -> u32;
 pub fn PxVehicleNoDrive_getNbDriveTorque(self_: *const PxVehicleNoDrive, ) -> u32;
 pub fn PxVehicleNoDrive_getNbBrakeTorque(self_: *const PxVehicleNoDrive, ) -> u32;
-pub fn PxProfilerCallback_zoneStart_mut(self_: *mut PxProfilerCallback, eventName: *const i8, detached: bool, contextId: usize, ) -> *mut std::ffi::c_void;
-pub fn PxProfilerCallback_zoneEnd_mut(self_: *mut PxProfilerCallback, profilerData: *mut std::ffi::c_void, eventName: *const i8, detached: bool, contextId: usize, ) -> ();
-pub fn PxProfileScoped_new_alloc(callback: *mut PxProfilerCallback, eventName: *const i8, detached: bool, contextId: usize, ) -> *mut PxProfileScoped;
+pub fn PxProfilerCallback_zoneStart_mut(self_: *mut PxProfilerCallback, eventName: *const u8, detached: bool, contextId: usize, ) -> *mut std::ffi::c_void;
+pub fn PxProfilerCallback_zoneEnd_mut(self_: *mut PxProfilerCallback, profilerData: *mut std::ffi::c_void, eventName: *const u8, detached: bool, contextId: usize, ) -> ();
+pub fn PxProfileScoped_new_alloc(callback: *mut PxProfilerCallback, eventName: *const u8, detached: bool, contextId: usize, ) -> *mut PxProfileScoped;
 pub fn PxProfileScoped_delete(self_: *mut PxProfileScoped, ) -> ();
 pub fn PxPvd_connect_mut(self_: *mut PxPvd, transport: *mut PxPvdTransport, flags: PxPvdInstrumentationFlags, ) -> bool;
 pub fn PxPvd_disconnect_mut(self_: *mut PxPvd, ) -> ();
@@ -3509,6 +3528,6 @@ pub fn PxPvdTransport_unlock_mut(self_: *mut PxPvdTransport, ) -> ();
 pub fn PxPvdTransport_flush_mut(self_: *mut PxPvdTransport, ) -> ();
 pub fn PxPvdTransport_getWrittenDataSize_mut(self_: *mut PxPvdTransport, ) -> usize;
 pub fn PxPvdTransport_release_mut(self_: *mut PxPvdTransport, ) -> ();
-pub fn phys_PxDefaultPvdSocketTransportCreate(host: *const i8, port: i32, timeoutInMilliseconds: u32, ) -> *mut PxPvdTransport;
-pub fn phys_PxDefaultPvdFileTransportCreate(name: *const i8, ) -> *mut PxPvdTransport;
+pub fn phys_PxDefaultPvdSocketTransportCreate(host: *const u8, port: i32, timeoutInMilliseconds: u32, ) -> *mut PxPvdTransport;
+pub fn phys_PxDefaultPvdFileTransportCreate(name: *const u8, ) -> *mut PxPvdTransport;
 }

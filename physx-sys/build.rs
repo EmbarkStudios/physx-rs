@@ -34,7 +34,7 @@ fn main() {
         _ => "profile",
     };
 
-    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
+    let use_cmake = dbg!(env::var("CARGO_FEATURE_USE_CMAKE").is_ok());
     let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
@@ -88,9 +88,13 @@ fn main() {
         .extra_warnings(false)
         .define("NDEBUG", None)
         .define("PX_PHYSX_STATIC_LIB", None)
+        
         .include("PhysX/physx/include")
         .include("PhysX/pxshared/include")
         .include("PhysX/physx/source/foundation/include");
+        physx_cc.cargo_metadata(false);
+        
+        physx_cc.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
 
     if compiler.is_none() && host.contains("-linux-") {
         physx_cc.compiler("clang++");
@@ -106,7 +110,7 @@ fn main() {
     let output_dir_path =
         PathBuf::from(env::var("OUT_DIR").expect("output directory not specified"));
 
-    let include_path = if env::var("CARGO_FEATURE_STRUCTGEN").is_ok() {
+    let include_path = if dbg!(env::var("CARGO_FEATURE_STRUCTGEN").is_ok()) {
         let mut structgen_path = output_dir_path.join("structgen");
 
         let structgen_compiler = physx_cc.get_compiler();
@@ -123,6 +127,8 @@ fn main() {
         } else {
             cmd.arg("-o").arg(&structgen_path);
         }
+
+        cmd.arg("-L/home/jasper/ndk/arm64/sysroot/usr/lib/aarch64-linux-android/29/");
 
         cmd.arg("src/structgen/structgen.cpp");
         cmd.status().expect("c++ compiler failed to execute");

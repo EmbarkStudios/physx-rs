@@ -1,0 +1,44 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/jasper/embark/physx-rs/physx-sys/pxbind/build/pxbind",
+            "args": [
+                "../PhysX/physx/include/PxPhysicsAPI.h",
+                "--",
+                "-v",
+                "-I/home/jasper/ndk/arm64/sysroot/usr/include/c++/v1",
+                "--target=aarch64-linux-android",
+                "-DNDEBUG=1 -x c++",
+                "-DDISABLE_CUDA_PHYSX",
+                "-I../pxbind",
+                "-I../PhysX/physx/include",
+                "-I../PhysX/physx/../pxshared/include/",
+            ],
+            "stopAtEntry": true,
+            "cwd": "/home/jasper/embark/physx-rs/physx-sys/src",
+            "environment": [
+                {
+                    "name": "PHYSX_ROOT_DIR",
+                    "value": "../PhysX/physx",
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/lldb-mi-9"
+        }
+    ]
+}

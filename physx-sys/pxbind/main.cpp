@@ -596,6 +596,7 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::SChar:
             return "char";
         case BuiltinType::UChar:
+        case BuiltinType::Char_U:
             return "unsigned char";
 
         case BuiltinType::Short:
@@ -611,10 +612,12 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::Long:
             return "int64_t";
         case BuiltinType::ULong:
+        case BuiltinType::ULongLong:
             return "uint64_t";
+
     }
 
-    printf("Unhanded builtin type. BuiltinType::Kind = %u\n", unsigned(k));
+    printf("Unhanded builtin cpp type. BuiltinType = %u\n", unsigned(k));
     abort();
 }
 
@@ -635,6 +638,7 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::SChar:
             return "i8";
         case BuiltinType::UChar:
+        case BuiltinType::Char_U:
             return "u8";
 
         case BuiltinType::Short:
@@ -650,10 +654,11 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::Long:
             return "isize";
         case BuiltinType::ULong:
+        case BuiltinType::ULongLong:
             return "usize";
     }
 
-    printf("Unhanded builtin type. BuiltinType::Kind = %u\n", unsigned(k));
+    printf("Unhanded builtin rust type. BuiltinType::Kind = %u\n", unsigned(k));
     abort();
 }
 
@@ -1341,11 +1346,16 @@ class MyFrontendAction : public ASTFrontendAction {
 };
 
 int main(int argc, const char** argv) {
+    std::cout << "Hi" << std::endl;
     // parse the command-line args passed to your code
     CommonOptionsParser op(argc, argv, PxBindCategory);
+
     // create a new Clang Tool instance (a LibTooling environment)
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
+    for(auto& s : op.getSourcePathList()) {
+        std::cout << s << std::endl;
+    }
     // run the Clang Tool, creating a new FrontendAction
     return Tool.run(newFrontendActionFactory<MyFrontendAction>().get());
 }
