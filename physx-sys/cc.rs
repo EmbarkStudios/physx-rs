@@ -234,19 +234,9 @@ fn add_common(ctx: &mut Context) {
     builder.cpp(true);
 
     // These includes are used by pretty much everything so just add them first
-    //ctx.includes.push("/home/jasper/ndk/arm64/sysroot/usr/include/".into());
-    //ctx.includes.push("/home/jasper/ndk/arm64/sysroot/usr/local/include/".into());
-    //ctx.includes.push("/home/jasper/ndk/arm64/sysroot/usr/include/c++/v1".into());
-    //ctx.includes.push("/home/jasper/ndk/arm64/include/c++/4.9.x".into());
-    //ctx.includes.push("/home/jasper/ndk/arm64/lib64/clang/9.0.8/include/".into());
     builder.define("ANDROID", None);
     builder.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
-    //C:\Users\Jasper\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\home\jasper\ndk\arm64\sysroot\usr\lib\aarch64-linux-android\29\crtbegin_dynamic.o
     println!("cargo:rustc-cdylib-link-arg={}", "-L/home/jasper/ndk/arm64/sysroot/usr/lib/aarch64-linux-android/29/");
-    //builder.flag("-L/home/jasper/ndk/arm64/sysroot/usr/lib/aarch64-linux-android/29/");
-    builder.cargo_metadata(false);
-
-    //ctx.includes.push("/home/jasper/ndk/android-ndk-r21/sources/android/support/include".into());
 
     ctx.includes.push(shared_root.join("include"));
     ctx.includes.extend(
@@ -344,15 +334,12 @@ fn add_common(ctx: &mut Context) {
             "-Wno-atomic-implicit-seq-cst",
             "-Wno-extra-semi-stmt",
 
-            // android system headers need these
             "-Wno-gcc-compat",
             "-Wno-gnu-include-next",
             "-Wno-class-varargs",
-
             "-Wno-implicit-exception-spec-mismatch",
             "-Wno-macro-redefined",
             "-Wno-zero-length-array",
-
             "-Wno-undefined-func-template",
             "-Wno-c99-extensions",
         ]

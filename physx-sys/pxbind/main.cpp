@@ -617,7 +617,7 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
 
     }
 
-    printf("Unhanded builtin cpp type. BuiltinType = %u\n", unsigned(k));
+    printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
     abort();
 }
 
@@ -1348,13 +1348,9 @@ class MyFrontendAction : public ASTFrontendAction {
 int main(int argc, const char** argv) {
     // parse the command-line args passed to your code
     CommonOptionsParser op(argc, argv, PxBindCategory);
-
     // create a new Clang Tool instance (a LibTooling environment)
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
-    for(auto& s : op.getSourcePathList()) {
-        std::cout << s << std::endl;
-    }
     // run the Clang Tool, creating a new FrontendAction
     return Tool.run(newFrontendActionFactory<MyFrontendAction>().get());
 }
