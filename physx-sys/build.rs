@@ -151,8 +151,6 @@ fn main() {
             structgen_path.set_extension("exe");
         }
 
-        eprintln!("{:?}", &structgen_path);
-
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
