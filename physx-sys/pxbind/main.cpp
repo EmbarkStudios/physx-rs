@@ -595,8 +595,8 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::Char_S:
         case BuiltinType::SChar:
             return "char";
-        case BuiltinType::UChar:
         case BuiltinType::Char_U:
+        case BuiltinType::UChar:
             return "unsigned char";
 
         case BuiltinType::Short:
@@ -1346,7 +1346,6 @@ class MyFrontendAction : public ASTFrontendAction {
 };
 
 int main(int argc, const char** argv) {
-    std::cout << "Hi" << std::endl;
     // parse the command-line args passed to your code
     CommonOptionsParser op(argc, argv, PxBindCategory);
 

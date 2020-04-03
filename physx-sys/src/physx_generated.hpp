@@ -254,7 +254,7 @@ physx::PxAllocatorCallback* self_ = reinterpret_cast<physx::PxAllocatorCallback*
 delete self_;
 }
 
-void* PxAllocatorCallback_allocate_mut(physx_PxAllocatorCallback_Pod* self__pod, uint64_t size, unsigned char const* typeName, unsigned char const* filename, int32_t line) {
+void* PxAllocatorCallback_allocate_mut(physx_PxAllocatorCallback_Pod* self__pod, uint64_t size, char const* typeName, char const* filename, int32_t line) {
 physx::PxAllocatorCallback* self_ = reinterpret_cast<physx::PxAllocatorCallback*>(self__pod);
 void* returnValue = self_->allocate(size, typeName, filename, line);
 return returnValue;
@@ -1554,7 +1554,7 @@ physx::PxErrorCallback* self_ = reinterpret_cast<physx::PxErrorCallback*>(self__
 delete self_;
 }
 
-void PxErrorCallback_reportError_mut(physx_PxErrorCallback_Pod* self__pod, int code_pod, unsigned char const* message, unsigned char const* file, int32_t line) {
+void PxErrorCallback_reportError_mut(physx_PxErrorCallback_Pod* self__pod, int code_pod, char const* message, char const* file, int32_t line) {
 physx::PxErrorCallback* self_ = reinterpret_cast<physx::PxErrorCallback*>(self__pod);
 PxErrorCode::Enum code = (PxErrorCode::Enum)code_pod;
 self_->reportError(code, message, file, line);
@@ -2139,7 +2139,7 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-physx_PxDebugText_Pod PxDebugText_new_1(physx_PxVec3_Pod const* p_pod, float const* s_pod, uint32_t const* c_pod, unsigned char const* str) {
+physx_PxDebugText_Pod PxDebugText_new_1(physx_PxVec3_Pod const* p_pod, float const* s_pod, uint32_t const* c_pod, char const* str) {
 physx::PxVec3 const& p = reinterpret_cast<physx::PxVec3 const&>(*p_pod);
 float const& s = *s_pod;
 uint32_t const& c = *c_pod;
@@ -2251,7 +2251,7 @@ physx::PxSerializationContext* self_ = reinterpret_cast<physx::PxSerializationCo
 self_->alignData(alignment);
 }
 
-void PxSerializationContext_writeName_mut(physx_PxSerializationContext_Pod* self__pod, unsigned char const* name) {
+void PxSerializationContext_writeName_mut(physx_PxSerializationContext_Pod* self__pod, char const* name) {
 physx::PxSerializationContext* self_ = reinterpret_cast<physx::PxSerializationContext*>(self__pod);
 self_->writeName(name);
 }
@@ -2263,9 +2263,9 @@ physx_PxBase_Pod* returnValue_pod = reinterpret_cast<physx_PxBase_Pod*>(returnVa
 return returnValue_pod;
 }
 
-void PxDeserializationContext_readName_mut(physx_PxDeserializationContext_Pod* self__pod, unsigned char const** name_pod) {
+void PxDeserializationContext_readName_mut(physx_PxDeserializationContext_Pod* self__pod, char const** name_pod) {
 physx::PxDeserializationContext* self_ = reinterpret_cast<physx::PxDeserializationContext*>(self__pod);
-unsigned char const*& name = *name_pod;
+char const*& name = *name_pod;
 self_->readName(name);
 }
 
@@ -2314,7 +2314,7 @@ physx_PxRepXSerializer_Pod* returnValue_pod = reinterpret_cast<physx_PxRepXSeria
 return returnValue_pod;
 }
 
-physx_PxRepXSerializer_Pod* PxSerializationRegistry_getRepXSerializer(physx_PxSerializationRegistry_Pod const* self__pod, unsigned char const* typeName) {
+physx_PxRepXSerializer_Pod* PxSerializationRegistry_getRepXSerializer(physx_PxSerializationRegistry_Pod const* self__pod, char const* typeName) {
 physx::PxSerializationRegistry const* self_ = reinterpret_cast<physx::PxSerializationRegistry const*>(self__pod);
 physx::PxRepXSerializer* returnValue = self_->getRepXSerializer(typeName);
 physx_PxRepXSerializer_Pod* returnValue_pod = reinterpret_cast<physx_PxRepXSerializer_Pod*>(returnValue);
@@ -2430,9 +2430,9 @@ physx::PxBase* self_ = reinterpret_cast<physx::PxBase*>(self__pod);
 self_->release();
 }
 
-unsigned char const* PxBase_getConcreteTypeName(physx_PxBase_Pod const* self__pod) {
+char const* PxBase_getConcreteTypeName(physx_PxBase_Pod const* self__pod) {
 physx::PxBase const* self_ = reinterpret_cast<physx::PxBase const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -2495,9 +2495,9 @@ bool returnValue = self_->isValid();
 return returnValue;
 }
 
-unsigned char const* PxStringTable_allocateStr_mut(physx_PxStringTable_Pod* self__pod, unsigned char const* inSrc) {
+char const* PxStringTable_allocateStr_mut(physx_PxStringTable_Pod* self__pod, char const* inSrc) {
 physx::PxStringTable* self_ = reinterpret_cast<physx::PxStringTable*>(self__pod);
-unsigned char const* returnValue = self_->allocateStr(inSrc);
+char const* returnValue = self_->allocateStr(inSrc);
 return returnValue;
 }
 
@@ -2574,9 +2574,9 @@ physx::PxProfilerCallback* profiler = reinterpret_cast<physx::PxProfilerCallback
 PxSetProfilerCallback(profiler);
 }
 
-unsigned char const* PxSerializer_getConcreteTypeName(physx_PxSerializer_Pod const* self__pod) {
+char const* PxSerializer_getConcreteTypeName(physx_PxSerializer_Pod const* self__pod) {
 physx::PxSerializer const* self_ = reinterpret_cast<physx::PxSerializer const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -2676,13 +2676,13 @@ physx::PxTask& task = reinterpret_cast<physx::PxTask&>(*task_pod);
 self_->taskCompleted(task);
 }
 
-uint32_t PxTaskManager_getNamedTask_mut(physx_PxTaskManager_Pod* self__pod, unsigned char const* name) {
+uint32_t PxTaskManager_getNamedTask_mut(physx_PxTaskManager_Pod* self__pod, char const* name) {
 physx::PxTaskManager* self_ = reinterpret_cast<physx::PxTaskManager*>(self__pod);
 uint32_t returnValue = self_->getNamedTask(name);
 return returnValue;
 }
 
-uint32_t PxTaskManager_submitNamedTask_mut(physx_PxTaskManager_Pod* self__pod, physx_PxTask_Pod* task_pod, unsigned char const* name, unsigned int type_pod) {
+uint32_t PxTaskManager_submitNamedTask_mut(physx_PxTaskManager_Pod* self__pod, physx_PxTask_Pod* task_pod, char const* name, unsigned int type_pod) {
 physx::PxTaskManager* self_ = reinterpret_cast<physx::PxTaskManager*>(self__pod);
 physx::PxTask* task = reinterpret_cast<physx::PxTask*>(task_pod);
 PxTaskType::Enum type = (PxTaskType::Enum)type_pod;
@@ -2740,9 +2740,9 @@ physx::PxBaseTask* self_ = reinterpret_cast<physx::PxBaseTask*>(self__pod);
 self_->run();
 }
 
-unsigned char const* PxBaseTask_getName(physx_PxBaseTask_Pod const* self__pod) {
+char const* PxBaseTask_getName(physx_PxBaseTask_Pod const* self__pod) {
 physx::PxBaseTask const* self_ = reinterpret_cast<physx::PxBaseTask const*>(self__pod);
-unsigned char const* returnValue = self_->getName();
+char const* returnValue = self_->getName();
 return returnValue;
 }
 
@@ -2946,9 +2946,9 @@ uint32_t returnValue = self_->getNbBounds();
 return returnValue;
 }
 
-unsigned char const* PxBVHStructure_getConcreteTypeName(physx_PxBVHStructure_Pod const* self__pod) {
+char const* PxBVHStructure_getConcreteTypeName(physx_PxBVHStructure_Pod const* self__pod) {
 physx::PxBVHStructure const* self_ = reinterpret_cast<physx::PxBVHStructure const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -3051,9 +3051,9 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-unsigned char const* PxConvexMesh_getConcreteTypeName(physx_PxConvexMesh_Pod const* self__pod) {
+char const* PxConvexMesh_getConcreteTypeName(physx_PxConvexMesh_Pod const* self__pod) {
 physx::PxConvexMesh const* self_ = reinterpret_cast<physx::PxConvexMesh const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -3669,9 +3669,9 @@ uint32_t returnValue = self_->getTimestamp();
 return returnValue;
 }
 
-unsigned char const* PxHeightField_getConcreteTypeName(physx_PxHeightField_Pod const* self__pod) {
+char const* PxHeightField_getConcreteTypeName(physx_PxHeightField_Pod const* self__pod) {
 physx::PxHeightField const* self_ = reinterpret_cast<physx::PxHeightField const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -3942,14 +3942,14 @@ physx_PxScene_Pod* returnValue_pod = reinterpret_cast<physx_PxScene_Pod*>(return
 return returnValue_pod;
 }
 
-void PxActor_setName_mut(physx_PxActor_Pod* self__pod, unsigned char const* name) {
+void PxActor_setName_mut(physx_PxActor_Pod* self__pod, char const* name) {
 physx::PxActor* self_ = reinterpret_cast<physx::PxActor*>(self__pod);
 self_->setName(name);
 }
 
-unsigned char const* PxActor_getName(physx_PxActor_Pod const* self__pod) {
+char const* PxActor_getName(physx_PxActor_Pod const* self__pod) {
 physx::PxActor const* self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-unsigned char const* returnValue = self_->getName();
+char const* returnValue = self_->getName();
 return returnValue;
 }
 
@@ -4077,9 +4077,9 @@ bool returnValue = self_->getSelfCollision();
 return returnValue;
 }
 
-unsigned char const* PxAggregate_getConcreteTypeName(physx_PxAggregate_Pod const* self__pod) {
+char const* PxAggregate_getConcreteTypeName(physx_PxAggregate_Pod const* self__pod) {
 physx::PxAggregate const* self_ = reinterpret_cast<physx::PxAggregate const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -4173,14 +4173,14 @@ uint32_t returnValue = self_->getLinks(userBuffer, bufferSize, startIndex);
 return returnValue;
 }
 
-void PxArticulationBase_setName_mut(physx_PxArticulationBase_Pod* self__pod, unsigned char const* name) {
+void PxArticulationBase_setName_mut(physx_PxArticulationBase_Pod* self__pod, char const* name) {
 physx::PxArticulationBase* self_ = reinterpret_cast<physx::PxArticulationBase*>(self__pod);
 self_->setName(name);
 }
 
-unsigned char const* PxArticulationBase_getName(physx_PxArticulationBase_Pod const* self__pod) {
+char const* PxArticulationBase_getName(physx_PxArticulationBase_Pod const* self__pod) {
 physx::PxArticulationBase const* self_ = reinterpret_cast<physx::PxArticulationBase const*>(self__pod);
-unsigned char const* returnValue = self_->getName();
+char const* returnValue = self_->getName();
 return returnValue;
 }
 
@@ -4920,9 +4920,9 @@ float returnValue = self_->getTwistLimitContactDistance();
 return returnValue;
 }
 
-unsigned char const* PxArticulationJoint_getConcreteTypeName(physx_PxArticulationJoint_Pod const* self__pod) {
+char const* PxArticulationJoint_getConcreteTypeName(physx_PxArticulationJoint_Pod const* self__pod) {
 physx::PxArticulationJoint const* self_ = reinterpret_cast<physx::PxArticulationJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -5022,9 +5022,9 @@ float returnValue = self_->getFrictionCoefficient();
 return returnValue;
 }
 
-unsigned char const* PxArticulationJointReducedCoordinate_getConcreteTypeName(physx_PxArticulationJointReducedCoordinate_Pod const* self__pod) {
+char const* PxArticulationJointReducedCoordinate_getConcreteTypeName(physx_PxArticulationJointReducedCoordinate_Pod const* self__pod) {
 physx::PxArticulationJointReducedCoordinate const* self_ = reinterpret_cast<physx::PxArticulationJointReducedCoordinate const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -5271,20 +5271,20 @@ bool returnValue = self_->isExclusive();
 return returnValue;
 }
 
-void PxShape_setName_mut(physx_PxShape_Pod* self__pod, unsigned char const* name) {
+void PxShape_setName_mut(physx_PxShape_Pod* self__pod, char const* name) {
 physx::PxShape* self_ = reinterpret_cast<physx::PxShape*>(self__pod);
 self_->setName(name);
 }
 
-unsigned char const* PxShape_getName(physx_PxShape_Pod const* self__pod) {
+char const* PxShape_getName(physx_PxShape_Pod const* self__pod) {
 physx::PxShape const* self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-unsigned char const* returnValue = self_->getName();
+char const* returnValue = self_->getName();
 return returnValue;
 }
 
-unsigned char const* PxShape_getConcreteTypeName(physx_PxShape_Pod const* self__pod) {
+char const* PxShape_getConcreteTypeName(physx_PxShape_Pod const* self__pod) {
 physx::PxShape const* self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -5609,9 +5609,9 @@ uint32_t returnValue = self_->getChildren(userBuffer, bufferSize, startIndex);
 return returnValue;
 }
 
-unsigned char const* PxArticulationLink_getConcreteTypeName(physx_PxArticulationLink_Pod const* self__pod) {
+char const* PxArticulationLink_getConcreteTypeName(physx_PxArticulationLink_Pod const* self__pod) {
 physx::PxArticulationLink const* self_ = reinterpret_cast<physx::PxArticulationLink const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -5980,9 +5980,9 @@ physx::PxConstraintShaderTable const& shaders = reinterpret_cast<physx::PxConstr
 self_->setConstraintFunctions(connector, shaders);
 }
 
-unsigned char const* PxConstraint_getConcreteTypeName(physx_PxConstraint_Pod const* self__pod) {
+char const* PxConstraint_getConcreteTypeName(physx_PxConstraint_Pod const* self__pod) {
 physx::PxConstraint const* self_ = reinterpret_cast<physx::PxConstraint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -6432,9 +6432,9 @@ unsigned int returnValue_pod = (unsigned int)returnValue;
 return returnValue_pod;
 }
 
-unsigned char const* PxMaterial_getConcreteTypeName(physx_PxMaterial_Pod const* self__pod) {
+char const* PxMaterial_getConcreteTypeName(physx_PxMaterial_Pod const* self__pod) {
 physx::PxMaterial const* self_ = reinterpret_cast<physx::PxMaterial const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -6852,15 +6852,15 @@ physx::PxRigidDynamic* self_ = reinterpret_cast<physx::PxRigidDynamic*>(self__po
 self_->setContactReportThreshold(threshold);
 }
 
-unsigned char const* PxRigidDynamic_getConcreteTypeName(physx_PxRigidDynamic_Pod const* self__pod) {
+char const* PxRigidDynamic_getConcreteTypeName(physx_PxRigidDynamic_Pod const* self__pod) {
 physx::PxRigidDynamic const* self_ = reinterpret_cast<physx::PxRigidDynamic const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-unsigned char const* PxRigidStatic_getConcreteTypeName(physx_PxRigidStatic_Pod const* self__pod) {
+char const* PxRigidStatic_getConcreteTypeName(physx_PxRigidStatic_Pod const* self__pod) {
 physx::PxRigidStatic const* self_ = reinterpret_cast<physx::PxRigidStatic const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -7021,7 +7021,7 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-void PxPvdSceneClient_updateCamera_mut(physx_PxPvdSceneClient_Pod* self__pod, unsigned char const* name, physx_PxVec3_Pod const* origin_pod, physx_PxVec3_Pod const* up_pod, physx_PxVec3_Pod const* target_pod) {
+void PxPvdSceneClient_updateCamera_mut(physx_PxPvdSceneClient_Pod* self__pod, char const* name, physx_PxVec3_Pod const* origin_pod, physx_PxVec3_Pod const* up_pod, physx_PxVec3_Pod const* target_pod) {
 physx::PxPvdSceneClient* self_ = reinterpret_cast<physx::PxPvdSceneClient*>(self__pod);
 physx::PxVec3 const& origin = reinterpret_cast<physx::PxVec3 const&>(*origin_pod);
 physx::PxVec3 const& up = reinterpret_cast<physx::PxVec3 const&>(*up_pod);
@@ -7721,7 +7721,7 @@ physx_PxTaskManager_Pod* returnValue_pod = reinterpret_cast<physx_PxTaskManager_
 return returnValue_pod;
 }
 
-void PxScene_lockRead_mut(physx_PxScene_Pod* self__pod, unsigned char const* file, uint32_t line) {
+void PxScene_lockRead_mut(physx_PxScene_Pod* self__pod, char const* file, uint32_t line) {
 physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
 self_->lockRead(file, line);
 }
@@ -7731,7 +7731,7 @@ physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
 self_->unlockRead();
 }
 
-void PxScene_lockWrite_mut(physx_PxScene_Pod* self__pod, unsigned char const* file, uint32_t line) {
+void PxScene_lockWrite_mut(physx_PxScene_Pod* self__pod, char const* file, uint32_t line) {
 physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
 self_->lockWrite(file, line);
 }
@@ -7805,7 +7805,7 @@ physx_PxPvdSceneClient_Pod* returnValue_pod = reinterpret_cast<physx_PxPvdSceneC
 return returnValue_pod;
 }
 
-physx_PxSceneReadLock_Pod* PxSceneReadLock_new_alloc(physx_PxScene_Pod* scene_pod, unsigned char const* file, uint32_t line) {
+physx_PxSceneReadLock_Pod* PxSceneReadLock_new_alloc(physx_PxScene_Pod* scene_pod, char const* file, uint32_t line) {
 physx::PxScene& scene = reinterpret_cast<physx::PxScene&>(*scene_pod);
 auto returnValue = new physx::PxSceneReadLock(scene, file, line);
 physx_PxSceneReadLock_Pod* returnValue_pod = reinterpret_cast<physx_PxSceneReadLock_Pod*>(returnValue);
@@ -7817,7 +7817,7 @@ physx::PxSceneReadLock* self_ = reinterpret_cast<physx::PxSceneReadLock*>(self__
 delete self_;
 }
 
-physx_PxSceneWriteLock_Pod* PxSceneWriteLock_new_alloc(physx_PxScene_Pod* scene_pod, unsigned char const* file, uint32_t line) {
+physx_PxSceneWriteLock_Pod* PxSceneWriteLock_new_alloc(physx_PxScene_Pod* scene_pod, char const* file, uint32_t line) {
 physx::PxScene& scene = reinterpret_cast<physx::PxScene&>(*scene_pod);
 auto returnValue = new physx::PxSceneWriteLock(scene, file, line);
 physx_PxSceneWriteLock_Pod* returnValue_pod = reinterpret_cast<physx_PxSceneWriteLock_Pod*>(returnValue);
@@ -8005,9 +8005,9 @@ uint32_t returnValue = self_->getNbRigidActors();
 return returnValue;
 }
 
-unsigned char const* PxPruningStructure_getConcreteTypeName(physx_PxPruningStructure_Pod const* self__pod) {
+char const* PxPruningStructure_getConcreteTypeName(physx_PxPruningStructure_Pod const* self__pod) {
 physx::PxPruningStructure const* self_ = reinterpret_cast<physx::PxPruningStructure const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -9069,7 +9069,7 @@ physx::PxDefaultMemoryInputData* self_ = reinterpret_cast<physx::PxDefaultMemory
 delete self_;
 }
 
-physx_PxDefaultFileOutputStream_Pod* PxDefaultFileOutputStream_new_alloc(unsigned char const* name) {
+physx_PxDefaultFileOutputStream_Pod* PxDefaultFileOutputStream_new_alloc(char const* name) {
 auto returnValue = new physx::PxDefaultFileOutputStream(name);
 physx_PxDefaultFileOutputStream_Pod* returnValue_pod = reinterpret_cast<physx_PxDefaultFileOutputStream_Pod*>(returnValue);
 return returnValue_pod;
@@ -9092,7 +9092,7 @@ bool returnValue = self_->isValid();
 return returnValue;
 }
 
-physx_PxDefaultFileInputData_Pod* PxDefaultFileInputData_new_alloc(unsigned char const* name) {
+physx_PxDefaultFileInputData_Pod* PxDefaultFileInputData_new_alloc(char const* name) {
 auto returnValue = new physx::PxDefaultFileInputData(name);
 physx_PxDefaultFileInputData_Pod* returnValue_pod = reinterpret_cast<physx_PxDefaultFileInputData_Pod*>(returnValue);
 return returnValue_pod;
@@ -9270,14 +9270,14 @@ physx_PxConstraint_Pod* returnValue_pod = reinterpret_cast<physx_PxConstraint_Po
 return returnValue_pod;
 }
 
-void PxJoint_setName_mut(physx_PxJoint_Pod* self__pod, unsigned char const* name) {
+void PxJoint_setName_mut(physx_PxJoint_Pod* self__pod, char const* name) {
 physx::PxJoint* self_ = reinterpret_cast<physx::PxJoint*>(self__pod);
 self_->setName(name);
 }
 
-unsigned char const* PxJoint_getName(physx_PxJoint_Pod const* self__pod) {
+char const* PxJoint_getName(physx_PxJoint_Pod const* self__pod) {
 physx::PxJoint const* self_ = reinterpret_cast<physx::PxJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getName();
+char const* returnValue = self_->getName();
 return returnValue;
 }
 
@@ -9405,13 +9405,13 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-unsigned char const* PxDistanceJoint_getConcreteTypeName(physx_PxDistanceJoint_Pod const* self__pod) {
+char const* PxDistanceJoint_getConcreteTypeName(physx_PxDistanceJoint_Pod const* self__pod) {
 physx::PxDistanceJoint const* self_ = reinterpret_cast<physx::PxDistanceJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-void* PxDefaultAllocator_allocate_mut(physx_PxDefaultAllocator_Pod* self__pod, uint64_t size, unsigned char const* anonymous_arg1, unsigned char const* anonymous_arg2, int32_t anonymous_arg3) {
+void* PxDefaultAllocator_allocate_mut(physx_PxDefaultAllocator_Pod* self__pod, uint64_t size, char const* anonymous_arg1, char const* anonymous_arg2, int32_t anonymous_arg3) {
 physx::PxDefaultAllocator* self_ = reinterpret_cast<physx::PxDefaultAllocator*>(self__pod);
 void* returnValue = self_->allocate(size, anonymous_arg1, anonymous_arg2, anonymous_arg3);
 return returnValue;
@@ -9517,9 +9517,9 @@ physx::PxContactJoint* self_ = reinterpret_cast<physx::PxContactJoint*>(self__po
 self_->setBounceThreshold(bounceThreshold);
 }
 
-unsigned char const* PxContactJoint_getConcreteTypeName(physx_PxContactJoint_Pod const* self__pod) {
+char const* PxContactJoint_getConcreteTypeName(physx_PxContactJoint_Pod const* self__pod) {
 physx::PxContactJoint const* self_ = reinterpret_cast<physx::PxContactJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -9568,9 +9568,9 @@ float returnValue = self_->getProjectionAngularTolerance();
 return returnValue;
 }
 
-unsigned char const* PxFixedJoint_getConcreteTypeName(physx_PxFixedJoint_Pod const* self__pod) {
+char const* PxFixedJoint_getConcreteTypeName(physx_PxFixedJoint_Pod const* self__pod) {
 physx::PxFixedJoint const* self_ = reinterpret_cast<physx::PxFixedJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -9804,9 +9804,9 @@ float returnValue = self_->getProjectionAngularTolerance();
 return returnValue;
 }
 
-unsigned char const* PxPrismaticJoint_getConcreteTypeName(physx_PxPrismaticJoint_Pod const* self__pod) {
+char const* PxPrismaticJoint_getConcreteTypeName(physx_PxPrismaticJoint_Pod const* self__pod) {
 physx::PxPrismaticJoint const* self_ = reinterpret_cast<physx::PxPrismaticJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -9923,9 +9923,9 @@ float returnValue = self_->getProjectionAngularTolerance();
 return returnValue;
 }
 
-unsigned char const* PxRevoluteJoint_getConcreteTypeName(physx_PxRevoluteJoint_Pod const* self__pod) {
+char const* PxRevoluteJoint_getConcreteTypeName(physx_PxRevoluteJoint_Pod const* self__pod) {
 physx::PxRevoluteJoint const* self_ = reinterpret_cast<physx::PxRevoluteJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -9998,9 +9998,9 @@ float returnValue = self_->getProjectionLinearTolerance();
 return returnValue;
 }
 
-unsigned char const* PxSphericalJoint_getConcreteTypeName(physx_PxSphericalJoint_Pod const* self__pod) {
+char const* PxSphericalJoint_getConcreteTypeName(physx_PxSphericalJoint_Pod const* self__pod) {
 physx::PxSphericalJoint const* self_ = reinterpret_cast<physx::PxSphericalJoint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -10226,9 +10226,9 @@ float returnValue = self_->getProjectionAngularTolerance();
 return returnValue;
 }
 
-unsigned char const* PxD6Joint_getConcreteTypeName(physx_PxD6Joint_Pod const* self__pod) {
+char const* PxD6Joint_getConcreteTypeName(physx_PxD6Joint_Pod const* self__pod) {
 physx::PxD6Joint const* self_ = reinterpret_cast<physx::PxD6Joint const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -10335,7 +10335,7 @@ physx::PxDefaultErrorCallback* self_ = reinterpret_cast<physx::PxDefaultErrorCal
 delete self_;
 }
 
-void PxDefaultErrorCallback_reportError_mut(physx_PxDefaultErrorCallback_Pod* self__pod, int code_pod, unsigned char const* message, unsigned char const* file, int32_t line) {
+void PxDefaultErrorCallback_reportError_mut(physx_PxDefaultErrorCallback_Pod* self__pod, int code_pod, char const* message, char const* file, int32_t line) {
 physx::PxDefaultErrorCallback* self_ = reinterpret_cast<physx::PxDefaultErrorCallback*>(self__pod);
 PxErrorCode::Enum code = (PxErrorCode::Enum)code_pod;
 self_->reportError(code, message, file, line);
@@ -11139,7 +11139,7 @@ bool returnValue = self_->convert(srcStream, srcSize, targetStream);
 return returnValue;
 }
 
-physx_PxRepXObject_Pod PxRepXObject_new(unsigned char const* inTypeName, void const* inSerializable, uint64_t inId) {
+physx_PxRepXObject_Pod PxRepXObject_new(char const* inTypeName, void const* inSerializable, uint64_t inId) {
 physx::PxRepXObject returnValue(inTypeName, inSerializable, inId);
 physx_PxRepXObject_Pod returnValue_pod;
 memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
@@ -11162,9 +11162,9 @@ memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
 return returnValue_pod;
 }
 
-unsigned char const* PxRepXSerializer_getTypeName_mut(physx_PxRepXSerializer_Pod* self__pod) {
+char const* PxRepXSerializer_getTypeName_mut(physx_PxRepXSerializer_Pod* self__pod) {
 physx::PxRepXSerializer* self_ = reinterpret_cast<physx::PxRepXSerializer*>(self__pod);
-unsigned char const* returnValue = self_->getTypeName();
+char const* returnValue = self_->getTypeName();
 return returnValue;
 }
 
@@ -12035,13 +12035,13 @@ physx::PxProcessPxBaseCallback& c = reinterpret_cast<physx::PxProcessPxBaseCallb
 self_->requiresObjects(c);
 }
 
-unsigned char const* PxVehicleWheels_getConcreteTypeName(physx_PxVehicleWheels_Pod const* self__pod) {
+char const* PxVehicleWheels_getConcreteTypeName(physx_PxVehicleWheels_Pod const* self__pod) {
 physx::PxVehicleWheels const* self_ = reinterpret_cast<physx::PxVehicleWheels const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-bool PxVehicleWheels_isKindOf(physx_PxVehicleWheels_Pod const* self__pod, unsigned char const* name) {
+bool PxVehicleWheels_isKindOf(physx_PxVehicleWheels_Pod const* self__pod, char const* name) {
 physx::PxVehicleWheels const* self_ = reinterpret_cast<physx::PxVehicleWheels const*>(self__pod);
 bool returnValue = self_->isKindOf(name);
 return returnValue;
@@ -12343,9 +12343,9 @@ physx_PxVehicleDrive_Pod* returnValue_pod = reinterpret_cast<physx_PxVehicleDriv
 return returnValue_pod;
 }
 
-unsigned char const* PxVehicleDrive_getConcreteTypeName(physx_PxVehicleDrive_Pod const* self__pod) {
+char const* PxVehicleDrive_getConcreteTypeName(physx_PxVehicleDrive_Pod const* self__pod) {
 physx::PxVehicleDrive const* self_ = reinterpret_cast<physx::PxVehicleDrive const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -12456,9 +12456,9 @@ physx_PxVehicleDrive4W_Pod* returnValue_pod = reinterpret_cast<physx_PxVehicleDr
 return returnValue_pod;
 }
 
-unsigned char const* PxVehicleDrive4W_getConcreteTypeName(physx_PxVehicleDrive4W_Pod const* self__pod) {
+char const* PxVehicleDrive4W_getConcreteTypeName(physx_PxVehicleDrive4W_Pod const* self__pod) {
 physx::PxVehicleDrive4W const* self_ = reinterpret_cast<physx::PxVehicleDrive4W const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
@@ -12531,13 +12531,13 @@ physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream
 PxVehicleDriveTank::getBinaryMetaData(stream);
 }
 
-unsigned char const* PxVehicleDriveTank_getConcreteTypeName(physx_PxVehicleDriveTank_Pod const* self__pod) {
+char const* PxVehicleDriveTank_getConcreteTypeName(physx_PxVehicleDriveTank_Pod const* self__pod) {
 physx::PxVehicleDriveTank const* self_ = reinterpret_cast<physx::PxVehicleDriveTank const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-bool PxVehicleDriveTank_isKindOf(physx_PxVehicleDriveTank_Pod const* self__pod, unsigned char const* name) {
+bool PxVehicleDriveTank_isKindOf(physx_PxVehicleDriveTank_Pod const* self__pod, char const* name) {
 physx::PxVehicleDriveTank const* self_ = reinterpret_cast<physx::PxVehicleDriveTank const*>(self__pod);
 bool returnValue = self_->isKindOf(name);
 return returnValue;
@@ -12756,13 +12756,13 @@ physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream
 PxVehicleDriveNW::getBinaryMetaData(stream);
 }
 
-unsigned char const* PxVehicleDriveNW_getConcreteTypeName(physx_PxVehicleDriveNW_Pod const* self__pod) {
+char const* PxVehicleDriveNW_getConcreteTypeName(physx_PxVehicleDriveNW_Pod const* self__pod) {
 physx::PxVehicleDriveNW const* self_ = reinterpret_cast<physx::PxVehicleDriveNW const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-bool PxVehicleDriveNW_isKindOf(physx_PxVehicleDriveNW_Pod const* self__pod, unsigned char const* name) {
+bool PxVehicleDriveNW_isKindOf(physx_PxVehicleDriveNW_Pod const* self__pod, char const* name) {
 physx::PxVehicleDriveNW const* self_ = reinterpret_cast<physx::PxVehicleDriveNW const*>(self__pod);
 bool returnValue = self_->isKindOf(name);
 return returnValue;
@@ -13190,7 +13190,7 @@ float& yMax = *yMax_pod;
 self_->getBackgroundCoords(xMin, yMin, xMax, yMax);
 }
 
-void PxVehicleGraph_computeGraphChannel(physx_PxVehicleGraph_Pod const* self__pod, uint32_t channel, float* xy, physx_PxVec3_Pod* colors_pod, unsigned char* title) {
+void PxVehicleGraph_computeGraphChannel(physx_PxVehicleGraph_Pod const* self__pod, uint32_t channel, float* xy, physx_PxVec3_Pod* colors_pod, char* title) {
 physx::PxVehicleGraph const* self_ = reinterpret_cast<physx::PxVehicleGraph const*>(self__pod);
 physx::PxVec3* colors = reinterpret_cast<physx::PxVec3*>(colors_pod);
 self_->computeGraphChannel(channel, xy, colors, title);
@@ -13359,13 +13359,13 @@ physx::PxOutputStream& stream = reinterpret_cast<physx::PxOutputStream&>(*stream
 PxVehicleNoDrive::getBinaryMetaData(stream);
 }
 
-unsigned char const* PxVehicleNoDrive_getConcreteTypeName(physx_PxVehicleNoDrive_Pod const* self__pod) {
+char const* PxVehicleNoDrive_getConcreteTypeName(physx_PxVehicleNoDrive_Pod const* self__pod) {
 physx::PxVehicleNoDrive const* self_ = reinterpret_cast<physx::PxVehicleNoDrive const*>(self__pod);
-unsigned char const* returnValue = self_->getConcreteTypeName();
+char const* returnValue = self_->getConcreteTypeName();
 return returnValue;
 }
 
-bool PxVehicleNoDrive_isKindOf(physx_PxVehicleNoDrive_Pod const* self__pod, unsigned char const* name) {
+bool PxVehicleNoDrive_isKindOf(physx_PxVehicleNoDrive_Pod const* self__pod, char const* name) {
 physx::PxVehicleNoDrive const* self_ = reinterpret_cast<physx::PxVehicleNoDrive const*>(self__pod);
 bool returnValue = self_->isKindOf(name);
 return returnValue;
@@ -13389,18 +13389,18 @@ uint32_t returnValue = self_->getNbBrakeTorque();
 return returnValue;
 }
 
-void* PxProfilerCallback_zoneStart_mut(physx_PxProfilerCallback_Pod* self__pod, unsigned char const* eventName, bool detached, uint64_t contextId) {
+void* PxProfilerCallback_zoneStart_mut(physx_PxProfilerCallback_Pod* self__pod, char const* eventName, bool detached, uint64_t contextId) {
 physx::PxProfilerCallback* self_ = reinterpret_cast<physx::PxProfilerCallback*>(self__pod);
 void* returnValue = self_->zoneStart(eventName, detached, contextId);
 return returnValue;
 }
 
-void PxProfilerCallback_zoneEnd_mut(physx_PxProfilerCallback_Pod* self__pod, void* profilerData, unsigned char const* eventName, bool detached, uint64_t contextId) {
+void PxProfilerCallback_zoneEnd_mut(physx_PxProfilerCallback_Pod* self__pod, void* profilerData, char const* eventName, bool detached, uint64_t contextId) {
 physx::PxProfilerCallback* self_ = reinterpret_cast<physx::PxProfilerCallback*>(self__pod);
 self_->zoneEnd(profilerData, eventName, detached, contextId);
 }
 
-physx_PxProfileScoped_Pod* PxProfileScoped_new_alloc(physx_PxProfilerCallback_Pod* callback_pod, unsigned char const* eventName, bool detached, uint64_t contextId) {
+physx_PxProfileScoped_Pod* PxProfileScoped_new_alloc(physx_PxProfilerCallback_Pod* callback_pod, char const* eventName, bool detached, uint64_t contextId) {
 physx::PxProfilerCallback* callback = reinterpret_cast<physx::PxProfilerCallback*>(callback_pod);
 auto returnValue = new physx::PxProfileScoped(callback, eventName, detached, contextId);
 physx_PxProfileScoped_Pod* returnValue_pod = reinterpret_cast<physx_PxProfileScoped_Pod*>(returnValue);
@@ -13510,13 +13510,13 @@ physx::PxPvdTransport* self_ = reinterpret_cast<physx::PxPvdTransport*>(self__po
 self_->release();
 }
 
-physx_PxPvdTransport_Pod* phys_PxDefaultPvdSocketTransportCreate(unsigned char const* host, int32_t port, uint32_t timeoutInMilliseconds) {
+physx_PxPvdTransport_Pod* phys_PxDefaultPvdSocketTransportCreate(char const* host, int32_t port, uint32_t timeoutInMilliseconds) {
 physx::PxPvdTransport* returnValue = PxDefaultPvdSocketTransportCreate(host, port, timeoutInMilliseconds);
 physx_PxPvdTransport_Pod* returnValue_pod = reinterpret_cast<physx_PxPvdTransport_Pod*>(returnValue);
 return returnValue_pod;
 }
 
-physx_PxPvdTransport_Pod* phys_PxDefaultPvdFileTransportCreate(unsigned char const* name) {
+physx_PxPvdTransport_Pod* phys_PxDefaultPvdFileTransportCreate(char const* name) {
 physx::PxPvdTransport* returnValue = PxDefaultPvdFileTransportCreate(name);
 physx_PxPvdTransport_Pod* returnValue_pod = reinterpret_cast<physx_PxPvdTransport_Pod*>(returnValue);
 return returnValue_pod;

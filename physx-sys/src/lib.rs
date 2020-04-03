@@ -139,6 +139,13 @@ include!("generated/x86_64-unknown-linux/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
+    target_os = "android",
+    target_arch = "aarch64",
+))]
+include!("generated/aarch64-linux-android/structgen.rs");
+
+#[cfg(all(
+    not(feature = "structgen"),
     target_os = "macos",
     target_arch = "x86_64",
 ))]

@@ -153,6 +153,9 @@ fn main() {
         match target.as_str() {
             "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" => {
                 include.push(target);
+            },
+            "aarch64-linux-android" => {
+                include.push(target);
             }
             nix if nix.starts_with("x86_64-unknown-linux") => {
                 include.push("x86_64-unknown-linux");
@@ -166,6 +169,7 @@ fn main() {
     physx_cc
         .include(include_path)
         .file("src/physx_api.cpp")
+        .flag("-v")
         .compile("physx_api");
 
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
