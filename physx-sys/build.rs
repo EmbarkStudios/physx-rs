@@ -34,7 +34,7 @@ fn main() {
         _ => "profile",
     };
 
-    let use_cmake = dbg!(env::var("CARGO_FEATURE_USE_CMAKE").is_ok());
+    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
     let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
@@ -110,7 +110,7 @@ fn main() {
     let output_dir_path =
         PathBuf::from(env::var("OUT_DIR").expect("output directory not specified"));
 
-    let include_path = if dbg!(env::var("CARGO_FEATURE_STRUCTGEN").is_ok()) {
+    let include_path = if env::var("CARGO_FEATURE_STRUCTGEN").is_ok() {
         let mut structgen_path = output_dir_path.join("structgen");
 
         let structgen_compiler = physx_cc.get_compiler();
