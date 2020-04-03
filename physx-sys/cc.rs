@@ -234,9 +234,10 @@ fn add_common(ctx: &mut Context) {
     builder.cpp(true);
 
     // These includes are used by pretty much everything so just add them first
-    builder.define("ANDROID", None);
-    builder.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
-    println!("cargo:rustc-cdylib-link-arg={}", "-L/home/jasper/ndk/arm64/sysroot/usr/lib/aarch64-linux-android/29/");
+    if ccenv.target_os == "android" {
+        builder.define("ANDROID", None);
+        builder.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
+    }
 
     ctx.includes.push(shared_root.join("include"));
     ctx.includes.extend(

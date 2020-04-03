@@ -88,13 +88,13 @@ fn main() {
         .extra_warnings(false)
         .define("NDEBUG", None)
         .define("PX_PHYSX_STATIC_LIB", None)
-        
         .include("PhysX/physx/include")
         .include("PhysX/pxshared/include")
         .include("PhysX/physx/source/foundation/include");
-        physx_cc.cargo_metadata(false);
         
-        physx_cc.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
+    if target.ends_with("-android") {
+        physx_cc.flag("--sysroot=/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
+    }
 
     if compiler.is_none() && host.contains("-linux-") {
         physx_cc.compiler("clang++");
@@ -115,6 +115,7 @@ fn main() {
 
         let structgen_compiler = physx_cc.get_compiler();
         let mut cmd = structgen_compiler.to_command();
+        
         if structgen_compiler.is_like_msvc() {
             let mut s = OsString::from("/Fe");
             s.push(&structgen_path);
@@ -128,7 +129,18 @@ fn main() {
             cmd.arg("-o").arg(&structgen_path);
         }
 
-        cmd.arg("-L/home/jasper/ndk/arm64/sysroot/usr/lib/aarch64-linux-android/29/");
+        if target.ends_with("-android") {
+            // for -lc++
+            cmd.arg("-L/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/");
+
+            // make static lib so that when we run under qemu we don't need an elf loader just for libc++_shared.so
+            cmd.arg("-static");
+
+            // for crtbegin_static.o & crtend_android.o setting a searchpath doesn't seem to work 
+            cmd.arg("-nostartfiles");
+            cmd.arg("/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_static.o");
+            cmd.arg("/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o");
+        }
 
         cmd.arg("src/structgen/structgen.cpp");
         cmd.status().expect("c++ compiler failed to execute");
@@ -139,10 +151,19 @@ fn main() {
             structgen_path.set_extension("exe");
         }
 
+        eprintln!("{:?}", &structgen_path);
+
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
-        let mut structgen = std::process::Command::new(&structgen_path);
+        let mut structgen = if target.starts_with("aarch64-") {
+            let mut structgen = std::process::Command::new("qemu-aarch64");
+            structgen.arg(&structgen_path);
+            structgen
+        } else {
+            std::process::Command::new(&structgen_path)
+        };
+
         structgen.current_dir(&output_dir_path);
         structgen.status().expect("structgen failed to execute");
 
@@ -190,3 +211,4 @@ fn main() {
         );
     }
 }
+
