@@ -169,7 +169,6 @@ fn main() {
     physx_cc
         .include(include_path)
         .file("src/physx_api.cpp")
-        .flag("-v")
         .compile("physx_api");
 
     println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
