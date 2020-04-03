@@ -1,8 +1,0 @@
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/install/strip.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/install/local.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/pxbind.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/intrinsics_gen.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/rebuild_cache.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/edit_cache.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/install.dir
-/home/jasper/embark/physx-rs/physx-sys/pxbind/build/CMakeFiles/list_install_components.dir
