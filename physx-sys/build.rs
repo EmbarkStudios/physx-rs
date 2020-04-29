@@ -75,7 +75,6 @@ fn main() {
             panic!("wtf are you doing?");
             cmake_compile(environment);
         } else {
-            panic!("alright fine");
             cc_compile(environment)
         }
     }
