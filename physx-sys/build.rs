@@ -34,7 +34,7 @@ fn main() {
         _ => "profile",
     };
 
-    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
+    let use_cmake = false;
     let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
