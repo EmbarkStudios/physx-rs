@@ -8,12 +8,12 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "/home/jasper/embark/physx-rs/physx-sys/pxbind/build/pxbind",
+            "program": "/home/viktor/physx-rs/physx-sys/pxbind/build/pxbind",
             "args": [
                 "../PhysX/physx/include/PxPhysicsAPI.h",
                 "--",
                 "-v",
-                "-I/home/jasper/ndk/arm64/sysroot/usr/include/c++/v1",
+                "-I/home/viktor/.NDK/arm64/sysroot/usr/include/c++/v1",
                 "--target=aarch64-linux-android",
                 "-DNDEBUG=1 -x c++",
                 "-DDISABLE_CUDA_PHYSX",
@@ -22,7 +22,7 @@
                 "-I../PhysX/physx/../pxshared/include/",
             ],
             "stopAtEntry": true,
-            "cwd": "/home/jasper/embark/physx-rs/physx-sys/src",
+            "cwd": "/home/viktor/physx-rs/physx-sys/src",
             "environment": [
                 {
                     "name": "PHYSX_ROOT_DIR",

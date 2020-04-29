@@ -236,7 +236,7 @@ fn add_common(ctx: &mut Context) {
     // These includes are used by pretty much everything so just add them first
     if ccenv.target_os == "android" {
         builder.define("ANDROID", None);
-        builder.flag("--sysroot=/home/jasper/ndk/arm64/sysroot/");
+        //builder.flag("--sysroot=/home/viktor/.NDK/arm64/sysroot/");
     }
 
     ctx.includes.push(shared_root.join("include"));
@@ -289,9 +289,11 @@ fn add_common(ctx: &mut Context) {
             "-ferror-limit=0",
             "-Wall",
             "-Wextra",
-            "-Werror",
+            //"-Werror",
             "-Wstrict-aliasing=2",
             "-Weverything",
+            "-fno-rtti",
+            "-fno-exceptions",
             "-Wno-documentation-deprecated-sync",
             "-Wno-documentation-unknown-command",
             "-Wno-gnu-anonymous-struct",

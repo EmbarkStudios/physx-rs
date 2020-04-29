@@ -1,3 +1,5 @@
-[target.aarch64-linux-android]
-ar = "/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar"
-linker = "/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld"
+#[target.aarch64-linux-android]
+#ar = "/home/viktor/android-ndk-r21b/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar"
+#linker = "/home/viktor/android-ndk-r21b/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-clang++"
+#ar = "/home/viktor/.NDK/arm64/bin/aarch64-linux-android-ar"
+#linker = "/home/viktor/.NDK/arm64/bin/aarch64-linux-android29-clang++"

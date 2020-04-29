@@ -93,7 +93,7 @@ fn main() {
         .include("PhysX/physx/source/foundation/include");
         
     if target.ends_with("-android") {
-        physx_cc.flag("--sysroot=/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
+        physx_cc.flag("--sysroot=/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
     }
 
     if compiler.is_none() && host.contains("-linux-") {
@@ -131,15 +131,15 @@ fn main() {
 
         if target.ends_with("-android") {
             // for -lc++
-            cmd.arg("-L/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/");
+            cmd.arg("-L/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/");
 
             // make static lib so that when we run under qemu we don't need an elf loader just for libc++_shared.so
             cmd.arg("-static");
 
             // for crtbegin_static.o & crtend_android.o setting a searchpath doesn't seem to work 
             cmd.arg("-nostartfiles");
-            cmd.arg("/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_static.o");
-            cmd.arg("/home/jasper/ndk/android-ndk-r21/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o");
+            cmd.arg("/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_static.o");
+            cmd.arg("/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o");
         }
 
         cmd.arg("src/structgen/structgen.cpp");
