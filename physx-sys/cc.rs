@@ -287,6 +287,8 @@ fn add_common(ctx: &mut Context) {
             "-Werror",
             "-Wstrict-aliasing=2",
             "-Weverything",
+            "-Wno-alloca",
+            "-Wno-anon-enum-enum-conversion",
             "-Wno-documentation-deprecated-sync",
             "-Wno-documentation-unknown-command",
             "-Wno-gnu-anonymous-struct",
