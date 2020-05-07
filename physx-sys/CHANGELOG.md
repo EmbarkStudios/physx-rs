@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.4.1] - 2020-05-07
+
+### Fixed
+
+- [PR#62](https://github.com/EmbarkStudios/physx-rs/pull/62) fixed C++ compile warnings/errors when compiling with clang 10.0.0.
+
 ## [0.4.0] - 2020-05-07
 
 ### Changed
