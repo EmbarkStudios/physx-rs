@@ -3,6 +3,8 @@
 #![allow(non_snake_case)]
 #![allow(clippy::unreadable_literal)]
 
+#![feature(static_nobundle)]
+
 //! # 🎳 physx-sys
 //!
 //! [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
