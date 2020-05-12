@@ -21,8 +21,8 @@ include!("cc.rs");
 include!("cmake.rs");
 
 fn main() {
-    #[cfg(android)]
-    println!("cargo:rustc-link-lib=static-nobundle=stdc++");
+    //#[cfg(android)]
+    //println!("cargo:rustc-link-lib=static-nobundle=stdc++");
 
     // Use the optimization level to determine the build profile to pass, we
     // don't use cfg!(debug_assertions) here because I'm not sure what happens
