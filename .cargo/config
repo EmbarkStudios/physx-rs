@@ -1,5 +1,5 @@
-[target.aarch64-linux-android]
-ar = "/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar"
-linker = "/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang"
+#   [target.aarch64-linux-android]
+#ar = "/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar"
+#linker = "/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang"
 #ar = "/home/viktor/.NDK/arm64/bin/aarch64-linux-android-ar"
 #linker = "/home/viktor/.NDK/arm64/bin/aarch64-linux-android29-clang++"
