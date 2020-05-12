@@ -59,7 +59,7 @@ fn main() {
         let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target os not specified");
         let target_env = env::var("CARGO_CFG_TARGET_ENV").ok();
         let static_crt = env::var("CARGO_CFG_TARGET_FEATURE")
-            .unwrap_or_default()cc
+            .unwrap_or_default()
             .contains("crt-static");
 
         let environment = Environment {
