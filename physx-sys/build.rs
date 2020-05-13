@@ -160,6 +160,15 @@ fn main() {
         include
     };
 
+    // gcc gives this:
+    // warning: src/physx_generated.hpp:6777:7: warning:
+    // ‘void* memcpy(void*, const void*, size_t)’ reading 2 bytes from a region of size 1 [-Wstringop-overflow=]
+    // which from cursory glance seems to be an erroneous warning as the type it is talking
+    // about is inside a struct containing a single u16, so....
+    if physx_cc.get_compiler().is_like_gnu() {
+        physx_cc.flag("-Wno-stringop-overflow");
+    }
+
     physx_cc
         .include(include_path)
         .file("src/physx_api.cpp")
