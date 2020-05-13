@@ -239,6 +239,8 @@ fn add_common(ctx: &mut Context) {
         //builder.flag("-lc++_static");
         //builder.flag("--sysroot=/home/viktor/.NDK/arm64/sysroot/");
         builder.flag("--sysroot=/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
+        builder.cpp_link_stdlib("c++");
+        builder.cpp_set_stdlib("c++");
     }
 
     ctx.includes.push(shared_root.join("include"));
