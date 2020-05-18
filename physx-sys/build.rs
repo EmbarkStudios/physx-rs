@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::{env, path::PathBuf};
 
 struct Environment {
@@ -17,7 +19,9 @@ struct Context {
     includes: Vec<PathBuf>,
 }
 
+#[cfg(not(feature = "use-cmake"))]
 include!("cc.rs");
+#[cfg(feature = "use-cmake")]
 include!("cmake.rs");
 
 fn main() {
@@ -34,7 +38,6 @@ fn main() {
         _ => "profile",
     };
 
-    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();
     let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
@@ -71,11 +74,11 @@ fn main() {
             static_crt,
         };
 
-        if use_cmake {
-            cmake_compile(environment);
-        } else {
-            cc_compile(environment)
-        }
+        #[cfg(feature = "use-cmake")]
+        cmake_compile(environment);
+
+        #[cfg(not(feature = "use-cmake"))]
+        cc_compile(environment);
     }
 
     let mut cc_builder = cc::Build::new();
@@ -168,6 +171,15 @@ fn main() {
         include
     };
 
+    // gcc gives this:
+    // warning: src/physx_generated.hpp:6777:7: warning:
+    // ‘void* memcpy(void*, const void*, size_t)’ reading 2 bytes from a region of size 1 [-Wstringop-overflow=]
+    // which from cursory glance seems to be an erroneous warning as the type it is talking
+    // about is inside a struct containing a single u16, so....
+    if physx_cc.get_compiler().is_like_gnu() {
+        physx_cc.flag("-Wno-stringop-overflow");
+    }
+
     physx_cc
         .include(include_path)
         .file("src/physx_api.cpp")
@@ -184,7 +196,7 @@ fn main() {
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
 
     // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
-    if use_cmake {
+    if cfg!(feature = "use-cmake") {
         let _ = std::fs::remove_file(
             env::current_dir()
                 .unwrap()

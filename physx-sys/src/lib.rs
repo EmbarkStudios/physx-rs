@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
 #![allow(clippy::unreadable_literal)]
+#![allow(clippy::unused_unit)]
 
 //! # 🎳 physx-sys
 //!

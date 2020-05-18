@@ -297,6 +297,8 @@ fn add_common(ctx: &mut Context) {
             "-Weverything",
             "-fno-rtti",
             "-fno-exceptions",
+            "-Wno-alloca",
+            "-Wno-anon-enum-enum-conversion",
             "-Wno-documentation-deprecated-sync",
             "-Wno-documentation-unknown-command",
             "-Wno-gnu-anonymous-struct",
@@ -350,7 +352,20 @@ fn add_common(ctx: &mut Context) {
             "-Wno-c99-extensions",
         ]
     } else if builder.get_compiler().is_like_gnu() {
-        vec!["-Wall -Werror -Wno-invalid-offsetof -Wno-uninitialized"]
+        vec![
+            "-std=c++14",
+            "-Wall",
+            "-Wextra",
+            "-Werror",
+            "-Wstrict-aliasing=2",
+            "-Wno-invalid-offsetof",
+            "-Wno-deprecated-copy",
+            "-Wno-class-memaccess",
+            "-Wno-uninitialized",
+            "-Wno-restrict",
+            "-Wno-implicit-fallthrough",
+            "-Wno-ignored-qualifiers",
+        ]
     } else if builder.get_compiler().is_like_msvc() {
         // Disable defaults and force certain flags
         builder.no_default_flags(true);
@@ -451,8 +466,4 @@ fn cc_compile(target_env: Environment) {
     }
 
     ctx.builder.compile("physx");
-
-    // if ctx.builder.get_compiler().is_like_msvc() {
-    //     panic!("OK, WHAT HAVE WE HERE THEN");
-    // }
 }
