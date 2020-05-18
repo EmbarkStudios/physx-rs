@@ -21,9 +21,6 @@ include!("cc.rs");
 include!("cmake.rs");
 
 fn main() {
-    //#[cfg(android)]
-    //println!("cargo:rustc-link-lib=static-nobundle=stdc++");
-
     // Use the optimization level to determine the build profile to pass, we
     // don't use cfg!(debug_assertions) here because I'm not sure what happens
     // with that when build dependencies are configured to be debug and the
@@ -37,7 +34,7 @@ fn main() {
         _ => "profile",
     };
 
-    let use_cmake = false;
+    let use_cmake = env::var("CARGO_FEATURE_USE_CMAKE").is_ok();;
     let target = env::var("TARGET").expect("TARGET not specified");
     let host = env::var("HOST").expect("HOST not specified");
 
@@ -75,7 +72,6 @@ fn main() {
         };
 
         if use_cmake {
-            panic!("wtf are you doing?");
             cmake_compile(environment);
         } else {
             cc_compile(environment)
@@ -95,10 +91,6 @@ fn main() {
         .include("PhysX/physx/include")
         .include("PhysX/pxshared/include")
         .include("PhysX/physx/source/foundation/include");
-        
-    if target.ends_with("-android") {
-        //physx_cc.flag("--sysroot=/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
-    }
 
     if compiler.is_none() && host.contains("-linux-") {
         physx_cc.compiler("clang++");
@@ -131,19 +123,6 @@ fn main() {
             cmd.arg(s);
         } else {
             cmd.arg("-o").arg(&structgen_path);
-        }
-
-        if target.ends_with("-android") {
-            // for -lc++
-            //cmd.arg("-L/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/");
-
-            // make static lib so that when we run under qemu we don't need an elf loader just for libc++_shared.so
-            //cmd.arg("-static");
-
-            // for crtbegin_static.o & crtend_android.o setting a searchpath doesn't seem to work 
-            //cmd.arg("-nostartfiles");
-            //cmd.arg("/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtbegin_static.o");
-            //cmd.arg("/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/29/crtend_android.o");
         }
 
         cmd.arg("src/structgen/structgen.cpp");
