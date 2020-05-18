@@ -236,7 +236,7 @@ fn add_common(ctx: &mut Context) {
     // These includes are used by pretty much everything so just add them first
     if ccenv.target_os == "android" {
         builder.define("ANDROID", None);
-        builder.flag("--sysroot=/home/viktor/.NDK/arm64/sysroot/");
+        builder.flag("--sysroot=/home/viktor/android-ndk-r21b/toolchains/llvm/prebuilt/linux-x86_64/sysroot");
         //builder.flag("--sysroot=/usr/local/android-ndk-r20/toolchains/llvm/prebuilt/linux-x86_64/sysroot/");
         builder.cpp_link_stdlib("c++");
         builder.cpp_set_stdlib("c++");
