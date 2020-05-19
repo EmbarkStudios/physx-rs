@@ -392,7 +392,14 @@ fn add_common(ctx: &mut Context) {
         // Disable some warnings
         flags.extend(
             [
-                "/wd4514", "/wd4820", "/wd4127", "/wd4710", "/wd4711", "/wd4577", "/wd4996",
+                "/wd4514",
+                "/wd4820",
+                "/wd4127",
+                "/wd4710",
+                "/wd4711",
+                "/wd4577",
+                "/wd4996",
+                "/wd4723", // potential divide by zero, only found when building in release
             ]
             .iter(),
         );
