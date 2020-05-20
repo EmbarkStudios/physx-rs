@@ -240,10 +240,8 @@ fn add_common(ctx: &mut Context) {
             Ok(str) => str,
             Err(_) => panic!("environment variable \"NDK_HOME\" has not been set"),
         };
-        println!("scooter{}", android_home);
         builder.flag(&format!("--sysroot={}/toolchains/llvm/prebuilt/linux-x86_64/sysroot", android_home));
         builder.cpp_link_stdlib("c++");
-        builder.cpp_set_stdlib("c++");
     }
 
     ctx.includes.push(shared_root.join("include"));
@@ -296,11 +294,9 @@ fn add_common(ctx: &mut Context) {
             "-ferror-limit=0",
             "-Wall",
             "-Wextra",
-            //"-Werror",
+            "-Werror",
             "-Wstrict-aliasing=2",
             "-Weverything",
-            "-fno-rtti",
-            "-fno-exceptions",
             "-Wno-alloca",
             "-Wno-anon-enum-enum-conversion",
             "-Wno-documentation-deprecated-sync",
