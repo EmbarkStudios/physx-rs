@@ -11,21 +11,23 @@ readme = "README.md"
 keywords = ["physics"]
 categories = ["external-ffi-bindings", "simulation", "game-engines"] 
 exclude = [
+    "PhysX/**/*.bat",
+    "PhysX/**/*.html",
+    "PhysX/**/*.sh",
+    "PhysX/*demo/**/*",
+    "PhysX/externals/cg-linux/**/*",
     "PhysX/externals/clang-physxmetadata/**/*",
+    "PhysX/externals/glew-linux/**/*",
     "PhysX/externals/glew/**/*",
     "PhysX/externals/opengl-linux/**/*",
     "PhysX/externals/targa/**/*",
     "PhysX/externals/vswhere/**/*",
-    "PhysX/*demo/**/*",
     "PhysX/physx/bin/**/*",
     "PhysX/physx/buildtools/**/*",
     "PhysX/physx/documentation/**/*",
     "PhysX/physx/samples/**/*",
     "PhysX/physx/snippets/**/*",
     "PhysX/physx/tools/**/*",
-    "PhysX/**/*.sh",
-    "PhysX/**/*.bat",
-    "PhysX/**/*.html",
 ]
 
 [lib]
