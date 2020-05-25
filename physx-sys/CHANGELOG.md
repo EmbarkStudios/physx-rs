@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.4.2] - 2020-05-25
+
+### Fixed
+
+- [PR#67](https://github.com/EmbarkStudios/physx-rs/pull/67) Reduce crate size from 10 MB to 2.7 MB by removing unused PhysX binary files
+
 ## [0.4.1] - 2020-05-07
 
 ### Fixed
@@ -21,5 +27,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.3.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.2...HEAD
+[0.4.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.1...physx-sys-v0.4.2
+[0.4.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.0...physx-sys-v0.4.1
+[0.4.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.3.0...physx-sys-v0.4.0
 [0.3.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.2.4...physx-sys-v0.3.0
