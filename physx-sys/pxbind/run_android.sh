@@ -7,6 +7,5 @@ export PHYSX_ROOT_DIR=../PhysX/physx
     -I../pxbind \
     -I../PhysX/physx/include \
     -I../PhysX/physx/../pxshared/include/ \
-    -I/home/viktor/android-ndk-r21b/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1 \
     --sysroot=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot \
     -fsigned-char
