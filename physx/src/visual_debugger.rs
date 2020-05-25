@@ -86,7 +86,7 @@ impl VisualDebugger {
         let mut pvd = Pvd::new(foundation);
         let transport = unsafe {
             let oshost = CStr::from_bytes_with_nul_unchecked(b"localhost\0");
-            phys_PxDefaultPvdSocketTransportCreate(oshost.as_ptr(), port, timeout)
+            phys_PxDefaultPvdSocketTransportCreate(oshost.as_ptr() as _, port, timeout)
         };
 
         if !pvd.connect(transport, flags) {
