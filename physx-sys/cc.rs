@@ -367,9 +367,14 @@ fn add_common(ctx: &mut Context) {
             "-Wno-ignored-qualifiers",
         ]
     } else if builder.get_compiler().is_like_msvc() {
-        // Disable defaults and force certain flags
+        // Disable defaults since we disagree with cc in some cases, this
+        // means we have to manually set eg profile and debug flags that
+        // would normally be set by default
         builder.no_default_flags(true);
-        let mut flags = vec!["-nologo"];
+
+        // We don't care about logos, but we absolutley care about not having
+        // long compile times
+        let mut flags = vec!["-nologo", "/MP"];
 
         if ccenv.static_crt {
             flags.push("/MT");
@@ -392,13 +397,7 @@ fn add_common(ctx: &mut Context) {
         // Disable some warnings
         flags.extend(
             [
-                "/wd4514",
-                "/wd4820",
-                "/wd4127",
-                "/wd4710",
-                "/wd4711",
-                "/wd4577",
-                "/wd4996",
+                "/wd4514", "/wd4820", "/wd4127", "/wd4710", "/wd4711", "/wd4577", "/wd4996",
                 "/wd4723", // potential divide by zero, only found when building in release
             ]
             .iter(),
