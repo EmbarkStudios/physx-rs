@@ -114,7 +114,6 @@ fn main() {
 
         let structgen_compiler = physx_cc.get_compiler();
         let mut cmd = structgen_compiler.to_command();
-        
         if structgen_compiler.is_like_msvc() {
             let mut s = OsString::from("/Fe");
             s.push(&structgen_path);
@@ -158,7 +157,7 @@ fn main() {
         match target.as_str() {
             "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" | "aarch64-linux-android" => {
                 include.push(target);
-            },
+            }
             nix if nix.starts_with("x86_64-unknown-linux") => {
                 include.push("x86_64-unknown-linux");
             }
@@ -201,4 +200,3 @@ fn main() {
         );
     }
 }
-
