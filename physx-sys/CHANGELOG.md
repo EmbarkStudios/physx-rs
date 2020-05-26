@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.4.3] - 2020-05-26
+
+### Changed
+
+- [PR#66](https://github.com/EmbarkStudios/physx-rs/pull/66) Added support for android (`aarch64`) to the build system and to `pxbind`.
+
 ## [0.4.2] - 2020-05-25
 
 ### Fixed
