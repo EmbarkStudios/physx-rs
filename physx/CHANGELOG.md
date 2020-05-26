@@ -2,7 +2,7 @@
 
 
 ## [0.6.1] - 2020-05-26
-### Changed
+### Added
 - [PR#66](https://github.com/EmbarkStudios/physx-rs/pull/66) minor change to take the fact that the internal pointer type may differ across platforms into account.
 ## [0.6.0] - 2020-05-07
 ### Changed
