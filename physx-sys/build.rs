@@ -139,7 +139,14 @@ fn main() {
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
-        let mut structgen = std::process::Command::new(&structgen_path);
+        let mut structgen = if target.starts_with("aarch64-") {
+            let mut structgen = std::process::Command::new("qemu-aarch64");
+            structgen.arg(&structgen_path);
+            structgen
+        } else {
+            std::process::Command::new(&structgen_path)
+        };
+
         structgen.current_dir(&output_dir_path);
         structgen.status().expect("structgen failed to execute");
 
@@ -148,7 +155,7 @@ fn main() {
         let mut include = PathBuf::from("src/generated");
 
         match target.as_str() {
-            "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" => {
+            "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" | "aarch64-linux-android" => {
                 include.push(target);
             }
             nix if nix.starts_with("x86_64-unknown-linux") => {

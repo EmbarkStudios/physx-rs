@@ -595,6 +595,7 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::Char_S:
         case BuiltinType::SChar:
             return "char";
+        case BuiltinType::Char_U:
         case BuiltinType::UChar:
             return "unsigned char";
 
@@ -611,10 +612,12 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::Long:
             return "int64_t";
         case BuiltinType::ULong:
+        case BuiltinType::ULongLong:
             return "uint64_t";
+
     }
 
-    printf("Unhanded builtin type. BuiltinType::Kind = %u\n", unsigned(k));
+    printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
     abort();
 }
 
@@ -635,6 +638,7 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::SChar:
             return "i8";
         case BuiltinType::UChar:
+        case BuiltinType::Char_U:
             return "u8";
 
         case BuiltinType::Short:
@@ -650,10 +654,11 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::Long:
             return "isize";
         case BuiltinType::ULong:
+        case BuiltinType::ULongLong:
             return "usize";
     }
 
-    printf("Unhanded builtin type. BuiltinType::Kind = %u\n", unsigned(k));
+    printf("Unhanded builtin rust type. BuiltinType::Kind = %u\n", unsigned(k));
     abort();
 }
 

@@ -234,6 +234,16 @@ fn add_common(ctx: &mut Context) {
     builder.cpp(true);
 
     // These includes are used by pretty much everything so just add them first
+    if ccenv.target_os == "android" {
+        builder.define("ANDROID", None);
+        let android_home = match env::var("NDK_HOME") {
+            Ok(str) => str,
+            Err(_) => panic!("environment variable \"NDK_HOME\" has not been set"),
+        };
+        builder.flag(&format!("--sysroot={}/toolchains/llvm/prebuilt/linux-x86_64/sysroot", android_home));
+        builder.cpp_link_stdlib("c++");
+    }
+
     ctx.includes.push(shared_root.join("include"));
     ctx.includes.extend(
         [
@@ -331,6 +341,15 @@ fn add_common(ctx: &mut Context) {
             "-Wno-unknown-warning-option",
             "-Wno-atomic-implicit-seq-cst",
             "-Wno-extra-semi-stmt",
+
+            "-Wno-gcc-compat",
+            "-Wno-gnu-include-next",
+            "-Wno-class-varargs",
+            "-Wno-implicit-exception-spec-mismatch",
+            "-Wno-macro-redefined",
+            "-Wno-zero-length-array",
+            "-Wno-undefined-func-template",
+            "-Wno-c99-extensions",
         ]
     } else if builder.get_compiler().is_like_gnu() {
         vec![
