@@ -1,10 +1,16 @@
 ## [Unreleased]
 
-## [0.4.3] - 2020-05-26
+## [0.4.4] - 2020-06-02
 
 ### Added
 
 - [PR#66](https://github.com/EmbarkStudios/physx-rs/pull/66) Added support for android (`aarch64`) to the build system and to `pxbind`.
+
+## [0.4.3] - 2020-05-27
+
+### Fixed
+
+- [PR#70](https://github.com/EmbarkStudios/physx-rs/pull/70) cleaned up some build script problems for Windows.
 
 ## [0.4.2] - 2020-05-25
 
@@ -33,7 +39,9 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.2...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...HEAD
+[0.4.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.3...physx-sys-v0.4.4
+[0.4.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.2...physx-sys-v0.4.3
 [0.4.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.1...physx-sys-v0.4.2
 [0.4.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.0...physx-sys-v0.4.1
 [0.4.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.3.0...physx-sys-v0.4.0
