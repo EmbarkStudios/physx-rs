@@ -69,13 +69,22 @@ If you require functionality not covered by the [physx](physx/) wrapper you can 
 ## Prerequisites
 
 * C++ compiler ([see the `cc` crate](https://crates.io/crates/cc) for requirements)
-* CMake ([see the `cmake` crate](https://crates.io/crates/cmake) for requirements)
+* CMake (optional, only used when the `use-cmake` feature is enabled) ([see the `cmake` crate](https://crates.io/crates/cmake) for requirements)
 
 ## How to build
 
 ```
 git submodule update --init
 cargo build --release
+```
+
+## Windows Note
+
+It is highly recommended to not enable debug info in release mode when building with MSVC, as the Physx C++ code will take an **extremely** long time to compile. You can disable this by putting the following in your Cargo.toml
+
+```ini
+[profile.release.package.physx-sys]
+debug = false
 ```
 
 ## Contributing
