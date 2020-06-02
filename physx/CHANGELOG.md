@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+
+## [0.6.1] - 2020-05-26
+### Added
+- [PR#66](https://github.com/EmbarkStudios/physx-rs/pull/66) minor change to take the fact that the internal pointer type may differ across platforms into account.
 ## [0.6.0] - 2020-05-07
 ### Changed
 - [PR#59](https://github.com/EmbarkStudios/physx-rs/pull/59) made `cmake` into an optional, non-default, dependency for building the C++ code, in favor of just using the `cc` crate. CMake can be enabled via the `use-cmake` feature.
