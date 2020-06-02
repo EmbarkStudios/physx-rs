@@ -1,9 +1,10 @@
 ## [Unreleased]
 
 
-## [0.6.1] - 2020-05-26
+## [0.6.1] - 2020-06-02
 ### Added
 - [PR#66](https://github.com/EmbarkStudios/physx-rs/pull/66) minor change to take the fact that the internal pointer type may differ across platforms into account.
+
 ## [0.6.0] - 2020-05-07
 ### Changed
 - [PR#59](https://github.com/EmbarkStudios/physx-rs/pull/59) made `cmake` into an optional, non-default, dependency for building the C++ code, in favor of just using the `cc` crate. CMake can be enabled via the `use-cmake` feature.
@@ -21,6 +22,8 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.5.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.1...HEAD
+[0.6.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.0...physx-v0.6.1
+[0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.5.1...physx-v0.6.0
 [0.5.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.5.0...physx-v0.5.1
 [0.5.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.4.2...physx-v0.5.0
