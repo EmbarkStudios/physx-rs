@@ -32,11 +32,11 @@ jobs:
       - uses: actions/checkout@v1
       - uses: EmbarkStudios/cargo-deny-action@master # we use latest master as this is our own tool that we maintain
 
-  test:
-    name: Test
+  test_debug:
+    name: Test (Debug)
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2016, windows-2019, macOS-latest]
+        os: [ubuntu-latest, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.1.app
     runs-on: ${{ matrix.os }}
@@ -47,16 +47,95 @@ jobs:
           toolchain: stable
           override: true
       - run: git submodule update --init
-      - uses: actions-rs/cargo@v1
+      - name: cargo fetch
+        uses: actions-rs/cargo@v1
+        with:
+          command: fetch
+      - name: test - no features
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - name: test - cmake + structgen
+        uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features
+      - name: ball cmake + structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example ball --all-features
+      - name: ball no features
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example ball
+      - name: ball just cmake
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
+      - name: ball just structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features structgen
+
+  test_release:
+    name: Test (Release)
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2019, macOS-latest]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_11.1.app
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: git submodule update --init
+      - name: cargo fetch
+        uses: actions-rs/cargo@v1
+        with:
+          command: fetch
+      - name: test - no features
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --release
+      - name: test - cmake + structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --all-features --release
+      - name: ball cmake + structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example ball --all-features --release
+      - name: ball no features
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --example ball --release
+      - name: ball just cmake
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake --release
+      - name: ball just structgen
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
 
   package:
     name: Package
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2016, windows-2019, macOS-latest]
+        os: [ubuntu-latest, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.1.app
     runs-on: ${{ matrix.os }}
@@ -71,3 +150,37 @@ jobs:
         with:
           command: package
           args: --manifest-path ./physx-sys/Cargo.toml
+
+  structgen:
+    name: Structgen
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2019, macOS-latest]
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_11.1.app
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: git submodule update --init
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --manifest-path ./physx-sys/Cargo.toml --features structgen
+      - name: Upload
+        shell: bash
+        run: |
+          # Copy the structgen output to a deterministic location
+          rs=$(find target/ -name structgen_out.rs)
+          hpp=$(find target/ -name structgen_out.hpp)
+
+          mkdir ./structgen
+          cp $rs ./structgen/structgen.rs
+          cp $hpp ./structgen/structgen_out.hpp
+      - uses: actions/upload-artifact@v1
+        with:
+          name: structgen-${{ matrix.os }}
+          path: structgen

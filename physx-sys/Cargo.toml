@@ -1,7 +1,7 @@
 [package]
 name = "physx-sys"
 description = "Unsafe bindings for NVIDIA PhysX C++ SDK"
-version = "0.2.4+4.1.1"
+version = "0.4.4"
 authors = ["Embark <opensource@embark-studios.com>", "Tomasz Stachowiak <h3@h3.gd>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/EmbarkStudios/physx-rs"
@@ -11,21 +11,23 @@ readme = "README.md"
 keywords = ["physics"]
 categories = ["external-ffi-bindings", "simulation", "game-engines"] 
 exclude = [
+    "PhysX/**/*.bat",
+    "PhysX/**/*.html",
+    "PhysX/**/*.sh",
+    "PhysX/*demo/**/*",
+    "PhysX/externals/cg-linux/**/*",
     "PhysX/externals/clang-physxmetadata/**/*",
+    "PhysX/externals/glew-linux/**/*",
     "PhysX/externals/glew/**/*",
     "PhysX/externals/opengl-linux/**/*",
     "PhysX/externals/targa/**/*",
     "PhysX/externals/vswhere/**/*",
-    "PhysX/*demo/**/*",
     "PhysX/physx/bin/**/*",
     "PhysX/physx/buildtools/**/*",
     "PhysX/physx/documentation/**/*",
     "PhysX/physx/samples/**/*",
     "PhysX/physx/snippets/**/*",
     "PhysX/physx/tools/**/*",
-    "PhysX/**/*.sh",
-    "PhysX/**/*.bat",
-    "PhysX/**/*.html",
 ]
 
 [lib]
@@ -34,5 +36,9 @@ doctest = false
 [dependencies]
 
 [build-dependencies]
-cc = "1.0"
-cmake = "0.1.35"
+cc = { version = "1.0", features = ["parallel"] }
+cmake = { version = "0.1.35", optional = true }
+
+[features]
+structgen = []
+use-cmake = ["cmake"]

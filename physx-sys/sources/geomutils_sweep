@@ -1,0 +1,13 @@
+[
+    "GuSweepBoxBox",
+    "GuSweepBoxSphere",
+    "GuSweepBoxTriangle_FeatureBased",
+    "GuSweepBoxTriangle_SAT",
+    "GuSweepCapsuleBox",
+    "GuSweepCapsuleCapsule",
+    "GuSweepCapsuleTriangle",
+    "GuSweepSphereCapsule",
+    "GuSweepSphereSphere",
+    "GuSweepSphereTriangle",
+    "GuSweepTriangleUtils",
+]

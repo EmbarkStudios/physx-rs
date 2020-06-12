@@ -101,7 +101,7 @@ impl Base {
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
     pub fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
-            std::ffi::CStr::from_ptr(PxBase_getConcreteTypeName(self.get_raw()))
+            std::ffi::CStr::from_ptr(PxBase_getConcreteTypeName(self.get_raw()) as _)
                 .to_str()
                 .ok()
         }

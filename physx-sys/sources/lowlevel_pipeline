@@ -1,0 +1,13 @@
+[
+    "PxcContactCache",
+    "PxcContactMethodImpl",
+    "PxcMaterialHeightField",
+    "PxcMaterialMesh",
+    "PxcMaterialMethodImpl",
+    "PxcMaterialShape",
+    "PxcNpBatch",
+    "PxcNpCacheStreamPair",
+    "PxcNpContactPrepShared",
+    "PxcNpMemBlockPool",
+    "PxcNpThreadContext",
+]

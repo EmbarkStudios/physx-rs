@@ -1,0 +1,12 @@
+[
+    "CctBoxController",
+    "CctCapsuleController",
+    "CctCharacterController",
+    "CctCharacterControllerCallbacks",
+    "CctCharacterControllerManager",
+    "CctController",
+    "CctObstacleContext",
+    "CctSweptBox",
+    "CctSweptCapsule",
+    "CctSweptVolume",
+]

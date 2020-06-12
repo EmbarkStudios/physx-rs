@@ -13,6 +13,7 @@ Wrapper for PhysX Scene
 use super::{
     articulation_reduced_coordinate::*,
     body::*,
+    controller::*,
     physics::Physics,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
@@ -36,6 +37,7 @@ pub struct Scene {
     statics: Vec<RigidStatic>,
     dynamics: Vec<RigidDynamic>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
+    controller_manager: Option<ControllerManager>,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,6 +50,7 @@ impl Scene {
             dynamics: Vec::new(),
             statics: Vec::new(),
             simulation_callback: None,
+            controller_manager: None,
         };
         _self.allocate_user_data();
         _self
@@ -71,10 +74,15 @@ impl Scene {
             destroy_contact_callback(callback);
         }
 
+        if let Some(manager) = self.controller_manager.take() {
+            manager.release();
+        }
+
         // Release the scene object
         let mut scene = self.px_scene.write().unwrap();
         let scene = scene.take().expect("scene already released");
         let b: Box<UserData> = Box::from_raw((*scene).userData as *mut _);
+
         drop(b);
         PxScene_release_mut(scene);
     }
@@ -86,6 +94,23 @@ impl Scene {
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
             )
         })
+    }
+
+    pub fn add_capsule_controller(
+        &mut self,
+        desc: &CapsuleControllerDesc,
+    ) -> Result<Controller, ControllerError> {
+        if self.controller_manager.is_none() {
+            return Err(ControllerError::NoControllerManager);
+        }
+
+        let mut controller = self
+            .controller_manager
+            .as_ref()
+            .unwrap()
+            .create_controller(desc);
+
+        Ok(Controller::new(controller.get_raw_mut()))
     }
 
     pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
@@ -436,6 +461,15 @@ impl Scene {
             PxScene_fetchResults_mut(scene.expect("accessing null ptr"), block, null_mut());
         }
     }
+
+    fn add_controller_manager(&mut self, locking_enabled: bool) {
+        if self.controller_manager.is_none() {
+            self.controller_manager = Some(ControllerManager::new(
+                self.px_scene.write().unwrap().expect("accessing null ptr"),
+                locking_enabled,
+            ))
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, BitFlags)]
@@ -469,15 +503,25 @@ pub struct SceneBuilder {
     pub(crate) simulation_filter_shader: Option<SimulationFilterShader>,
     pub(crate) simulation_threading: Option<SimulationThreadType>,
     pub(crate) broad_phase_type: BroadPhaseType,
+    pub(crate) use_controller_manager: bool,
+    pub(crate) controller_manager_locking: bool,
+    pub(crate) call_default_filter_shader_first: bool,
+    pub(crate) use_ccd: bool,
+    pub(crate) enable_ccd_resweep: bool,
 }
 
 impl Default for SceneBuilder {
     fn default() -> Self {
         Self {
             gravity: Vec3::new(0.0, -9.80665, 0.0), // standard gravity value
+            call_default_filter_shader_first: true,
             simulation_filter_shader: None,
             simulation_threading: None,
             broad_phase_type: BroadPhaseType::SweepAndPrune,
+            use_controller_manager: false,
+            controller_manager_locking: false,
+            use_ccd: false,
+            enable_ccd_resweep: false,
         }
     }
 }
@@ -503,24 +547,64 @@ impl SceneBuilder {
         self
     }
 
+    /// Enable the controller manager on the scene.
+    ///
+    /// Default: false, false
+    pub fn use_controller_manager(
+        &mut self,
+        use_controller_manager: bool,
+        locking_enabled: bool,
+    ) -> &mut Self {
+        self.use_controller_manager = use_controller_manager;
+        self.controller_manager_locking = locking_enabled;
+        self
+    }
+
+    /// Sets whether the filter should begin by calling the default filter shader
+    /// PxDefaultSimulationFilterShader that emulates the PhysX 2.8 rules.
+    ///
+    /// Default: true
+    pub fn set_call_default_filter_shader_first(
+        &mut self,
+        call_default_filter_shader_first: bool,
+    ) -> &mut Self {
+        self.call_default_filter_shader_first = call_default_filter_shader_first;
+        self
+    }
+
     /// Set the number of threads to use for simulation
     ///
     /// Default: not set
-    pub fn set_simulation_threading(&mut self, _type: SimulationThreadType) -> &mut Self {
-        self.simulation_threading = Some(_type);
+    pub fn set_simulation_threading(
+        &mut self,
+        simulation_threading: SimulationThreadType,
+    ) -> &mut Self {
+        self.simulation_threading = Some(simulation_threading);
         self
     }
 
     /// Set collision detection type
     ///
     /// Default: Sweep and prune
-    pub fn set_broad_phase_type(&mut self, _type: BroadPhaseType) -> &mut Self {
-        self.broad_phase_type = _type;
+    pub fn set_broad_phase_type(&mut self, broad_phase_type: BroadPhaseType) -> &mut Self {
+        self.broad_phase_type = broad_phase_type;
         self
     }
 
-    /// Build a new Scene from the provided parameters
-    pub(super) fn build(&self, physics: &mut Physics) -> PxSceneDesc {
+    /// Set if CCD (continuous collision detection) should be available for use in the scene.
+    /// Doesn't automatically enable it for all rigid bodies, they still need to be flagged.
+    ///
+    /// If you don't set enable_ccd_resweep to true, eDISABLE_CCD_RESWEEP is set, which improves performance
+    /// at the cost of accuracy right after bounces.
+    ///
+    /// Default: false, false
+    pub fn set_use_ccd(&mut self, use_ccd: bool, enable_ccd_resweep: bool) -> &mut Self {
+        self.use_ccd = use_ccd;
+        self.enable_ccd_resweep = enable_ccd_resweep;
+        self
+    }
+
+    pub(super) fn build_desc(&self, physics: &mut Physics) -> PxSceneDesc {
         unsafe {
             let tolerances = physics.get_tolerances_scale();
             let mut scene_desc = PxSceneDesc_new(tolerances);
@@ -537,16 +621,40 @@ impl SceneBuilder {
 
             scene_desc.cpuDispatcher = dispatcher;
             scene_desc.gravity = gl_to_px_v3(self.gravity);
-
+            if self.use_ccd {
+                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_CCD;
+                if !self.enable_ccd_resweep {
+                    scene_desc.flags.mBits |= PxSceneFlag::eDISABLE_CCD_RESWEEP;
+                }
+            }
             if let Some(filter_shader) = self.simulation_filter_shader {
                 physx_sys::enable_custom_filter_shader(
                     &mut scene_desc as *mut PxSceneDesc,
                     filter_shader,
+                    if self.call_default_filter_shader_first {
+                        1
+                    } else {
+                        0
+                    },
                 );
             } else {
                 scene_desc.filterShader = get_default_simulation_filter_shader();
             }
             scene_desc
+        }
+    }
+
+    /// Build a new Scene from the provided parameters
+    pub(super) fn build(&self, physics: &mut Physics) -> Scene {
+        unsafe {
+            let scene_desc = self.build_desc(physics);
+            let px_scene = PxPhysics_createScene_mut(physics.get_raw_mut(), &scene_desc);
+            let mut scene = Scene::new(px_scene);
+
+            if self.use_controller_manager {
+                scene.add_controller_manager(self.controller_manager_locking);
+            }
+            scene
         }
     }
 }

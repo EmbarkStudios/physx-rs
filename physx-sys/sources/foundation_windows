@@ -1,0 +1,12 @@
+[
+    "PsWindowsAtomic",
+    "PsWindowsCpu",
+    "PsWindowsFPU",
+    "PsWindowsMutex",
+    "PsWindowsPrintString",
+    "PsWindowsSList",
+    "PsWindowsSocket",
+    "PsWindowsSync",
+    "PsWindowsThread",
+    "PsWindowsTime",
+]
