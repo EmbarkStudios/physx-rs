@@ -7,7 +7,7 @@
 
 //! # 🎳 physx
 //!
-//! [![Build Status](https://travis-ci.com/EmbarkStudios/physx-rs.svg?branch=master)](https://travis-ci.com/EmbarkStudios/physx-rs)
+//! ![Build Status](https://github.com/EmbarkStudios/physx-rs/workflows/CI/badge.svg)
 //! [![Crates.io](https://img.shields.io/crates/v/physx.svg)](https://crates.io/crates/physx)
 //! [![Docs](https://docs.rs/physx/badge.svg)](https://docs.rs/physx)
 //! [![Contributor Covenant](https://img.shields.io/badge/contributor%20covenant-v1.4%20adopted-ff69b4.svg)](../CODE_OF_CONDUCT.md)
