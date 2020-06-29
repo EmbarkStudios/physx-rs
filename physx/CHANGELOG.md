@@ -6,7 +6,9 @@
 
 ### Changed
 
-- [PR#72](https://github.com/EmbarkStudios/physx-rs/pull/72)
+## [0.7.0] - 2020-06-29
+
+- [PR#72](https://github.com/EmbarkStudios/physx-rs/pull/72) Upgrade `glam` to 0.9. This includes a change of `Vec3` internal representation from 16-byte SIMD type to 12-byte 3x floats.
 
 ## [0.6.1] - 2020-06-02
 
@@ -38,7 +40,8 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.0...HEAD
+[0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.1...physx-v0.7.0
 [0.6.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.0...physx-v0.6.1
 [0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.5.1...physx-v0.6.0
 [0.5.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.5.0...physx-v0.5.1
