@@ -19,8 +19,8 @@ physx-sys = { version = "^0.4", path = "../physx-sys" }
 
 enumflags2 = "0.6"
 log = "0.4"
-glam = "0.8"
-thiserror = "1.0.11"
+glam = "0.9"
+thiserror = "1.0.20"
 
 [features]
 structgen = ["physx-sys/structgen"]

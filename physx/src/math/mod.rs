@@ -44,7 +44,7 @@ impl Isometry {
         assert!(x.w() == 0.0 && y.w() == 0.0 && z.w() == 0.0, "Unable to extract the rotation matrix because one of the W components of the axis wasn't 0.0");
 
         let rotation = Mat4::from_cols(x, y, z, Vec4::unit_w());
-        let translation = Mat4::from_translation(m.w_axis().truncate());
+        let translation = Mat4::from_translation(m.w_axis().truncate().into());
         Self {
             rotation,
             translation,
