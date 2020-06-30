@@ -118,7 +118,7 @@ class RaycastFilterCallback : public PxQueryFilterCallback
     }
 };
 
-typedef int (*RaycastHitCallback)(const PxRigidActor *actor, PxFilterData const *filterData, const void *userData);
+typedef int (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
 
 class RaycastFilterTrampoline : public PxQueryFilterCallback
 {
@@ -129,12 +129,13 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
     RaycastHitCallback mCallback;
     const void *mUserData;
 
-    virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &)
+    virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
     {
-        switch (mCallback(actor, &filterData, mUserData)) {
+        switch (mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
         case 0: return PxQueryHitType::eNONE;
         case 1: return PxQueryHitType::eTOUCH;
         case 2: return PxQueryHitType::eBLOCK;
+        default: return PxQueryHitType::eNONE;
         }
     }
 
