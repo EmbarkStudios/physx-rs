@@ -236,11 +236,26 @@ fn add_common(ctx: &mut Context) {
     // These includes are used by pretty much everything so just add them first
     if ccenv.target_os == "android" {
         builder.define("ANDROID", None);
-        let android_home = match env::var("NDK_HOME") {
-            Ok(str) => str,
-            Err(_) => panic!("environment variable \"NDK_HOME\" has not been set"),
+        let ndk_path = PathBuf::from(
+            env::var("NDK_HOME").expect("environment variable \"NDK_HOME\" has not been set"),
+        );
+        let ndk_toolchain = match ccenv.host.as_str() {
+            "x86_64-pc-windows-msvc" => "windows-x86_64",
+            "x86_64-unknown-linux-gnu" => "linux-x86_64",
+            "x86_64-apple-darwin" => "darwin-x86_64",
+            _ => panic!("Host triple {} is unsupported for cross-compilation to Android"),
         };
-        builder.flag(&format!("--sysroot={}/toolchains/llvm/prebuilt/linux-x86_64/sysroot", android_home));
+        let sysroot_path = ndk_path
+            .join("toolchains/llvm/prebuilt")
+            .join(ndk_toolchain)
+            .join("sysroot");
+        if !sysroot_path.exists() {
+            panic!(
+                "Can't find Android NDK sysroot path \"{}\"",
+                sysroot_path.to_str().unwrap()
+            );
+        }
+        builder.flag(&format!("--sysroot={}", &sysroot_path.to_str().unwrap()));
         builder.cpp_link_stdlib("c++");
     }
 
@@ -341,7 +356,6 @@ fn add_common(ctx: &mut Context) {
             "-Wno-unknown-warning-option",
             "-Wno-atomic-implicit-seq-cst",
             "-Wno-extra-semi-stmt",
-
             "-Wno-gcc-compat",
             "-Wno-gnu-include-next",
             "-Wno-class-varargs",
