@@ -174,8 +174,13 @@ pub type CollisionCallback =
 /// return 0 = eNONE
 /// return 1 = eTOUCH
 /// return 2 = eBLOCK
-pub type RaycastHitCallback =
-    unsafe extern "C" fn(*const PxRigidActor, *const PxFilterData, *const PxShape, hit_flags: u32, *const c_void) -> i32;
+pub type RaycastHitCallback = unsafe extern "C" fn(
+    *const PxRigidActor,
+    *const PxFilterData,
+    *const PxShape,
+    hit_flags: u32,
+    *const c_void,
+) -> i32;
 
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
