@@ -126,7 +126,7 @@
 //! Unless you explicitly state otherwise, any contribution intentionally
 //! submitted for inclusion in the work by you, as defined in the Apache-2.0
 //! license, shall be dual licensed as above, without any additional terms or
-//! conditions.  
+//! conditions.
 
 #[cfg(feature = "structgen")]
 include!(concat!(env!("OUT_DIR"), "/structgen_out.rs"));
@@ -171,6 +171,12 @@ pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 
+/// return 0 = eNONE
+/// return 1 = eTOUCH
+/// return 2 = eBLOCK
+pub type RaycastHitCallback =
+    unsafe extern "C" fn(*const PxFilterData, *const PxActor, *const c_void) -> i32;
+
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
     pub attributes0: u32,
@@ -189,8 +195,16 @@ extern "C" {
     pub fn physx_create_physics(foundation: *mut PxFoundation) -> *mut PxPhysics;
     pub fn get_default_allocator() -> *mut PxDefaultAllocator;
     pub fn get_default_error_callback() -> *mut PxDefaultErrorCallback;
+
+    /// Destroy the returned callback object using PxQueryFilterCallback_delete.
     pub fn create_raycast_filter_callback(
         actor_to_ignore: *const PxRigidActor,
+    ) -> *mut PxQueryFilterCallback;
+
+    /// Destroy the returned callback object using PxQueryFilterCallback_delete.
+    pub fn create_raycast_filter_callback_func(
+        callback: RaycastHitCallback,
+        userdata: *mut c_void,
     ) -> *mut PxQueryFilterCallback;
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
