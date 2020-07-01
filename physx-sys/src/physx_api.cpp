@@ -118,6 +118,33 @@ class RaycastFilterCallback : public PxQueryFilterCallback
     }
 };
 
+typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
+
+class RaycastFilterTrampoline : public PxQueryFilterCallback
+{
+  public:
+    RaycastFilterTrampoline(RaycastHitCallback callback, const void *userdata)
+        : mCallback(callback), mUserData(userdata) {}
+
+    RaycastHitCallback mCallback;
+    const void *mUserData;
+
+    virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
+    {
+        switch (mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
+        case 0: return PxQueryHitType::eNONE;
+        case 1: return PxQueryHitType::eTOUCH;
+        case 2: return PxQueryHitType::eBLOCK;
+        default: return PxQueryHitType::eNONE;
+        }
+    }
+
+    virtual PxQueryHitType::Enum postFilter(const PxFilterData &, const PxQueryHit &)
+    {
+        return PxQueryHitType::eNONE;
+    }
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -147,6 +174,10 @@ extern "C"
     PxQueryFilterCallback *create_raycast_filter_callback(PxRigidActor *actor_to_ignore)
     {
         return new RaycastFilterCallback(actor_to_ignore);
+    }
+
+    PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData) {
+        return new RaycastFilterTrampoline(callback, userData);
     }
 
     void *get_default_simulation_filter_shader()
