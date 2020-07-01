@@ -118,7 +118,7 @@ class RaycastFilterCallback : public PxQueryFilterCallback
     }
 };
 
-typedef int (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
+typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
 
 class RaycastFilterTrampoline : public PxQueryFilterCallback
 {

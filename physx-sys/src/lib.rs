@@ -171,16 +171,16 @@ pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 
-/// return 0 = eNONE
-/// return 1 = eTOUCH
-/// return 2 = eBLOCK
+/// return 0 = PxQueryHitType::eNONE
+/// return 1 = PxQueryHitType::eTOUCH
+/// return 2 = PxQueryHitType::eBLOCK
 pub type RaycastHitCallback = unsafe extern "C" fn(
     *const PxRigidActor,
     *const PxFilterData,
     *const PxShape,
     hit_flags: u32,
     *const c_void,
-) -> i32;
+) -> u32;
 
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
