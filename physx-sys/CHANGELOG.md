@@ -1,5 +1,15 @@
 ## [Unreleased]
 
+## [0.4.5] - 2020-07-01
+
+### Added
+
+- [PR#73](https://github.com/EmbarkStudios/physx-rs/pull/73) Added `create_raycast_filter_callback_func`, allowing custom filtering of raycast hits
+
+### Fixed
+
+- [PR#74](https://github.com/EmbarkStudios/physx-rs/pull/74) Fix Android NDK toolchain path selection on Mac & Windows
+
 ## [0.4.4] - 2020-06-02
 
 ### Added
@@ -39,7 +49,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.5...HEAD
+[0.4.5]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...physx-sys-v0.4.5
 [0.4.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.3...physx-sys-v0.4.4
 [0.4.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.2...physx-sys-v0.4.3
 [0.4.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.1...physx-sys-v0.4.2
