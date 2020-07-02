@@ -1,5 +1,7 @@
 on: [push, pull_request]
 name: CI
+env:
+    ANDROID_NDK_ROOT : /usr/local/lib/android/sdk/ndk-bundle
 jobs:
   lint:
     name: Lint
@@ -183,4 +185,89 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: structgen-${{ matrix.os }}
+          path: structgen
+
+  build_android_debug:
+    name: Build (Debug) (aarch64-linux-android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: git submodule update --init
+      - run: rustup target add aarch64-linux-android
+      - name: cargo fetch
+        uses: actions-rs/cargo@v1
+        with:
+          command: fetch
+      - name: build - no features
+        env:
+          LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
+          CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
+          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
+          AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
+        uses: actions-rs/cargo@v1
+        with:
+          command: build 
+          args: --target aarch64-linux-android
+
+  build_android_release:
+    name: Build (Release) (aarch64-linux-android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: git submodule update --init
+      - run: rustup target add aarch64-linux-android
+      - name: cargo fetch
+        uses: actions-rs/cargo@v1
+        with:
+          command: fetch
+      - name: build - no features
+        env:
+          LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
+          CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
+          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
+          AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
+        uses: actions-rs/cargo@v1
+        with:
+          command: build 
+          args: --target aarch64-linux-android --release
+
+  android_structgen:
+    name: Structgen (aarch64-linux-android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: git submodule update --init
+      - run: rustup target add aarch64-linux-android
+      - run: sudo apt-get install libclang-9-dev
+      - name: build & run pxbind
+        env:
+          LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
+          CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
+          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
+          AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
+        run: export CC=/usr/bin/clang && export CXX=/usr/bin/clang++ && cd physx-sys/pxbind && ./build.sh && echo build succeeded && ./run_android.sh
+      - name: Upload
+        shell: bash
+        run: |
+          # Copy the structgen output to a deterministic location
+          rs=$(find physx-sys/src/ -name physx_generated.rs)
+          hpp=$(find physx-sys/src/ -name physx_generated.hpp)
+          mkdir ./structgen
+          cp $rs ./structgen/structgen.rs
+          cp $hpp ./structgen/structgen_out.hpp
+      - uses: actions/upload-artifact@v1
+        with:
+          name: structgen-aarch64-linux-android
           path: structgen

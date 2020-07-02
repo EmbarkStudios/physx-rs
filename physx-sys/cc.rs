@@ -237,7 +237,7 @@ fn add_common(ctx: &mut Context) {
     if ccenv.target_os == "android" {
         builder.define("ANDROID", None);
         let ndk_path = PathBuf::from(
-            env::var("NDK_HOME").expect("environment variable \"NDK_HOME\" has not been set"),
+            env::var("ANDROID_NDK_ROOT").expect("environment variable \"ANDROID_NDK_ROOT\" has not been set"),
         );
         let ndk_toolchain = match ccenv.host.as_str() {
             "x86_64-pc-windows-msvc" => "windows-x86_64",
