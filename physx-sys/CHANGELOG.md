@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.4.7] - 2020-07-02
+
+### Fixed
+
+- [PR#76](https://github.com/EmbarkStudios/physx-rs/pull/76) Use proper `ANDROID_NDK_ROOT` env var instead of `NDK_HOME`
+
 ## [0.4.6] - 2020-07-01
 
 ### Added
@@ -49,7 +55,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.6...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...HEAD
+[0.4.7]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.6...physx-sys-v0.4.7
 [0.4.6]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...physx-sys-v0.4.6
 [0.4.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.3...physx-sys-v0.4.4
 [0.4.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.2...physx-sys-v0.4.3
