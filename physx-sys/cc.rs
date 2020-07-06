@@ -320,7 +320,7 @@ fn add_common(ctx: &mut Context) {
             "-Wextra",
             "-Werror",
             "-Wstrict-aliasing=2",
-            "-Wno-everything",
+            "-w",
         ]
     } else if builder.get_compiler().is_like_msvc() {
         // Disable defaults since we disagree with cc in some cases, this
