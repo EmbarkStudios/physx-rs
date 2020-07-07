@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [0.4.8] - 2020-07-02
+
+### Fixed
+
+- [PR#77](https://github.com/EmbarkStudios/physx-rs/pull/77) Ignore potential PhysX C++ compile warnings
+
 ## [0.4.7] - 2020-07-02
 
 ### Fixed
@@ -55,7 +61,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...HEAD
+[0.4.8]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...physx-sys-v0.4.8
 [0.4.7]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.6...physx-sys-v0.4.7
 [0.4.6]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...physx-sys-v0.4.6
 [0.4.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.3...physx-sys-v0.4.4
