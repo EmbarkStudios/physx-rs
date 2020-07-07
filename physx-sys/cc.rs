@@ -1,14 +1,14 @@
 impl Context {
     fn add_includes(&mut self, rel_root: &str, includes: &[&str]) -> &mut Self {
-        let root = self.root.join(rel_root);
         self.includes
-            .extend(includes.iter().map(|inc| root.join(inc)));
+            .extend(includes.iter().map(|inc| format!("%PHYSX_ROOT%/{}/{}", rel_root, inc)));
 
         self
     }
 
     fn add_sources(&mut self, rel_root: &str, files: &[&str]) -> &mut Self {
         let root = self.root.join(rel_root);
+
         self.builder.files(files.iter().map(|src| {
             let mut p = root.join(src);
             p.set_extension("cpp");
@@ -16,7 +16,7 @@ impl Context {
         }));
 
         // Always add the src directory as an include as well
-        self.includes.push(root);
+        self.includes.push(format!("%PHYSX_ROOT%/{}", rel_root));
 
         self
     }
@@ -27,7 +27,7 @@ impl Context {
 
         let mut comproot = self.root.join("source");
         comproot.push(name);
-        self.includes.push(comproot.join("include"));
+        self.includes.push(format!("%PHYSX_ROOT%/source/{}/include", name));
 
         self
     }
@@ -259,7 +259,7 @@ fn add_common(ctx: &mut Context) {
         builder.cpp_link_stdlib("c++");
     }
 
-    ctx.includes.push(shared_root.join("include"));
+    ctx.includes.push(format!("%PHYSX_ROOT%/../pxshared/include"));
     ctx.includes.extend(
         [
             "include",
@@ -268,7 +268,7 @@ fn add_common(ctx: &mut Context) {
             "source/filebuf/include", // only used by pvd
         ]
         .iter()
-        .map(|inc| root.join(inc)),
+        .map(|inc| format!("%PHYSX_ROOT%/{}", inc)),
     );
 
     // If we're targetting msvc, just silence all the annoying warnings
@@ -475,14 +475,17 @@ fn cc_compile(target_env: Environment) {
     scenequery(&mut ctx);
     simulationcontroller(&mut ctx);
 
-    ctx.includes.push(ctx.root.join("source/pvd/include"));
+    ctx.includes.push("%PHYSX_ROOT%/source/pvd/include".into());
 
     // Strip out duplicate include paths, C++ already has it hard enough as it is
     ctx.includes.sort();
     ctx.includes.dedup();
 
+    ctx.builder.__set_env("PHYSX_ROOT", ctx.root.to_str().unwrap());
+
     for dir in ctx.includes {
-        ctx.builder.include(dir);
+        ctx.builder.flag("-I");
+        ctx.builder.flag(&dir);
     }
 
     ctx.builder.compile("physx");

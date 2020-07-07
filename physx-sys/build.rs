@@ -16,7 +16,7 @@ struct Context {
     root: PathBuf,
     builder: cc::Build,
     env: Environment,
-    includes: Vec<PathBuf>,
+    includes: Vec<String>,
 }
 
 #[cfg(not(feature = "use-cmake"))]
