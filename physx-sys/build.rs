@@ -161,6 +161,9 @@ fn main() {
             nix if nix.starts_with("x86_64-unknown-linux") => {
                 include.push("x86_64-unknown-linux");
             }
+            nix if nix.starts_with("aarch64-unknown-linux") => {
+                include.push("aarch64-unknown-linux");
+            }
             _ => panic!("unknown TARGET triple '{}'", target),
         }
 
