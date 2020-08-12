@@ -268,10 +268,10 @@ extern "C" {
     pub fn destroy_contact_callback(callback: *mut PxSimulationEventCallback);
 
     /// New interface to handle simulation events, replacing create_contact_callback.
-    pub fn create_simulation_event_handler(
+    pub fn create_simulation_event_callbacks(
         callbacks: *const SimulationEventCallbackInfo,
     ) -> *mut PxSimulationEventCallback;
-    pub fn destroy_simulation_event_handler(callback: *mut PxSimulationEventCallback);
+    pub fn destroy_simulation_event_callbacks(callback: *mut PxSimulationEventCallback);
 
     /// Override the default filter shader in the scene with a custom function.
     /// If call_default_filter_shader_first is set to true, this will first call the

@@ -213,30 +213,13 @@ extern "C"
         return (void *)PxDefaultSimulationFilterShader;
     }
 
-    // DEPRECATED
-    PxSimulationEventCallback *create_contact_callback(CollisionCallback callback, void *userData)
-    {
-        SimulationEventCallbackInfo callbacks{};
-        callbacks.collisionCallback = callback;
-        callbacks.collisionUserData = userData;
-        SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(&callbacks);
-        return static_cast<PxSimulationEventCallback *>(trampoline);
-    }
-
-    // DEPRECATED
-    void destroy_contact_callback(PxSimulationEventCallback *callback)
-    {
-        SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
-        delete trampoline;
-    }
-
-    PxSimulationEventCallback *create_simulation_event_handler(const SimulationEventCallbackInfo *callbacks)
+    PxSimulationEventCallback *create_simulation_event_callbacks(const SimulationEventCallbackInfo *callbacks)
     {
         SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(callbacks);
         return static_cast<PxSimulationEventCallback *>(trampoline);
     }
 
-    void destroy_simulation_event_handler(PxSimulationEventCallback *callback)
+    void destroy_simulation_event_callbacks(PxSimulationEventCallback *callback)
     {
         SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
         delete trampoline;
