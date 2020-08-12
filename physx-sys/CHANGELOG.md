@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [PR#80](https://github.com/EmbarkStudios/physx-rs/pull/80) New way to register simulation event callbacks, supporting all callback types this time.
+
 ## [0.4.8] - 2020-07-02
 
 ### Fixed
