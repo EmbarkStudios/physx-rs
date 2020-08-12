@@ -5,6 +5,7 @@
 #![warn(clippy::all)]
 #![warn(rust_2018_idioms)]
 #![allow(clippy::missing_safety_doc)]
+#![allow(deprecated)]
 
 /*!
 Wrapper for PhysX Scene
@@ -36,6 +37,7 @@ pub struct Scene {
     bodies: Vec<ArticulationReducedCoordinate>,
     statics: Vec<RigidStatic>,
     dynamics: Vec<RigidDynamic>,
+    old_simulation_callback: Option<*mut PxSimulationEventCallback>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
     controller_manager: Option<ControllerManager>,
 }
@@ -49,6 +51,7 @@ impl Scene {
             bodies: Vec::new(),
             dynamics: Vec::new(),
             statics: Vec::new(),
+            old_simulation_callback: None,
             simulation_callback: None,
             controller_manager: None,
         };
@@ -70,8 +73,11 @@ impl Scene {
         self.dynamics.drain(..).for_each(|mut e| e.release());
 
         // destroy simulation callback if we have one
-        if let Some(callback) = self.simulation_callback.take() {
+        if let Some(callback) = self.old_simulation_callback.take() {
             destroy_contact_callback(callback);
+        }
+        if let Some(callback) = self.simulation_callback.take() {
+            destroy_simulation_event_handler(callback);
         }
 
         if let Some(manager) = self.controller_manager.take() {
@@ -284,6 +290,8 @@ impl Scene {
         }
     }
 
+    // See below function `set_simulation_event_callbacks`.
+    #[deprecated]
     pub fn set_simulation_event_callback<T>(
         &mut self,
         callback: physx_sys::CollisionCallback,
@@ -292,6 +300,23 @@ impl Scene {
         unsafe {
             let callback =
                 physx_sys::create_contact_callback(callback, userdata as *mut std::ffi::c_void);
+            self.old_simulation_callback = Some(callback);
+            PxScene_setSimulationEventCallback_mut(
+                self.px_scene
+                    .write()
+                    .expect("failed reading scene")
+                    .expect("accessing null ptr"),
+                callback,
+            );
+        }
+    }
+
+    pub fn set_simulation_event_callbacks(
+        &mut self,
+        callbacks: &physx_sys::SimulationEventCallbackInfo,
+    ) {
+        unsafe {
+            let callback = physx_sys::create_simulation_event_handler(&*callbacks);
             self.simulation_callback = Some(callback);
             PxScene_setSimulationEventCallback_mut(
                 self.px_scene

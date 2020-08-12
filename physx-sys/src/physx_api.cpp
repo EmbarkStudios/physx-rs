@@ -52,45 +52,73 @@ PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
     return PxFilterFlags{shaderfilter(&info)};
 }
 
-class CollisionFilterTrampoline : public PxSimulationEventCallback
+typedef void (*CollisionCallback)(void *, PxContactPairHeader const *, PxContactPair const *, PxU32);
+typedef void (*TriggerCallback)(void *, PxTriggerPair const *, PxU32);
+typedef void (*ConstraintBreakCallback)(void *, PxConstraintInfo const *, PxU32);
+typedef void (*WakeSleepCallback)(void *, PxActor **const, PxU32, bool);
+typedef void (*AdvanceCallback)(void *, const PxRigidBody *const *, const PxTransform *const, PxU32);
+
+struct SimulationEventCallbackInfo {
+    CollisionCallback collisionCallback;
+    void *collisionUserData;
+    TriggerCallback triggerCallback = nullptr;
+    void *triggerUserData = nullptr;
+    ConstraintBreakCallback constraintBreakCallback = nullptr;
+    void *constraintBreakUserData = nullptr;
+    WakeSleepCallback wakeSleepCallback = nullptr;
+    void *wakeSleepUserData = nullptr;
+    AdvanceCallback advanceCallback = nullptr;
+    void *advanceUserData = nullptr;
+};
+
+class SimulationEventTrampoline : public PxSimulationEventCallback
 {
   public:
-    CollisionFilterTrampoline(CollisionCallback callback, void *userData) : mUserData(userData), mCallback(callback)
-    {}
-
-    void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override
-    {
-        mCallback(mUserData, &pairHeader, pairs, nbPairs);
+    SimulationEventTrampoline(const SimulationEventCallbackInfo *callbacks) {
+        mCallbacks = *callbacks;
+    }
+    // Collisions
+    void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
+        if (mCallbacks.collisionCallback) {
+            mCallbacks.collisionCallback(mCallbacks.collisionUserData, &pairHeader, pairs, nbPairs);
+        }
     }
 
-    void onTrigger(PxTriggerPair *pairs, PxU32 count) override
-    {
-        /* noop */
+    // Triggers
+    void onTrigger(PxTriggerPair *pairs, PxU32 count) override {
+        if (mCallbacks.triggerCallback) {
+            mCallbacks.triggerCallback(mCallbacks.triggerUserData, pairs, count);
+        }
     }
 
-    void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override
-    {
-        /* noop */
+    // Constraint breaks
+    void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override {
+        if (mCallbacks.constraintBreakCallback) {
+            mCallbacks.constraintBreakCallback(mCallbacks.constraintBreakUserData, constraints, count);
+        }
     }
 
-    void onWake(PxActor **actors, PxU32 count) override
-    {
-        /* noop */
+    // Wake/Sleep (combined for convenience)
+    void onWake(PxActor **actors, PxU32 count) override {
+        if (mCallbacks.wakeSleepCallback) {
+            mCallbacks.wakeSleepCallback(mCallbacks.wakeSleepUserData, actors, count, true);
+        }
+    }
+    void onSleep(PxActor **actors, PxU32 count) override {
+        if (mCallbacks.wakeSleepCallback) {
+            mCallbacks.wakeSleepCallback(mCallbacks.wakeSleepUserData, actors, count, false);
+        }
     }
 
-    void onSleep(PxActor **actors, PxU32 count) override
-    {
-        /* noop */
-    }
-
-    void onAdvance(const PxRigidBody *const *bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override
-    {
-        /* noop */
+    // Advance
+    void onAdvance(const PxRigidBody *const * bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override {
+        if (mCallbacks.advanceCallback) {
+            mCallbacks.advanceCallback(mCallbacks.advanceUserData, bodyBuffer, poseBuffer, count);
+        }
     }
 
   private:
-    void *mUserData;
-    CollisionCallback mCallback;
+    SimulationEventCallbackInfo mCallbacks;
 };
 
 class RaycastFilterCallback : public PxQueryFilterCallback
@@ -185,14 +213,33 @@ extern "C"
         return (void *)PxDefaultSimulationFilterShader;
     }
 
+    // DEPRECATED
     PxSimulationEventCallback *create_contact_callback(CollisionCallback callback, void *userData)
     {
-        return new CollisionFilterTrampoline(callback, userData);
+        SimulationEventCallbackInfo callbacks{};
+        callbacks.collisionCallback = callback;
+        callbacks.collisionUserData = userData;
+        SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(&callbacks);
+        return static_cast<PxSimulationEventCallback *>(trampoline);
     }
 
+    // DEPRECATED
     void destroy_contact_callback(PxSimulationEventCallback *callback)
     {
-        delete reinterpret_cast<CollisionFilterTrampoline *>(callback);
+        SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
+        delete trampoline;
+    }
+
+    PxSimulationEventCallback *create_simulation_event_handler(const SimulationEventCallbackInfo *callbacks)
+    {
+        SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(callbacks);
+        return static_cast<PxSimulationEventCallback *>(trampoline);
+    }
+
+    void destroy_simulation_event_handler(PxSimulationEventCallback *callback)
+    {
+        SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
+        delete trampoline;
     }
 
     void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter, uint32_t call_default_filter_shader_first)

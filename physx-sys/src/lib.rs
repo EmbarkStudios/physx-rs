@@ -171,6 +171,48 @@ pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
 
+pub type TriggerCallback = unsafe extern "C" fn(*mut c_void, *const PxTriggerPair, count: u32);
+
+pub type ConstraintBreakCallback =
+    unsafe extern "C" fn(*mut c_void, *const PxConstraintInfo, count: u32);
+
+pub type WakeSleepCallback =
+    unsafe extern "C" fn(*mut c_void, *const *const PxActor, count: u32, bool);
+
+pub type AdvanceCallback =
+    unsafe extern "C" fn(*mut c_void, *const *const PxRigidBody, *const PxTransform, count: u32);
+
+#[repr(C)]
+pub struct SimulationEventCallbackInfo {
+    pub collision_callback: Option<CollisionCallback>, // Yes, option<funcptr> becomes a nullable C pointer
+    pub collision_user_data: *mut c_void,
+    pub trigger_callback: Option<TriggerCallback>,
+    pub trigger_user_data: *mut c_void,
+    pub constraint_break_callback: Option<ConstraintBreakCallback>,
+    pub constraint_break_user_data: *mut c_void,
+    pub wake_sleep_callback: Option<WakeSleepCallback>,
+    pub wake_sleep_user_data: *mut c_void,
+    pub advance_callback: Option<AdvanceCallback>,
+    pub advance_user_data: *mut c_void,
+}
+
+impl Default for SimulationEventCallbackInfo {
+    fn default() -> Self {
+        Self {
+            collision_callback: None,
+            collision_user_data: std::ptr::null_mut(),
+            trigger_callback: None,
+            trigger_user_data: std::ptr::null_mut(),
+            constraint_break_callback: None,
+            constraint_break_user_data: std::ptr::null_mut(),
+            wake_sleep_callback: None,
+            wake_sleep_user_data: std::ptr::null_mut(),
+            advance_callback: None,
+            advance_user_data: std::ptr::null_mut(),
+        }
+    }
+}
+
 /// return 0 = PxQueryHitType::eNONE
 /// return 1 = PxQueryHitType::eTOUCH
 /// return 2 = PxQueryHitType::eBLOCK
@@ -216,13 +258,20 @@ extern "C" {
 
     /// Create a C++ proxy callback which will forward contact events to `Callback`.
     /// The returned pointer must be freed by calling `destroy_contact_callback` when done using.
+    #[deprecated]
     pub fn create_contact_callback(
         callback: CollisionCallback,
         userdata: *mut c_void,
     ) -> *mut PxSimulationEventCallback;
-
     /// Deallocates the PxSimulationEventCallback that has previously been created
+    #[deprecated()]
     pub fn destroy_contact_callback(callback: *mut PxSimulationEventCallback);
+
+    /// New interface to handle simulation events, replacing create_contact_callback.
+    pub fn create_simulation_event_handler(
+        callbacks: *const SimulationEventCallbackInfo,
+    ) -> *mut PxSimulationEventCallback;
+    pub fn destroy_simulation_event_handler(callback: *mut PxSimulationEventCallback);
 
     /// Override the default filter shader in the scene with a custom function.
     /// If call_default_filter_shader_first is set to true, this will first call the
