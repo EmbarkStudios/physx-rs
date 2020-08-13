@@ -169,29 +169,35 @@ pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
 }
 
 pub type CollisionCallback =
-    unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, count: u32);
+    unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, u32);
 
-pub type TriggerCallback = unsafe extern "C" fn(*mut c_void, *const PxTriggerPair, count: u32);
+pub type TriggerCallback = unsafe extern "C" fn(*mut c_void, *const PxTriggerPair, u32);
 
-pub type ConstraintBreakCallback =
-    unsafe extern "C" fn(*mut c_void, *const PxConstraintInfo, count: u32);
+pub type ConstraintBreakCallback = unsafe extern "C" fn(*mut c_void, *const PxConstraintInfo, u32);
 
-pub type WakeSleepCallback =
-    unsafe extern "C" fn(*mut c_void, *const *const PxActor, count: u32, bool);
+pub type WakeSleepCallback = unsafe extern "C" fn(*mut c_void, *const *const PxActor, u32, bool);
 
 pub type AdvanceCallback =
-    unsafe extern "C" fn(*mut c_void, *const *const PxRigidBody, *const PxTransform, count: u32);
+    unsafe extern "C" fn(*mut c_void, *const *const PxRigidBody, *const PxTransform, u32);
 
+// Function pointers in Rust are normally not nullable (which is why they don't require unsafe to call)
+// but we need them to be, so we simply wrap them in Option<>. An Option<funcptr> is luckily represented
+// by the compiler as a simple pointer with null representing None, so this is compatible with the C struct.
 #[repr(C)]
 pub struct SimulationEventCallbackInfo {
-    pub collision_callback: Option<CollisionCallback>, // Yes, option<funcptr> becomes a nullable C pointer
+    // Callback for collision events.
+    pub collision_callback: Option<CollisionCallback>,
     pub collision_user_data: *mut c_void,
+    // Callback for trigger shape events (an object entered or left a trigger shape).
     pub trigger_callback: Option<TriggerCallback>,
     pub trigger_user_data: *mut c_void,
+    // Callback for when a constraint breaks (such as a joint with a force limit)
     pub constraint_break_callback: Option<ConstraintBreakCallback>,
     pub constraint_break_user_data: *mut c_void,
+    // Callback for when an object falls asleep or is awoken.
     pub wake_sleep_callback: Option<WakeSleepCallback>,
     pub wake_sleep_user_data: *mut c_void,
+    // Callback to get the next pose early for objects (if flagged with eENABLE_POSE_INTEGRATION_PREVIEW).
     pub advance_callback: Option<AdvanceCallback>,
     pub advance_user_data: *mut c_void,
 }

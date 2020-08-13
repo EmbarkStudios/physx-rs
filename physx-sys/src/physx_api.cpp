@@ -52,21 +52,26 @@ PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
     return PxFilterFlags{shaderfilter(&info)};
 }
 
-typedef void (*CollisionCallback)(void *, PxContactPairHeader const *, PxContactPair const *, PxU32);
-typedef void (*TriggerCallback)(void *, PxTriggerPair const *, PxU32);
-typedef void (*ConstraintBreakCallback)(void *, PxConstraintInfo const *, PxU32);
-typedef void (*WakeSleepCallback)(void *, PxActor **const, PxU32, bool);
-typedef void (*AdvanceCallback)(void *, const PxRigidBody *const *, const PxTransform *const, PxU32);
+using CollisionCallback = void (*)(void *, PxContactPairHeader const *, PxContactPair const *, PxU32);
+using TriggerCallback = void (*)(void *, PxTriggerPair const *, PxU32);
+using ConstraintBreakCallback = void (*)(void *, PxConstraintInfo const *, PxU32);
+using WakeSleepCallback = void (*)(void *, PxActor **const, PxU32, bool);
+using AdvanceCallback = void (*)(void *, const PxRigidBody *const *, const PxTransform *const, PxU32);
 
 struct SimulationEventCallbackInfo {
-    CollisionCallback collisionCallback;
-    void *collisionUserData;
+    // Callback for collision events.
+    CollisionCallback collisionCallback = nullptr;
+    void *collisionUserData = nullptr;
+    // Callback for trigger shape events (an object entered or left a trigger shape).
     TriggerCallback triggerCallback = nullptr;
     void *triggerUserData = nullptr;
+    // Callback for when a constraint breaks (such as a joint with a force limit)
     ConstraintBreakCallback constraintBreakCallback = nullptr;
     void *constraintBreakUserData = nullptr;
+    // Callback for when an object falls asleep or is awoken.
     WakeSleepCallback wakeSleepCallback = nullptr;
     void *wakeSleepUserData = nullptr;
+    // Callback to get the next pose early for objects (if flagged with eENABLE_POSE_INTEGRATION_PREVIEW).
     AdvanceCallback advanceCallback = nullptr;
     void *advanceUserData = nullptr;
 };
@@ -74,9 +79,8 @@ struct SimulationEventCallbackInfo {
 class SimulationEventTrampoline : public PxSimulationEventCallback
 {
   public:
-    SimulationEventTrampoline(const SimulationEventCallbackInfo *callbacks) {
-        mCallbacks = *callbacks;
-    }
+    SimulationEventTrampoline(const SimulationEventCallbackInfo *callbacks) : mCallbacks(*callbacks) {}
+
     // Collisions
     void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
         if (mCallbacks.collisionCallback) {
