@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.4.9] - 2020-08-13
+
 ### Added
 
 - [PR#80](https://github.com/EmbarkStudios/physx-rs/pull/80) New way to register simulation event callbacks, supporting all callback types this time.
@@ -69,7 +71,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.9...HEAD
+[0.4.9]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...physx-sys-v0.4.9
 [0.4.8]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...physx-sys-v0.4.8
 [0.4.7]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.6...physx-sys-v0.4.7
 [0.4.6]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.4...physx-sys-v0.4.6
