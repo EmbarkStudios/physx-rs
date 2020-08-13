@@ -8,7 +8,7 @@
 
 ### Added
 
-- [PR#80](https://github.com/EmbarkStudios/physx-rs/pull/80) New way to register simulation event callbacks, supporting all callback types this time.
+- [PR#80](https://github.com/EmbarkStudios/physx-rs/pull/80) New way to register simulation event callbacks, supporting all callback types this time. Deprecates `set_simulation_event_callback` in favor of `set_simulation_event_callbacks`.
 
 ## [0.7.0] - 2020-06-29
 
