@@ -5,6 +5,7 @@
 #![warn(clippy::all)]
 #![warn(rust_2018_idioms)]
 #![allow(clippy::missing_safety_doc)]
+#![allow(deprecated)]
 
 /*!
 Wrapper for PhysX Scene
@@ -71,7 +72,7 @@ impl Scene {
 
         // destroy simulation callback if we have one
         if let Some(callback) = self.simulation_callback.take() {
-            destroy_contact_callback(callback);
+            destroy_simulation_event_callbacks(callback);
         }
 
         if let Some(manager) = self.controller_manager.take() {
@@ -284,14 +285,37 @@ impl Scene {
         }
     }
 
+    // See below function `set_simulation_event_callbacks`.
+    #[deprecated]
     pub fn set_simulation_event_callback<T>(
         &mut self,
         callback: physx_sys::CollisionCallback,
         userdata: *mut T,
     ) {
         unsafe {
-            let callback =
-                physx_sys::create_contact_callback(callback, userdata as *mut std::ffi::c_void);
+            let callback_info = physx_sys::SimulationEventCallbackInfo {
+                collision_callback: Some(callback),
+                collision_user_data: userdata as *mut std::ffi::c_void,
+                ..Default::default()
+            };
+            let callback = physx_sys::create_simulation_event_callbacks(&callback_info);
+            self.simulation_callback = Some(callback);
+            PxScene_setSimulationEventCallback_mut(
+                self.px_scene
+                    .write()
+                    .expect("failed reading scene")
+                    .expect("accessing null ptr"),
+                callback,
+            );
+        }
+    }
+
+    pub fn set_simulation_event_callbacks(
+        &mut self,
+        callbacks: &physx_sys::SimulationEventCallbackInfo,
+    ) {
+        unsafe {
+            let callback = physx_sys::create_simulation_event_callbacks(&*callbacks);
             self.simulation_callback = Some(callback);
             PxScene_setSimulationEventCallback_mut(
                 self.px_scene

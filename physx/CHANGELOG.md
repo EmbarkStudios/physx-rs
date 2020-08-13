@@ -4,9 +4,13 @@
 
 ## [Unreleased]
 
-### Changed
+### Added
+
+- [PR#80](https://github.com/EmbarkStudios/physx-rs/pull/80) New way to register simulation event callbacks, supporting all callback types this time.
 
 ## [0.7.0] - 2020-06-29
+
+### Changed
 
 - [PR#72](https://github.com/EmbarkStudios/physx-rs/pull/72) Upgrade `glam` to 0.9. This includes a change of `Vec3` internal representation from 16-byte SIMD type to 12-byte 3x floats.
 

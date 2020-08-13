@@ -226,7 +226,12 @@ impl Physics {
         let scene = scene_builder.build(self);
         let mut scene = Box::new(scene);
         let scene_ptr = scene.as_mut() as *mut Scene;
-        scene.set_simulation_event_callback(on_contact_callback, scene_ptr);
+        let callback_info = SimulationEventCallbackInfo {
+            collision_callback: Some(on_contact_callback),
+            collision_user_data: scene_ptr as *mut std::os::raw::c_void,
+            ..Default::default()
+        };
+        scene.set_simulation_event_callbacks(&callback_info);
         scene
     }
 

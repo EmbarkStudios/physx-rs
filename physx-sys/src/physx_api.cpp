@@ -52,45 +52,77 @@ PxFilterFlags FilterShaderTrampoline(PxFilterObjectAttributes attributes0,
     return PxFilterFlags{shaderfilter(&info)};
 }
 
-class CollisionFilterTrampoline : public PxSimulationEventCallback
+using CollisionCallback = void (*)(void *, PxContactPairHeader const *, PxContactPair const *, PxU32);
+using TriggerCallback = void (*)(void *, PxTriggerPair const *, PxU32);
+using ConstraintBreakCallback = void (*)(void *, PxConstraintInfo const *, PxU32);
+using WakeSleepCallback = void (*)(void *, PxActor **const, PxU32, bool);
+using AdvanceCallback = void (*)(void *, const PxRigidBody *const *, const PxTransform *const, PxU32);
+
+struct SimulationEventCallbackInfo {
+    // Callback for collision events.
+    CollisionCallback collisionCallback = nullptr;
+    void *collisionUserData = nullptr;
+    // Callback for trigger shape events (an object entered or left a trigger shape).
+    TriggerCallback triggerCallback = nullptr;
+    void *triggerUserData = nullptr;
+    // Callback for when a constraint breaks (such as a joint with a force limit)
+    ConstraintBreakCallback constraintBreakCallback = nullptr;
+    void *constraintBreakUserData = nullptr;
+    // Callback for when an object falls asleep or is awoken.
+    WakeSleepCallback wakeSleepCallback = nullptr;
+    void *wakeSleepUserData = nullptr;
+    // Callback to get the next pose early for objects (if flagged with eENABLE_POSE_INTEGRATION_PREVIEW).
+    AdvanceCallback advanceCallback = nullptr;
+    void *advanceUserData = nullptr;
+};
+
+class SimulationEventTrampoline : public PxSimulationEventCallback
 {
   public:
-    CollisionFilterTrampoline(CollisionCallback callback, void *userData) : mUserData(userData), mCallback(callback)
-    {}
+    SimulationEventTrampoline(const SimulationEventCallbackInfo *callbacks) : mCallbacks(*callbacks) {}
 
-    void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override
-    {
-        mCallback(mUserData, &pairHeader, pairs, nbPairs);
+    // Collisions
+    void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
+        if (mCallbacks.collisionCallback) {
+            mCallbacks.collisionCallback(mCallbacks.collisionUserData, &pairHeader, pairs, nbPairs);
+        }
     }
 
-    void onTrigger(PxTriggerPair *pairs, PxU32 count) override
-    {
-        /* noop */
+    // Triggers
+    void onTrigger(PxTriggerPair *pairs, PxU32 count) override {
+        if (mCallbacks.triggerCallback) {
+            mCallbacks.triggerCallback(mCallbacks.triggerUserData, pairs, count);
+        }
     }
 
-    void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override
-    {
-        /* noop */
+    // Constraint breaks
+    void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) override {
+        if (mCallbacks.constraintBreakCallback) {
+            mCallbacks.constraintBreakCallback(mCallbacks.constraintBreakUserData, constraints, count);
+        }
     }
 
-    void onWake(PxActor **actors, PxU32 count) override
-    {
-        /* noop */
+    // Wake/Sleep (combined for convenience)
+    void onWake(PxActor **actors, PxU32 count) override {
+        if (mCallbacks.wakeSleepCallback) {
+            mCallbacks.wakeSleepCallback(mCallbacks.wakeSleepUserData, actors, count, true);
+        }
+    }
+    void onSleep(PxActor **actors, PxU32 count) override {
+        if (mCallbacks.wakeSleepCallback) {
+            mCallbacks.wakeSleepCallback(mCallbacks.wakeSleepUserData, actors, count, false);
+        }
     }
 
-    void onSleep(PxActor **actors, PxU32 count) override
-    {
-        /* noop */
-    }
-
-    void onAdvance(const PxRigidBody *const *bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override
-    {
-        /* noop */
+    // Advance
+    void onAdvance(const PxRigidBody *const * bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override {
+        if (mCallbacks.advanceCallback) {
+            mCallbacks.advanceCallback(mCallbacks.advanceUserData, bodyBuffer, poseBuffer, count);
+        }
     }
 
   private:
-    void *mUserData;
-    CollisionCallback mCallback;
+    SimulationEventCallbackInfo mCallbacks;
 };
 
 class RaycastFilterCallback : public PxQueryFilterCallback
@@ -185,14 +217,16 @@ extern "C"
         return (void *)PxDefaultSimulationFilterShader;
     }
 
-    PxSimulationEventCallback *create_contact_callback(CollisionCallback callback, void *userData)
+    PxSimulationEventCallback *create_simulation_event_callbacks(const SimulationEventCallbackInfo *callbacks)
     {
-        return new CollisionFilterTrampoline(callback, userData);
+        SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(callbacks);
+        return static_cast<PxSimulationEventCallback *>(trampoline);
     }
 
-    void destroy_contact_callback(PxSimulationEventCallback *callback)
+    void destroy_simulation_event_callbacks(PxSimulationEventCallback *callback)
     {
-        delete reinterpret_cast<CollisionFilterTrampoline *>(callback);
+        SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
+        delete trampoline;
     }
 
     void enable_custom_filter_shader(PxSceneDesc *desc, SimulationShaderFilter filter, uint32_t call_default_filter_shader_first)
