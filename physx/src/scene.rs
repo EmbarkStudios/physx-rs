@@ -707,8 +707,9 @@ impl SceneBuilder {
         unsafe {
             let tolerances = physics.get_tolerances_scale();
             let mut scene_desc = PxSceneDesc_new(tolerances);
+            let sim_threading = self.simulation_threading.as_ref().expect("simulation_thread not provided. Did you forget to call set_simulation_threading?");
 
-            let dispatcher = match self.simulation_threading.as_ref().expect("foo") {
+            let dispatcher = match sim_threading {
                 SimulationThreadType::Default => {
                     phys_PxDefaultCpuDispatcherCreate(1, null_mut()) as *mut _
                 }
