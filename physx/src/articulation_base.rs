@@ -179,35 +179,34 @@ impl ArticulationBase {
         transform: Option<Mat4>,
         joint_transform: Option<Mat4>,
     ) -> *mut PxArticulationLink {
+        // FIXME Assumes that self is the correct articulation for parent, which may not be true
 
-		// FIXME Assumes that self is the correct articulation for parent, which may not be true
+        if let ActorType::ArticulationLink(_articulation_handle) = parent.1 {
+            let (parent, trans) = if parent.0 == 0 {
+                (null_mut(), Mat4::identity())
+            } else {
+                let parent_link = parent.0 as *mut PxArticulationLink;
+                (parent_link, unsafe {
+                    px_to_gl_tf(PxRigidActor_getGlobalPose(
+                        parent_link as *const PxRigidActor,
+                    ))
+                })
+            };
 
-		if let ActorType::ArticulationLink(_articulation_handle) = parent.1 {
-			let (parent, trans) = if parent.0 == 0 {
-				(null_mut(), Mat4::identity())
-			} else {
-				let parent_link = parent.0 as *mut PxArticulationLink;
-				(parent_link, unsafe {
-					px_to_gl_tf(PxRigidActor_getGlobalPose(
-						parent_link as *const PxRigidActor,
-					))
-				})
-			};
+            let transform = joint_transform.unwrap_or_else(Mat4::identity)
+                * transform.unwrap_or_else(Mat4::identity);
 
-			let transform = joint_transform.unwrap_or_else(Mat4::identity)
-				* transform.unwrap_or_else(Mat4::identity);
-
-			unsafe {
-				PxArticulationBase_createLink_mut(
-					self.get_raw_mut(),
-					parent,
-					&gl_to_px_tf(trans * transform),
-				)
-			}
-		} else {
-			// TODO error instead? Also should this function return an ActorHandle instead?
-			std::ptr::null_mut::<PxArticulationLink>()
-		}
+            unsafe {
+                PxArticulationBase_createLink_mut(
+                    self.get_raw_mut(),
+                    parent,
+                    &gl_to_px_tf(trans * transform),
+                )
+            }
+        } else {
+            // TODO error instead? Also should this function return an ActorHandle instead?
+            std::ptr::null_mut::<PxArticulationLink>()
+        }
     }
 
     /// Get the world bounds of this articulation

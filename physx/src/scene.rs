@@ -186,7 +186,7 @@ impl Scene {
                     let mut raw_actor = self.statics.swap_remove(idx);
                     raw_actor.release();
                 }
-            },
+            }
             ActorType::Dynamic | ActorType::ArticulationLink(..) => {
                 let actor = handle.0 as *const PxActor;
 
@@ -207,7 +207,7 @@ impl Scene {
                     let mut raw_actor = self.dynamics.swap_remove(idx);
                     raw_actor.release();
                 }
-            },
+            }
             ActorType::Unknown => {
                 // FIXME Go ahead and make the call to removeActor, but we don't really know
                 //       what else to do! Eventually, the Unknown variant should not exist.
@@ -228,7 +228,6 @@ impl Scene {
 
     /// Remove an articulation from the scene given a handle.
     pub fn remove_articulation(&mut self, handle: ArticulationHandle) {
-
         // FIXME Should this also remove all articulation links?
 
         let articulation = handle.0 as *const PxArticulationBase;
@@ -284,7 +283,10 @@ impl Scene {
         }
     }
 
-    pub fn get_multibody(&self, handle: ArticulationHandle) -> Option<&ArticulationReducedCoordinate> {
+    pub fn get_multibody(
+        &self,
+        handle: ArticulationHandle,
+    ) -> Option<&ArticulationReducedCoordinate> {
         self.articulations.iter().find(|bod| bod.handle() == handle)
     }
 
@@ -292,7 +294,9 @@ impl Scene {
         &mut self,
         handle: ArticulationHandle,
     ) -> Option<&mut ArticulationReducedCoordinate> {
-        self.articulations.iter_mut().find(|bod| bod.handle() == handle)
+        self.articulations
+            .iter_mut()
+            .find(|bod| bod.handle() == handle)
     }
 
     pub fn sample_height(
@@ -764,7 +768,9 @@ impl SceneBuilder {
         unsafe {
             let tolerances = physics.get_tolerances_scale();
             let mut scene_desc = PxSceneDesc_new(tolerances);
-            let sim_threading = self.simulation_threading.as_ref().expect("simulation_thread not provided. Did you forget to call set_simulation_threading?");
+            let sim_threading = self.simulation_threading.as_ref().expect(
+                "simulation_thread not provided. Did you forget to call set_simulation_threading?",
+            );
 
             let dispatcher = match sim_threading {
                 SimulationThreadType::Default => {

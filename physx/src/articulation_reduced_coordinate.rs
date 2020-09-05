@@ -124,7 +124,10 @@ impl ArticulationReducedCoordinate {
     #[inline]
     /// Retrieve a handle for the root link of this articulation
     pub fn root_handle(&self) -> ActorHandle {
-		ActorHandle(self.links()[0].handle().0, ActorType::ArticulationLink(ArticulationHandle(self.ptr as usize)))
+        ActorHandle(
+            self.links()[0].handle().0,
+            ActorType::ArticulationLink(ArticulationHandle(self.ptr as usize)),
+        )
     }
 
     #[inline]

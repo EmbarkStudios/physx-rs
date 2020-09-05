@@ -11,10 +11,10 @@ Utility for handle-based usage
 /// The type of actor pointed to by a handle, used primarily for internal tracking.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum ActorType {
-	Unknown, // a necessary evil until we remove ambigious type handle creation (specifically creating handles from raw PxRigidActor ptrs)
-	Static,
-	Dynamic,
-	ArticulationLink(ArticulationHandle),
+    Unknown, // a necessary evil until we remove ambigious type handle creation (specifically creating handles from raw PxRigidActor ptrs)
+    Static,
+    Dynamic,
+    ArticulationLink(ArticulationHandle),
 }
 
 /// A handle associated with an actor. Also contains some type information.

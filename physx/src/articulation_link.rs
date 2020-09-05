@@ -12,7 +12,7 @@ use super::{
     articulation_base::ArticulationBase,
     articulation_joint_base::*,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
-    body::{ActorHandle, ArticulationHandle, ActorType},
+    body::{ActorHandle, ActorType, ArticulationHandle},
     geometry::*,
     math::Isometry,
     px_type::*,
@@ -160,7 +160,7 @@ impl ArticulationLink {
     pub fn handle(&self) -> ActorHandle {
         ActorHandle(
             self.get_raw() as usize,
-			ActorType::ArticulationLink(ArticulationHandle(self.get_articulation().ptr as usize)),
+            ActorType::ArticulationLink(ArticulationHandle(self.get_articulation().ptr as usize)),
         )
     }
 

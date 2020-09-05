@@ -42,7 +42,7 @@ impl RigidActor {
 
     /// Get a handle which can later be converted back into this actor via the Scene.
     pub fn handle(&self) -> ActorHandle {
-		ActorHandle(self.get_raw() as usize, ActorType::Static)
+        ActorHandle(self.get_raw() as usize, ActorType::Static)
     }
 
     /// Get the global pose of this rigid actor
