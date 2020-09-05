@@ -122,7 +122,7 @@ impl Physics {
         &mut self,
         scene: &mut Scene,
         func: T,
-    ) -> PartHandle {
+    ) -> ArticulationHandle {
         let mb = ArticulationReducedCoordinate::new(self);
         scene.add_articulation(mb, func)
     }
@@ -135,13 +135,9 @@ impl Physics {
         scene: &mut Scene,
         cooking: &mut Cooking,
         func: T,
-    ) -> PartHandle {
+    ) -> ArticulationHandle {
         let mb = ArticulationReducedCoordinate::new_with_link(builder, self, cooking);
         scene.add_articulation(mb, func)
-    }
-
-    pub fn remove_body(&mut self, scene: &mut Scene, handle: BodyHandle) {
-        scene.remove_articulation(handle);
     }
 
     pub fn create_rigid_static(&mut self, transform: Mat4) -> RigidStatic {

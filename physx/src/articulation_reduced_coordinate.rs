@@ -116,15 +116,15 @@ impl ArticulationReducedCoordinate {
     }
 
     #[inline]
-    /// Retrieve a handle for this body
-    pub fn handle(&self) -> BodyHandle {
-        BodyHandle(self.ptr as usize)
+    /// Retrieve a handle for this articulation
+    pub fn handle(&self) -> ArticulationHandle {
+        ArticulationHandle(self.ptr as usize)
     }
 
     #[inline]
-    /// Retrieve a handle for the root link of this body
-    pub fn root_handle(&self) -> PartHandle {
-        PartHandle(self.ptr as usize, self.links()[0].handle().1)
+    /// Retrieve a handle for the root link of this articulation
+    pub fn root_handle(&self) -> ActorHandle {
+		ActorHandle(self.links()[0].handle().0, ActorType::ArticulationLink(ArticulationHandle(self.ptr as usize)))
     }
 
     #[inline]
@@ -153,13 +153,13 @@ impl ArticulationReducedCoordinate {
 
     #[inline]
     /// Retrieve part by handle
-    pub fn part_from_handle(&self, handle: PartHandle) -> Option<&ArticulationLink> {
+    pub fn part_from_handle(&self, handle: ActorHandle) -> Option<&ArticulationLink> {
         self.iter_links().find(|link| link.handle() == handle)
     }
 
     #[inline]
     /// Retrieve part by handle
-    pub fn part_from_handle_mut(&mut self, handle: PartHandle) -> Option<&mut ArticulationLink> {
+    pub fn part_from_handle_mut(&mut self, handle: ActorHandle) -> Option<&mut ArticulationLink> {
         self.iter_links_mut().find(|link| link.handle() == handle)
     }
 

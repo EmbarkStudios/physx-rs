@@ -8,29 +8,19 @@
 Utility for handle-based usage
 */
 
-/// Handle for a whole body
+/// The type of actor pointed to by a handle, used primarily for internal tracking.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct BodyHandle(pub usize);
+pub enum ActorType {
+	Unknown, // a necessary evil until we remove ambigious type handle creation (specifically creating handles from raw PxRigidActor ptrs)
+	Static,
+	Dynamic,
+	ArticulationLink(ArticulationHandle),
+}
 
-/// Handle for a link inside a body
+/// A handle associated with an actor. Also contains some type information.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct PartHandle(pub usize, pub usize);
+pub struct ActorHandle(pub usize, pub ActorType);
 
-/// Extract the body handle from the parthandle
-impl Into<BodyHandle> for PartHandle {
-    fn into(self) -> BodyHandle {
-        BodyHandle(self.0)
-    }
-}
-
-/// Trait for a body
-trait Body {
-    fn handle(&self) -> BodyHandle;
-    fn root(&self) -> PartHandle;
-}
-
-/// Trait for a body part, e.g. link
-trait BodyPart {
-    fn body(&self) -> BodyHandle;
-    fn handle(&self) -> PartHandle;
-}
+/// A handle associated with an articulation
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ArticulationHandle(pub usize);

@@ -33,7 +33,7 @@ use std::sync::RwLock;
 
 pub struct Scene {
     px_scene: RwLock<Option<*mut PxScene>>,
-    bodies: Vec<ArticulationReducedCoordinate>,
+    articulations: Vec<ArticulationReducedCoordinate>,
     statics: Vec<RigidStatic>,
     dynamics: Vec<RigidDynamic>,
     simulation_callback: Option<*mut PxSimulationEventCallback>,
@@ -46,7 +46,7 @@ impl Scene {
     pub fn new(scene: *mut PxScene) -> Self {
         let mut _self = Self {
             px_scene: RwLock::new(Some(scene)),
-            bodies: Vec::new(),
+            articulations: Vec::new(),
             dynamics: Vec::new(),
             statics: Vec::new(),
             simulation_callback: None,
@@ -65,7 +65,7 @@ impl Scene {
     }
 
     pub unsafe fn release(&mut self) {
-        self.bodies.drain(..).for_each(|mut e| e.release());
+        self.articulations.drain(..).for_each(|mut e| e.release());
         self.statics.drain(..).for_each(|mut e| e.release());
         self.dynamics.drain(..).for_each(|mut e| e.release());
 
@@ -113,7 +113,7 @@ impl Scene {
         Ok(Controller::new(controller.get_raw_mut()))
     }
 
-    pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
+    pub fn add_actor(&mut self, mut actor: RigidStatic) -> ActorHandle {
         unsafe {
             PxScene_addActor_mut(
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
@@ -122,12 +122,12 @@ impl Scene {
             );
         }
 
-        let handle = BodyHandle(actor.get_raw() as usize);
+        let handle = ActorHandle(actor.get_raw() as usize, ActorType::Static);
         self.statics.push(actor);
         handle
     }
 
-    pub fn add_dynamic(&mut self, mut actor: RigidDynamic) -> BodyHandle {
+    pub fn add_dynamic(&mut self, mut actor: RigidDynamic) -> ActorHandle {
         unsafe {
             PxScene_addActor_mut(
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
@@ -136,7 +136,7 @@ impl Scene {
             );
         }
 
-        let handle = BodyHandle(actor.get_raw() as usize);
+        let handle = ActorHandle(actor.get_raw() as usize, ActorType::Dynamic);
         self.dynamics.push(actor);
         handle
     }
@@ -147,8 +147,8 @@ impl Scene {
         &mut self,
         mut mb: ArticulationReducedCoordinate,
         func: T,
-    ) -> PartHandle {
-        let handle = mb.root_handle();
+    ) -> ArticulationHandle {
+        let handle = mb.handle();
         func(&mut mb);
 
         let scene = self.px_scene.write().unwrap();
@@ -159,27 +159,96 @@ impl Scene {
             );
         }
         mb.common_init();
-        self.bodies.push(mb);
+        self.articulations.push(mb);
         handle
     }
 
-    /// Remove an articulation from the world
-    pub fn remove_articulation(&mut self, handle: BodyHandle) {
+    /// Remove an actor from the scene given a handle.
+    pub fn remove_actor(&mut self, handle: ActorHandle) {
+        match handle.1 {
+            ActorType::Static => {
+                let actor = handle.0 as *const PxActor;
+
+                unsafe {
+                    PxScene_removeActor_mut(
+                        self.px_scene.write().unwrap().expect("accessing null ptr"),
+                        actor as *mut PxActor,
+                        false,
+                    );
+                }
+
+                // Remove actor from tracking list
+                if let Some(idx) = self
+                    .statics
+                    .iter()
+                    .position(|b| b.deref().get_raw() == actor as *const PxRigidActor)
+                {
+                    let mut raw_actor = self.statics.swap_remove(idx);
+                    raw_actor.release();
+                }
+            },
+            ActorType::Dynamic | ActorType::ArticulationLink(..) => {
+                let actor = handle.0 as *const PxActor;
+
+                unsafe {
+                    PxScene_removeActor_mut(
+                        self.px_scene.write().unwrap().expect("accessing null ptr"),
+                        actor as *mut PxActor,
+                        false,
+                    );
+                }
+
+                // Remove actor from tracking list
+                if let Some(idx) = self
+                    .dynamics
+                    .iter()
+                    .position(|b| b.deref().get_raw() == actor as *const PxRigidBody)
+                {
+                    let mut raw_actor = self.dynamics.swap_remove(idx);
+                    raw_actor.release();
+                }
+            },
+            ActorType::Unknown => {
+                // FIXME Go ahead and make the call to removeActor, but we don't really know
+                //       what else to do! Eventually, the Unknown variant should not exist.
+                //       We have to use it now because converting a raw PxRigidActor ptr to a handle
+                //       results in a handle with an ambiguous actor type.
+                let actor = handle.0 as *const PxActor;
+
+                unsafe {
+                    PxScene_removeActor_mut(
+                        self.px_scene.write().unwrap().expect("accessing null ptr"),
+                        actor as *mut PxActor,
+                        false,
+                    );
+                }
+            }
+        }
+    }
+
+    /// Remove an articulation from the scene given a handle.
+    pub fn remove_articulation(&mut self, handle: ArticulationHandle) {
+
+        // FIXME Should this also remove all articulation links?
+
+        let articulation = handle.0 as *const PxArticulationBase;
+
         unsafe {
-            let articulation = handle.0 as *const PxArticulationBase;
             PxScene_removeArticulation_mut(
                 self.px_scene.write().unwrap().expect("accessing null ptr"),
                 articulation as *mut PxArticulationBase,
                 false,
             );
+        }
 
-            if let Some(idx) = self
-                .bodies
-                .iter()
-                .position(|b| b.deref().get_raw() == articulation)
-            {
-                let mut body = self.bodies.swap_remove(idx);
-                body.release();
+        if let Some(idx) = self
+            .articulations
+            .iter()
+            .position(|b| b.deref().get_raw() == articulation)
+        {
+            let mut raw_articulation = self.articulations.swap_remove(idx);
+            unsafe {
+                raw_articulation.release();
             }
         }
     }
@@ -214,17 +283,16 @@ impl Scene {
             }
         }
     }
-    //    fn read(self) -> std::sync::RwLockReadGuard<Px>
 
-    pub fn get_multibody(&self, handle: BodyHandle) -> Option<&ArticulationReducedCoordinate> {
-        self.bodies.iter().find(|bod| bod.handle() == handle)
+    pub fn get_multibody(&self, handle: ArticulationHandle) -> Option<&ArticulationReducedCoordinate> {
+        self.articulations.iter().find(|bod| bod.handle() == handle)
     }
 
     pub fn get_multibody_mut(
         &mut self,
-        handle: BodyHandle,
+        handle: ArticulationHandle,
     ) -> Option<&mut ArticulationReducedCoordinate> {
-        self.bodies.iter_mut().find(|bod| bod.handle() == handle)
+        self.articulations.iter_mut().find(|bod| bod.handle() == handle)
     }
 
     pub fn sample_height(
@@ -327,51 +395,43 @@ impl Scene {
     }
 
     /// Lookup and retrieve a RigidStatic reference for this handle
-    pub fn get_static(&self, handle: BodyHandle) -> Option<&RigidStatic> {
+    pub fn get_static(&self, handle: ActorHandle) -> Option<&RigidStatic> {
         self.statics.iter().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidStatic reference for this handle
-    pub fn get_static_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidStatic> {
+    pub fn get_static_mut(&mut self, handle: ActorHandle) -> Option<&mut RigidStatic> {
         self.statics.iter_mut().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidDynamic reference for this handle
-    pub fn get_dynamic(&self, handle: BodyHandle) -> Option<&RigidDynamic> {
+    pub fn get_dynamic(&self, handle: ActorHandle) -> Option<&RigidDynamic> {
         self.dynamics.iter().find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidDynamic reference for this handle
-    pub fn get_dynamic_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidDynamic> {
+    pub fn get_dynamic_mut(&mut self, handle: ActorHandle) -> Option<&mut RigidDynamic> {
         self.dynamics
             .iter_mut()
             .find(|elem| handle == elem.handle())
     }
 
     /// Lookup and retrieve a RigidActor reference for this handle
-    pub fn get_rigid_actor(&self, handle: BodyHandle) -> Option<&RigidActor> {
-        if let Some(dynamic) = self.get_dynamic(handle) {
-            Some(dynamic)
-        } else if let Some(static_) = self.get_static(handle) {
-            Some(static_)
+    pub fn get_rigid_actor(&self, handle: ActorHandle) -> Option<&RigidActor> {
+        if let Some(dynamic_actor) = self.get_dynamic(handle) {
+            Some(dynamic_actor)
+        } else if let Some(static_actor) = self.get_static(handle) {
+            Some(static_actor)
         } else {
-            for body in &self.bodies {
-                let art_handle = body.handle();
-                let part_handle = PartHandle(art_handle.0, handle.0);
-                let part = body.part_from_handle(part_handle);
-                if part.is_some() {
-                    return part.map(|link| link.deref().deref());
-                }
-            }
             None
         }
     }
 
     /// Retrieve a RigidActor based on the bodyhandle. Note: This API is unsafe
     /// and bypasses a lot of safety checks for lifetimes and ownership.
-    pub unsafe fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
+    pub unsafe fn get_rigid_actor_unchecked(&self, handle: &ActorHandle) -> &RigidActor {
         // Clippy this is the right way to do it instead of a transmute...
-        &*(handle as *const BodyHandle as *const super::px_type::PxType<PxRigidActor>)
+        &*(handle as *const ActorHandle as *const super::px_type::PxType<PxRigidActor>)
     }
 
     pub fn find_matching_rigid_actor_mut(
@@ -392,10 +452,9 @@ impl Scene {
             return Some(rigid);
         };
 
-        for body in &mut self.bodies {
-            let handle = body.handle();
-            let handle = PartHandle(handle.0, actor as usize);
-            let part = body.part_from_handle_mut(handle);
+        for articulation in &mut self.articulations {
+            let actor_handle = ActorHandle(actor as usize, ActorType::Unknown);
+            let part = articulation.part_from_handle_mut(actor_handle);
             if part.is_some() {
                 return part.map(|link| link.deref_mut().deref_mut());
             }
@@ -416,10 +475,9 @@ impl Scene {
     //         return Some(rigid);
     //     };
 
-    //     for body in &self.bodies {
-    //         let handle = body.handle();
-    //         let handle = PartHandle(handle.0, actor as usize);
-    //         let part = body.part_from_handle(handle);
+    //     for articulation in &mut self.articulations {
+    //          let actor_handle = ActorHandle(actor as usize, ActorType::Unknown);
+    //         let part = articulation.part_from_handle_mut(actor_handle);
     //         if part.is_some() {
     //             return part.map(|link| link.deref().deref());
     //         }
@@ -428,7 +486,6 @@ impl Scene {
     //     None
     // }
 
-    /// Looking
     pub fn collide_raw_pair(
         &mut self,
         first_px_actor: *mut PxRigidActor,
@@ -464,8 +521,8 @@ impl Scene {
         }
     }
 
-    pub fn get_bodies(&self) -> &Vec<ArticulationReducedCoordinate> {
-        &self.bodies
+    pub fn get_articulations(&self) -> &Vec<ArticulationReducedCoordinate> {
+        &self.articulations
     }
 
     ////////////////////////////////////////////////////////////////////////////////

@@ -12,7 +12,7 @@ use super::{
     articulation_base::ArticulationBase,
     articulation_joint_base::*,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
-    body::PartHandle,
+    body::{ActorHandle, ArticulationHandle, ActorType},
     geometry::*,
     math::Isometry,
     px_type::*,
@@ -157,10 +157,10 @@ impl ArticulationLink {
     }
 
     /// Get a handle to this part
-    pub fn handle(&self) -> PartHandle {
-        PartHandle(
-            self.get_articulation().ptr as usize,
+    pub fn handle(&self) -> ActorHandle {
+        ActorHandle(
             self.get_raw() as usize,
+			ActorType::ArticulationLink(ArticulationHandle(self.get_articulation().ptr as usize)),
         )
     }
 
@@ -234,9 +234,9 @@ impl ArticulationLinkBuilder {
     pub fn build(
         &self,
         body: &mut ArticulationReducedCoordinate,
-        parent: PartHandle,
+        parent: ActorHandle,
         joint_transform: Option<Mat4>,
-    ) -> PartHandle {
+    ) -> ActorHandle {
         let parent_quat = self.parent_rotation;
 
         let transform = Mat4::from_rotation_translation(parent_quat, self.parent_offset);

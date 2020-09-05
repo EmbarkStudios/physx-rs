@@ -253,9 +253,9 @@ impl Default for JointBuilder {
 }
 
 impl JointBuilder {
-    pub fn build(&self, part: PartHandle) -> ArticulationJointReducedCoordinate {
+    pub fn build(&self, part: ActorHandle) -> ArticulationJointReducedCoordinate {
         let z_axis = self.axis == Vec3::unit_z();
-        let link = part.1 as *mut PxArticulationLink;
+        let link = part.0 as *mut PxArticulationLink;
 
         unsafe {
             let joint = PxArticulationLink_getInboundJoint(link);

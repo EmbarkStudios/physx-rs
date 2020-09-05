@@ -10,7 +10,7 @@ Trait for RigidActor
 
 use super::{
     actor::Actor,
-    body::BodyHandle,
+    body::{ActorHandle, ActorType},
     geometry::*,
     px_type::*,
     shape::CollisionLayer,
@@ -40,9 +40,9 @@ impl RigidActor {
         _self
     }
 
-    /// Get a handle which can later be converted back into this body via the Scene.
-    pub fn handle(&self) -> BodyHandle {
-        BodyHandle(self.get_raw() as usize)
+    /// Get a handle which can later be converted back into this actor via the Scene.
+    pub fn handle(&self) -> ActorHandle {
+		ActorHandle(self.get_raw() as usize, ActorType::Static)
     }
 
     /// Get the global pose of this rigid actor
