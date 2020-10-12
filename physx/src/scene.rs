@@ -3,7 +3,6 @@
 // Created: 10 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 #![allow(clippy::missing_safety_doc)]
 #![allow(deprecated)]
 
@@ -648,7 +647,7 @@ impl SceneBuilder {
 
     /// Set solver type
     ///
-    /// Default: eTGS
+    /// Default: PGS
     pub fn set_solver_type(&mut self, solver_type: SolverType) -> &mut Self {
         self.solver_type = solver_type;
         self

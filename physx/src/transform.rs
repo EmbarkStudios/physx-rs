@@ -3,7 +3,6 @@
 // Created:  2 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 This defines utility conversion functions from PhysX data types to glm datatypes

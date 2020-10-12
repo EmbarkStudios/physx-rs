@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 use crate::px_type::*;
 use crate::rigid_dynamic::RigidDynamic;

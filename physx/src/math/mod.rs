@@ -3,7 +3,6 @@
 // Created: 17 June 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 

@@ -3,7 +3,6 @@
 // Created: 12 June 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 Release trait to make sure our Deref hack calls the right Release
