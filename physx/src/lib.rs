@@ -4,6 +4,7 @@
 
 #![warn(clippy::all)]
 #![warn(rust_2018_idioms)]
+#![allow(unused_attributes)]
 
 //! # 🎳 physx
 //!
