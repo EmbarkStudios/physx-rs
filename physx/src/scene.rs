@@ -516,6 +516,22 @@ impl Into<PxBroadPhaseType::Enum> for BroadPhaseType {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]
+pub enum SolverType {
+    PGS = 1,
+    TGS = 2,
+}
+
+impl Into<PxSolverType::Enum> for SolverType {
+    fn into(self) -> PxSolverType::Enum {
+        match self {
+            SolverType::PGS => PxSolverType::ePGS,
+            SolverType::TGS => PxSolverType::eTGS,
+        }
+    }
+}
+
 pub enum SimulationThreadType {
     Dedicated(u32),
     Shared(*mut PxCpuDispatcher),
@@ -532,6 +548,7 @@ pub struct SceneBuilder {
     pub(crate) call_default_filter_shader_first: bool,
     pub(crate) use_ccd: bool,
     pub(crate) enable_ccd_resweep: bool,
+    pub(crate) solver_type: SolverType,
 }
 
 impl Default for SceneBuilder {
@@ -546,6 +563,7 @@ impl Default for SceneBuilder {
             controller_manager_locking: false,
             use_ccd: false,
             enable_ccd_resweep: false,
+            solver_type: SolverType::PGS,
         }
     }
 }
@@ -628,6 +646,14 @@ impl SceneBuilder {
         self
     }
 
+    /// Set solver type
+    ///
+    /// Default: eTGS
+    pub fn set_solver_type(&mut self, solver_type: SolverType) -> &mut Self {
+        self.solver_type = solver_type;
+        self
+    }
+
     pub(super) fn build_desc(&self, physics: &mut Physics) -> PxSceneDesc {
         unsafe {
             let tolerances = physics.get_tolerances_scale();
@@ -645,6 +671,9 @@ impl SceneBuilder {
 
             scene_desc.cpuDispatcher = dispatcher;
             scene_desc.gravity = gl_to_px_v3(self.gravity);
+            scene_desc.solverType = self.solver_type.into();
+            scene_desc.broadPhaseType = self.broad_phase_type.into();
+
             if self.use_ccd {
                 scene_desc.flags.mBits |= PxSceneFlag::eENABLE_CCD;
                 if !self.enable_ccd_resweep {
