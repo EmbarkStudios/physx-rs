@@ -31,7 +31,7 @@ impl ControllerManager {
         Controller::new(controller)
     }
 
-    pub unsafe fn release(self: Self) {
+    pub unsafe fn release(self) {
         PxControllerManager_release_mut(self.ptr);
     }
 }
@@ -64,7 +64,7 @@ impl CapsuleControllerDesc {
         }
     }
 
-    pub fn release(self: Self) {
+    pub fn release(self) {
         unsafe { PxCapsuleControllerDesc_delete(self.ptr) };
     }
 }
