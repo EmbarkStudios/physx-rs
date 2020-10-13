@@ -3,7 +3,6 @@
 // Created: 16 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 Trait for PxActor

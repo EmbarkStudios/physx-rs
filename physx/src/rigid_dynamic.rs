@@ -3,7 +3,6 @@
 // Created: 19 June 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 Wrapper implementation for PxRigidDynamic

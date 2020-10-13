@@ -3,7 +3,6 @@
 // Created:  9 May 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 Prelude for commonly useful types

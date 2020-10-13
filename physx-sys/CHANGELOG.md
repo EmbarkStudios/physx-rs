@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- [PR#87](https://github.com/EmbarkStudios/physx-rs/pull/87) Allow setting the solver type when creating a scene
+
 ## [0.4.9] - 2020-08-13
 
 ### Added
