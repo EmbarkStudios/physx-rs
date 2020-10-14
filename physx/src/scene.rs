@@ -548,6 +548,11 @@ pub struct SceneBuilder {
     pub(crate) use_ccd: bool,
     pub(crate) enable_ccd_resweep: bool,
     pub(crate) solver_type: SolverType,
+    pub(crate) enhanced_determinism: bool,
+    pub(crate) friction_every_iteration: bool,
+    pub(crate) stabilization: bool,
+    pub(crate) adaptive_force: bool,
+    pub(crate) ccd_max_passes: usize,
 }
 
 impl Default for SceneBuilder {
@@ -563,6 +568,11 @@ impl Default for SceneBuilder {
             use_ccd: false,
             enable_ccd_resweep: false,
             solver_type: SolverType::PGS,
+            enhanced_determinism: false,
+            friction_every_iteration: false,
+            stabilization: false,
+            adaptive_force: false,
+            ccd_max_passes: 1,
         }
     }
 }
@@ -645,11 +655,51 @@ impl SceneBuilder {
         self
     }
 
+    /// Maximum number of CCD passes.
+    ///
+    /// Default: 1
+    pub fn set_ccd_max_passes(&mut self, ccd_max_passes: usize) -> &mut Self {
+        self.ccd_max_passes = ccd_max_passes;
+        self
+    }
+
     /// Set solver type
     ///
     /// Default: PGS
     pub fn set_solver_type(&mut self, solver_type: SolverType) -> &mut Self {
         self.solver_type = solver_type;
+        self
+    }
+
+    /// Set to enable enhanced determinism flag
+    ///
+    /// Default: false
+    pub fn set_enhanced_determinism(&mut self, enhanced_determinism: bool) -> &mut Self {
+        self.enhanced_determinism = enhanced_determinism;
+        self
+    }
+
+    /// Set to evaluate friction every iteration instead of only in the final 3 position iterations
+    ///
+    /// Default: false
+    pub fn set_friction_every_iteration(&mut self, friction_every_iteration: bool) -> &mut Self {
+        self.friction_every_iteration = friction_every_iteration;
+        self
+    }
+
+    /// Set to enable an additional stabilization pass in the solver.
+    ///
+    /// Default: false
+    pub fn set_stabilization(&mut self, stabilization: bool) -> &mut Self {
+        self.stabilization = stabilization;
+        self
+    }
+
+    /// Set to enable adaptive force to accelerate convergence of the solver
+    ///
+    /// Default: false
+    pub fn set_adaptive_force(&mut self, adaptive_force: bool) -> &mut Self {
+        self.adaptive_force = adaptive_force;
         self
     }
 
@@ -678,7 +728,25 @@ impl SceneBuilder {
                 if !self.enable_ccd_resweep {
                     scene_desc.flags.mBits |= PxSceneFlag::eDISABLE_CCD_RESWEEP;
                 }
+                scene_desc.ccdMaxPasses = self.ccd_max_passes as u32;
             }
+
+            if self.enhanced_determinism {
+                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+            }
+
+            if self.friction_every_iteration {
+                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+            }
+
+            if self.stabilization {
+                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_STABILIZATION;
+            }
+
+            if self.adaptive_force {
+                scene_desc.flags.mBits |= PxSceneFlag::eADAPTIVE_FORCE;
+            }
+
             if let Some(filter_shader) = self.simulation_filter_shader {
                 physx_sys::enable_custom_filter_shader(
                     &mut scene_desc as *mut PxSceneDesc,
