@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.7.3] - 2020-10-14
+
+### Added
+
+- [PR#90](https://github.com/EmbarkStudios/physx-rs/pull/90) Expose a bunch of additional parameters on SceneBuilder
+
 ## [0.7.2] - 2020-10-13
 
 ### Added
@@ -52,7 +58,8 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.2...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.3...HEAD
+[0.7.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.2...physx-v0.7.3
 [0.7.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.1...physx-v0.7.2
 [0.7.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.0...physx-v0.7.1
 [0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.1...physx-v0.7.0

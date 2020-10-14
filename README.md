@@ -99,7 +99,7 @@ of the crate needs updating, and what [semantic version](https://semver.org/) bu
 
 3. Create a branch: `git checkout -b release-physx-0.x.y`
 
-4. Update relevant changelogs (also update the diff links at the bottom of them!)
+4. Update relevant changelogs (also update the diff links at the bottom of them!), and the version number in the Cargo.toml files for the crate(s) that you are updating.
 
 5. Make a PR from your branch, get it reviewed and merged. If in doubt about what the PR
 should look like, just look at previous release PRs
