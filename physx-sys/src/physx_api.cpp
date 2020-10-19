@@ -177,11 +177,39 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
     }
 };
 
+typedef void * (*AllocCallback)(uint64_t size, const char *typeName, const char *filename, int line, void *userdata);
+typedef void (*DeallocCallback)(void *ptr, void *userdata);
+
+class CustomAllocatorTrampoline : public PxAllocatorCallback {
+public:
+    CustomAllocatorTrampoline(AllocCallback allocCb, DeallocCallback deallocCb, void *userdata)
+        : mAllocCallback(allocCb), mDeallocCallback(deallocCb), mUserData(userdata) {
+    }
+
+	void *allocate(size_t size, const char* typeName, const char* filename, int line) {
+        return mAllocCallback((uint64_t)size, typeName, filename, line, mUserData);
+    }
+
+	virtual void deallocate(void* ptr) {
+        mDeallocCallback(ptr, mUserData);
+    }
+
+private:
+    AllocCallback mAllocCallback;
+    DeallocCallback mDeallocCallback;
+    void *mUserData;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
     {
         return PxCreateFoundation(PX_PHYSICS_VERSION, gAllocator, gErrorCallback);
+    }
+
+    PxFoundation *physx_create_foundation_with_alloc(PxAllocatorCallback *allocator)
+    {
+        return PxCreateFoundation(PX_PHYSICS_VERSION, *allocator, gErrorCallback);
     }
 
     // fixme[tolsson]: this might be iffy on Windows with DLLs if we have multiple packages
@@ -210,6 +238,14 @@ extern "C"
 
     PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData) {
         return new RaycastFilterTrampoline(callback, userData);
+    }
+
+    PxAllocatorCallback *create_alloc_callback(
+        AllocCallback alloc_callback,
+        DeallocCallback dealloc_callback,
+        void *userdata
+    ) {
+        return new CustomAllocatorTrampoline(alloc_callback, dealloc_callback, userdata);
     }
 
     void *get_default_simulation_filter_shader()

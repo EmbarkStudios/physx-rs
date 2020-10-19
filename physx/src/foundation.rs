@@ -40,6 +40,17 @@ impl Foundation {
         Self::from_ptr(px_foundation)
     }
 
+    pub fn new_with_alloc(version: u32, allocator: *mut PxAllocatorCallback) -> Self {
+        let px_foundation = unsafe {
+            phys_PxCreateFoundation(
+                version,
+                allocator,
+                get_default_error_callback() as *mut PxErrorCallback,
+            )
+        };
+        Self::from_ptr(px_foundation)
+    }
+
     pub fn get_error_callback(&mut self) -> *mut PxErrorCallback {
         unsafe { PxFoundation_getErrorCallback_mut(self.get_raw_mut()) }
     }
