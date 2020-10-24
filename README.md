@@ -2,7 +2,9 @@
 
 ![Build Status](https://github.com/EmbarkStudios/physx-rs/workflows/CI/badge.svg)
 [![Contributor Covenant](https://img.shields.io/badge/contributor%20covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+[![dependency status](https://deps.rs/repo/github/EmbarkStudios/physx-rs/status.svg)](https://deps.rs/repo/github/EmbarkStudios/physx-rs)
 [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](http://embark.games)
+[![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
 
 Rust binding and wrapper over [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine particularly well-suited for games.
 
