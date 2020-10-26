@@ -3,38 +3,84 @@
 // Created: 10 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 ArticulationReducedCoordinate wrapper for PhysX.
  */
 
 use super::{
+    owner::Owner,
     articulation_base::ArticulationBase,
     articulation_cache::{ArticulationCache, ArticulationCacheFlag},
-    articulation_link::*,
-    body::*,
-    cooking::*,
-    physics::Physics,
-    px_type::*,
-    shape::CollisionLayer,
-    traits::*,
-    transform::*,
-    user_data::UserData,
+    math::PxTransform,
+    traits::{Class, UserData, PxFlags},
 };
+
+use std::{
+    ptr::NonNull,
+    marker::PhantomData,
+};
+
 use enumflags2::BitFlags;
-use glam::{Mat4, Vec3};
-use physx_macros::*;
-use physx_sys::*;
-use std::ptr::{null, null_mut};
+
+use physx_sys::{
+    PxArticulationFlag,
+    PxArticulationFlags,
+    PxArticulationCacheFlags,
+    //PxArticulationReducedCoordinate_addLoopJoint_mut,
+    PxArticulationReducedCoordinate_applyCache_mut,
+    PxArticulationReducedCoordinate_commonInit,
+    PxArticulationReducedCoordinate_computeCoefficientMatrix,
+    PxArticulationReducedCoordinate_computeCoriolisAndCentrifugalForce,
+    PxArticulationReducedCoordinate_computeDenseJacobian,
+    PxArticulationReducedCoordinate_computeGeneralizedExternalForce,
+    PxArticulationReducedCoordinate_computeGeneralizedGravityForce,
+    PxArticulationReducedCoordinate_computeGeneralizedMassMatrix,
+    PxArticulationReducedCoordinate_computeJointAcceleration,
+    PxArticulationReducedCoordinate_computeJointForce,
+    PxArticulationReducedCoordinate_computeLambda,
+    PxArticulationReducedCoordinate_copyInternalStateToCache,
+    PxArticulationReducedCoordinate_createCache,
+    PxArticulationReducedCoordinate_getArticulationFlags,
+    PxArticulationReducedCoordinate_getCacheDataSize,
+    //PxArticulationReducedCoordinate_getCoefficientMatrixSize,
+    PxArticulationReducedCoordinate_getDofs,
+    //PxArticulationReducedCoordinate_getLoopJoints,
+    //PxArticulationReducedCoordinate_getNbLoopJoints,
+    PxArticulationReducedCoordinate_packJointData,
+    PxArticulationReducedCoordinate_release_mut,
+    PxArticulationReducedCoordinate_releaseCache,
+    //PxArticulationReducedCoordinate_removeLoopJoint_mut,
+    PxArticulationReducedCoordinate_setArticulationFlag_mut,
+    PxArticulationReducedCoordinate_setArticulationFlags_mut,
+    PxArticulationReducedCoordinate_teleportRootLink_mut,
+    PxArticulationReducedCoordinate_unpackJointData,
+    PxArticulationReducedCoordinate_zeroCache_mut,
+};
 
 /*******************************************************************************
  * Section FLAGS                                                               *
  ******************************************************************************/
 
+pub type ArticulationFlags = BitFlags<ArticulationFlag>;
+
+impl PxFlags for ArticulationFlags {
+    type Target = PxArticulationFlags;
+
+    fn into_px(self) -> Self::Target {
+        PxArticulationFlags{mBits:self.bits()}
+    }
+
+    fn from_px(flags: Self::Target) -> Self {
+        unsafe { BitFlags::new(flags.mBits) }
+    }
+}
+
+ #[derive(Copy, Clone, Debug, BitFlags)]
 #[repr(u8)]
 pub enum ArticulationFlag {
-    FixBase = 1,
+    FixBase = 1 << 0,
+    DriveLimitsAreForces = 1 << 1,
 }
 
 impl Into<PxArticulationFlag::Enum> for ArticulationFlag {
@@ -43,196 +89,97 @@ impl Into<PxArticulationFlag::Enum> for ArticulationFlag {
     }
 }
 
-impl ToFlags<PxArticulationFlags> for ArticulationFlag {
-    fn to_flags(self) -> PxArticulationFlags {
-        PxArticulationFlags { mBits: self as _ }
+/*******************************************************************************
+ * Section ARTICULATION                                                        *
+*******************************************************************************/
+
+ #[repr(transparent)]
+pub struct ArticulationReducedCoordinate<U, L, H, M> {
+    pub(crate) obj: physx_sys::PxArticulationReducedCoordinate,
+    phantom_user_data: PhantomData<(U, L, H, M)>,
+}
+
+impl<U, L, H, M> ArticulationBase<L, H, M> for ArticulationReducedCoordinate<U, L, H, M> {}
+unsafe impl<S, U, L, H, M> Class<S> for ArticulationReducedCoordinate<U, L, H, M>
+where physx_sys::PxArticulationReducedCoordinate: Class<S> {
+    fn as_ptr(&self) -> *const S {
+        self.obj.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut S {
+        self.obj.as_mut_ptr()
     }
 }
 
-/*******************************************************************************
- * Section ARTICULATION                                                        *
- ******************************************************************************/
-
-////////////////////////////////////////////////////////////////////////////////
-
-#[physx_type(inherit = "ArticulationBase")]
-impl ArticulationReducedCoordinate {
-    /// Construct a new multibody with a fixed root
-    pub fn new(world: &mut Physics) -> Self {
-        let articulation =
-            unsafe { PxPhysics_createArticulationReducedCoordinate_mut(world.physics) };
-
-        let root_raw_link = unsafe {
-            PxArticulationBase_createLink_mut(
-                articulation as *mut PxArticulationBase,
-                null_mut(),
-                &px_identity_tf(),
-            )
-        };
-
-        let mut root_link = ArticulationLink::new(root_raw_link);
-        if let UserData::RigidActor(data) = root_link.user_data_mut() {
-            data.name = String::from("noname")
-        }
-
-        let mut _self = Self { ptr: articulation };
-        _self.allocate_user_data();
-        _self
+impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
+    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxArticulationReducedCoordinate, user_data: U) -> Option<Owner<Self>> {
+        let arc = (ptr as *mut Self).as_mut();
+        Owner::from_raw(arc?.init_user_data(user_data))
     }
 
-    /// Create a new multibody, using data from builder to construct the root link
-    pub fn new_with_link(
-        builder: &ArticulationLinkBuilder,
-        physics: &mut Physics,
-        cooking: &mut Cooking,
-    ) -> Self {
-        let articulation =
-            unsafe { PxPhysics_createArticulationReducedCoordinate_mut(physics.get_raw_mut()) };
-
-        let parent_quat = builder.parent_rotation;
-
-        let transform = Mat4::from_rotation_translation(parent_quat, builder.parent_offset);
-        let root_raw_link = unsafe {
-            PxArticulationBase_createLink_mut(
-                articulation as *mut PxArticulationBase,
-                null_mut(),
-                &gl_to_px_tf(transform),
-            )
-        };
-
-        let mut link = ArticulationLink::new(root_raw_link);
-        if let UserData::RigidActor(data) = link.user_data_mut() {
-            data.name = builder.name.clone()
-        }
-
-        if let Some(ref collider) = builder.collider {
-            let geometry = cooking.make_geometry(collider.clone());
-            link.create_exclusive_shape(geometry, Mat4::identity(), Mat4::identity());
-        }
-
-        let mut _self = Self { ptr: articulation };
-        _self.allocate_user_data();
-        _self.add_link(link);
-        _self
+    pub fn get_user_data(&self) -> &U {
+        // Safety: construction must go through `from_raw` which calls `init_user_data`
+        unsafe { UserData::get_user_data(self) }
     }
 
-    #[inline]
-    /// Retrieve a handle for this body
-    pub fn handle(&self) -> BodyHandle {
-        BodyHandle(self.ptr as usize)
+    pub fn get_user_data_mut(&mut self) -> &mut U {
+        // Safety: construction must go through `from_raw` which calls `init_user_data`
+        unsafe { UserData::get_user_data_mut(self) }
     }
-
-    #[inline]
-    /// Retrieve a handle for the root link of this body
-    pub fn root_handle(&self) -> PartHandle {
-        PartHandle(self.ptr as usize, self.links()[0].handle().1)
-    }
-
-    #[inline]
-    /// Retrieve the root link of this body
-    pub fn root(&self) -> &ArticulationLink {
-        &self.links()[0]
-    }
-
-    #[inline]
-    /// Mutably retrieve the root link of this body
-    pub fn root_mut(&mut self) -> &mut ArticulationLink {
-        &mut self.links_mut()[0]
-    }
-
-    #[inline]
-    /// Retrieve part by index
-    pub fn part(&self, part: usize) -> Option<&ArticulationLink> {
-        self.links().get(part)
-    }
-
-    #[inline]
-    /// Retrieve part by index
-    pub fn part_mut(&mut self, part: usize) -> Option<&mut ArticulationLink> {
-        self.links_mut().get_mut(part)
-    }
-
-    #[inline]
-    /// Retrieve part by handle
-    pub fn part_from_handle(&self, handle: PartHandle) -> Option<&ArticulationLink> {
-        self.iter_links().find(|link| link.handle() == handle)
-    }
-
-    #[inline]
-    /// Retrieve part by handle
-    pub fn part_from_handle_mut(&mut self, handle: PartHandle) -> Option<&mut ArticulationLink> {
-        self.iter_links_mut().find(|link| link.handle() == handle)
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Section PASSTHROUGH
-    ////////////////////////////////////////////////////////////////////////////////
-
+    
+    
     #[inline]
     pub fn common_init(&mut self) {
         unsafe {
-            PxArticulationReducedCoordinate_commonInit(self.get_raw());
+            PxArticulationReducedCoordinate_commonInit(self.as_ptr())
         }
     }
 
-    #[inline]
     /// Get the number of dofs for the body
+    #[inline]
     pub fn get_dofs(&self) -> usize {
-        unsafe { PxArticulationReducedCoordinate_getDofs(self.get_raw()) as usize }
+        unsafe { PxArticulationReducedCoordinate_getDofs(self.as_ptr()) as usize }
     }
 
-    #[inline]
     /// Set an articulation flag
+    #[inline]
     pub fn set_articulation_flag(&mut self, flag: ArticulationFlag, value: bool) {
         unsafe {
             PxArticulationReducedCoordinate_setArticulationFlag_mut(
-                self.get_raw_mut(),
+                self.as_mut_ptr(),
                 flag.into(),
                 value,
-            );
+            )
         }
     }
 
-    #[inline]
     /// Set the articulation flags
+    #[inline]
     pub fn set_articulation_flags(&mut self, flag: ArticulationFlag) {
         unsafe {
             PxArticulationReducedCoordinate_setArticulationFlags_mut(
-                self.get_raw_mut(),
-                flag.to_flags(),
-            );
+                self.as_mut_ptr(),
+                PxArticulationFlags{mBits:flag as u8},
+            )
         }
     }
 
+    /// Get the articulation flags
     #[inline]
-    /// Set the articulation flags
-    pub fn get_articulation_flags(&self) {
+    pub fn get_articulation_flags(&self) -> ArticulationFlags {
         unsafe {
-            PxArticulationReducedCoordinate_getArticulationFlags(self.get_raw());
+            ArticulationFlags::from_px(PxArticulationReducedCoordinate_getArticulationFlags(self.as_ptr()))
         }
-    }
-
-    #[inline]
-    /// Get the number of joints across the whole tree
-    pub fn get_nb_joints(&self) -> usize {
-        self.iter_links().fold(0, |accum, link| {
-            accum + if link.inbound_joint().is_some() { 1 } else { 0 }
-        })
-    }
-    //
-    /// Get the pose of the body in the world
-    pub fn global_pose(&self) -> Mat4 {
-        self.root().get_global_pose()
     }
 
     /// Teleport the whole body to the transform and and orientation given by `Pose`
-    pub fn teleport_to(&mut self, pose: Mat4) {
+    pub fn teleport_to(&mut self, pose: &PxTransform) {
         // self.links[0].set_transform(pose);
         self.common_init();
         unsafe {
             PxArticulationReducedCoordinate_teleportRootLink_mut(
-                self.get_raw_mut(),
-                &gl_to_px_tf(pose),
+                self.as_mut_ptr(),
+                pose.as_ptr(),
                 true,
             );
         }
@@ -243,28 +190,32 @@ impl ArticulationReducedCoordinate {
     ////////////////////////////////////////////////////////////////////////////////
 
     /// Create a new cache for this articulation
-    pub fn create_cache(&self) -> ArticulationCache {
-        let mut cache = ArticulationCache::new(unsafe {
-            PxArticulationReducedCoordinate_createCache(self.get_raw())
-        });
-        cache.compute_dof_information(self);
-        cache
+    pub fn create_cache(&self) -> Option<ArticulationCache> {
+        let px_articulation_cache = unsafe {
+            NonNull::new(
+                PxArticulationReducedCoordinate_createCache(self.as_ptr())
+            )?
+        };
+    
+        Some(ArticulationCache::new(
+            px_articulation_cache
+        ))
     }
 
     /// Release the cache and free the memory
     pub fn release_cache(&self, mut cache: ArticulationCache) {
-        unsafe { PxArticulationReducedCoordinate_releaseCache(self.get_raw(), cache.get_raw_mut()) }
+        unsafe { PxArticulationReducedCoordinate_releaseCache(self.as_ptr(), cache.as_mut_ptr()) }
     }
 
     /// Get the memory size of this cache
     pub fn get_cache_data_size(&self) -> u32 {
-        unsafe { PxArticulationReducedCoordinate_getCacheDataSize(self.get_raw()) }
+        unsafe { PxArticulationReducedCoordinate_getCacheDataSize(self.as_ptr()) }
     }
 
     /// Zero everything in the cache
     pub fn zero_cache(&mut self, cache: &mut ArticulationCache) {
         unsafe {
-            PxArticulationReducedCoordinate_zeroCache_mut(self.get_raw_mut(), cache.get_raw_mut())
+            PxArticulationReducedCoordinate_zeroCache_mut(self.as_mut_ptr(), cache.as_mut_ptr())
         }
     }
 
@@ -277,9 +228,9 @@ impl ArticulationReducedCoordinate {
     ) {
         unsafe {
             PxArticulationReducedCoordinate_applyCache_mut(
-                self.get_raw_mut(),
-                cache.get_raw_mut(),
-                flag.to_flags(),
+                self.as_mut_ptr(),
+                cache.as_mut_ptr(),
+                PxArticulationCacheFlags{mBits: flag.bits()},
                 autowake,
             )
         }
@@ -293,9 +244,9 @@ impl ArticulationReducedCoordinate {
     ) {
         unsafe {
             PxArticulationReducedCoordinate_copyInternalStateToCache(
-                self.get_raw(),
-                cache.get_raw_mut(),
-                flag.to_flags(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
+                PxArticulationCacheFlags{mBits: flag.bits()},
             )
         }
     }
@@ -304,8 +255,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_generalized_gravity_force(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeGeneralizedGravityForce(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             )
         }
     }
@@ -314,8 +265,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_coriolis_and_centrifugal_force(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeCoriolisAndCentrifugalForce(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             )
         }
     }
@@ -324,8 +275,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_generalized_external_force(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeGeneralizedExternalForce(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             )
         }
     }
@@ -334,8 +285,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_joint_acceleration(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeJointAcceleration(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             )
         }
     }
@@ -343,7 +294,7 @@ impl ArticulationReducedCoordinate {
     /// Compute joint force caused by changes in joint acceleration
     pub fn compute_joint_force(&self, cache: &mut ArticulationCache) {
         unsafe {
-            PxArticulationReducedCoordinate_computeJointForce(self.get_raw(), cache.get_raw_mut())
+            PxArticulationReducedCoordinate_computeJointForce(self.as_ptr(), cache.as_mut_ptr())
         }
     }
 
@@ -354,10 +305,10 @@ impl ArticulationReducedCoordinate {
         let mut cols = 0;
         unsafe {
             PxArticulationReducedCoordinate_computeDenseJacobian(
-                self.get_raw(),
-                cache.get_raw_mut(),
-                &mut rows as *mut u32,
-                &mut cols as *mut u32,
+                self.as_ptr(),
+                cache.as_mut_ptr(),
+                &mut rows,
+                &mut cols,
             );
         }
 
@@ -368,8 +319,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_coefficient_matrix(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeCoefficientMatrix(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             )
         }
     }
@@ -384,9 +335,9 @@ impl ArticulationReducedCoordinate {
     ) -> bool {
         unsafe {
             PxArticulationReducedCoordinate_computeLambda(
-                self.get_raw(),
-                cache.get_raw_mut(),
-                initial_state.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
+                initial_state.as_mut_ptr(),
                 joint_torques.as_ptr(),
                 max_iter,
             )
@@ -397,8 +348,8 @@ impl ArticulationReducedCoordinate {
     pub fn compute_generalized_mass_matrix(&self, cache: &mut ArticulationCache) {
         unsafe {
             PxArticulationReducedCoordinate_computeGeneralizedMassMatrix(
-                self.get_raw(),
-                cache.get_raw_mut(),
+                self.as_ptr(),
+                cache.as_mut_ptr(),
             );
         }
     }
@@ -407,7 +358,7 @@ impl ArticulationReducedCoordinate {
     pub fn pack_joint_data(&self, maximum: &[f32], reduced: &mut [f32]) {
         unsafe {
             PxArticulationReducedCoordinate_packJointData(
-                self.get_raw(),
+                self.as_ptr(),
                 maximum.as_ptr(),
                 reduced.as_mut_ptr(),
             )
@@ -418,24 +369,26 @@ impl ArticulationReducedCoordinate {
     pub fn unpack_joint_data(&self, reduced: &[f32], maximum: &mut [f32]) {
         unsafe {
             PxArticulationReducedCoordinate_unpackJointData(
-                self.get_raw(),
+                self.as_ptr(),
                 reduced.as_ptr(),
                 maximum.as_mut_ptr(),
             )
         }
     }
 
+    /* TODO
     /// Compute the total center of mass w.r.t. all attached shapes
     pub fn get_center_of_mass(&self) -> Vec3 {
         let nb_shapes = self
-            .iter_links()
+            .get_links()
+            .iter()
             .fold(0, |accum, link| accum + link.get_nb_shapes()) as usize;
         let mut shape_ptrs = vec![null(); nb_shapes];
         let mut offset = 0;
         let props = unsafe {
             for link in self.links() {
                 for shape in link.get_shapes() {
-                    shape_ptrs[offset] = shape.get_raw();
+                    shape_ptrs[offset] = shape.as_ptr();
                     offset += 1;
                 }
             }
@@ -456,14 +409,15 @@ impl ArticulationReducedCoordinate {
     /// Compute the total center of mass and velocity w.r.t. all attached shapes
     pub fn get_center_of_mass_and_velocity(&self) -> (Vec3, Vec3) {
         let nb_shapes = self
-            .iter_links()
+            .get_links()
+            .iter()
             .fold(0, |accum, link| accum + link.get_nb_shapes()) as usize;
         let mut shape_ptrs = vec![null(); nb_shapes];
         let mut offset = 0;
         let props = unsafe {
             for link in self.links() {
                 for shape in link.get_shapes() {
-                    shape_ptrs[offset] = shape.get_raw();
+                    shape_ptrs[offset] = shape.as_ptr();
                     offset += 1;
                 }
             }
@@ -475,7 +429,7 @@ impl ArticulationReducedCoordinate {
         };
 
         let com_vel = unsafe {
-            PxRigidBodyExt_getVelocityAtPos_mut(self.root().deref().get_raw(), &props.centerOfMass)
+            PxRigidBodyExt_getVelocityAtPos_mut(Class::<PxRigidBody>::as_ptr(self.root()), &props.centerOfMass)
         };
 
         (px_to_gl_v3(props.centerOfMass), px_to_gl_v3(com_vel))
@@ -491,31 +445,43 @@ impl ArticulationReducedCoordinate {
         this_layer: BitFlags<CollisionLayer>,  // word1
         other_layer: BitFlags<CollisionLayer>, // word2
     ) {
-        let (a, b) = ((self.ptr as usize >> 32) as u32, self.ptr as usize as u32);
-        for link in self.iter_links_mut() {
+        let (a, b) = (
+            (Class::<physx_sys::PxArticulationReducedCoordinate>::as_mut_ptr(self) as usize >> 32) as u32,
+            Class::<physx_sys::PxArticulationReducedCoordinate>::as_mut_ptr(self) as usize as u32
+        );
+        for link in self.get_links_mut() {
             link.set_collision_filter(this_layer, other_layer, a, b);
         }
     }
 
     /// Set the collision layer on all links and shapes of this body
     pub fn set_query_filter(&mut self, this_layer: BitFlags<CollisionLayer>) {
-        for link in self.iter_links_mut() {
+        for link in self.get_links_mut() {
             link.set_query_filter(this_layer);
         }
     }
 
     /// Clears collision flag on all links
     pub fn clear_collisions(&mut self) {
-        for link in self.iter_links_mut() {
+        for link in self.get_links_mut() {
             link.reset_collide()
         }
     }
-    pub unsafe fn release(&mut self) {
-        // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
-        for mut link in self.links_mut().drain(..).rev() {
-            link.release();
-        }
+*/
+}
 
-        PxArticulationReducedCoordinate_release_mut(self.get_raw_mut());
+unsafe impl<U: Send, L: Send, H: Send, M: Send>Send  for ArticulationReducedCoordinate<U, L, H, M> {}
+unsafe impl<U: Sync, L: Send, H: Sync, M: Send> Sync for ArticulationReducedCoordinate<U, L, H, M> {}
+
+impl<U, L, H, M> Drop for ArticulationReducedCoordinate<U, L, H, M> {
+    fn drop(&mut self) {
+        // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
+        for link in self.get_links().drain(..).rev() {
+            drop(link);
+        }
+        drop(self.get_user_data_mut());
+        unsafe {
+            PxArticulationReducedCoordinate_release_mut(self.as_mut_ptr());
+        }
     }
 }

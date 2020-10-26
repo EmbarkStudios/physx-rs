@@ -3,18 +3,113 @@
 // Created:  2 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
-/*!
+use crate::{
+    traits::Class,
+    convex_mesh::ConvexMesh,
+    triangle_mesh::TriangleMesh,
+    height_field::HeightField,
+    
+};
 
-*/
+pub use physx_sys::{
+    PxGeometry,
+    PxSphereGeometry,
+    PxBoxGeometry,
+    PxCapsuleGeometry,
+    PxPlaneGeometry,
+    PxTriangleMeshGeometry,
+    PxConvexMeshGeometry,
+    PxHeightFieldGeometry,
+};
 
-/* Stolen from world/physics.rs */
+use physx_sys::{
+    PxMeshScale,
+    PxGeometryType,
+    PxMeshGeometryFlag,
+    PxMeshGeometryFlags,
+    PxConvexMeshGeometryFlag,
+    PxConvexMeshGeometryFlags,
+    PxGeometry_getType,
+    PxSphereGeometry_new,
+    PxSphereGeometry_new_1,
+    PxSphereGeometry_isValid,
+    PxBoxGeometry_new,
+    PxBoxGeometry_new_1,
+    PxBoxGeometry_isValid,
+    PxCapsuleGeometry_new,
+    PxCapsuleGeometry_new_1,
+    PxCapsuleGeometry_isValid,
+    PxPlaneGeometry_new,
+    PxPlaneGeometry_isValid,
+    PxTriangleMeshGeometry_new,
+    PxTriangleMeshGeometry_new_1,
+    PxTriangleMeshGeometry_isValid,
+    PxConvexMeshGeometry_new,
+    PxConvexMeshGeometry_new_1,
+    PxConvexMeshGeometry_isValid,
+    PxHeightFieldGeometry_new,
+    PxHeightFieldGeometry_new_1,
+    PxHeightFieldGeometry_isValid,
+};
 
-use glam::Vec3;
-use physx_sys::*;
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(u8)]
+pub enum MeshGeometryFlag {
+    DoubleSided = 1u8,
+}
 
-pub type Point3 = PxVec3;
+impl From<MeshGeometryFlag> for PxMeshGeometryFlags {
+    fn from(flag: MeshGeometryFlag) -> Self {
+        PxMeshGeometryFlags { mBits: flag as _ }
+    }
+}
+
+impl From<PxMeshGeometryFlag::Enum> for MeshGeometryFlag {
+    fn from(val: PxMeshGeometryFlag::Enum) -> Self {
+        match val {
+            PxMeshGeometryFlag::eDOUBLE_SIDED => MeshGeometryFlag::DoubleSided,
+            _ => unreachable!("Invalid PxMeshGeometryFlag variant.")
+        }
+    }
+}
+
+impl From<MeshGeometryFlag> for PxMeshGeometryFlag::Enum {
+    fn from(val: MeshGeometryFlag) -> PxMeshGeometryFlag::Enum {
+        match val {
+            MeshGeometryFlag::DoubleSided => PxMeshGeometryFlag::eDOUBLE_SIDED,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+#[repr(u8)]
+pub enum ConvexMeshGeometryFlag {
+    TightBounds = 1u8,
+}
+
+impl From<ConvexMeshGeometryFlag> for PxConvexMeshGeometryFlags {
+    fn from(flag: ConvexMeshGeometryFlag) -> Self {
+        Self { mBits: flag as _ }
+    }
+}
+
+impl From<PxConvexMeshGeometryFlag::Enum> for ConvexMeshGeometryFlag {
+    fn from(val: PxConvexMeshGeometryFlag::Enum) -> Self {
+        match val {
+            PxConvexMeshGeometryFlag::eTIGHT_BOUNDS => ConvexMeshGeometryFlag::TightBounds,
+            _ => unreachable!("Invalid PxConvexMeshGeometryFlag enum.")
+        }
+    }
+}
+
+impl From<ConvexMeshGeometryFlag> for PxConvexMeshGeometryFlag::Enum {
+    fn from(val: ConvexMeshGeometryFlag) -> PxConvexMeshGeometryFlag::Enum {
+        match val {
+            ConvexMeshGeometryFlag::TightBounds => PxConvexMeshGeometryFlag::eTIGHT_BOUNDS,
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[repr(i32)]
@@ -47,9 +142,9 @@ impl From<PxGeometryType::Enum> for GeometryType {
     }
 }
 
-impl Into<PxGeometryType::Enum> for GeometryType {
-    fn into(self) -> PxGeometryType::Enum {
-        match self {
+impl From<GeometryType> for PxGeometryType::Enum {
+    fn from(val: GeometryType) -> PxGeometryType::Enum {
+        match val {
             GeometryType::Sphere => PxGeometryType::eSPHERE,
             GeometryType::Plane => PxGeometryType::ePLANE,
             GeometryType::Capsule => PxGeometryType::eCAPSULE,
@@ -63,128 +158,136 @@ impl Into<PxGeometryType::Enum> for GeometryType {
     }
 }
 
-#[derive(Clone)]
-pub enum ColliderDesc {
-    Sphere(f32),
-    Box(f32, f32, f32),
-    Capsule(f32, f32),
-    Cylinder(f32, f32), // not supported by physx
-
-    TriMesh {
-        vertices: Vec<Point3>,
-        indices: Vec<u32>,
-        mesh_scale: Vec3,
-    },
+impl <T> Geometry for T where T: Class<PxGeometry> {}
+pub trait Geometry: Class<PxGeometry> {
+    fn get_type(&self) -> GeometryType {
+        unsafe { PxGeometry_getType(self.as_ptr() as *const _).into() }
+    }
 }
 
-pub enum Geometry {
-    Sphere(PxSphereGeometry),
-    Plane(PxPlaneGeometry),
-    Capsule(PxCapsuleGeometry),
-    Box(PxBoxGeometry),
-    ConvexMesh(PxConvexMeshGeometry),
-    TriangleMesh(PxTriangleMeshGeometry),
-    HeightField(PxHeightFieldGeometry),
+impl <T> SphereGeometry for T where T: Class<PxSphereGeometry> + Geometry {}
+pub trait  SphereGeometry: Class<PxSphereGeometry> + Geometry {
+    fn new(radius: f32) -> PxSphereGeometry {
+        unsafe { PxSphereGeometry_new_1(radius) }
+    }
+
+    fn default() -> PxSphereGeometry {
+        unsafe { PxSphereGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxSphereGeometry_isValid(self.as_ptr()) }
+    }
 }
 
-impl Geometry {
-    pub fn as_ptr(&self) -> *const PxGeometry {
-        match self {
-            Geometry::Sphere(val) => val as *const PxSphereGeometry as *const PxGeometry,
-            Geometry::Plane(val) => val as *const PxPlaneGeometry as *const PxGeometry,
-            Geometry::Capsule(val) => val as *const PxCapsuleGeometry as *const PxGeometry,
-            Geometry::Box(val) => val as *const PxBoxGeometry as *const PxGeometry,
-            Geometry::ConvexMesh(val) => val as *const PxConvexMeshGeometry as *const PxGeometry,
-            Geometry::TriangleMesh(val) => {
-                val as *const PxTriangleMeshGeometry as *const PxGeometry
-            }
-            Geometry::HeightField(val) => val as *const PxHeightFieldGeometry as *const PxGeometry,
+impl <T> PlaneGeometry for T where T: Class<PxPlaneGeometry> + Geometry {}
+pub trait PlaneGeometry: Class<PxPlaneGeometry> + Geometry {
+    fn new() -> PxPlaneGeometry {
+        unsafe { PxPlaneGeometry_new() }
+    }
+
+    fn default() -> PxPlaneGeometry {
+        unsafe { PxPlaneGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxPlaneGeometry_isValid(self.as_ptr()) }
+    }
+}
+
+impl <T> CapsuleGeometry for T where T: Class<PxCapsuleGeometry> + Geometry {}
+pub trait CapsuleGeometry: Class<PxCapsuleGeometry> + Geometry {
+    fn new(radius: f32, half_height: f32) -> PxCapsuleGeometry {
+        unsafe { PxCapsuleGeometry_new_1(radius, half_height) }
+    }
+
+    fn default() -> PxCapsuleGeometry {
+        unsafe { PxCapsuleGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxCapsuleGeometry_isValid(self.as_ptr()) }
+    }
+}
+
+impl <T> BoxGeometry for T where T: Class<PxBoxGeometry> + Geometry {}
+pub trait BoxGeometry: Class<PxBoxGeometry> + Geometry {
+    fn new(half_x: f32, half_y: f32, half_z: f32) -> PxBoxGeometry {
+        unsafe { PxBoxGeometry_new_1(half_x, half_y, half_z) }
+    }
+
+    fn default() -> PxBoxGeometry {
+        unsafe { PxBoxGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxBoxGeometry_isValid(self.as_ptr()) }
+    }
+}
+
+impl <T> ConvexMeshGeometry for T where T: Class<PxConvexMeshGeometry> + Geometry {}
+pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
+    fn new(
+        mesh: &mut ConvexMesh,
+        scaling: &impl Class<PxMeshScale>,
+        flags: PxConvexMeshGeometryFlags
+    ) -> PxConvexMeshGeometry {
+        unsafe { PxConvexMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags.into()) }
+    }
+
+    fn default() -> PxConvexMeshGeometry {
+        unsafe { PxConvexMeshGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxConvexMeshGeometry_isValid(self.as_ptr()) }
+    }
+}
+
+impl <T> TriangleMeshGeometry for T where T: Class<PxTriangleMeshGeometry> + Geometry {}
+pub trait TriangleMeshGeometry: Class<PxTriangleMeshGeometry> + Geometry {
+    fn new(
+        mesh: &mut TriangleMesh,
+        scaling: &impl Class<PxMeshScale>,
+        flags: PxMeshGeometryFlags
+    ) -> PxTriangleMeshGeometry {
+        unsafe { PxTriangleMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags) }
+    }
+
+    fn default() -> PxTriangleMeshGeometry {
+        unsafe { PxTriangleMeshGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxTriangleMeshGeometry_isValid(self.as_ptr()) }
+    }
+}
+
+impl <T> HeightFieldGeometry for T where T: Class<PxHeightFieldGeometry> + Geometry {}
+pub trait HeightFieldGeometry: Class<PxHeightFieldGeometry> + Geometry {
+    fn new(
+        height_field: &mut HeightField,
+        flags: PxMeshGeometryFlags,
+        height_scale: f32,
+        row_scale: f32,
+        column_scale: f32,
+    ) -> PxHeightFieldGeometry {
+        unsafe {
+            PxHeightFieldGeometry_new_1(
+                height_field.as_mut_ptr(),
+                flags,
+                height_scale,
+                row_scale,
+                column_scale
+            )
         }
     }
 
-    pub fn as_ptr_mut(&mut self) -> *mut PxGeometry {
-        match self {
-            Geometry::Sphere(val) => val as *mut PxSphereGeometry as *mut PxGeometry,
-            Geometry::Plane(val) => val as *mut PxPlaneGeometry as *mut PxGeometry,
-            Geometry::Capsule(val) => val as *mut PxCapsuleGeometry as *mut PxGeometry,
-            Geometry::Box(val) => val as *mut PxBoxGeometry as *mut PxGeometry,
-            Geometry::ConvexMesh(val) => val as *mut PxConvexMeshGeometry as *mut PxGeometry,
-            Geometry::TriangleMesh(val) => val as *mut PxTriangleMeshGeometry as *mut PxGeometry,
-            Geometry::HeightField(val) => val as *mut PxHeightFieldGeometry as *mut PxGeometry,
-        }
+    fn default() -> PxHeightFieldGeometry {
+        unsafe { PxHeightFieldGeometry_new() }
+    }
+
+    fn is_valid(&self) -> bool {
+        unsafe { PxHeightFieldGeometry_isValid(self.as_ptr()) }
     }
 }
-
-pub struct PhysicsGeometry {
-    pub geometry: Geometry,
-}
-
-impl From<&ColliderDesc> for PhysicsGeometry {
-    fn from(desc: &ColliderDesc) -> Self {
-        let geometry: Geometry = unsafe {
-            match desc {
-                ColliderDesc::Sphere(radius) => Geometry::Sphere(PxSphereGeometry_new_1(*radius)),
-                ColliderDesc::Box(x, y, z) => Geometry::Box(PxBoxGeometry_new_1(*x, *y, *z)),
-                ColliderDesc::Capsule(r, h) => {
-                    Geometry::Capsule(PxCapsuleGeometry_new_1(*r, *h / 2.0))
-                }
-                ColliderDesc::Cylinder(r, h) => {
-                    Geometry::Capsule(PxCapsuleGeometry_new_1(*r, *h / 2.0))
-                }
-                _ => panic!("cannot do simple cook for trimeshes"),
-            }
-        };
-        PhysicsGeometry::new(geometry)
-    }
-}
-
-impl PhysicsGeometry {
-    pub fn new(geometry: Geometry) -> Self {
-        Self { geometry }
-    }
-
-    pub fn get_type(&self) -> GeometryType {
-        unsafe { PxGeometry_getType(self.geometry.as_ptr() as *const PxGeometry).into() }
-    }
-
-    pub fn as_raw(&self) -> *const PxGeometry {
-        self.geometry.as_ptr()
-    }
-
-    pub fn as_raw_mut(&mut self) -> *mut PxGeometry {
-        self.geometry.as_ptr_mut()
-    }
-
-    // pub fn get_convex_mesh(&self) -> ConvexMesh {
-    //     let px_convex = unsafe {
-    //         (*PxGeometryHolder_convexMesh(&PxGeometryHolder_new_1(self.geometry.as_ptr())))
-    //             .convexMesh
-    //     };
-    //     ConvexMesh { px_convex }
-    // }
-}
-
-// pub struct ConvexMesh {
-//     px_convex: *const PxConvexMesh,
-// }
-
-// impl ConvexMesh {
-//     /// Get the number of vertices in this mesh
-//     pub fn get_nb_vertices(&self) -> usize {
-//         unsafe { PxConvexMesh_getNbVertices(self.px_convex) as usize }
-//     }
-
-//     pub fn get_vertices(&self) -> &[PxVec3] {
-//         unsafe {
-//             let raw_data = PxConvexMesh_getVertices(self.px_convex);
-//             let item_count = self.get_nb_vertices();
-//             std::slice::from_raw_parts(raw_data, item_count)
-//         }
-//     }
-
-//     pub fn get_nb_polygons(&self) -> usize {
-//         unsafe { PxConvexMesh_getNbPolygons(self.px_convex) as usize }
-//     }
-
-//     pub fn get_indices(&self) -> &[usize]
-// }

@@ -3,46 +3,66 @@
 // Created: 12 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 
 */
 
-use super::{foundation::*, geometry::*, px_type::*, transform::gl_to_px_v3};
-use glam::Vec3;
-use physx_macros::*;
-use physx_sys::*;
-
 /*
+use super::{
+    foundation::*,
+    geometry::*,
+};
+use physx_sys::{
+    // TODO import things individually and fix safety holes
+};
+
 todo[tolsson]: Make these into builder parameters
 */
 pub const HEIGHT_SCALE: f32 = 1.0;
 pub const XZ_SCALE: f32 = 100.0;
+/*
+impl Release for PxCooking {
+    unsafe fn release(pointer: &mut Self) {
+        PxCooking_release_mut(pointer)
+    }
+}
 
-#[physx_type]
-impl Cooking {
+impl PxCooking {
     pub fn new(
         physx_version: u32,
-        foundation: &mut Foundation,
+        foundation: &mut impl Foundation,
         cook_params: PxCookingParams,
-    ) -> Self {
-        let px_cooking =
-            unsafe { phys_PxCreateCooking(physx_version, foundation.get_raw_mut(), &cook_params) };
+    ) -> Option<Self> {
+        unsafe {
+            PxCooking::from_raw(
+                phys_PxCreateCooking(
+                    physx_version,
+                    foundation.as_mut_ptr(),
+                    &cook_params
+                )
+            )
+        }
+    }
+}
 
-        Self::from_ptr(px_cooking)
+pub trait Cooking {
+    fn as_ptr(&self) -> *const PxCooking;
+
+    fn as_mut_ptr(&mut self) -> *mut PxCooking {
+        self.as_ptr() as *mut PxCooking
     }
 
     /// Validate that the provided description is valid
-    pub fn validate_triangle_mesh(&self, mesh_desc: &PxTriangleMeshDesc) -> bool {
-        unsafe { PxCooking_validateTriangleMesh(self.get_raw(), mesh_desc) }
+    fn validate_triangle_mesh(&self, mesh_desc: &PxTriangleMeshDesc) -> bool {
+        unsafe { PxCooking_validateTriangleMesh(self.as_ptr(), mesh_desc) }
     }
 
-    pub fn create_triangle_mesh(
+    fn create_triangle_mesh(
         &self,
         mesh_desc: &PxTriangleMeshDesc,
-        mesh_scale: Vec3,
-    ) -> Result<Geometry, ()> {
+        mesh_scale: &PxVec3,
+    ) -> Result<PxTriangleMeshGeometry, ()> {
         let mut cooking_result = PxTriangleMeshCookingResult::eSUCCESS;
         unsafe {
             if !self.validate_triangle_mesh(mesh_desc) {
@@ -51,59 +71,58 @@ impl Cooking {
                 let insertion_callback =
                     PxPhysics_getPhysicsInsertionCallback_mut(phys_PxGetPhysics());
 
-                let tri_mesh = PxCooking_createTriangleMesh(
-                    self.get_raw(),
+                let tri_mesh = PxTriangleMesh::from_raw(PxCooking_createTriangleMesh(
+                    self.as_ptr(),
                     mesh_desc,
                     insertion_callback,
                     &mut cooking_result,
-                );
+                ));
 
-                let mesh_scale = PxMeshScale_new_2(&gl_to_px_v3(mesh_scale));
+                let mesh_scale = PxMeshScale_new_2(mesh_scale);
 
-                Ok(Geometry::TriangleMesh(PxTriangleMeshGeometry_new_1(
+                Ok(<PxTriangleMeshGeometry as TriangleMeshGeometry>::new(
                     tri_mesh,
                     &mesh_scale,
                     PxMeshGeometryFlags { mBits: 0 },
-                )))
+                ))
             }
         }
     }
 
     /// Build heightfield geometry from a description
-    pub fn create_heightfield(
+    fn create_heightfield(
         &self,
         heightfield_desc: PxHeightFieldDesc,
         double_sided: bool,
-    ) -> Geometry {
+    ) -> PxHeightFieldGeometry {
         unsafe {
             let insertion_callback = PxPhysics_getPhysicsInsertionCallback_mut(phys_PxGetPhysics());
 
             let heightfield =
-                PxCooking_createHeightField(self.get_raw(), &heightfield_desc, insertion_callback);
+                PxCooking_createHeightField(self.as_ptr(), &heightfield_desc, insertion_callback);
             let mesh_flags = if double_sided {
                 PxMeshGeometryFlag::eDOUBLE_SIDED
             } else {
                 0
             };
 
-            let heightfield_geom = PxHeightFieldGeometry_new_1(
-                heightfield,
+            <PxHeightFieldGeometry as HeightFieldGeometry>::new(
+                &mut*heightfield,
                 PxMeshGeometryFlags {
                     mBits: mesh_flags as u8,
                 },
                 HEIGHT_SCALE,
                 XZ_SCALE,
                 XZ_SCALE,
-            );
-
-            Geometry::HeightField(heightfield_geom)
+            )
         }
     }
 
-    pub fn make_geometry(&mut self, desc: ColliderDesc) -> PhysicsGeometry {
-        let geometry: Geometry = unsafe {
+    /* TODO make sense of  PxGeometry creation :)
+    fn make_geometry<T>(&mut self, desc: ColliderDesc) -> Geometry<T> {
+        unsafe {
             match desc {
-                ColliderDesc::Sphere(radius) => Geometry::Sphere(PxSphereGeometry_new_1(radius)),
+                ColliderDesc::Sphere(radius) => Geometry::<PxSphereGeometry>(PxSphereGeometry_new_1(radius)),
                 ColliderDesc::Box(x, y, z) => Geometry::Box(PxBoxGeometry_new_1(x, y, z)),
                 ColliderDesc::Capsule(r, h) => {
                     Geometry::Capsule(PxCapsuleGeometry_new_1(r, h / 2.0))
@@ -130,8 +149,8 @@ impl Cooking {
                         .expect("failed creating triangle mesh")
                 }
             }
-        };
-
-        PhysicsGeometry::new(geometry)
+        }
     }
+    */
 }
+*/

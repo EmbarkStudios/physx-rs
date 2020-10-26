@@ -3,21 +3,42 @@
 // Created: 16 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 Trait for PxActor
  */
 
-use super::{base::Base, math::*, px_type::*};
-use enumflags2::*;
-use physx_macros::*;
+use crate::{
+    math::*,
+    base::Base,
+    traits::Class,
+    rigid_dynamic::RigidDynamic,
+    rigid_static::RigidStatic,
+    articulation_link::ArticulationLink,
+};
+use enumflags2::BitFlags;
+
+use std::marker::PhantomData;
+
 use physx_sys::{
-    PxActor, PxActorFlag, PxActorFlags, PxActorType, PxActor_getActorFlags, PxActor_getAggregate,
-    PxActor_getDominanceGroup, PxActor_getOwnerClient, PxActor_getScene, PxActor_getType,
-    PxActor_getWorldBounds, PxActor_release_mut, PxActor_setActorFlag_mut,
-    PxActor_setActorFlags_mut, PxActor_setDominanceGroup_mut, PxActor_setOwnerClient_mut,
-    PxAggregate, PxScene,
+    PxActor,
+    PxActorFlag,
+    PxActorFlags,
+    PxActorType,
+    PxActor_getActorFlags,
+    PxActor_getDominanceGroup,
+    PxActor_getOwnerClient,
+    PxActor_getType,
+    PxActor_getWorldBounds,
+    PxActor_setActorFlag_mut,
+    PxActor_release_mut,
+    PxActor_setActorFlags_mut,
+    PxActor_setDominanceGroup_mut,
+    PxActor_setOwnerClient_mut,
+    // PxActor_getScene,
+    //PxActor_getAggregate,
+    //PxActor_getName,
+    //PxActor_setName_mut,
 };
 
 /* TODO:
@@ -61,8 +82,8 @@ impl From<PxActorFlag::Enum> for ActorFlag {
     }
 }
 
-#[physx_type(inherit = "Base")]
-impl Actor {
+impl <T> Actor for T where T: Class<PxActor> + Base {}
+pub trait Actor: Class<PxActor> + Base {
     /*
     fixme[tolsson]: when I tried implementing these it had no effect, and it
         introduces a risk of memory leaks since physx does not copy the data, so
@@ -70,40 +91,35 @@ impl Actor {
         until some later point. For types that define a userData, it is much
         safer to define it there.
 
-    pub fn setName(&mut self, name: &str)  {PxActor_setName_mut(self.get_raw_mut(), name) }
-    pub fn getName(&self) -> *const i8  {PxActor_getName(self.get_raw())}
+    pub fn setName(&mut self, name: &str)  {PxActor_setName_mut(self.as_mut_ptr(), name) }
+    pub fn getName(&self) -> *const i8  {PxActor_getName(self.as_ptr())}
      */
 
     /// Release this actor
-    pub fn release(&mut self) {
-        unsafe { PxActor_release_mut(self.get_raw_mut()) }
+    unsafe fn release(&mut self) {
+        PxActor_release_mut(self.as_mut_ptr())
     }
 
     /// Get the actual type of the actor
-    pub fn get_type(&self) -> PxActorType::Enum {
-        unsafe { PxActor_getType(self.get_raw()) }
-    }
-
-    /// Get the scene this Actor is part of
-    pub fn get_scene(&self) -> *mut PxScene {
-        unsafe { PxActor_getScene(self.get_raw()) }
+    fn get_type(&self) -> PxActorType::Enum {
+        unsafe { PxActor_getType(self.as_ptr()) }
     }
 
     /// Get the world bounds of this actor
-    pub fn get_world_bounds(&self, inflation: f32) -> Bounds {
-        unsafe { PxActor_getWorldBounds(self.get_raw(), inflation).into() }
+    fn get_world_bounds(&self, inflation: f32) -> PxBounds3 {
+        unsafe { PxActor_getWorldBounds(self.as_ptr(), inflation).into() }
     }
 
     /// Set a flag on this actor
-    pub fn set_actor_flag(&mut self, flag: ActorFlag, value: bool) {
-        unsafe { PxActor_setActorFlag_mut(self.get_raw_mut(), flag.into(), value) }
+    fn set_actor_flag(&mut self, flag: ActorFlag, value: bool) {
+        unsafe { PxActor_setActorFlag_mut(self.as_mut_ptr(), flag.into(), value) }
     }
 
     /// Set the flags to the provided value
-    pub fn set_actor_flags(&mut self, flags: BitFlags<ActorFlag>) {
+    fn set_actor_flags(&mut self, flags: BitFlags<ActorFlag>) {
         unsafe {
             PxActor_setActorFlags_mut(
-                self.get_raw_mut(),
+                self.as_mut_ptr(),
                 PxActorFlags {
                     mBits: flags.bits(),
                 },
@@ -112,46 +128,132 @@ impl Actor {
     }
 
     /// Get all actor flags
-    pub fn get_actor_flags(&self) -> PxActorFlags {
-        unsafe { PxActor_getActorFlags(self.get_raw()) }
+    fn get_actor_flags(&self) -> PxActorFlags {
+        unsafe { PxActor_getActorFlags(self.as_ptr()) }
     }
 
     /// Set the dominance group
-    pub fn set_dominance_group(&mut self, group: u8) {
-        unsafe { PxActor_setDominanceGroup_mut(self.get_raw_mut(), group) }
+    fn set_dominance_group(&mut self, group: u8) {
+        unsafe { PxActor_setDominanceGroup_mut(self.as_mut_ptr(), group) }
     }
 
     /// Read the dominance group
-    pub fn get_dominance_group(&self) -> u8 {
-        unsafe { PxActor_getDominanceGroup(self.get_raw()) }
+    fn get_dominance_group(&self) -> u8 {
+        unsafe { PxActor_getDominanceGroup(self.as_ptr()) }
     }
 
     /// Set the owner client of this actor
-    pub fn set_owner_client(&mut self, client: u8) {
-        unsafe { PxActor_setOwnerClient_mut(self.get_raw_mut(), client) }
+    fn set_owner_client(&mut self, client: u8) {
+        unsafe { PxActor_setOwnerClient_mut(self.as_mut_ptr(), client) }
     }
 
     /// Read the owner client of this actor
-    pub fn get_owner_client(&self) -> u8 {
-        unsafe { PxActor_getOwnerClient(self.get_raw()) }
-    }
-
-    /// Get the aggregate this actor belongs to
-    pub fn get_aggregate(&self) -> *mut PxAggregate {
-        unsafe { PxActor_getAggregate(self.get_raw()) }
+    fn get_owner_client(&self) -> u8 {
+        unsafe { PxActor_getOwnerClient(self.as_ptr()) }
     }
 
     /// Enable visualization of this actor
-    pub fn enable_visualization(&mut self, enable: bool) {
+    fn enable_visualization(&mut self, enable: bool) {
         unsafe {
-            PxActor_setActorFlag_mut(self.get_raw_mut(), PxActorFlag::eVISUALIZATION, enable);
+            PxActor_setActorFlag_mut(self.as_mut_ptr(), PxActorFlag::eVISUALIZATION, enable);
         }
     }
 
     /// set gravity state
-    pub fn enable_gravity(&mut self, enable: bool) {
+    fn enable_gravity(&mut self, enable: bool) {
         unsafe {
-            PxActor_setActorFlag_mut(self.get_raw_mut(), PxActorFlag::eDISABLE_GRAVITY, !enable);
+            PxActor_setActorFlag_mut(self.as_mut_ptr(), PxActorFlag::eDISABLE_GRAVITY, !enable);
+        }
+    }
+}
+
+#[repr(transparent)]
+pub struct ActorMap<L, S, D, H, M> {
+    obj: *mut physx_sys::PxActor,
+    phantom_user_data: PhantomData<(L, S, D, H, M)>,
+}
+
+unsafe impl<P, L, S, D, H, M> Class<P> for ActorMap<L, S, D, H, M> where physx_sys::PxActor: Class<P> {
+    fn as_ptr(&self) -> *const P {
+        self.obj as *const _ as *const _
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut P {
+        self.obj as *mut _
+    }
+}
+
+impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
+    pub fn map<'a, Ret: 'a, RDFn, RSFn, ALFn>(
+        &'a mut self,
+        rigid_dynamic_fn: RDFn,
+        rigid_static_fn: RSFn,
+        articulation_link_fn: ALFn,
+    ) -> Ret
+    where
+        RDFn: FnOnce(&'a mut RigidDynamic<D, H, M>) -> Ret,
+        RSFn: FnOnce(&'a mut RigidStatic<S, H, M>) -> Ret,
+        ALFn: FnOnce(&'a mut ArticulationLink<L, H, M>) -> Ret
+    {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::RigidDynamic => {
+                rigid_dynamic_fn(
+                    unsafe {
+                        &mut*(self.obj as *mut RigidDynamic<D, H, M>)
+                    }
+                )
+            }
+            crate::base::ConcreteType::RigidStatic => {
+                rigid_static_fn(
+                    unsafe {
+                        &mut*(self.obj as *mut RigidStatic<S, H, M>)
+                    }
+                )
+            }
+            crate::base::ConcreteType::ArticulationLink => {
+                articulation_link_fn(
+                    unsafe {
+                        &mut*(self.obj as *mut ArticulationLink<L, H, M>)
+                    }
+                )
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    /// Tries to cast to RigidStatic.
+    pub fn as_rigid_static(&mut self) -> Option<&mut RigidStatic<S, H, M>> {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::RigidStatic => {
+                unsafe {
+                    Some(&mut*(self.obj as *mut RigidStatic<S, H, M>))
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// Tries to cast to RigidDynamic.
+    pub fn as_rigid_dynamic(&mut self) -> Option<&mut RigidDynamic<D, H, M>> {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::RigidDynamic => {
+                unsafe {
+                    Some(&mut*(self.obj as *mut RigidDynamic<D, H, M>))
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// Tries to cast to ArticulationLink.
+    pub fn as_articulation_link(&mut self) -> Option<&mut ArticulationLink<L, H, M>> {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::ArticulationLink => {
+                unsafe {
+                    Some(&mut*(self.obj as *mut ArticulationLink<L, H, M>))
+                }
+            }
+            _ => None,
         }
     }
 }

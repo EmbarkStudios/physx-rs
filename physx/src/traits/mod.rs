@@ -3,20 +3,22 @@
 // Created: 12 June 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 
 */
 
 mod collidable;
-pub use collidable::Collidable;
+//pub use collidable::Collidable;
 
-mod releasable;
-pub use releasable::Releasable;
+mod class;
+pub use class::Class;
 
-mod to_flags;
-pub use to_flags::ToFlags;
+mod user_data;
+pub(crate) use user_data::UserData;
 
-mod get_raw;
-pub use get_raw::GetRaw;
+pub trait PxFlags: Copy {
+    type Target;
+    fn into_px(self) -> Self::Target;
+    fn from_px(flags: Self::Target) -> Self;
+}

@@ -3,30 +3,60 @@
 // Created: 17 June 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 
 */
 
-use super::transform::*;
-use glam::{Mat4, Vec3, Vec4};
-use physx_sys::PxBounds3;
+mod transform;
+pub use transform::PxTransform;
+mod quat;
+pub use quat::PxQuat;
+mod vec3;
+pub use vec3::PxVec3;
 
-pub struct Bounds {
-    pub min_size: Vec3,
-    pub max_size: Vec3,
+#[derive(Copy, Clone)]
+#[repr(transparent)]
+pub struct PxExtendedVec3{
+    obj: physx_sys::PxExtendedVec3
 }
 
-impl From<PxBounds3> for Bounds {
-    fn from(other: PxBounds3) -> Self {
-        Self {
-            min_size: px_to_gl_v3(other.minimum),
-            max_size: px_to_gl_v3(other.maximum),
-        }
+crate::ClassObj!(PxExtendedVec3 : PxExtendedVec3);
+
+impl From<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
+    fn from(bounds: physx_sys::PxExtendedVec3) -> Self {
+        PxExtendedVec3{obj: bounds}
     }
 }
 
+impl Into<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
+    fn into(self) -> physx_sys::PxExtendedVec3 {
+        self.obj
+    }
+}
+
+use crate::traits::Class;
+
+#[repr(transparent)]
+pub struct PxBounds3{
+    obj: physx_sys::PxBounds3
+}
+
+crate::ClassObj!(PxBounds3 : PxBounds3);
+
+impl From<physx_sys::PxBounds3> for PxBounds3 {
+    fn from(bounds: physx_sys::PxBounds3) -> Self {
+        PxBounds3{obj: bounds}
+    }
+}
+
+impl Into<physx_sys::PxBounds3> for PxBounds3 {
+    fn into(self) -> physx_sys::PxBounds3 {
+        self.obj
+    }
+}
+
+/*
 pub struct Isometry {
     pub translation: Mat4,
     pub rotation: Mat4,
@@ -70,3 +100,4 @@ mod tests {
         assert!(iso.rotation == rot);
     }
 }
+*/

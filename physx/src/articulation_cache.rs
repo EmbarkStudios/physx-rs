@@ -3,20 +3,23 @@
 // Created: 16 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 
 */
-use super::{
+use crate::{
+    articulation_base::ArticulationBase,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
-    traits::*,
-    transform::{gl_to_px_q, gl_to_px_v3, px_to_gl_q, px_to_gl_v3},
+    math::{PxTransform, PxVec3},
+    traits::Class,
 };
+
 use enumflags2::BitFlags;
-use glam::{Quat, Vec3};
+use std::ptr::NonNull;
+
 use physx_sys::{
-    PxArticulationCache, PxArticulationCacheFlags, PxArticulationRootLinkData, PxTransform_new_5,
+    PxArticulationCache,
+    PxArticulationRootLinkData,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -33,42 +36,37 @@ pub enum ArticulationCacheFlag {
     Root = 16,
 }
 
-impl ToFlags<PxArticulationCacheFlags> for BitFlags<ArticulationCacheFlag> {
-    fn to_flags(self) -> PxArticulationCacheFlags {
-        PxArticulationCacheFlags { mBits: self.bits() }
-    }
-}
-
+// TODO turn these into methods.  Will need a ArticulationCache trait implemented on PxArticulationCache because it is external
 macro_rules! ptr_to_slice_mut {
     ($ptr: ident, $me: ident) => {
         unsafe {
-            std::slice::from_raw_parts_mut((*$me.get_raw_mut()).$ptr, $me.total_dofs as usize)
+            std::slice::from_raw_parts_mut((*$me.px_articulation_cache.as_mut()).$ptr, $me.total_dofs as usize)
         }
     };
 }
 
 macro_rules! ptr_to_slice {
     ($ptr: ident, $me: ident) => {
-        unsafe { std::slice::from_raw_parts((*$me.get_raw()).$ptr, $me.total_dofs as usize) }
+        unsafe { std::slice::from_raw_parts((*$me.px_articulation_cache.as_ptr()).$ptr, $me.total_dofs as usize) }
     };
 }
 
 pub struct ArticulationRootLinkData {
-    pub transform: (Quat, Vec3),
-    pub world_lin_vel: Vec3,
-    pub world_ang_vel: Vec3,
-    pub world_lin_accel: Vec3,
-    pub world_ang_accel: Vec3,
+    pub transform: PxTransform,
+    pub world_lin_vel: PxVec3,
+    pub world_ang_vel: PxVec3,
+    pub world_lin_accel: PxVec3,
+    pub world_ang_accel: PxVec3,
 }
 
 impl From<PxArticulationRootLinkData> for ArticulationRootLinkData {
     fn from(data: PxArticulationRootLinkData) -> Self {
         Self {
-            transform: (px_to_gl_q(data.transform.q), px_to_gl_v3(data.transform.p)),
-            world_lin_vel: px_to_gl_v3(data.worldLinVel),
-            world_ang_vel: px_to_gl_v3(data.worldAngVel),
-            world_lin_accel: px_to_gl_v3(data.worldLinAccel),
-            world_ang_accel: px_to_gl_v3(data.worldAngAccel),
+            transform: data.transform.into(),
+            world_lin_vel: data.worldLinVel.into(),
+            world_ang_vel: data.worldAngVel.into(),
+            world_lin_accel: data.worldLinAccel.into(),
+            world_ang_accel: data.worldAngAccel.into(),
         }
     }
 }
@@ -76,16 +74,11 @@ impl From<PxArticulationRootLinkData> for ArticulationRootLinkData {
 impl Into<PxArticulationRootLinkData> for ArticulationRootLinkData {
     fn into(self) -> PxArticulationRootLinkData {
         PxArticulationRootLinkData {
-            transform: unsafe {
-                PxTransform_new_5(
-                    &gl_to_px_v3(self.transform.1),
-                    &gl_to_px_q(self.transform.0),
-                )
-            },
-            worldLinVel: gl_to_px_v3(self.world_lin_vel),
-            worldAngVel: gl_to_px_v3(self.world_ang_vel),
-            worldLinAccel: gl_to_px_v3(self.world_lin_accel),
-            worldAngAccel: gl_to_px_v3(self.world_ang_accel),
+            transform: self.transform.into(),
+            worldLinVel: self.world_lin_vel.into(),
+            worldAngVel: self.world_ang_vel.into(),
+            worldLinAccel: self.world_lin_accel.into(),
+            worldAngAccel: self.world_ang_accel.into(),
         }
     }
 }
@@ -113,7 +106,7 @@ Definition of PxArticulationCache:
  */
 
 pub struct ArticulationCache {
-    px_articulation_cache: *mut PxArticulationCache,
+    px_articulation_cache: NonNull<PxArticulationCache>,
     /*
     NB:
 
@@ -126,10 +119,20 @@ pub struct ArticulationCache {
     total_dofs: u32,
 }
 
+unsafe impl Class<PxArticulationCache> for ArticulationCache {
+    fn as_ptr(&self) -> *const PxArticulationCache {
+        self.px_articulation_cache.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut PxArticulationCache {
+        self.px_articulation_cache.as_ptr()
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 impl ArticulationCache {
-    pub fn new(px_articulation_cache: *mut PxArticulationCache) -> Self {
+    pub fn new(px_articulation_cache: NonNull<PxArticulationCache>) -> ArticulationCache {    
         Self {
             px_articulation_cache,
             link_offsets: [0; 64],
@@ -138,6 +141,7 @@ impl ArticulationCache {
         }
     }
 
+    // What is this for? O.o
     pub fn proxy(&self) -> Self {
         Self {
             px_articulation_cache: self.px_articulation_cache,
@@ -147,22 +151,20 @@ impl ArticulationCache {
         }
     }
 
-    pub fn compute_dof_information(&mut self, body: &ArticulationReducedCoordinate) {
+    pub unsafe fn compute_dof_information<U, L, H, M>(&mut self, articulation: &mut ArticulationReducedCoordinate<U, L, H, M>) {
         let mut offsets = [0u32; 64];
         let mut dofs = [0u8; 64];
         offsets[0] = 0; //We know that the root link does not have a joint
 
-        for i in 1..body.get_nb_links() {
-            if let Some(link) = body.part(i) {
-                let link_index = link.get_link_index();
-                let link_dofs = link.get_inbound_joint_dof();
-                offsets[link_index] = link_dofs as u32;
-                dofs[link_index] = link_dofs as u8;
-            }
+        for link in articulation.get_links().into_iter().skip(1) {
+            let link_index = link.get_link_index() as usize;
+            let link_dofs = link.get_inbound_joint_dof() as usize;
+            offsets[link_index] = link_dofs as u32;
+            dofs[link_index] = link_dofs as u8;
         }
 
         let mut count = 0;
-        for offset in offsets.iter_mut().take(body.get_nb_links()).skip(1) {
+        for offset in offsets.iter_mut().take(articulation.get_number_links()).skip(1) {
             let link_dofs = *offset;
             *offset = count;
             count += link_dofs;
@@ -241,22 +243,12 @@ impl ArticulationCache {
     }
 
     pub fn read_root_link_data(&self) -> ArticulationRootLinkData {
-        unsafe { ArticulationRootLinkData::from(*(*self.get_raw()).rootLinkData) }
+        unsafe { ArticulationRootLinkData::from(*(*self.px_articulation_cache.as_ptr()).rootLinkData) }
     }
 
-    pub fn set_root_link_data(&self, data: ArticulationRootLinkData) {
+    pub fn set_root_link_data(&mut self, data: ArticulationRootLinkData) {
         unsafe {
-            *(*self.get_raw()).rootLinkData = data.into();
+            *(*self.px_articulation_cache.as_mut()).rootLinkData = data.into();
         }
-    }
-}
-
-impl GetRaw<PxArticulationCache> for ArticulationCache {
-    fn get_raw(&self) -> *const PxArticulationCache {
-        self.px_articulation_cache
-    }
-
-    fn get_raw_mut(&mut self) -> *mut PxArticulationCache {
-        self.px_articulation_cache
     }
 }

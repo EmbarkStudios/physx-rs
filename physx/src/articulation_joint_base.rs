@@ -3,84 +3,113 @@
 // Created: 16 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
 
 /*!
 
 */
 
-use super::transform::{gl_to_px_tf, px_to_gl_tf};
-use super::{
+use crate::{
+    base::Base,
+    traits::Class,
+    math::PxTransform,
+    articulation_joint::ArticulationJoint,
     articulation_joint_reduced_coordinate::ArticulationJointReducedCoordinate,
-    articulation_link::ArticulationLink, base::Base, px_type::*,
 };
-use glam::Mat4;
-use physx_macros::*;
+
+pub(crate) use physx_sys::PxArticulationJointBase;
+
 use physx_sys::{
-    PxArticulationJointBase, PxArticulationJointBase_getChildPose,
-    PxArticulationJointBase_getParentArticulationLink, PxArticulationJointBase_getParentPose,
-    PxArticulationJointBase_setChildPose_mut, PxArticulationJointBase_setParentPose_mut,
+    PxArticulationJointBase_getChildPose,
+    PxArticulationJointBase_getParentPose,
+    PxArticulationJointBase_setChildPose_mut,
+    PxArticulationJointBase_setParentPose_mut,
+    // PxArticulationJointBase_getParentArticulationLink,
+    // PxArticulationJointBase_getChildArticulationLink,
 };
 
 /*******************************************************************************
- * Section IMPLEMENTATION                                                               *
+ * Section IMPLEMENTATION                                                      *
  ******************************************************************************/
 
-#[physx_type(inherit = "Base")]
-impl ArticulationJointBase {
+impl <T> ArticulationJointBase for T where T: Class<PxArticulationJointBase> + Base {}
+pub trait ArticulationJointBase: Class<PxArticulationJointBase> + Base {
     /// Set the pose of the joint in the child frame
-    pub fn set_child_pose(&mut self, pose: Mat4) {
+    fn set_child_pose(&mut self, pose: &PxTransform) {
         unsafe {
-            PxArticulationJointBase_setChildPose_mut(self.get_raw_mut(), &gl_to_px_tf(pose));
+            PxArticulationJointBase_setChildPose_mut(self.as_mut_ptr(), pose.as_ptr());
         }
     }
 
     /// Get the pose of the joint in the child frame
-    pub fn get_child_pose(&self) -> Mat4 {
-        px_to_gl_tf(unsafe { PxArticulationJointBase_getChildPose(self.get_raw()) })
+    fn get_child_pose(&self) -> PxTransform {
+        unsafe { PxArticulationJointBase_getChildPose(self.as_ptr()).into() }
     }
 
     /// Set the pose of the joint in the parent frame
-    pub fn set_parent_pose(&mut self, pose: Mat4) {
+    fn set_parent_pose(&mut self, pose: &PxTransform) {
         unsafe {
-            PxArticulationJointBase_setParentPose_mut(self.get_raw_mut(), &gl_to_px_tf(pose));
+            PxArticulationJointBase_setParentPose_mut(self.as_mut_ptr(), pose.as_ptr());
         }
     }
 
     /// Get the pose of the joint in the parent frame
-    pub fn get_parent_pose(&self) -> Mat4 {
-        px_to_gl_tf(unsafe { PxArticulationJointBase_getParentPose(self.get_raw()) })
+    fn get_parent_pose(&self) -> PxTransform {
+        unsafe { PxArticulationJointBase_getParentPose(self.as_ptr()).into() }
     }
-
-    pub fn get_parent_articulation_link(&self) -> ArticulationLink {
-        ArticulationLink::from_ptr(unsafe {
-            PxArticulationJointBase_getParentArticulationLink(self.get_raw())
-        })
-    }
-
-    pub fn get_joint_transform_global(&self) -> Mat4 {
+/*
+    fn get_joint_transform_global(&self) -> PxTransform {
         let outbound_link = self.get_parent_articulation_link();
         let outbound_link_global_pose = outbound_link.get_global_pose();
 
         let joint_pose = self.get_parent_pose();
 
         // model_to_world * model
-        outbound_link_global_pose * joint_pose
+        outbound_link_global_pose.transform(&joint_pose)
+    }
+    */
+}
+
+pub struct JointMap {
+    obj: *mut physx_sys::PxArticulationJointBase,
+    //phantom_user_data: PhantomData<>,
+}
+
+unsafe impl<P> Class<P> for JointMap where physx_sys::PxArticulationBase: Class<P> {
+    fn as_ptr(&self) -> *const P {
+        self.obj as *const _ as *const _
     }
 
-    pub fn as_reduced_joint_mut(&mut self) -> &mut ArticulationJointReducedCoordinate {
-        assert!(self.is_type("PxArticulationJointReducedCoordinate"));
-
-        unsafe {
-            &mut *(self as *mut ArticulationJointBase as *mut ArticulationJointReducedCoordinate)
-        }
+    fn as_mut_ptr(&mut self) -> *mut P {
+        self.obj as *mut _
     }
+}
 
-    pub fn as_reduced_joint(&self) -> &ArticulationJointReducedCoordinate {
-        assert!(self.is_type("PxArticulationJointReducedCoordinate"));
-
-        unsafe {
-            &*(self as *const ArticulationJointBase as *const ArticulationJointReducedCoordinate)
+impl JointMap {
+    pub fn map<Ret, ArtJoFn, ArcJoFn>(
+        &mut self,
+        art_fn: ArtJoFn,
+        arc_fn: ArcJoFn,
+    ) -> Ret
+    where
+        ArtJoFn: FnOnce(&mut ArticulationJoint) -> Ret,
+        ArcJoFn: FnOnce(&mut ArticulationJointReducedCoordinate) -> Ret,
+    {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::ArticulationJoint => {
+                art_fn(
+                    unsafe {
+                        &mut*(self.obj as *mut ArticulationJoint)
+                    }
+                )
+            }
+            crate::base::ConcreteType::ArticulationJointReducedCoordinate => {
+                arc_fn(
+                    unsafe {
+                        &mut*(self.obj as *mut ArticulationJointReducedCoordinate)
+                    }
+                )
+            }
+            _ => unreachable!(),
         }
     }
 }
