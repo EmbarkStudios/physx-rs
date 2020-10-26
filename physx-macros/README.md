@@ -5,6 +5,7 @@
 [![Docs](https://docs.rs/physx/badge.svg)](https://docs.rs/physx)
 [![Contributor Covenant](https://img.shields.io/badge/contributor%20covenant-v1.4%20adopted-ff69b4.svg)](../CODE_OF_CONDUCT.md)
 [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](http://embark.games)
+[![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
 
 Utility macros used internally by the [`physx`](https://crates.io/crates/physx) crate.
 

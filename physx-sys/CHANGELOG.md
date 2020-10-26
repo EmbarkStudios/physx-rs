@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.4.10] - 2020-10-20
+
+### Added
+
+- [PR#94](https://github.com/EmbarkStudios/physx-rs/pull/94) Allow overriding the PxAllocatorCallback with a pair of custom callback functions
+
 ## [0.4.9] - 2020-08-13
 
 ### Added
@@ -71,7 +77,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.9...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.10...HEAD
+[0.4.10]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.9...physx-sys-v0.4.10
 [0.4.9]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...physx-sys-v0.4.9
 [0.4.8]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...physx-sys-v0.4.8
 [0.4.7]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.6...physx-sys-v0.4.7

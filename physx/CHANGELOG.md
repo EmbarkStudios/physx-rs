@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [0.7.4] - 2020-10-20
+
+### Added
+
+- [PR#94](https://github.com/EmbarkStudios/physx-rs/pull/94) Allow overriding the PxAllocatorCallback with a pair of custom callback functions
+
+## [0.7.3] - 2020-10-14
+
+### Added
+
+- [PR#90](https://github.com/EmbarkStudios/physx-rs/pull/90) Expose a bunch of additional parameters on SceneBuilder
+
+## [0.7.2] - 2020-10-13
+
+### Added
+
+- [PR#87](https://github.com/EmbarkStudios/physx-rs/pull/87) Allow setting the solver type when creating a scene
+
 ## [0.7.1] - 2020-08-13
 
 ### Added
@@ -46,7 +64,10 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.4...HEAD
+[0.7.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.3...physx-v0.7.4
+[0.7.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.2...physx-v0.7.3
+[0.7.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.1...physx-v0.7.2
 [0.7.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.0...physx-v0.7.1
 [0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.1...physx-v0.7.0
 [0.6.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.6.0...physx-v0.6.1

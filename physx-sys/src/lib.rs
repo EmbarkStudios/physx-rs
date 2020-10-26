@@ -243,9 +243,18 @@ pub struct FilterShaderCallbackInfo {
 
 pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
 
+pub type AllocCallback =
+    unsafe extern "C" fn(u64, *const c_void, *const c_void, u32, *const c_void) -> *mut c_void;
+
+pub type DeallocCallback = unsafe extern "C" fn(*const c_void, *const c_void);
+
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
+    pub fn physx_create_foundation_with_alloc(
+        allocator: *mut PxDefaultAllocator,
+    ) -> *mut PxFoundation;
     pub fn physx_create_physics(foundation: *mut PxFoundation) -> *mut PxPhysics;
+
     pub fn get_default_allocator() -> *mut PxDefaultAllocator;
     pub fn get_default_error_callback() -> *mut PxDefaultErrorCallback;
 
@@ -259,6 +268,12 @@ extern "C" {
         callback: RaycastHitCallback,
         userdata: *mut c_void,
     ) -> *mut PxQueryFilterCallback;
+
+    pub fn create_alloc_callback(
+        alloc_callback: AllocCallback,
+        dealloc_callback: DeallocCallback,
+        userdata: *mut c_void,
+    ) -> *mut PxAllocatorCallback;
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 
