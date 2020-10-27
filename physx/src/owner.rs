@@ -18,12 +18,15 @@ impl<T> Owner<T> {
     /// the amount of time spent dealing with raw pointers is as little as possible.
     pub(crate) unsafe fn from_raw(ptr: *mut T) -> Option<Self> {
         Some(Self {
-            ptr: NonNull::new(ptr)?
+            ptr: NonNull::new(ptr)?,
         })
     }
 }
 
-unsafe impl<T, S> Class<S> for Owner<T> where T: Class<S> {
+unsafe impl<T, S> Class<S> for Owner<T>
+where
+    T: Class<S>,
+{
     fn as_ptr(&self) -> *const S {
         self.as_ref().as_ptr()
     }
@@ -38,7 +41,7 @@ unsafe impl<T: Sync> Sync for Owner<T> {}
 
 impl<T> Drop for Owner<T> {
     fn drop(&mut self) {
-        drop(self.as_mut())
+        unsafe { std::ptr::drop_in_place(self.ptr.as_ptr()) }
     }
 }
 

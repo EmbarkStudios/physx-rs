@@ -7,19 +7,13 @@
 /*!
 
 */
-use super::{
-    articulation_link::ArticulationDriveType,
-    traits::Class,
-};
+use super::{articulation_link::ArticulationDriveType, traits::Class};
 
 use physx_sys::{
-    PxArticulationAxis,
-    PxArticulationJointDriveType,
-    PxArticulationMotion,
-    PxArticulationJointType,
+    PxArticulationAxis, PxArticulationJointDriveType,
     PxArticulationJointReducedCoordinate_getJointType,
-    PxArticulationJointReducedCoordinate_setDrive_mut,
     PxArticulationJointReducedCoordinate_setDriveTarget_mut,
+    PxArticulationJointReducedCoordinate_setDrive_mut,
     PxArticulationJointReducedCoordinate_setJointType_mut,
     PxArticulationJointReducedCoordinate_setLimit_mut,
     PxArticulationJointReducedCoordinate_setMotion_mut,
@@ -36,6 +30,7 @@ use physx_sys::{
     PxArticulationJointReducedCoordinate_setFrictionCoefficient_mut,
     */
     //PxArticulationJointReducedCoordinate_getConcreteTypeName,
+    PxArticulationJointType, PxArticulationMotion,
 };
 
 /* todo[tolsson]
@@ -185,7 +180,11 @@ pub struct ArticulationJointReducedCoordinate {
     obj: physx_sys::PxArticulationJointReducedCoordinate,
 }
 
-crate::ClassObj!(ArticulationJointReducedCoordinate : PxArticulationJointReducedCoordinate, PxArticulationBase, PxBase);
+crate::ClassObj!(
+    ArticulationJointReducedCoordinate: PxArticulationJointReducedCoordinate,
+    PxArticulationBase,
+    PxBase
+);
 
 impl ArticulationJointReducedCoordinate {
     /// Set target angle around axis for this joint
@@ -202,7 +201,10 @@ impl ArticulationJointReducedCoordinate {
     /// set joint type
     pub fn set_joint_type(&mut self, joint_type: ArticulationJointType) {
         unsafe {
-            PxArticulationJointReducedCoordinate_setJointType_mut(self.as_mut_ptr(), joint_type.into())
+            PxArticulationJointReducedCoordinate_setJointType_mut(
+                self.as_mut_ptr(),
+                joint_type.into(),
+            )
         }
     }
 

@@ -1,11 +1,6 @@
-use crate::{
-    traits::Class,
-    owner::Owner,
-};
+use crate::{owner::Owner, traits::Class};
 
-use physx_sys::{
-    PxConstraint_release_mut,
-};
+use physx_sys::PxConstraint_release_mut;
 
 #[repr(transparent)]
 pub struct Constraint {
@@ -26,8 +21,6 @@ unsafe impl Sync for Constraint {}
 
 impl Drop for Constraint {
     fn drop(&mut self) {
-        unsafe {
-            PxConstraint_release_mut(self.as_mut_ptr())
-        }
+        unsafe { PxConstraint_release_mut(self.as_mut_ptr()) }
     }
 }

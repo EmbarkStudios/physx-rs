@@ -1,18 +1,13 @@
-use crate::{
-    traits::Class,
-    owner::Owner,
-};
+use crate::{owner::Owner, traits::Class};
 
-use physx_sys::{
-    PxConvexMesh_release_mut,
-};
+use physx_sys::PxConvexMesh_release_mut;
 
 #[repr(transparent)]
 pub struct ConvexMesh {
     obj: physx_sys::PxConvexMesh,
 }
 
-crate::ClassObj!(ConvexMesh : PxConvexMesh, PxBase);
+crate::ClassObj!(ConvexMesh: PxConvexMesh, PxBase);
 
 impl ConvexMesh {
     #[allow(dead_code)]
@@ -26,8 +21,6 @@ unsafe impl Sync for ConvexMesh {}
 
 impl Drop for ConvexMesh {
     fn drop(&mut self) {
-        unsafe {
-            PxConvexMesh_release_mut(self.as_mut_ptr())
-        }
+        unsafe { PxConvexMesh_release_mut(self.as_mut_ptr()) }
     }
 }

@@ -15,39 +15,14 @@ use crate::{
     traits::Class,
 };
 use enumflags2::BitFlags;
-use physx_sys::{
-    //PxHeightFieldFlag,
-    PxHeightField_release_mut,
-    /*
-    PxHeightFieldFlags,
-    PxHeightFieldDesc,
-    PxHeightFieldDesc_new,
-    PxHeightFieldSample,
-    PxHeightField_acquireReference_mut,
-    PxHeightField_getConcreteTypeName,
-    PxHeightField_getConvexEdgeThreshold,
-    PxHeightField_getFlags,
-    PxHeightField_getFormat,
-    PxHeightField_getHeight,
-    PxHeightField_getNbColumns,
-    PxHeightField_getNbRows,
-    PxHeightField_getReferenceCount,
-    PxHeightField_getSample,
-    PxHeightField_getSampleStride,
-    PxHeightField_getTimestamp,
-    PxHeightField_getTriangleMaterialIndex,
-    PxHeightField_getTriangleNormal,
-    PxHeightField_modifySamples_mut,
-    PxHeightField_saveCells,
-    */
-};
+use physx_sys::PxHeightField_release_mut;
 
 #[repr(transparent)]
 pub struct HeightField {
     obj: physx_sys::PxHeightField,
 }
 
-crate::ClassObj!(HeightField : PxHeightField, PxBase);
+crate::ClassObj!(HeightField: PxHeightField, PxBase);
 
 impl HeightField {
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxHeightField) -> Option<Owner<Self>> {
@@ -57,9 +32,7 @@ impl HeightField {
 
 impl Drop for HeightField {
     fn drop(&mut self) {
-        unsafe {
-            PxHeightField_release_mut(self.as_mut_ptr())
-        }
+        unsafe { PxHeightField_release_mut(self.as_mut_ptr()) }
     }
 }
 
@@ -144,7 +117,7 @@ impl<'a> HeightFieldBuilder<'a> {
                     x as f32 * XZ_SCALE,
                     heights[index] * HEIGHT_SCALE,
                     y as f32 * XZ_SCALE,
-                    
+
                 ));
             }
         }

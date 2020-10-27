@@ -9,24 +9,24 @@ ArticulationReducedCoordinate wrapper for PhysX.
  */
 
 use super::{
-    owner::Owner,
     articulation_base::ArticulationBase,
     articulation_cache::{ArticulationCache, ArticulationCacheFlag},
     math::PxTransform,
-    traits::{Class, UserData, PxFlags},
+    math::*,
+    owner::Owner,
+    rigid_actor::RigidActor,
+    shape::CollisionLayer,
+    traits::{Class, PxFlags, UserData},
 };
 
-use std::{
-    ptr::NonNull,
-    marker::PhantomData,
-};
+use std::{marker::PhantomData, ptr::NonNull};
 
 use enumflags2::BitFlags;
 
 use physx_sys::{
+    PxArticulationCacheFlags,
     PxArticulationFlag,
     PxArticulationFlags,
-    PxArticulationCacheFlags,
     //PxArticulationReducedCoordinate_addLoopJoint_mut,
     PxArticulationReducedCoordinate_applyCache_mut,
     PxArticulationReducedCoordinate_commonInit,
@@ -48,14 +48,16 @@ use physx_sys::{
     //PxArticulationReducedCoordinate_getLoopJoints,
     //PxArticulationReducedCoordinate_getNbLoopJoints,
     PxArticulationReducedCoordinate_packJointData,
-    PxArticulationReducedCoordinate_release_mut,
     PxArticulationReducedCoordinate_releaseCache,
+    PxArticulationReducedCoordinate_release_mut,
     //PxArticulationReducedCoordinate_removeLoopJoint_mut,
     PxArticulationReducedCoordinate_setArticulationFlag_mut,
     PxArticulationReducedCoordinate_setArticulationFlags_mut,
     PxArticulationReducedCoordinate_teleportRootLink_mut,
     PxArticulationReducedCoordinate_unpackJointData,
     PxArticulationReducedCoordinate_zeroCache_mut,
+    PxRigidBodyExt_computeMassPropertiesFromShapes_mut,
+    PxRigidBodyExt_getVelocityAtPos_mut,
 };
 
 /*******************************************************************************
@@ -68,7 +70,7 @@ impl PxFlags for ArticulationFlags {
     type Target = PxArticulationFlags;
 
     fn into_px(self) -> Self::Target {
-        PxArticulationFlags{mBits:self.bits()}
+        PxArticulationFlags { mBits: self.bits() }
     }
 
     fn from_px(flags: Self::Target) -> Self {
@@ -76,7 +78,7 @@ impl PxFlags for ArticulationFlags {
     }
 }
 
- #[derive(Copy, Clone, Debug, BitFlags)]
+#[derive(Copy, Clone, Debug, BitFlags)]
 #[repr(u8)]
 pub enum ArticulationFlag {
     FixBase = 1 << 0,
@@ -93,7 +95,7 @@ impl Into<PxArticulationFlag::Enum> for ArticulationFlag {
  * Section ARTICULATION                                                        *
 *******************************************************************************/
 
- #[repr(transparent)]
+#[repr(transparent)]
 pub struct ArticulationReducedCoordinate<U, L, H, M> {
     pub(crate) obj: physx_sys::PxArticulationReducedCoordinate,
     phantom_user_data: PhantomData<(U, L, H, M)>,
@@ -101,7 +103,9 @@ pub struct ArticulationReducedCoordinate<U, L, H, M> {
 
 impl<U, L, H, M> ArticulationBase<L, H, M> for ArticulationReducedCoordinate<U, L, H, M> {}
 unsafe impl<S, U, L, H, M> Class<S> for ArticulationReducedCoordinate<U, L, H, M>
-where physx_sys::PxArticulationReducedCoordinate: Class<S> {
+where
+    physx_sys::PxArticulationReducedCoordinate: Class<S>,
+{
     fn as_ptr(&self) -> *const S {
         self.obj.as_ptr()
     }
@@ -112,7 +116,10 @@ where physx_sys::PxArticulationReducedCoordinate: Class<S> {
 }
 
 impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxArticulationReducedCoordinate, user_data: U) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxArticulationReducedCoordinate,
+        user_data: U,
+    ) -> Option<Owner<Self>> {
         let arc = (ptr as *mut Self).as_mut();
         Owner::from_raw(arc?.init_user_data(user_data))
     }
@@ -126,13 +133,10 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
         unsafe { UserData::get_user_data_mut(self) }
     }
-    
-    
+
     #[inline]
     pub fn common_init(&mut self) {
-        unsafe {
-            PxArticulationReducedCoordinate_commonInit(self.as_ptr())
-        }
+        unsafe { PxArticulationReducedCoordinate_commonInit(self.as_ptr()) }
     }
 
     /// Get the number of dofs for the body
@@ -159,7 +163,7 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
         unsafe {
             PxArticulationReducedCoordinate_setArticulationFlags_mut(
                 self.as_mut_ptr(),
-                PxArticulationFlags{mBits:flag as u8},
+                PxArticulationFlags { mBits: flag as u8 },
             )
         }
     }
@@ -168,7 +172,9 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
     #[inline]
     pub fn get_articulation_flags(&self) -> ArticulationFlags {
         unsafe {
-            ArticulationFlags::from_px(PxArticulationReducedCoordinate_getArticulationFlags(self.as_ptr()))
+            ArticulationFlags::from_px(PxArticulationReducedCoordinate_getArticulationFlags(
+                self.as_ptr(),
+            ))
         }
     }
 
@@ -191,15 +197,11 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
 
     /// Create a new cache for this articulation
     pub fn create_cache(&self) -> Option<ArticulationCache> {
-        let px_articulation_cache = unsafe {
-            NonNull::new(
-                PxArticulationReducedCoordinate_createCache(self.as_ptr())
-            )?
-        };
-    
-        Some(ArticulationCache::new(
-            px_articulation_cache
-        ))
+        let mut articulation_cache = ArticulationCache::new(NonNull::new(unsafe {
+            PxArticulationReducedCoordinate_createCache(self.as_ptr())
+        })?);
+        unsafe { articulation_cache.compute_dof_information(self) };
+        Some(articulation_cache)
     }
 
     /// Release the cache and free the memory
@@ -230,7 +232,7 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
             PxArticulationReducedCoordinate_applyCache_mut(
                 self.as_mut_ptr(),
                 cache.as_mut_ptr(),
-                PxArticulationCacheFlags{mBits: flag.bits()},
+                PxArticulationCacheFlags { mBits: flag.bits() },
                 autowake,
             )
         }
@@ -246,7 +248,7 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
             PxArticulationReducedCoordinate_copyInternalStateToCache(
                 self.as_ptr(),
                 cache.as_mut_ptr(),
-                PxArticulationCacheFlags{mBits: flag.bits()},
+                PxArticulationCacheFlags { mBits: flag.bits() },
             )
         }
     }
@@ -376,30 +378,22 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
         }
     }
 
-    /* TODO
     /// Compute the total center of mass w.r.t. all attached shapes
-    pub fn get_center_of_mass(&self) -> Vec3 {
-        let nb_shapes = self
-            .get_links()
+    pub fn get_center_of_mass(&self) -> PxVec3 {
+        let links = self.get_links();
+        let nb_shapes = links
             .iter()
-            .fold(0, |accum, link| accum + link.get_nb_shapes()) as usize;
-        let mut shape_ptrs = vec![null(); nb_shapes];
-        let mut offset = 0;
+            .fold(0, |accum, link| accum + link.get_nb_shapes());
+        let mut shape_ptrs = Vec::with_capacity(nb_shapes as usize);
         let props = unsafe {
-            for link in self.links() {
+            for link in links {
                 for shape in link.get_shapes() {
-                    shape_ptrs[offset] = shape.as_ptr();
-                    offset += 1;
+                    shape_ptrs.push(shape.as_ptr());
                 }
             }
-
-            PxRigidBodyExt_computeMassPropertiesFromShapes_mut(
-                shape_ptrs.as_ptr(),
-                nb_shapes as u32,
-            )
+            PxRigidBodyExt_computeMassPropertiesFromShapes_mut(shape_ptrs.as_ptr(), nb_shapes)
         };
-
-        Vec3::new(
+        PxVec3::new(
             props.centerOfMass.x,
             props.centerOfMass.y,
             props.centerOfMass.z,
@@ -407,36 +401,18 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
     }
 
     /// Compute the total center of mass and velocity w.r.t. all attached shapes
-    pub fn get_center_of_mass_and_velocity(&self) -> (Vec3, Vec3) {
-        let nb_shapes = self
-            .get_links()
-            .iter()
-            .fold(0, |accum, link| accum + link.get_nb_shapes()) as usize;
-        let mut shape_ptrs = vec![null(); nb_shapes];
-        let mut offset = 0;
-        let props = unsafe {
-            for link in self.links() {
-                for shape in link.get_shapes() {
-                    shape_ptrs[offset] = shape.as_ptr();
-                    offset += 1;
-                }
-            }
-
-            PxRigidBodyExt_computeMassPropertiesFromShapes_mut(
-                shape_ptrs.as_ptr(),
-                nb_shapes as u32,
-            )
-        };
+    pub fn get_center_of_mass_and_velocity(&self) -> (PxVec3, PxVec3) {
+        let center_of_mass = self.get_center_of_mass();
 
         let com_vel = unsafe {
-            PxRigidBodyExt_getVelocityAtPos_mut(Class::<PxRigidBody>::as_ptr(self.root()), &props.centerOfMass)
+            PxRigidBodyExt_getVelocityAtPos_mut(
+                self.root_link().expect("root link is null").as_ptr(),
+                &center_of_mass.into(),
+            )
+            .into()
         };
 
-        (px_to_gl_v3(props.centerOfMass), px_to_gl_v3(com_vel))
-    }
-
-    pub fn get_origin(&self) -> Vec3 {
-        Vec3::zero() // todo[tolsson]
+        (center_of_mass, com_vel)
     }
 
     /// Set the collision layer on all links and shapes of this body
@@ -446,8 +422,8 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
         other_layer: BitFlags<CollisionLayer>, // word2
     ) {
         let (a, b) = (
-            (Class::<physx_sys::PxArticulationReducedCoordinate>::as_mut_ptr(self) as usize >> 32) as u32,
-            Class::<physx_sys::PxArticulationReducedCoordinate>::as_mut_ptr(self) as usize as u32
+            (self as *const _ as usize >> 32) as u32,
+            self as *const _ as usize as u32,
         );
         for link in self.get_links_mut() {
             link.set_collision_filter(this_layer, other_layer, a, b);
@@ -461,16 +437,21 @@ impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
         }
     }
 
-    /// Clears collision flag on all links
-    pub fn clear_collisions(&mut self) {
-        for link in self.get_links_mut() {
-            link.reset_collide()
+    /*
+        /// Clears collision flag on all links
+        pub fn clear_collisions(&mut self) {
+            for link in self.get_links_mut() {
+                link.reset_collide()
+            }
         }
-    }
-*/
+
+        pub fn get_origin(&self) -> Vec3 {
+            Vec3::zero() // todo[tolsson]
+        }
+    */
 }
 
-unsafe impl<U: Send, L: Send, H: Send, M: Send>Send  for ArticulationReducedCoordinate<U, L, H, M> {}
+unsafe impl<U: Send, L: Send, H: Send, M: Send> Send for ArticulationReducedCoordinate<U, L, H, M> {}
 unsafe impl<U: Sync, L: Send, H: Sync, M: Send> Sync for ArticulationReducedCoordinate<U, L, H, M> {}
 
 impl<U, L, H, M> Drop for ArticulationReducedCoordinate<U, L, H, M> {

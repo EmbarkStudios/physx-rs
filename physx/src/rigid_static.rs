@@ -11,30 +11,29 @@
 use std::marker::PhantomData;
 
 use crate::{
-    owner::Owner,
     geometry::PxGeometry,
     material::Material,
-    physics::Physics,
     math::PxTransform,
+    owner::Owner,
+    physics::Physics,
     rigid_actor::RigidActor,
     traits::{Class, UserData},
 };
 
-use physx_sys::{
-    phys_PxCreateStatic,
-    PxRigidActor_release_mut,
-    PxRigidStatic_getConcreteTypeName,
-};
+use physx_sys::{phys_PxCreateStatic, PxRigidActor_release_mut, PxRigidStatic_getConcreteTypeName};
 
 #[repr(transparent)]
-pub struct RigidStatic<S, H, M>{
+pub struct RigidStatic<S, H, M> {
     pub(crate) obj: physx_sys::PxRigidStatic,
-    phantom_user_data: PhantomData<(S, H, M)>
+    phantom_user_data: PhantomData<(S, H, M)>,
 }
 
 impl<S, H, M> RigidActor<H, M> for RigidStatic<S, H, M> {}
 
-unsafe impl<P, S, H, M> Class<P> for RigidStatic<S, H, M> where physx_sys::PxRigidStatic: Class<P> {
+unsafe impl<P, S, H, M> Class<P> for RigidStatic<S, H, M>
+where
+    physx_sys::PxRigidStatic: Class<P>,
+{
     fn as_ptr(&self) -> *const P {
         self.obj.as_ptr()
     }
@@ -51,39 +50,44 @@ impl<S, H, M> RigidStatic<S, H, M> {
         geometry: &impl Class<PxGeometry>,
         material: &mut Material<M>,
         shape_transform: PxTransform,
-        user_data: S
+        user_data: S,
     ) -> Option<Owner<Self>> {
-        unsafe { Self::from_raw(
-            phys_PxCreateStatic(
-                physics.as_mut_ptr(),
-                transform.as_ptr(),
-                geometry.as_ptr(),
-                material.as_mut_ptr(),
-                shape_transform.as_ptr(),
-            ),
-            user_data
-        ) }
+        unsafe {
+            Self::from_raw(
+                phys_PxCreateStatic(
+                    physics.as_mut_ptr(),
+                    transform.as_ptr(),
+                    geometry.as_ptr(),
+                    material.as_mut_ptr(),
+                    shape_transform.as_ptr(),
+                ),
+                user_data,
+            )
+        }
     }
 
     /// Safety: Calling this twice on the same pointer may result in a double-free or other use-after-free.
     /// FFI calls that return a *mut PxRigidStatic should be wrapped in this to avoid working with raw pointers.
-    pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxRigidStatic, user_data: S) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw(
+        ptr: *mut physx_sys::PxRigidStatic,
+        user_data: S,
+    ) -> Option<Owner<Self>> {
         let actor = (ptr as *mut Self).as_mut();
         Owner::from_raw(actor?.init_user_data(user_data))
     }
 
     pub fn get_user_data(&self) -> &S {
-        // Safety: user data was initiliazed during construction, see `new` and `from_raw`.
+        // Safety: user data was initiliazed during construction, see `from_raw`.
         unsafe { UserData::get_user_data(self) }
     }
 
     pub fn get_user_data_mut(&mut self) -> &mut S {
-        // Safety: user data was initiliazed during construction, see `new` and `from_raw`.
+        // Safety: user data was initiliazed during construction, see `from_raw`.
         unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
-    // TODO does this leak memory? or is it returning a pointer into the object or to an interned string?
+    // TODO does this leak memory? or is it returning a pointer into the object or maybe an interned string?
     pub fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
             std::ffi::CStr::from_ptr(PxRigidStatic_getConcreteTypeName(self.as_ptr()) as _)

@@ -17,15 +17,15 @@ pub use vec3::PxVec3;
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
-pub struct PxExtendedVec3{
-    obj: physx_sys::PxExtendedVec3
+pub struct PxExtendedVec3 {
+    obj: physx_sys::PxExtendedVec3,
 }
 
-crate::ClassObj!(PxExtendedVec3 : PxExtendedVec3);
+crate::ClassObj!(PxExtendedVec3: PxExtendedVec3);
 
 impl From<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
     fn from(bounds: physx_sys::PxExtendedVec3) -> Self {
-        PxExtendedVec3{obj: bounds}
+        PxExtendedVec3 { obj: bounds }
     }
 }
 
@@ -38,15 +38,15 @@ impl Into<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
 use crate::traits::Class;
 
 #[repr(transparent)]
-pub struct PxBounds3{
-    obj: physx_sys::PxBounds3
+pub struct PxBounds3 {
+    obj: physx_sys::PxBounds3,
 }
 
-crate::ClassObj!(PxBounds3 : PxBounds3);
+crate::ClassObj!(PxBounds3: PxBounds3);
 
 impl From<physx_sys::PxBounds3> for PxBounds3 {
     fn from(bounds: physx_sys::PxBounds3) -> Self {
-        PxBounds3{obj: bounds}
+        PxBounds3 { obj: bounds }
     }
 }
 

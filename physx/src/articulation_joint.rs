@@ -8,14 +8,10 @@
 
 */
 
-use crate::{
-    traits::Class,
-    math::PxQuat,
-};
+use crate::{math::PxQuat, traits::Class};
 
 use physx_sys::{
-    PxArticulationJointDriveType,
-    PxArticulationJoint_setDriveType_mut,
+    PxArticulationJointDriveType, PxArticulationJoint_setDriveType_mut,
     PxArticulationJoint_setTargetOrientation_mut,
     /* TODO implement!
     PxArticulationJoint_getDamping,
@@ -78,7 +74,11 @@ pub struct ArticulationJoint {
     obj: physx_sys::PxArticulationJoint,
 }
 
-crate::ClassObj!(ArticulationJoint : PxArticulationJoint, PxArticulationJointBase, PxBase);
+crate::ClassObj!(
+    ArticulationJoint: PxArticulationJoint,
+    PxArticulationJointBase,
+    PxBase
+);
 
 impl ArticulationJoint {
     /// set drive type of the associated joints
@@ -88,9 +88,7 @@ impl ArticulationJoint {
 
     /// not implemented yet, not work for reduced coordinate
     pub fn set_target_orientation(&mut self, quat: &PxQuat) {
-        unsafe {
-            PxArticulationJoint_setTargetOrientation_mut(self.as_mut_ptr(), quat.as_ptr())
-        };
+        unsafe { PxArticulationJoint_setTargetOrientation_mut(self.as_mut_ptr(), quat.as_ptr()) };
     }
 }
 

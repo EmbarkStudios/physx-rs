@@ -1,93 +1,67 @@
 // PxBase hierarchy
 use physx_sys::{
-    PxBase,
     PxActor,
-    PxRigidActor,
-    PxRigidStatic,
-    PxRigidBody,
-    PxRigidDynamic,
-    PxArticulationLink,
     PxAggregate,
-    PxArticulationBase,
     PxArticulation,
-    PxArticulationReducedCoordinate,
-    PxArticulationJointBase,
+    PxArticulationBase,
     PxArticulationJoint,
+    PxArticulationJointBase,
     PxArticulationJointReducedCoordinate,
+    PxArticulationLink,
+    PxArticulationReducedCoordinate,
     PxBVHStructure,
+    PxBase,
     PxConstraint,
-    PxConvexMesh,
-    PxHeightField,
-    PxJoint,
     PxContactJoint,
+    PxConvexMesh,
     PxD6Joint,
     PxDistanceJoint,
     PxFixedJoint,
-    PxPrismaticJoint,
-    PxRevoluteJoint,
-    PxSphericalJoint,
+    PxHeightField,
+    PxJoint,
     PxMaterial,
+    PxPrismaticJoint,
     PxPruningStructure,
+    PxRevoluteJoint,
+    PxRigidActor,
+    PxRigidBody,
+    PxRigidDynamic,
+    PxRigidStatic,
     PxShape,
+    PxSphericalJoint,
     PxTriangleMesh,
-    PxVehicleWheels,
-    PxVehicleNoDrive,
     PxVehicleDrive,
     PxVehicleDrive4W,
     PxVehicleDriveNW,
     PxVehicleDriveTank,
     //PxBVH34TriangleMesh, // Doesn't exist?
     //PxBVH33TriangleMesh, // Doesn't exist?
+    PxVehicleNoDrive,
+    PxVehicleWheels,
 };
 
 // Main classes
 use physx_sys::{
-    PxCooking,
-    PxFoundation,
-    PxPhysics,
-    PxPvdSceneClient,
-    PxPvdTransport,
-    PxPvd,
-    PxScene,
+    PxCooking, PxFoundation, PxPhysics, PxPvd, PxPvdSceneClient, PxPvdTransport, PxScene,
 };
 
 // Controller stuff
 use physx_sys::{
-    PxControllerManager,
-    PxController,
-    PxCapsuleController,
-    PxBoxController,
-    PxControllerDesc,
-    PxCapsuleControllerDesc,
-    PxBoxControllerDesc,
+    PxBoxController, PxBoxControllerDesc, PxCapsuleController, PxCapsuleControllerDesc,
+    PxController, PxControllerDesc, PxControllerManager,
 };
 
 // Math
-use physx_sys::{
-    PxTransform,
-    PxVec3,
-    PxExtendedVec3,
-    PxQuat,
-    PxMeshScale,
-    PxBounds3,
-};
+use physx_sys::{PxBounds3, PxExtendedVec3, PxMeshScale, PxQuat, PxTransform, PxVec3};
 
 // Geometries
 use physx_sys::{
-    PxGeometry,
-    PxSphereGeometry,
-    PxBoxGeometry,
-    PxCapsuleGeometry,
-    PxHeightFieldGeometry,
-    PxTriangleMeshGeometry,
-    PxConvexMeshGeometry,
-    PxPlaneGeometry,
+    PxBoxGeometry, PxCapsuleGeometry, PxConvexMeshGeometry, PxGeometry, PxHeightFieldGeometry,
+    PxPlaneGeometry, PxSphereGeometry, PxTriangleMeshGeometry,
 };
 
 // Misc
-use physx_sys::{
-    PxArticulationCache,
-};
+use physx_sys::PxArticulationCache;
 
 ////////////////////////////////////////////////
 // Class
@@ -98,8 +72,8 @@ use physx_sys::{
 /// **Implementing `Class<S>` for `T` where `S` is not a superclass of `T` will cause Undefined Behaviour.**
 ///
 /// This trait may hide a raw pointer cast from `*Self` to `*T`.  It is intended for use in
-/// default implementations for traits wrapping C++ classes.  In C++-land these are just
-/// upcasts to a super-class, which is a-ok.  From the Rust side of things, this is madness.
+/// default implementations for traits wrapping C++ classes.  In C++-land this is just how
+/// things are done, but From Rust's perspective, this is madness.
 /// The relations defined between types using this trait must align with the C++ class hierarchy.
 /// The [Inherit] trait can be used to simplify implementing `Class<S> for T where T: Class<T>`.
 pub unsafe trait Class<S> {
@@ -137,6 +111,10 @@ macro_rules! Class {
 }
 
 #[macro_export(crate)]
+/// Macro for quickly defining Class<...> impls for new type wrapeprs.
+/// The type must be reprp(transparent), and have the Px object in a field
+/// named obj.
+// TODO remove this? It's only used in a couple places now.
 macro_rules! ClassObj {
     ($PxWrap:ident : $($PxClass:ident),+) => {
         $(unsafe impl Class<::physx_sys::$PxClass> for $PxWrap {
@@ -150,23 +128,32 @@ macro_rules! ClassObj {
     }
 }
 
-// TODO delete? most of these aren't instantiable, so they really don't matter.  OTOH,
+// TODO most of these aren't instantiable, so they really don't matter.  OTOH,
 // if someone needed to use the raw types via the physx_sys crate, having these defined
-// would probably make them very happy.
+// would probably make them very happy.  The instantiable ones need to stay due to the
+// bound on the Class impl for the newtype wrappers.
 Class!(PxBase);
 Class!(PxActor: PxBase);
 Class!(PxRigidActor: PxActor, PxBase);
 Class!(PxRigidStatic: PxRigidActor, PxActor, PxBase);
 Class!(PxRigidBody: PxRigidActor, PxActor, PxBase);
 Class!(PxRigidDynamic: PxRigidBody, PxRigidActor, PxActor, PxBase);
-Class!(PxArticulationLink: PxRigidBody, PxRigidActor, PxActor, PxBase);
+Class!(
+    PxArticulationLink: PxRigidBody,
+    PxRigidActor,
+    PxActor,
+    PxBase
+);
 Class!(PxAggregate: PxBase);
 Class!(PxArticulationBase: PxBase);
 Class!(PxArticulation: PxArticulationBase, PxBase);
 Class!(PxArticulationReducedCoordinate: PxArticulationBase, PxBase);
 Class!(PxArticulationJointBase: PxBase);
 Class!(PxArticulationJoint: PxArticulationJointBase, PxBase);
-Class!(PxArticulationJointReducedCoordinate: PxArticulationJointBase, PxBase);
+Class!(
+    PxArticulationJointReducedCoordinate: PxArticulationJointBase,
+    PxBase
+);
 Class!(PxBVHStructure: PxBase);
 Class!(PxConstraint: PxBase);
 Class!(PxConvexMesh: PxBase);
@@ -213,6 +200,8 @@ Class!(PxExtendedVec3);
 Class!(PxMeshScale);
 Class!(PxBounds3);
 
+Class!(PxArticulationCache);
+
 macro_rules! ImplClassForGeometries {
     ($($Px: ty,)*) => {
         $(
@@ -245,5 +234,3 @@ ImplClassForGeometries!(
     PxConvexMeshGeometry,
     PxPlaneGeometry,
 );
-
-Class!(PxArticulationCache);

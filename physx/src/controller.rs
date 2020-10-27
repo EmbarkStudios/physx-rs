@@ -7,38 +7,31 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{
-    marker::PhantomData,
-    mem::size_of,
-    ffi::c_void,
-};
+use std::{ffi::c_void, marker::PhantomData, mem::size_of};
 
 use thiserror::Error;
 
 use physx_sys::{
-    PxController,
-    PxControllerDesc,
-    PxExtendedVec3,
     PxCapsuleControllerDesc_delete,
     PxCapsuleControllerDesc_isValid,
     PxCapsuleControllerDesc_new_alloc,
+    PxController,
+    PxControllerDesc,
     PxController_getPosition,
+    PxController_getUserData,
     PxController_release_mut,
     PxController_setPosition_mut,
-    PxController_getUserData,
     PxController_setUserData_mut,
     //PxController_getActor,
+    PxExtendedVec3,
 };
 
-impl <T> Controller for T where T: Class<PxController> {}
+impl<T> Controller for T where T: Class<PxController> {}
 pub trait Controller: Class<PxController> {
     fn set_position(&mut self, position: PxVec3) {
         unsafe {
             let position: PxExtendedVec3 = position.into();
-            PxController_setPosition_mut(
-                self.as_mut_ptr(),
-                &position,
-            );
+            PxController_setPosition_mut(self.as_mut_ptr(), &position);
         }
     }
 
@@ -53,7 +46,10 @@ pub struct CapsuleController<C> {
     phantom_user_data: PhantomData<C>,
 }
 
-unsafe impl<T, C> Class<T> for CapsuleController<C> where physx_sys::PxCapsuleController: Class<T> {
+unsafe impl<T, C> Class<T> for CapsuleController<C>
+where
+    physx_sys::PxCapsuleController: Class<T>,
+{
     fn as_ptr(&self) -> *const T {
         self.obj.as_ptr()
     }
@@ -77,7 +73,8 @@ impl<U> CapsuleController<U> {
             if size_of::<U>() > size_of::<*mut c_void>() {
                 // Cast *mut c_void to appropriate type and reborrow
                 &*(PxController_getUserData(self.as_ptr()) as *const U)
-            } else { // DATA_SIZE < VOID_SIZE
+            } else {
+                // DATA_SIZE < VOID_SIZE
                 // The data is packed into the "*mut c_void"
                 &*(&PxController_getUserData(self.as_ptr()) as *const *mut c_void as *const U)
             }
@@ -93,7 +90,8 @@ impl<U> CapsuleController<U> {
                 let user_data = Box::new(user_data);
                 // Cast to *mut c_void
                 Box::into_raw(user_data) as *mut c_void
-            } else { // DATA_SIZE < VOID_SIZE
+            } else {
+                // DATA_SIZE < VOID_SIZE
                 // The data is small enough to be packed directly into the "*mut c_void"
                 *(&user_data as *const U as *const *mut c_void)
             };
@@ -151,11 +149,14 @@ impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
 
 #[repr(transparent)]
 pub(crate) struct PxCapsuleControllerDesc<U> {
-    pub (crate) obj: physx_sys::PxCapsuleControllerDesc,
+    pub(crate) obj: physx_sys::PxCapsuleControllerDesc,
     phantom_user_data: PhantomData<U>,
 }
 
-unsafe impl<T, U> Class<T> for PxCapsuleControllerDesc<U> where physx_sys::PxCapsuleControllerDesc: Class<T> {
+unsafe impl<T, U> Class<T> for PxCapsuleControllerDesc<U>
+where
+    physx_sys::PxCapsuleControllerDesc: Class<T>,
+{
     fn as_ptr(&self) -> *const T {
         self.obj.as_ptr()
     }
@@ -166,7 +167,10 @@ unsafe impl<T, U> Class<T> for PxCapsuleControllerDesc<U> where physx_sys::PxCap
 }
 
 impl<U> PxCapsuleControllerDesc<U> {
-    unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxCapsuleControllerDesc, user_data: U) -> Option<&'a mut Self> {
+    unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxCapsuleControllerDesc,
+        user_data: U,
+    ) -> Option<&'a mut Self> {
         Some((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 }
@@ -180,14 +184,19 @@ impl<U> Drop for PxCapsuleControllerDesc<U> {
     }
 }
 
-impl <T> CapsuleControllerDesc for T where T: Class<physx_sys::PxCapsuleControllerDesc> + ControllerDesc {}
-pub trait CapsuleControllerDesc: Class<physx_sys::PxCapsuleControllerDesc> + ControllerDesc {
+impl<T> CapsuleControllerDesc for T where
+    T: Class<physx_sys::PxCapsuleControllerDesc> + ControllerDesc
+{
+}
+pub trait CapsuleControllerDesc:
+    Class<physx_sys::PxCapsuleControllerDesc> + ControllerDesc
+{
     unsafe fn is_valid(&self) -> bool {
         PxCapsuleControllerDesc_isValid(self.as_ptr())
     }
 }
 
-impl <T> ControllerDesc for T where T: Class<PxControllerDesc> {}
+impl<T> ControllerDesc for T where T: Class<PxControllerDesc> {}
 pub trait ControllerDesc: Class<PxControllerDesc> {
     // ???
 }

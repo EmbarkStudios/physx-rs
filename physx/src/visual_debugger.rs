@@ -8,25 +8,14 @@
 
 */
 
-use super::{
-    foundation::Foundation,
-    traits::Class,
-    owner::Owner,
-};
+use super::{foundation::Foundation, owner::Owner, traits::Class};
 
 use enumflags2::BitFlags;
 
 use physx_sys::{
-    PxPvdInstrumentationFlag,
-    PxPvdInstrumentationFlags,
-    PxPvdSceneFlags,
-    phys_PxCreatePvd,
-    PxPvd_connect_mut,
-    PxPvd_disconnect_mut,
-    phys_PxDefaultPvdSocketTransportCreate,
-    PxPvdTransport_release_mut,
-    PxPvd_release_mut,
-    PxPvdSceneClient_setScenePvdFlags_mut,
+    phys_PxCreatePvd, phys_PxDefaultPvdSocketTransportCreate, PxPvdInstrumentationFlag,
+    PxPvdInstrumentationFlags, PxPvdSceneClient_setScenePvdFlags_mut, PxPvdSceneFlags,
+    PxPvdTransport_release_mut, PxPvd_connect_mut, PxPvd_disconnect_mut, PxPvd_release_mut,
 };
 
 #[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
@@ -53,8 +42,8 @@ unsafe impl Class<physx_sys::PxPvd> for VisualDebugger {
 }
 
 impl VisualDebugger {
-    /// Create a new VisualDebugger instance. This is a utility class that
-    /// combines the TCP setup and the actual Pvd into one object. The port
+    /// Create a new VisualDebugger instance, a utility class that
+    /// combines the TCP setup and the Pvd into one object. The port
     /// default for the PVD program is port 5425, so it is suggested to use this
     /// unless you're explicitly changing the other one as well.
     ///
@@ -72,20 +61,18 @@ impl VisualDebugger {
             mBits: PxPvdInstrumentationFlag::eDEBUG as u8,
         };
 
-        let pvd = unsafe {
-            Pvd::from_raw(
-                phys_PxCreatePvd(foundation.as_mut_ptr())
-            )?
-        };
+        let pvd = unsafe { Pvd::from_raw(phys_PxCreatePvd(foundation.as_mut_ptr()))? };
         let transport = unsafe {
             let oshost = CStr::from_bytes_with_nul_unchecked(b"localhost\0");
-            PvdTransport::from_raw(
-                phys_PxDefaultPvdSocketTransportCreate(oshost.as_ptr() as _, port, timeout)
-            )?
+            PvdTransport::from_raw(phys_PxDefaultPvdSocketTransportCreate(
+                oshost.as_ptr() as _,
+                port,
+                timeout,
+            ))?
         };
 
         let mut visual_debugger = Self { pvd, transport };
-        
+
         visual_debugger.connect(flags);
 
         Some(visual_debugger)
@@ -105,10 +92,12 @@ pub struct PvdTransport {
     obj: physx_sys::PxPvdTransport,
 }
 
-crate::ClassObj!(PvdTransport : PxPvdTransport);
+crate::ClassObj!(PvdTransport: PxPvdTransport);
 
 impl PvdTransport {
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxPvdTransport) -> Option<Owner<PvdTransport>> {
+    pub(crate) unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxPvdTransport,
+    ) -> Option<Owner<PvdTransport>> {
         Owner::from_raw(ptr as *mut Self)
     }
 }
@@ -129,7 +118,7 @@ pub struct Pvd {
     obj: physx_sys::PxPvd,
 }
 
-crate::ClassObj!(Pvd : PxPvd);
+crate::ClassObj!(Pvd: PxPvd);
 
 impl Pvd {
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvd) -> Option<Owner<Self>> {
@@ -166,7 +155,7 @@ pub struct PvdSceneClient {
     obj: physx_sys::PxPvdSceneClient,
 }
 
-crate::ClassObj!(PvdSceneClient : PxPvdSceneClient);
+crate::ClassObj!(PvdSceneClient: PxPvdSceneClient);
 
 impl PvdSceneClient {
     #[allow(dead_code)]

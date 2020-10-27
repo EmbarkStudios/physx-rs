@@ -9,22 +9,14 @@ Wrapper for PxArticulationBase
  */
 
 use crate::{
-    owner::Owner,
+    articulation::Articulation, articulation_joint_base::ArticulationJointBase,
     articulation_link::ArticulationLink,
-    articulation_joint_base::ArticulationJointBase,
-    articulation::Articulation,
-    articulation_reduced_coordinate::ArticulationReducedCoordinate,
-    math::PxBounds3,
-    traits::Class,
-    math::PxTransform,
-    base::Base,
+    articulation_reduced_coordinate::ArticulationReducedCoordinate, base::Base, math::PxBounds3,
+    math::PxTransform, owner::Owner, traits::Class,
 };
 //use glam::Mat4;
 
-use std::{
-    marker::PhantomData,
-    ptr::null_mut,
-};
+use std::{marker::PhantomData, ptr::null_mut};
 
 pub(crate) use physx_sys::PxArticulationBase;
 
@@ -52,8 +44,7 @@ use physx_sys::{
     //PxArticulationBase_getAggregate,
 };
 
-//impl <T, L, M> ArticulationBase<L, M> for T where T: Class<PxArticulationBase> + Base {}
-pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
+pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
     /*
     fixme[tgolsson]: Unsupported so far!
         pub fn set_name(&mut self, name: *const i8) {}
@@ -66,11 +57,7 @@ pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
         pub pub fn get_impl(&mut self) -> *mut PxArticulationImpl;
         pub pub fn get_impl(&self) -> *const PxArticulationImpl;
      */
-    fn set_solver_iteration_counts(
-        &mut self,
-        min_position_iters: u32,
-        min_velocity_iters: u32,
-    ) {
+    fn set_solver_iteration_counts(&mut self, min_position_iters: u32, min_velocity_iters: u32) {
         unsafe {
             PxArticulationBase_setSolverIterationCounts_mut(
                 self.as_mut_ptr(),
@@ -155,16 +142,44 @@ pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
         unsafe { PxArticulationBase_getNbLinks(self.as_ptr()) as usize }
     }
 
-    /// Get an vec of all the links
-    fn get_links(&mut self) -> Vec<&mut ArticulationLink<L, H, M>> {
+    fn root_link(&self) -> Option<&ArticulationLink<L, H, M>> {
+        unsafe {
+            let mut buffer: Vec<*const ArticulationLink<L, H, M>> = vec![null_mut()];
+            PxArticulationBase_getLinks(self.as_ptr(), buffer.as_mut_ptr() as *mut *mut _, 1, 0);
+            // Safety: if there is no root link, rather than crash on an invalid index,
+            // let as_ref return None.
+            buffer.set_len(1);
+            buffer[0].as_ref()
+        }
+    }
+
+    /// Get a vec of all the links
+    fn get_links(&self) -> Vec<&ArticulationLink<L, H, M>> {
         unsafe {
             let capacity = PxArticulationBase_getNbLinks(self.as_ptr());
-            let mut buffer: Vec<&mut ArticulationLink<L, H, M>> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&ArticulationLink<L, H, M>> = Vec::with_capacity(capacity as usize);
             let len = PxArticulationBase_getLinks(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    /// Get a mutable vec of all the links
+    fn get_links_mut(&mut self) -> Vec<&mut ArticulationLink<L, H, M>> {
+        unsafe {
+            let capacity = PxArticulationBase_getNbLinks(self.as_ptr());
+            let mut buffer: Vec<&mut ArticulationLink<L, H, M>> =
+                Vec::with_capacity(capacity as usize);
+            let len = PxArticulationBase_getLinks(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -187,18 +202,17 @@ pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
             ArticulationLink::from_raw(
                 PxArticulationBase_createLink_mut(
                     self.as_mut_ptr(),
-                    parent.map(
-                        |parent|
-                        parent.as_mut_ptr()
-                    ).unwrap_or(null_mut()),
-                    pose.as_ptr()
+                    parent
+                        .map(|parent| parent.as_mut_ptr())
+                        .unwrap_or(null_mut()),
+                    pose.as_ptr(),
                 ),
-                user_data
+                user_data,
             )
         }
     }
 
-    // TODO not clear how this is used, the docs imply that articulation joints are created automatically
+    // TODO not clear on how this is used, the docs imply that articulation joints are created automatically
     // when creating a link, and shows how to manipulate them not what creating one on it's own is for/if it's useful.
     fn create_articulation_joint<J: ArticulationJointBase>(
         &mut self,
@@ -206,17 +220,15 @@ pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
         parent_frame: &PxTransform,
         child: &mut ArticulationLink<L, H, M>,
         child_frame: &PxTransform,
-    ) ->Option<Owner<J>> {
+    ) -> Option<Owner<J>> {
         unsafe {
-            Owner::from_raw(
-                PxArticulationBase_createArticulationJoint_mut(
-                    self.as_mut_ptr(),
-                    parent.as_mut_ptr(),
-                    parent_frame.as_ptr(),
-                    child.as_mut_ptr(),
-                    child_frame.as_ptr(),
-                ) as *mut J
-            )
+            Owner::from_raw(PxArticulationBase_createArticulationJoint_mut(
+                self.as_mut_ptr(),
+                parent.as_mut_ptr(),
+                parent_frame.as_ptr(),
+                child.as_mut_ptr(),
+                child_frame.as_ptr(),
+            ) as *mut J)
         }
     }
 
@@ -227,10 +239,13 @@ pub trait ArticulationBase<L, H, M> : Class<PxArticulationBase> + Base {
 
 pub struct ArticulationMap<T, C, L, H, M> {
     obj: *mut physx_sys::PxArticulationBase,
-    phantom_user_data: PhantomData<(T, C, L, H, M)>
+    phantom_user_data: PhantomData<(T, C, L, H, M)>,
 }
 
-unsafe impl<S, T, C, L, H, M> Class<S> for ArticulationMap<T, C, L, H, M> where physx_sys::PxArticulationBase: Class<S> {
+unsafe impl<S, T, C, L, H, M> Class<S> for ArticulationMap<T, C, L, H, M>
+where
+    physx_sys::PxArticulationBase: Class<S>,
+{
     fn as_ptr(&self) -> *const S {
         self.obj as *const _ as *const _
     }
@@ -241,30 +256,18 @@ unsafe impl<S, T, C, L, H, M> Class<S> for ArticulationMap<T, C, L, H, M> where 
 }
 
 impl<T, C, L, H, M> ArticulationMap<T, C, L, H, M> {
-    pub fn map<Ret, ArtFn, ArcFn>(
-        &mut self,
-        art_fn: ArtFn,
-        arc_fn: ArcFn,
-    ) -> Ret
+    pub fn map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Ret
     where
         ArtFn: FnOnce(&mut Articulation<T, L, H, M>) -> Ret,
         ArcFn: FnOnce(&mut ArticulationReducedCoordinate<C, L, H, M>) -> Ret,
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::Articulation => {
-                art_fn(
-                    unsafe {
-                        &mut*(self.obj as *mut Articulation<T, L, H, M>)
-                    }
-                )
+                art_fn(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) })
             }
-            crate::base::ConcreteType::ArticulationReducedCoordinate => {
-                arc_fn(
-                    unsafe {
-                        &mut*(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
-                    }
-                )
-            }
+            crate::base::ConcreteType::ArticulationReducedCoordinate => arc_fn(unsafe {
+                &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
+            }),
             _ => unreachable!(),
         }
     }

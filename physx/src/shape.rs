@@ -9,9 +9,9 @@ Wrapper for PxShape
  */
 
 use crate::{
-    owner::Owner,
     material::Material,
-    traits::{Class, UserData, PxFlags},
+    owner::Owner,
+    traits::{Class, PxFlags, UserData},
 };
 
 use enumflags2::BitFlags;
@@ -19,19 +19,10 @@ use enumflags2::BitFlags;
 use std::marker::PhantomData;
 
 use physx_sys::{
-    PxFilterData,
-    PxShapeFlag,
-    PxShapeFlags,
-    PxFilterData_new_1,
-    PxShape_getMaterials,
-    PxShape_getNbMaterials,
-    PxShape_getQueryFilterData,
-    PxShape_getSimulationFilterData,
-    PxShape_release_mut,
-    PxShape_setFlag_mut,
-    PxShape_setQueryFilterData_mut,
+    PxFilterData, PxFilterData_new_1, PxShapeFlag, PxShapeFlags, PxShape_getMaterials,
+    PxShape_getNbMaterials, PxShape_getQueryFilterData, PxShape_getSimulationFilterData,
+    PxShape_release_mut, PxShape_setFlag_mut, PxShape_setQueryFilterData_mut,
     PxShape_setSimulationFilterData_mut,
-    
 };
 
 /// Layers used for collision/querying of shapes
@@ -44,14 +35,15 @@ pub enum CollisionLayer {
     Character = 8,
 }
 
-
 pub type ShapeFlags = BitFlags<ShapeFlag>;
 
 impl PxFlags for ShapeFlags {
     type Target = PxShapeFlags;
 
     fn into_px(self) -> Self::Target {
-        PxShapeFlags{mBits: self.bits() as u8}
+        PxShapeFlags {
+            mBits: self.bits() as u8,
+        }
     }
 
     fn from_px(flags: Self::Target) -> Self {
@@ -85,7 +77,10 @@ pub struct Shape<H, M> {
     phantom_user_data: PhantomData<(H, M)>,
 }
 
-unsafe impl<S, H, M> Class<S> for Shape<H, M> where physx_sys::PxShape: Class<S> {
+unsafe impl<S, H, M> Class<S> for Shape<H, M>
+where
+    physx_sys::PxShape: Class<S>,
+{
     fn as_ptr(&self) -> *const S {
         self.obj.as_ptr()
     }
@@ -96,23 +91,22 @@ unsafe impl<S, H, M> Class<S> for Shape<H, M> where physx_sys::PxShape: Class<S>
 }
 
 impl<H, M> Shape<H, M> {
-    pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxShape, user_data: H) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw(
+        ptr: *mut physx_sys::PxShape,
+        user_data: H,
+    ) -> Option<Owner<Self>> {
         let shape = (ptr as *mut Self).as_mut();
         Owner::from_raw(shape?.init_user_data(user_data))
     }
 
     pub fn get_user_data(&self) -> &H {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe {
-            UserData::get_user_data(self)
-        }
+        unsafe { UserData::get_user_data(self) }
     }
 
     pub fn get_user_data_mut(&mut self) -> &mut H {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe {
-            UserData::get_user_data_mut(self)
-        }
+        unsafe { UserData::get_user_data_mut(self) }
     }
     /// Set the simulation (collision) filter of this shape
     pub fn set_simulation_filter_data(

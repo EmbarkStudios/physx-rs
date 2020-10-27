@@ -1,18 +1,13 @@
-use crate::{
-    traits::Class,
-    owner::Owner,
-};
+use crate::{owner::Owner, traits::Class};
 
-use physx_sys::{
-    PxBase_release_mut,
-};
+use physx_sys::PxBase_release_mut;
 
 #[repr(transparent)]
 pub struct BVHStructure {
     obj: physx_sys::PxBVHStructure,
 }
 
-crate::ClassObj!(BVHStructure : PxBVHStructure, PxBase);
+crate::ClassObj!(BVHStructure: PxBVHStructure, PxBase);
 
 impl BVHStructure {
     #[allow(dead_code)]
@@ -26,8 +21,6 @@ unsafe impl Sync for BVHStructure {}
 
 impl Drop for BVHStructure {
     fn drop(&mut self) {
-        unsafe {
-            PxBase_release_mut(self.as_mut_ptr())
-        }
+        unsafe { PxBase_release_mut(self.as_mut_ptr()) }
     }
 }

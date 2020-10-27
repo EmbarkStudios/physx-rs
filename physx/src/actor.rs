@@ -9,12 +9,8 @@ Trait for PxActor
  */
 
 use crate::{
-    math::*,
-    base::Base,
-    traits::Class,
-    rigid_dynamic::RigidDynamic,
-    rigid_static::RigidStatic,
-    articulation_link::ArticulationLink,
+    articulation_link::ArticulationLink, base::Base, math::*, rigid_dynamic::RigidDynamic,
+    rigid_static::RigidStatic, traits::Class,
 };
 use enumflags2::BitFlags;
 
@@ -30,8 +26,8 @@ use physx_sys::{
     PxActor_getOwnerClient,
     PxActor_getType,
     PxActor_getWorldBounds,
-    PxActor_setActorFlag_mut,
     PxActor_release_mut,
+    PxActor_setActorFlag_mut,
     PxActor_setActorFlags_mut,
     PxActor_setDominanceGroup_mut,
     PxActor_setOwnerClient_mut,
@@ -82,7 +78,7 @@ impl From<PxActorFlag::Enum> for ActorFlag {
     }
 }
 
-impl <T> Actor for T where T: Class<PxActor> + Base {}
+impl<T> Actor for T where T: Class<PxActor> + Base {}
 pub trait Actor: Class<PxActor> + Base {
     /*
     fixme[tolsson]: when I tried implementing these it had no effect, and it
@@ -173,7 +169,10 @@ pub struct ActorMap<L, S, D, H, M> {
     phantom_user_data: PhantomData<(L, S, D, H, M)>,
 }
 
-unsafe impl<P, L, S, D, H, M> Class<P> for ActorMap<L, S, D, H, M> where physx_sys::PxActor: Class<P> {
+unsafe impl<P, L, S, D, H, M> Class<P> for ActorMap<L, S, D, H, M>
+where
+    physx_sys::PxActor: Class<P>,
+{
     fn as_ptr(&self) -> *const P {
         self.obj as *const _ as *const _
     }
@@ -193,29 +192,17 @@ impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
     where
         RDFn: FnOnce(&'a mut RigidDynamic<D, H, M>) -> Ret,
         RSFn: FnOnce(&'a mut RigidStatic<S, H, M>) -> Ret,
-        ALFn: FnOnce(&'a mut ArticulationLink<L, H, M>) -> Ret
+        ALFn: FnOnce(&'a mut ArticulationLink<L, H, M>) -> Ret,
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::RigidDynamic => {
-                rigid_dynamic_fn(
-                    unsafe {
-                        &mut*(self.obj as *mut RigidDynamic<D, H, M>)
-                    }
-                )
+                rigid_dynamic_fn(unsafe { &mut *(self.obj as *mut RigidDynamic<D, H, M>) })
             }
             crate::base::ConcreteType::RigidStatic => {
-                rigid_static_fn(
-                    unsafe {
-                        &mut*(self.obj as *mut RigidStatic<S, H, M>)
-                    }
-                )
+                rigid_static_fn(unsafe { &mut *(self.obj as *mut RigidStatic<S, H, M>) })
             }
             crate::base::ConcreteType::ArticulationLink => {
-                articulation_link_fn(
-                    unsafe {
-                        &mut*(self.obj as *mut ArticulationLink<L, H, M>)
-                    }
-                )
+                articulation_link_fn(unsafe { &mut *(self.obj as *mut ArticulationLink<L, H, M>) })
             }
             _ => unreachable!(),
         }
@@ -224,11 +211,9 @@ impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
     /// Tries to cast to RigidStatic.
     pub fn as_rigid_static(&mut self) -> Option<&mut RigidStatic<S, H, M>> {
         match self.get_concrete_type() {
-            crate::base::ConcreteType::RigidStatic => {
-                unsafe {
-                    Some(&mut*(self.obj as *mut RigidStatic<S, H, M>))
-                }
-            }
+            crate::base::ConcreteType::RigidStatic => unsafe {
+                Some(&mut *(self.obj as *mut RigidStatic<S, H, M>))
+            },
             _ => None,
         }
     }
@@ -236,11 +221,9 @@ impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
     /// Tries to cast to RigidDynamic.
     pub fn as_rigid_dynamic(&mut self) -> Option<&mut RigidDynamic<D, H, M>> {
         match self.get_concrete_type() {
-            crate::base::ConcreteType::RigidDynamic => {
-                unsafe {
-                    Some(&mut*(self.obj as *mut RigidDynamic<D, H, M>))
-                }
-            }
+            crate::base::ConcreteType::RigidDynamic => unsafe {
+                Some(&mut *(self.obj as *mut RigidDynamic<D, H, M>))
+            },
             _ => None,
         }
     }
@@ -248,11 +231,9 @@ impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
     /// Tries to cast to ArticulationLink.
     pub fn as_articulation_link(&mut self) -> Option<&mut ArticulationLink<L, H, M>> {
         match self.get_concrete_type() {
-            crate::base::ConcreteType::ArticulationLink => {
-                unsafe {
-                    Some(&mut*(self.obj as *mut ArticulationLink<L, H, M>))
-                }
-            }
+            crate::base::ConcreteType::ArticulationLink => unsafe {
+                Some(&mut *(self.obj as *mut ArticulationLink<L, H, M>))
+            },
             _ => None,
         }
     }

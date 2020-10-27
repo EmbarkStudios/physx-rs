@@ -5,52 +5,23 @@
 #![warn(clippy::all)]
 
 use crate::{
-    traits::Class,
-    convex_mesh::ConvexMesh,
-    triangle_mesh::TriangleMesh,
-    height_field::HeightField,
-    
+    convex_mesh::ConvexMesh, height_field::HeightField, traits::Class, triangle_mesh::TriangleMesh,
 };
 
 pub use physx_sys::{
-    PxGeometry,
-    PxSphereGeometry,
-    PxBoxGeometry,
-    PxCapsuleGeometry,
-    PxPlaneGeometry,
-    PxTriangleMeshGeometry,
-    PxConvexMeshGeometry,
-    PxHeightFieldGeometry,
+    PxBoxGeometry, PxCapsuleGeometry, PxConvexMeshGeometry, PxGeometry, PxHeightFieldGeometry,
+    PxPlaneGeometry, PxSphereGeometry, PxTriangleMeshGeometry,
 };
 
 use physx_sys::{
-    PxMeshScale,
-    PxGeometryType,
-    PxMeshGeometryFlag,
-    PxMeshGeometryFlags,
-    PxConvexMeshGeometryFlag,
-    PxConvexMeshGeometryFlags,
-    PxGeometry_getType,
-    PxSphereGeometry_new,
-    PxSphereGeometry_new_1,
-    PxSphereGeometry_isValid,
-    PxBoxGeometry_new,
-    PxBoxGeometry_new_1,
-    PxBoxGeometry_isValid,
-    PxCapsuleGeometry_new,
-    PxCapsuleGeometry_new_1,
-    PxCapsuleGeometry_isValid,
-    PxPlaneGeometry_new,
-    PxPlaneGeometry_isValid,
-    PxTriangleMeshGeometry_new,
-    PxTriangleMeshGeometry_new_1,
-    PxTriangleMeshGeometry_isValid,
-    PxConvexMeshGeometry_new,
-    PxConvexMeshGeometry_new_1,
-    PxConvexMeshGeometry_isValid,
-    PxHeightFieldGeometry_new,
-    PxHeightFieldGeometry_new_1,
-    PxHeightFieldGeometry_isValid,
+    PxBoxGeometry_isValid, PxBoxGeometry_new, PxBoxGeometry_new_1, PxCapsuleGeometry_isValid,
+    PxCapsuleGeometry_new, PxCapsuleGeometry_new_1, PxConvexMeshGeometryFlag,
+    PxConvexMeshGeometryFlags, PxConvexMeshGeometry_isValid, PxConvexMeshGeometry_new,
+    PxConvexMeshGeometry_new_1, PxGeometryType, PxGeometry_getType, PxHeightFieldGeometry_isValid,
+    PxHeightFieldGeometry_new, PxHeightFieldGeometry_new_1, PxMeshGeometryFlag,
+    PxMeshGeometryFlags, PxMeshScale, PxPlaneGeometry_isValid, PxPlaneGeometry_new,
+    PxSphereGeometry_isValid, PxSphereGeometry_new, PxSphereGeometry_new_1,
+    PxTriangleMeshGeometry_isValid, PxTriangleMeshGeometry_new, PxTriangleMeshGeometry_new_1,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -69,7 +40,7 @@ impl From<PxMeshGeometryFlag::Enum> for MeshGeometryFlag {
     fn from(val: PxMeshGeometryFlag::Enum) -> Self {
         match val {
             PxMeshGeometryFlag::eDOUBLE_SIDED => MeshGeometryFlag::DoubleSided,
-            _ => unreachable!("Invalid PxMeshGeometryFlag variant.")
+            _ => unreachable!("Invalid PxMeshGeometryFlag variant."),
         }
     }
 }
@@ -98,7 +69,7 @@ impl From<PxConvexMeshGeometryFlag::Enum> for ConvexMeshGeometryFlag {
     fn from(val: PxConvexMeshGeometryFlag::Enum) -> Self {
         match val {
             PxConvexMeshGeometryFlag::eTIGHT_BOUNDS => ConvexMeshGeometryFlag::TightBounds,
-            _ => unreachable!("Invalid PxConvexMeshGeometryFlag enum.")
+            _ => unreachable!("Invalid PxConvexMeshGeometryFlag enum."),
         }
     }
 }
@@ -158,15 +129,17 @@ impl From<GeometryType> for PxGeometryType::Enum {
     }
 }
 
-impl <T> Geometry for T where T: Class<PxGeometry> {}
+impl<T> Geometry for T where T: Class<PxGeometry> {}
 pub trait Geometry: Class<PxGeometry> {
     fn get_type(&self) -> GeometryType {
         unsafe { PxGeometry_getType(self.as_ptr() as *const _).into() }
     }
 }
 
-impl <T> SphereGeometry for T where T: Class<PxSphereGeometry> + Geometry {}
-pub trait  SphereGeometry: Class<PxSphereGeometry> + Geometry {
+// TODO these should be changed to newtype wrappers instead of traits
+
+impl<T> SphereGeometry for T where T: Class<PxSphereGeometry> + Geometry {}
+pub trait SphereGeometry: Class<PxSphereGeometry> + Geometry {
     fn new(radius: f32) -> PxSphereGeometry {
         unsafe { PxSphereGeometry_new_1(radius) }
     }
@@ -180,7 +153,7 @@ pub trait  SphereGeometry: Class<PxSphereGeometry> + Geometry {
     }
 }
 
-impl <T> PlaneGeometry for T where T: Class<PxPlaneGeometry> + Geometry {}
+impl<T> PlaneGeometry for T where T: Class<PxPlaneGeometry> + Geometry {}
 pub trait PlaneGeometry: Class<PxPlaneGeometry> + Geometry {
     fn new() -> PxPlaneGeometry {
         unsafe { PxPlaneGeometry_new() }
@@ -195,7 +168,7 @@ pub trait PlaneGeometry: Class<PxPlaneGeometry> + Geometry {
     }
 }
 
-impl <T> CapsuleGeometry for T where T: Class<PxCapsuleGeometry> + Geometry {}
+impl<T> CapsuleGeometry for T where T: Class<PxCapsuleGeometry> + Geometry {}
 pub trait CapsuleGeometry: Class<PxCapsuleGeometry> + Geometry {
     fn new(radius: f32, half_height: f32) -> PxCapsuleGeometry {
         unsafe { PxCapsuleGeometry_new_1(radius, half_height) }
@@ -210,7 +183,7 @@ pub trait CapsuleGeometry: Class<PxCapsuleGeometry> + Geometry {
     }
 }
 
-impl <T> BoxGeometry for T where T: Class<PxBoxGeometry> + Geometry {}
+impl<T> BoxGeometry for T where T: Class<PxBoxGeometry> + Geometry {}
 pub trait BoxGeometry: Class<PxBoxGeometry> + Geometry {
     fn new(half_x: f32, half_y: f32, half_z: f32) -> PxBoxGeometry {
         unsafe { PxBoxGeometry_new_1(half_x, half_y, half_z) }
@@ -225,12 +198,12 @@ pub trait BoxGeometry: Class<PxBoxGeometry> + Geometry {
     }
 }
 
-impl <T> ConvexMeshGeometry for T where T: Class<PxConvexMeshGeometry> + Geometry {}
+impl<T> ConvexMeshGeometry for T where T: Class<PxConvexMeshGeometry> + Geometry {}
 pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
     fn new(
         mesh: &mut ConvexMesh,
         scaling: &impl Class<PxMeshScale>,
-        flags: PxConvexMeshGeometryFlags
+        flags: PxConvexMeshGeometryFlags,
     ) -> PxConvexMeshGeometry {
         unsafe { PxConvexMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags.into()) }
     }
@@ -244,12 +217,12 @@ pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
     }
 }
 
-impl <T> TriangleMeshGeometry for T where T: Class<PxTriangleMeshGeometry> + Geometry {}
+impl<T> TriangleMeshGeometry for T where T: Class<PxTriangleMeshGeometry> + Geometry {}
 pub trait TriangleMeshGeometry: Class<PxTriangleMeshGeometry> + Geometry {
     fn new(
         mesh: &mut TriangleMesh,
         scaling: &impl Class<PxMeshScale>,
-        flags: PxMeshGeometryFlags
+        flags: PxMeshGeometryFlags,
     ) -> PxTriangleMeshGeometry {
         unsafe { PxTriangleMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags) }
     }
@@ -263,7 +236,7 @@ pub trait TriangleMeshGeometry: Class<PxTriangleMeshGeometry> + Geometry {
     }
 }
 
-impl <T> HeightFieldGeometry for T where T: Class<PxHeightFieldGeometry> + Geometry {}
+impl<T> HeightFieldGeometry for T where T: Class<PxHeightFieldGeometry> + Geometry {}
 pub trait HeightFieldGeometry: Class<PxHeightFieldGeometry> + Geometry {
     fn new(
         height_field: &mut HeightField,
@@ -278,7 +251,7 @@ pub trait HeightFieldGeometry: Class<PxHeightFieldGeometry> + Geometry {
                 flags,
                 height_scale,
                 row_scale,
-                column_scale
+                column_scale,
             )
         }
     }

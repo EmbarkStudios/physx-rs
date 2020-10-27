@@ -17,10 +17,7 @@ use crate::{
 use enumflags2::BitFlags;
 use std::ptr::NonNull;
 
-use physx_sys::{
-    PxArticulationCache,
-    PxArticulationRootLinkData,
-};
+use physx_sys::{PxArticulationCache, PxArticulationRootLinkData};
 
 ////////////////////////////////////////////////////////////////////////////////
 // Section ENUMS
@@ -36,18 +33,25 @@ pub enum ArticulationCacheFlag {
     Root = 16,
 }
 
-// TODO turn these into methods.  Will need a ArticulationCache trait implemented on PxArticulationCache because it is external
 macro_rules! ptr_to_slice_mut {
     ($ptr: ident, $me: ident) => {
         unsafe {
-            std::slice::from_raw_parts_mut((*$me.px_articulation_cache.as_mut()).$ptr, $me.total_dofs as usize)
+            std::slice::from_raw_parts_mut(
+                (*$me.px_articulation_cache.as_mut()).$ptr,
+                $me.total_dofs as usize,
+            )
         }
     };
 }
 
 macro_rules! ptr_to_slice {
     ($ptr: ident, $me: ident) => {
-        unsafe { std::slice::from_raw_parts((*$me.px_articulation_cache.as_ptr()).$ptr, $me.total_dofs as usize) }
+        unsafe {
+            std::slice::from_raw_parts(
+                (*$me.px_articulation_cache.as_ptr()).$ptr,
+                $me.total_dofs as usize,
+            )
+        }
     };
 }
 
@@ -132,7 +136,7 @@ unsafe impl Class<PxArticulationCache> for ArticulationCache {
 ////////////////////////////////////////////////////////////////////////////////
 
 impl ArticulationCache {
-    pub fn new(px_articulation_cache: NonNull<PxArticulationCache>) -> ArticulationCache {    
+    pub fn new(px_articulation_cache: NonNull<PxArticulationCache>) -> ArticulationCache {
         Self {
             px_articulation_cache,
             link_offsets: [0; 64],
@@ -141,7 +145,6 @@ impl ArticulationCache {
         }
     }
 
-    // What is this for? O.o
     pub fn proxy(&self) -> Self {
         Self {
             px_articulation_cache: self.px_articulation_cache,
@@ -151,7 +154,10 @@ impl ArticulationCache {
         }
     }
 
-    pub unsafe fn compute_dof_information<U, L, H, M>(&mut self, articulation: &mut ArticulationReducedCoordinate<U, L, H, M>) {
+    pub unsafe fn compute_dof_information<U, L, H, M>(
+        &mut self,
+        articulation: &ArticulationReducedCoordinate<U, L, H, M>,
+    ) {
         let mut offsets = [0u32; 64];
         let mut dofs = [0u8; 64];
         offsets[0] = 0; //We know that the root link does not have a joint
@@ -164,7 +170,11 @@ impl ArticulationCache {
         }
 
         let mut count = 0;
-        for offset in offsets.iter_mut().take(articulation.get_number_links()).skip(1) {
+        for offset in offsets
+            .iter_mut()
+            .take(articulation.get_number_links())
+            .skip(1)
+        {
             let link_dofs = *offset;
             *offset = count;
             count += link_dofs;
@@ -243,7 +253,9 @@ impl ArticulationCache {
     }
 
     pub fn read_root_link_data(&self) -> ArticulationRootLinkData {
-        unsafe { ArticulationRootLinkData::from(*(*self.px_articulation_cache.as_ptr()).rootLinkData) }
+        unsafe {
+            ArticulationRootLinkData::from(*(*self.px_articulation_cache.as_ptr()).rootLinkData)
+        }
     }
 
     pub fn set_root_link_data(&mut self, data: ArticulationRootLinkData) {

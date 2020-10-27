@@ -9,8 +9,8 @@ A link of a reduced coordinate multibody.
  */
 
 use crate::{
-    owner::Owner,
     articulation_joint_base::JointMap,
+    owner::Owner,
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
     shape::ShapeFlag,
@@ -21,14 +21,14 @@ use std::marker::PhantomData;
 
 use physx_sys::{
     PxArticulationDriveType,
-    PxArticulationLink_getInboundJointDof,
-    PxArticulationLink_getLinkIndex,
-    PxArticulationLink_getNbChildren,
-    PxArticulationLink_release_mut,
     PxArticulationLink_getChildren,
     PxArticulationLink_getInboundJoint,
     //PxArticulationLink_getArticulation,
     //PxArticulationLink_getConcreteTypeName,
+    PxArticulationLink_getInboundJointDof,
+    PxArticulationLink_getLinkIndex,
+    PxArticulationLink_getNbChildren,
+    PxArticulationLink_release_mut,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,6 @@ impl Into<PxArticulationDriveType::Enum> for ArticulationDriveType {
     }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // Section ArticulationLink
 // /////////////////////////////////////////////////////////////////////////////
@@ -64,7 +63,10 @@ pub struct ArticulationLink<L, H, M> {
     phantom_user_data: PhantomData<(L, H, M)>,
 }
 
-unsafe impl<P, L, H, M> Class<P> for ArticulationLink<L, H, M> where physx_sys::PxArticulationLink: Class<P> {
+unsafe impl<P, L, H, M> Class<P> for ArticulationLink<L, H, M>
+where
+    physx_sys::PxArticulationLink: Class<P>,
+{
     fn as_ptr(&self) -> *const P {
         self.obj.as_ptr()
     }
@@ -78,28 +80,27 @@ impl<L, H, M> RigidActor<H, M> for ArticulationLink<L, H, M> {}
 impl<L, H, M> RigidBody<H, M> for ArticulationLink<L, H, M> {}
 
 impl<L, H, M> ArticulationLink<L, H, M> {
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxArticulationLink, user_data: L) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxArticulationLink,
+        user_data: L,
+    ) -> Option<Owner<Self>> {
         let link = (ptr as *mut Self).as_mut();
         Owner::from_raw(link?.init_user_data(user_data))
     }
 
     pub fn get_user_data(&self) -> &L {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe {
-            UserData::get_user_data(self)
-        }
+        unsafe { UserData::get_user_data(self) }
     }
 
     pub fn get_user_data_mut(&mut self) -> &mut L {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe {
-            UserData::get_user_data_mut(self)
-        }
+        unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Enable collisions for this link. Equivalent to setting SimulationShape to false for all attached shapes.
     pub fn enable_collision(&mut self, enable: bool) {
-        for shape in self.get_shapes() {
+        for shape in self.get_shapes_mut() {
             shape.set_flag(ShapeFlag::SimulationShape, enable);
         }
     }
@@ -129,7 +130,7 @@ impl<L, H, M> ArticulationLink<L, H, M> {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(new_len as usize);
             buffer
@@ -220,4 +221,4 @@ impl Collidable for PxArticulationLink {
 ////////////////////////////////////////////////////////////////////////////////
 // Section BUILDER
 ////////////////////////////////////////////////////////////////////////////////
-// TODO write a descriptor, 
+// TODO write a descriptor,

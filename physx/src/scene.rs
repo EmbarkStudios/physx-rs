@@ -17,39 +17,44 @@ use crate::{
     articulation_link::ArticulationLink,
     constraint::Constraint,
     controller_manager::ControllerManager,
+    math::PxVec3,
     owner::Owner,
     physics::Physics,
     pruning_structure::PruningStructure,
-    visual_debugger::PvdSceneClient,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
     rigid_static::RigidStatic,
     shape::Shape,
-    math::PxVec3,
-    traits::{Class, UserData, PxFlags},
+    traits::{Class, PxFlags, UserData},
+    visual_debugger::PvdSceneClient,
 };
 
 use enumflags2::BitFlags;
 use std::{
-    ptr::{null, null_mut},
-    marker::PhantomData,
     ffi::c_void,
-    mem::size_of,
+    marker::PhantomData,
+    mem::{forget, size_of},
+    ptr::{null, null_mut},
 };
 
 // TODO write proper wrappers for these rather than re-export
 pub use physx_sys::{
-    SimulationEventCallbackInfo,
-    PxContactPair,
-    PxContactPairHeader,
-    PxRaycastCallback,
+    PxContactPair, PxContactPairHeader, PxRaycastCallback, SimulationEventCallbackInfo,
 };
 
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
 use physx_sys::{
+    create_simulation_event_callbacks,
+    destroy_simulation_event_callbacks,
+    get_default_simulation_filter_shader,
+    phys_PxCreateControllerManager,
+    phys_PxDefaultCpuDispatcherCreate,
     PxActorTypeFlags,
     PxBaseTask,
+    PxBroadPhaseCallback,
+    PxBroadPhaseType,
+    PxCCDContactModifyCallback,
     /*
     PxOverlapCallback,
     PxSweepCallback,
@@ -59,28 +64,18 @@ use physx_sys::{
     PxQueryCache,
     */
     PxContactModifyCallback,
-    PxCCDContactModifyCallback,
-    PxBroadPhaseCallback,
-    //PxHitFlags,
-    PxSceneFlags,
-    PxPairFilteringMode,
-    PxBroadPhaseType,
-    PxPruningStructureType,
-    PxSimulationFilterCallback,
-    get_default_simulation_filter_shader,
     PxCpuDispatcher,
-    phys_PxDefaultCpuDispatcherCreate,
+    PxPairFilteringMode,
+    PxPruningStructureType,
     PxSceneDesc,
     PxSceneDesc_new,
-    phys_PxCreateControllerManager,
-    create_simulation_event_callbacks,
-    destroy_simulation_event_callbacks,
+    //PxHitFlags,
+    PxSceneFlags,
     PxScene_addActor_mut,
     PxScene_addActors_mut,
     PxScene_addActors_mut_1,
     PxScene_addAggregate_mut,
     PxScene_addArticulation_mut,
-    PxScene_simulate_mut,
     PxScene_fetchResults_mut,
     /* TODO implement the more involved simulation controls
     PxScene_advance_mut,
@@ -101,24 +96,24 @@ use physx_sys::{
     // PxScene_sweep,
     PxScene_getActiveActors_mut,
     PxScene_getActors,
-    PxScene_getNbActors,
     PxScene_getAggregates,
-    PxScene_getNbAggregates,
     PxScene_getArticulations,
-    PxScene_getNbArticulations,
-    PxScene_getConstraints,
-    PxScene_getNbConstraints,
     PxScene_getBroadPhaseCallback,
     PxScene_getCCDContactModifyCallback,
+    PxScene_getConstraints,
     PxScene_getContactModifyCallback,
+    PxScene_getDynamicStructure,
     PxScene_getFilterCallback,
-    PxScene_getSimulationEventCallback,
     //PxScene_getFilterShader,
     PxScene_getFilterShaderData,
     PxScene_getFilterShaderDataSize,
-    PxScene_getDynamicStructure,
     PxScene_getKinematicKinematicFilteringMode,
+    PxScene_getNbActors,
+    PxScene_getNbAggregates,
+    PxScene_getNbArticulations,
+    PxScene_getNbConstraints,
     PxScene_getScenePvdClient_mut,
+    PxScene_getSimulationEventCallback,
     PxScene_getStaticKinematicFilteringMode,
     PxScene_getStaticStructure,
     PxScene_release_mut,
@@ -190,6 +185,9 @@ use physx_sys::{
     // PxScene_unlockRead_mut,
     // PxScene_lockWrite_mut,
     // PxScene_unlockWrite_mut,
+    PxScene_simulate_mut,
+    PxSimulationFilterCallback,
+    PxSolverType,
 };
 
 pub type ActorTypeFlags = BitFlags<ActorTypeFlag>;
@@ -198,7 +196,7 @@ impl PxFlags for ActorTypeFlags {
     type Target = PxActorTypeFlags;
 
     fn into_px(self) -> Self::Target {
-        PxActorTypeFlags{ mBits: self.bits() }
+        PxActorTypeFlags { mBits: self.bits() }
     }
 
     fn from_px(flags: Self::Target) -> Self {
@@ -216,10 +214,13 @@ pub enum ActorTypeFlag {
 #[repr(transparent)]
 pub struct Scene<U, L, S, D, M, H, T, C> {
     pub(crate) obj: physx_sys::PxScene,
-    phantom_user_data: PhantomData<(U, L, S, D, M, H, T, C)>
+    phantom_user_data: PhantomData<(U, L, S, D, M, H, T, C)>,
 }
 
-unsafe impl<P, U, L, S, D, M, H, T, C> Class<P> for Scene<U, L, S, D, M, H, T, C> where physx_sys::PxScene: Class<P> {
+unsafe impl<P, U, L, S, D, M, H, T, C> Class<P> for Scene<U, L, S, D, M, H, T, C>
+where
+    physx_sys::PxScene: Class<P>,
+{
     fn as_ptr(&self) -> *const P {
         self.obj.as_ptr()
     }
@@ -243,24 +244,23 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         // Safety: Scenes are constructed from SceneDescriptor which sets up user data appropriately
         unsafe { UserData::get_user_data_mut(self) }
     }
-    
+
     /// Get the visual debugger client
     pub fn get_pvd_client(&mut self) -> Option<&mut PvdSceneClient> {
         unsafe {
-            (PxScene_getScenePvdClient_mut(
-                self.as_mut_ptr(),
-            )as *mut PvdSceneClient).as_mut()
+            (PxScene_getScenePvdClient_mut(self.as_mut_ptr()) as *mut PvdSceneClient).as_mut()
         }
     }
 
-    pub fn create_controller_manager(&mut self, locking_enabled: bool) -> Option<Owner<ControllerManager>> {
+    pub fn create_controller_manager(
+        &mut self,
+        locking_enabled: bool,
+    ) -> Option<Owner<ControllerManager>> {
         unsafe {
-            ControllerManager::from_raw(
-                phys_PxCreateControllerManager(
-                    self.as_mut_ptr(),
-                    locking_enabled
-                )
-            )
+            ControllerManager::from_raw(phys_PxCreateControllerManager(
+                self.as_mut_ptr(),
+                locking_enabled,
+            ))
         }
     }
 
@@ -270,63 +270,65 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     /// Add a dynamic actor to the world.
     pub fn add_dynamic_actor(&mut self, mut actor: Owner<RigidDynamic<D, H, M>>) {
         unsafe {
-            PxScene_addActor_mut(
-                self.as_mut_ptr(),
-                actor.as_mut_ptr(),
-                null(),
-            );
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.as_mut_ptr(), null());
+            forget(actor);
         }
     }
 
     /// Add dynamic actors to the world.
-    pub fn add_dynamic_actors(&mut self, actors: Vec<Owner<RigidDynamic<D, H, M>>>) {
+    pub fn add_dynamic_actors(&mut self, mut actors: Vec<Owner<RigidDynamic<D, H, M>>>) {
         unsafe {
             PxScene_addActors_mut(
                 self.as_mut_ptr(),
                 actors.as_ptr() as *const *mut _,
-                actors.len() as u32
+                actors.len() as u32,
             );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
         }
     }
     /// Add a static actor to the world.
     pub fn add_static_actor(&mut self, mut actor: Owner<RigidStatic<S, H, M>>) {
         unsafe {
-            PxScene_addActor_mut(
-                self.as_mut_ptr(),
-                actor.as_mut_ptr(),
-                null(),
-            );
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.as_mut_ptr(), null());
+            forget(actor);
         }
     }
 
     /// Add dynamic actors to the world.
-    pub fn add_static_actors(&mut self, actors: Vec<Owner<RigidStatic<S, H, M>>>) {
+    pub fn add_static_actors(&mut self, mut actors: Vec<Owner<RigidStatic<S, H, M>>>) {
         unsafe {
             PxScene_addActors_mut(
                 self.as_mut_ptr(),
                 actors.as_ptr() as *const *mut _,
-                actors.len() as u32
+                actors.len() as u32,
             );
-        }
-    }
-    /// Add an actor to the world.
-    pub fn add_articulation_link(&mut self, mut actor: Owner<ArticulationLink<L, H, M>>) {
-        unsafe {
-            PxScene_addActor_mut(
-                self.as_mut_ptr(),
-                actor.as_mut_ptr(),
-                null(),
-            );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
         }
     }
 
-    pub fn add_articulation_links(&mut self, actors: Vec<Owner<ArticulationLink<L, H, M>>>) {
+    /// Add an articulation link to the world.
+    pub fn add_articulation_link(&mut self, mut actor: Owner<ArticulationLink<L, H, M>>) {
+        unsafe {
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.as_mut_ptr(), null());
+            forget(actor);
+        }
+    }
+
+    /// Add articulation links to the world.
+    pub fn add_articulation_links(&mut self, mut actors: Vec<Owner<ArticulationLink<L, H, M>>>) {
         unsafe {
             PxScene_addActors_mut(
                 self.as_mut_ptr(),
                 actors.as_ptr() as *const *mut _,
-                actors.len() as u32
+                actors.len() as u32,
             );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
         }
     }
 
@@ -337,30 +339,33 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         }
     }
 
-    pub unsafe fn remove_actors(&mut self, mut actors:Vec<&mut impl Actor>, wake_touching: bool) {
+    pub unsafe fn remove_actors(&mut self, mut actors: Vec<&mut impl Actor>, wake_touching: bool) {
         PxScene_removeActors_mut(
             self.as_mut_ptr(),
-            actors.iter_mut().map(
-                    |actor|
-                    actor.as_mut_ptr()
-                ).collect::<Vec<_>>().as_ptr(),
+            actors
+                .iter_mut()
+                .map(|actor| actor.as_mut_ptr())
+                .collect::<Vec<_>>()
+                .as_ptr(),
             actors.len() as u32,
-            wake_touching
+            wake_touching,
         );
     }
 
-    /// Add a articulation to the world.
+    /// Add an articulation to the world.
     pub fn add_articulation(&mut self, mut articulation: Owner<impl ArticulationBase<L, H, M>>) {
         unsafe {
-            PxScene_addArticulation_mut(
-                self.as_mut_ptr(),
-                articulation.as_mut_ptr(),
-            );
+            PxScene_addArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr());
+            forget(articulation);
         };
     }
 
     /// Remove an articulation from the world
-    pub fn remove_articulation(&mut self, articulation: &mut impl ArticulationBase<L, H, M>, wake_touching: bool) {
+    pub fn remove_articulation(
+        &mut self,
+        articulation: &mut impl ArticulationBase<L, H, M>,
+        wake_touching: bool,
+    ) {
         unsafe {
             PxScene_removeArticulation_mut(
                 self.as_mut_ptr(),
@@ -372,42 +377,38 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
 
     pub fn add_aggregate(&mut self, mut aggregate: Owner<Aggregate<L, S, D, H, M>>) {
         unsafe {
-            PxScene_addAggregate_mut(
-                self.as_mut_ptr(),
-                aggregate.as_mut_ptr()
-            );
+            PxScene_addAggregate_mut(self.as_mut_ptr(), aggregate.as_mut_ptr());
+            forget(aggregate);
         }
     }
 
-    pub fn remove_aggregate(&mut self, aggregate: &mut Aggregate<L, S, D, H, M>, wake_touching: bool) {
+    pub fn remove_aggregate(
+        &mut self,
+        aggregate: &mut Aggregate<L, S, D, H, M>,
+        wake_touching: bool,
+    ) {
         unsafe {
-            PxScene_removeAggregate_mut(
-                self.as_mut_ptr(),
-                aggregate.as_mut_ptr(),
-                wake_touching
-            );
+            PxScene_removeAggregate_mut(self.as_mut_ptr(), aggregate.as_mut_ptr(), wake_touching);
         }
     }
 
-/* TODO implement Collection and the rest of the serialization pipeline
-    fn add_collection(&mut self, collection: &PxCollection) {
-        unsafe {
-            PxScene_addCollection_mut(
-                self.as_mut_ptr(),
-                collection
-            );
+    /* TODO implement Collection and the rest of the serialization pipeline
+        fn add_collection(&mut self, collection: &PxCollection) {
+            unsafe {
+                PxScene_addCollection_mut(
+                    self.as_mut_ptr(),
+                    collection
+                );
+            }
         }
-    }
-*/
+    */
 
     // TODO implement PruningStructure trait
     pub fn add_pruning_structure(&mut self, mut pruning_structure: Owner<PruningStructure>) {
         unsafe {
-            PxScene_addActors_mut_1(
-                self.as_mut_ptr(),
-                pruning_structure.as_mut_ptr()
-            )
+            PxScene_addActors_mut_1(self.as_mut_ptr(), pruning_structure.as_mut_ptr());
         }
+        forget(pruning_structure);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -427,7 +428,10 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         };
 
         let (scratch_ptr, scratch_size) = if let Some(scratch) = scratch {
-            (scratch.as_mut_ptr() as *mut std::ffi::c_void, (scratch.len() * 16_384) as u32)
+            (
+                scratch.as_mut_ptr() as *mut std::ffi::c_void,
+                (scratch.len() * 16_384) as u32,
+            )
         } else {
             (null_mut(), 0)
         };
@@ -464,7 +468,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         completion_task: Option<&mut PxBaseTask>,
         // scratch memory must be 16-align, 16K blocks
         scratch: Option<&mut [[(u64, u64); 1024]]>,
-        block: bool
+        block: bool,
     ) -> Result<(), u32> {
         self.simulate(time_step, completion_task, scratch);
         self.fetch_results(block)
@@ -507,7 +511,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         let filter_data = &physx_sys::PxQueryFilterData_new_2(
             physx_sys::PxQueryFlags{mBits: physx_sys::PxQueryFlag::eDYNAMIC as u16}
         );
-        
+
         dbg!("hi");
         if PxScene_raycast(
             self.as_ptr(),
@@ -609,43 +613,54 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     /// PhysX after running a simulation step along with [get_actors], [get_active_actors], and [get_aggregates].
     pub unsafe fn get_articulations(&mut self) -> Vec<&mut ArticulationMap<T, C, L, H, M>> {
         let capacity = PxScene_getNbArticulations(self.as_ptr());
-        let mut buffer: Vec<&mut ArticulationMap<T, C, L, H, M>> = Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&mut ArticulationMap<T, C, L, H, M>> =
+            Vec::with_capacity(capacity as usize);
         let len = PxScene_getArticulations(
             self.as_ptr(),
             buffer.as_mut_ptr() as *mut *mut _,
             capacity,
-            0
+            0,
         );
         buffer.set_len(len as usize);
         buffer
     }
 
-    pub unsafe fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<&mut ActorMap<L, S, D, H, M>> {
-        let flags = actor_type.into_px();
-        let capacity = PxScene_getNbActors(self.as_ptr(), flags);
-        let mut buffer: Vec<&mut ActorMap<L, S, D, H, M>> = Vec::with_capacity(capacity as usize);
-        let len = PxScene_getActors(
-            self.as_ptr(),
-            flags,
-            buffer.as_mut_ptr() as *mut *mut _,
-            capacity,
-            0
-        );
-        buffer.set_len(len as usize);
-        buffer
+    pub fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<&mut ActorMap<L, S, D, H, M>> {
+        unsafe {
+            let flags = actor_type.into_px();
+            let capacity = PxScene_getNbActors(self.as_ptr(), flags);
+            let mut buffer: Vec<&mut ActorMap<L, S, D, H, M>> =
+                Vec::with_capacity(capacity as usize);
+            let len = PxScene_getActors(
+                self.as_ptr(),
+                flags,
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
     }
 
-    pub fn get_active_actors(&mut self) -> &mut[&mut ActorMap<L, S, D, H, M>] {
+    // This cannot return a Vec.  Vec has specific allocation/alignment requirements
+    // that the C++-allocated buffer does not meet, and dropping the fake vec causes a crash.
+    pub fn get_active_actors(&mut self) -> &mut [&mut ActorMap<L, S, D, H, M>] {
         unsafe {
             let mut length = 0;
             let actors = PxScene_getActiveActors_mut(self.as_mut_ptr(), &mut length);
-            std::slice::from_raw_parts_mut(actors as *mut &mut ActorMap<L, S, D, H, M>, length as usize)
+            std::slice::from_raw_parts_mut(
+                actors as *mut &mut ActorMap<L, S, D, H, M>,
+                length as usize,
+            )
         }
     }
 
     pub fn get_static_actors(&mut self) -> Vec<&mut RigidStatic<S, H, M>> {
         unsafe {
-            let flags = PxActorTypeFlags{mBits: ActorTypeFlag::RigidStatic as u16};
+            let flags = PxActorTypeFlags {
+                mBits: ActorTypeFlag::RigidStatic as u16,
+            };
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
             let mut buffer: Vec<&mut RigidStatic<S, H, M>> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
@@ -653,17 +668,18 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
                 flags,
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
         }
     }
 
-    /// Safety: `U` must be the same user data type as the actors were instantiated with.
     pub fn get_dynamic_actors(&mut self) -> Vec<&mut RigidDynamic<D, H, M>> {
         unsafe {
-            let flags = PxActorTypeFlags{mBits: ActorTypeFlag::RigidDynamic as u16};
+            let flags = PxActorTypeFlags {
+                mBits: ActorTypeFlag::RigidDynamic as u16,
+            };
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
             let mut buffer: Vec<&mut RigidDynamic<D, H, M>> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
@@ -671,7 +687,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
                 flags,
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -686,7 +702,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut physx_sys::PxAggregate,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -701,7 +717,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut physx_sys::PxConstraint,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -711,22 +727,18 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     //////////////////////////////////////////////////////////////////////////
     // Callbacks
 
-    pub fn set_simulation_event_callback(
-        &mut self,
-        callbacks: &SimulationEventCallbackInfo,
-    ) {
+    pub fn set_simulation_event_callback(&mut self, callbacks: &SimulationEventCallbackInfo) {
         unsafe {
             let callback = create_simulation_event_callbacks(&*callbacks);
-            PxScene_setSimulationEventCallback_mut(
-                self.as_mut_ptr(),
-                &mut *callback,
-            );
+            PxScene_setSimulationEventCallback_mut(self.as_mut_ptr(), &mut *callback);
         }
     }
 
     pub fn get_simulation_event_callbacks(&self) -> Option<&PxSimulationEventCallback> {
-        unsafe {PxSimulationEventCallback::from_raw(PxScene_getSimulationEventCallback(self.as_ptr()))}
-        .map(|mut_ref|&*mut_ref)
+        unsafe {
+            (PxScene_getSimulationEventCallback(self.as_ptr()) as *const PxSimulationEventCallback)
+                .as_ref()
+        }
     }
 
     pub unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
@@ -737,7 +749,10 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         &*PxScene_getContactModifyCallback(self.as_ptr())
     }
 
-    pub unsafe fn set_ccd_contact_modify_callback(&mut self, callback: &mut PxCCDContactModifyCallback) {
+    pub unsafe fn set_ccd_contact_modify_callback(
+        &mut self,
+        callback: &mut PxCCDContactModifyCallback,
+    ) {
         PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
     }
 
@@ -761,31 +776,30 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         PxScene_setFilterShaderData_mut(
             self.as_mut_ptr(),
             data.as_ptr() as *const std::ffi::c_void,
-            data.len() as u32
+            data.len() as u32,
         );
     }
 
-    // TODO if this was typed, it would be a much friendlier interface :)
     pub unsafe fn get_filter_shader_data(&self) -> &[u8] {
         std::slice::from_raw_parts(
             PxScene_getFilterShaderData(self.as_ptr()) as *const u8,
-            PxScene_getFilterShaderDataSize(self.as_ptr()) as usize
+            PxScene_getFilterShaderDataSize(self.as_ptr()) as usize,
         )
     }
 
     /* TODO this returns a function pointer, which still needs to have a type defined that is inline with the C++
     // definition:
     typedef PxFilterFlags (*PxSimulationFilterShader)
-	(PxFilterObjectAttributes attributes0, PxFilterData filterData0, 
-	 PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+    (PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+     PxFilterObjectAttributes attributes1, PxFilterData filterData1,
      PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize);
-    
+
     unsafe fn get_filter_shader(&self) -> PxSimulationFilterShader {
         PxScene_getFilterShader(self.as_ptr())
     }
     */
 
-    pub unsafe fn get_filter_callback(&self)-> &PxSimulationFilterCallback {
+    pub unsafe fn get_filter_callback(&self) -> &PxSimulationFilterCallback {
         &*PxScene_getFilterCallback(self.as_ptr())
     }
 
@@ -796,13 +810,13 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     pub unsafe fn reset_rigid_actor_filtering(
         &mut self,
         actor: &mut impl RigidActor<H, M>,
-        shapes: &[&mut Shape<H, M>]
+        shapes: &[&mut Shape<H, M>],
     ) {
         PxScene_resetFiltering_mut_1(
             self.as_mut_ptr(),
             actor.as_mut_ptr(),
             shapes.as_ptr() as *const *mut physx_sys::PxShape,
-            shapes.len() as u32
+            shapes.len() as u32,
         );
     }
 
@@ -815,8 +829,14 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     }
 }
 
-unsafe impl<U: Send, L: Send, S: Send, D: Send, M: Send, H: Send, T: Send, C: Send> Send for Scene<U, L, S, D, M, H, T, C> {}
-unsafe impl<U: Sync, L: Sync, S: Sync, D: Sync, M: Sync, H: Sync, T: Sync, C: Sync> Sync for Scene<U, L, S, D, M, H, T, C> {}
+unsafe impl<U: Send, L: Send, S: Send, D: Send, M: Send, H: Send, T: Send, C: Send> Send
+    for Scene<U, L, S, D, M, H, T, C>
+{
+}
+unsafe impl<U: Sync, L: Sync, S: Sync, D: Sync, M: Sync, H: Sync, T: Sync, C: Sync> Sync
+    for Scene<U, L, S, D, M, H, T, C>
+{
+}
 
 impl<U, L, S, D, M, H, T, C> Drop for Scene<U, L, S, D, M, H, T, C> {
     fn drop(&mut self) {
@@ -831,17 +851,17 @@ pub struct PxSimulationEventCallback {
     obj: physx_sys::PxSimulationEventCallback,
 }
 
-crate::ClassObj!(PxSimulationEventCallback : PxSimulationEventCallback);
+crate::ClassObj!(PxSimulationEventCallback: PxSimulationEventCallback);
 
 impl PxSimulationEventCallback {
-    fn new<'a>(callbacks: SimulationEventCallbackInfo) -> Option<&'a mut Self> {
-        unsafe {
-            Self::from_raw(create_simulation_event_callbacks(&callbacks))
-        }
+    fn new(callbacks: SimulationEventCallbackInfo) -> Option<Owner<Self>> {
+        unsafe { Self::from_raw(create_simulation_event_callbacks(&callbacks)) }
     }
 
-    unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxSimulationEventCallback) -> Option<&'a mut PxSimulationEventCallback> {
-        (ptr as *mut Self).as_mut()
+    unsafe fn from_raw(
+        ptr: *mut physx_sys::PxSimulationEventCallback,
+    ) -> Option<Owner<PxSimulationEventCallback>> {
+        Owner::from_raw(ptr as *mut Self)
     }
 }
 
@@ -899,7 +919,7 @@ impl From<PxPruningStructureType::Enum> for PruningStructureType {
             PxPruningStructureType::eNONE => PruningStructureType::None,
             PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAABBTree,
             PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAABBTree,
-            _ => unimplemented!("Invalid enum variant.")
+            _ => unimplemented!("Invalid enum variant."),
         }
     }
 }
@@ -936,7 +956,7 @@ impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
             PxPairFilteringMode::eKILL => PairFilteringMode::Kill,
             // eDEFAULT has the same integer value as eSUPPRESS so it will get caught by that branch
             //PxPairFilteringMode::eDEFAULT => PairFilteringMode::Suppress,
-            _ => unimplemented!("Invalid enum variant.")
+            _ => unimplemented!("Invalid enum variant."),
         }
     }
 }
@@ -957,6 +977,22 @@ impl Into<PxBroadPhaseType::Enum> for BroadPhaseType {
             BroadPhaseType::MultiBoxPruning => 1,
             BroadPhaseType::AutomaticBoxPruning => 2,
             BroadPhaseType::GPU => 3,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]
+pub enum SolverType {
+    PGS = 1,
+    TGS = 2,
+}
+
+impl Into<PxSolverType::Enum> for SolverType {
+    fn into(self) -> PxSolverType::Enum {
+        match self {
+            SolverType::PGS => PxSolverType::ePGS,
+            SolverType::TGS => PxSolverType::eTGS,
         }
     }
 }
@@ -1002,7 +1038,7 @@ pub struct SceneDescriptor<E, L, S, D, T, C> {
         S, // RigidStatic user data
         D, // RigidDynamic user data
         T, // Articulation user data
-        C  // ArticulationReducedCoordinate user data
+        C, // ArticulationReducedCoordinate user data
     )>,
 }
 
@@ -1111,29 +1147,25 @@ impl<E, L, S, D, T, C> SceneDescriptor<E, L, S, D, T, C> {
     }
 
     pub(crate) fn into_desc<H, M>(self, physics: &mut Physics<H, M>) -> PxSceneDesc {
-        let mut desc = unsafe {
-            PxSceneDesc_new(physics.get_tolerances_scale().unwrap())
-        };
+        let mut desc = unsafe { PxSceneDesc_new(physics.get_tolerances_scale().unwrap()) };
 
         desc.cpuDispatcher = match self.simulation_threading {
-            SimulationThreadType::Default => {
-                unsafe {
-                    phys_PxDefaultCpuDispatcherCreate(1, null_mut()) as *mut _
-                }
-            }
-            SimulationThreadType::Dedicated(count) => {
-                unsafe {
-                    phys_PxDefaultCpuDispatcherCreate(count, null_mut()) as *mut _
-                }
-            }
+            SimulationThreadType::Default => unsafe {
+                phys_PxDefaultCpuDispatcherCreate(1, null_mut()) as *mut _
+            },
+            SimulationThreadType::Dedicated(count) => unsafe {
+                phys_PxDefaultCpuDispatcherCreate(count, null_mut()) as *mut _
+            },
             SimulationThreadType::Shared(dispatcher) => dispatcher,
         };
         desc.gravity = self.gravity.into();
-        desc.flags = PxSceneFlags{mBits: self.scene_flags.bits()};
+        desc.flags = PxSceneFlags {
+            mBits: self.scene_flags.bits(),
+        };
         desc.simulationEventCallback = {
             PxSimulationEventCallback::new(self.simulation_event_callback)
-            .expect("Simulation event callback creation returned a null pointer.")
-            as *mut PxSimulationEventCallback as *mut physx_sys::PxSimulationEventCallback
+                .expect("Simulation event callback creation returned a null pointer.")
+                .as_mut_ptr() as *mut physx_sys::PxSimulationEventCallback
         };
         unsafe {
             desc.filterShader = get_default_simulation_filter_shader();
@@ -1141,12 +1173,12 @@ impl<E, L, S, D, T, C> SceneDescriptor<E, L, S, D, T, C> {
                 // Too big to pack into a *mut c_void, kick it to the heap.
                 let data = Box::new(self.scene_user_data);
                 Box::into_raw(data) as *mut c_void
-    
-            } else { // DATA_SIZE < VOID_SIZE
+            } else {
+                // DATA_SIZE < VOID_SIZE
                 *(&self.scene_user_data as *const E as *const *mut c_void)
             }
         }
-        
+
         desc
     }
 }

@@ -1,12 +1,11 @@
 use crate::{
-    traits::Class,
-    owner::Owner,
     controller::{CapsuleController, CapsuleControllerDescriptor},
+    owner::Owner,
+    traits::Class,
 };
 
 use physx_sys::{
-    PxControllerManager_createController_mut,
-    PxControllerManager_purgeControllers_mut,
+    PxControllerManager_createController_mut, PxControllerManager_purgeControllers_mut,
     PxControllerManager_release_mut,
 };
 
@@ -15,24 +14,24 @@ pub struct ControllerManager {
     obj: physx_sys::PxControllerManager,
 }
 
-crate::ClassObj!(ControllerManager : PxControllerManager);
+crate::ClassObj!(ControllerManager: PxControllerManager);
 
 impl ControllerManager {
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxControllerManager) -> Option<Owner<ControllerManager>> {
+    pub(crate) unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxControllerManager,
+    ) -> Option<Owner<ControllerManager>> {
         Owner::from_raw(ptr as *mut Self)
     }
 
     pub fn create_capsule_controller<'a, U, M>(
         &mut self,
-        desc: CapsuleControllerDescriptor<'a, U, M>
+        desc: CapsuleControllerDescriptor<'a, U, M>,
     ) -> Option<Owner<CapsuleController<U>>> {
         unsafe {
-            CapsuleController::from_raw(
-                PxControllerManager_createController_mut(
-                    self.as_mut_ptr(),
-                    desc.into_desc()?.as_ptr(),
-                ) as *mut _
-            )
+            CapsuleController::from_raw(PxControllerManager_createController_mut(
+                self.as_mut_ptr(),
+                desc.into_desc()?.as_ptr(),
+            ) as *mut _)
         }
     }
 }

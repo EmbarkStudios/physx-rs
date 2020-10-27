@@ -9,48 +9,28 @@
 */
 use crate::{
     math::{PxTransform, PxVec3},
-    traits::{Class, PxFlags},
     rigid_actor::RigidActor,
+    traits::{Class, PxFlags},
 };
 use enumflags2::BitFlags;
 
 use physx_sys::{
-    PxRigidBody,
-    PxForceMode, PxRigidBodyFlag, PxRigidBodyFlags,
-    PxRigidBody_addForce_mut,
-    PxRigidBody_addTorque_mut,
-    PxRigidBody_clearForce_mut,
-    PxRigidBody_clearTorque_mut,
-    PxRigidBody_getAngularDamping,
-    PxRigidBody_getAngularVelocity,
-    PxRigidBody_getCMassLocalPose,
-    PxRigidBody_getInvMass,
-    PxRigidBody_getLinearDamping,
-    PxRigidBody_getLinearVelocity,
-    PxRigidBody_getMass,
-    PxRigidBody_getMassSpaceInertiaTensor,
-    PxRigidBody_getMassSpaceInvInertiaTensor,
-    PxRigidBody_getMaxAngularVelocity,
-    PxRigidBody_getMaxContactImpulse,
-    PxRigidBody_getMaxDepenetrationVelocity,
-    PxRigidBody_getMaxLinearVelocity,
-    PxRigidBody_getMinCCDAdvanceCoefficient,
-    PxRigidBody_getRigidBodyFlags,
-    PxRigidBody_setAngularDamping_mut,
-    PxRigidBody_setAngularVelocity_mut,
-    PxRigidBody_setCMassLocalPose_mut,
-    PxRigidBody_setForceAndTorque_mut,
-    PxRigidBody_setLinearDamping_mut,
-    PxRigidBody_setLinearVelocity_mut,
-    PxRigidBody_setMassSpaceInertiaTensor_mut,
-    PxRigidBody_setMass_mut,
-    PxRigidBody_setMaxAngularVelocity_mut,
-    PxRigidBody_setMaxContactImpulse_mut,
-    PxRigidBody_setMaxDepenetrationVelocity_mut,
-    PxRigidBody_setMaxLinearVelocity_mut,
-    PxRigidBody_setMinCCDAdvanceCoefficient_mut,
-    PxRigidBody_setRigidBodyFlag_mut,
-    PxRigidBody_setRigidBodyFlags_mut,
+    PxForceMode, PxRigidBody, PxRigidBodyFlag, PxRigidBodyFlags, PxRigidBody_addForce_mut,
+    PxRigidBody_addTorque_mut, PxRigidBody_clearForce_mut, PxRigidBody_clearTorque_mut,
+    PxRigidBody_getAngularDamping, PxRigidBody_getAngularVelocity, PxRigidBody_getCMassLocalPose,
+    PxRigidBody_getInvMass, PxRigidBody_getLinearDamping, PxRigidBody_getLinearVelocity,
+    PxRigidBody_getMass, PxRigidBody_getMassSpaceInertiaTensor,
+    PxRigidBody_getMassSpaceInvInertiaTensor, PxRigidBody_getMaxAngularVelocity,
+    PxRigidBody_getMaxContactImpulse, PxRigidBody_getMaxDepenetrationVelocity,
+    PxRigidBody_getMaxLinearVelocity, PxRigidBody_getMinCCDAdvanceCoefficient,
+    PxRigidBody_getRigidBodyFlags, PxRigidBody_setAngularDamping_mut,
+    PxRigidBody_setAngularVelocity_mut, PxRigidBody_setCMassLocalPose_mut,
+    PxRigidBody_setForceAndTorque_mut, PxRigidBody_setLinearDamping_mut,
+    PxRigidBody_setLinearVelocity_mut, PxRigidBody_setMassSpaceInertiaTensor_mut,
+    PxRigidBody_setMass_mut, PxRigidBody_setMaxAngularVelocity_mut,
+    PxRigidBody_setMaxContactImpulse_mut, PxRigidBody_setMaxDepenetrationVelocity_mut,
+    PxRigidBody_setMaxLinearVelocity_mut, PxRigidBody_setMinCCDAdvanceCoefficient_mut,
+    PxRigidBody_setRigidBodyFlag_mut, PxRigidBody_setRigidBodyFlags_mut,
 };
 
 /*******************************************************************************
@@ -145,7 +125,6 @@ impl From<PxForceMode::Enum> for ForceMode {
     }
 }
 
-//impl <T, H, M> RigidBody<H, M> for T where T: Class<PxRigidBody> + RigidActor<H, M> {}
 pub trait RigidBody<H, M>: Class<PxRigidBody> + RigidActor<H, M> {
     /// Set the mass of this body
     fn set_mass(&mut self, mass: f32) {
@@ -212,15 +191,11 @@ pub trait RigidBody<H, M>: Class<PxRigidBody> + RigidActor<H, M> {
     }
 
     fn set_linear_velocity(&mut self, lin_vel: &PxVec3, autowake: bool) {
-        unsafe {
-            PxRigidBody_setLinearVelocity_mut(self.as_mut_ptr(), lin_vel.as_ptr(), autowake)
-        }
+        unsafe { PxRigidBody_setLinearVelocity_mut(self.as_mut_ptr(), lin_vel.as_ptr(), autowake) }
     }
 
     fn set_angular_velocity(&mut self, ang_vel: &PxVec3, autowake: bool) {
-        unsafe {
-            PxRigidBody_setAngularVelocity_mut(self.as_mut_ptr(), ang_vel.as_ptr(), autowake)
-        }
+        unsafe { PxRigidBody_setAngularVelocity_mut(self.as_mut_ptr(), ang_vel.as_ptr(), autowake) }
     }
 
     fn set_max_angular_velocity(&mut self, max_ang_vel: f32) {
@@ -241,23 +216,13 @@ pub trait RigidBody<H, M>: Class<PxRigidBody> + RigidActor<H, M> {
 
     fn add_force(&mut self, force: &PxVec3, mode: ForceMode, autowake: bool) {
         unsafe {
-            PxRigidBody_addForce_mut(
-                self.as_mut_ptr(),
-                force.as_ptr(),
-                mode.into(),
-                autowake,
-            )
+            PxRigidBody_addForce_mut(self.as_mut_ptr(), force.as_ptr(), mode.into(), autowake)
         }
     }
 
     fn add_torque(&mut self, torque: &PxVec3, mode: ForceMode, autowake: bool) {
         unsafe {
-            PxRigidBody_addTorque_mut(
-                self.as_mut_ptr(),
-                torque.as_ptr(),
-                mode.into(),
-                autowake,
-            )
+            PxRigidBody_addTorque_mut(self.as_mut_ptr(), torque.as_ptr(), mode.into(), autowake)
         }
     }
 
@@ -285,18 +250,11 @@ pub trait RigidBody<H, M>: Class<PxRigidBody> + RigidActor<H, M> {
     }
 
     fn set_rigid_body_flags(&mut self, flags: RigidBodyFlags) {
-        unsafe {
-            PxRigidBody_setRigidBodyFlags_mut(
-                self.as_mut_ptr(),
-                flags.into_px(),
-            )
-        }
+        unsafe { PxRigidBody_setRigidBodyFlags_mut(self.as_mut_ptr(), flags.into_px()) }
     }
 
     fn get_rigid_body_flags(&self) -> RigidBodyFlags {
-        unsafe {
-            RigidBodyFlags::from_px(PxRigidBody_getRigidBodyFlags(self.as_ptr()))
-        }
+        unsafe { RigidBodyFlags::from_px(PxRigidBody_getRigidBodyFlags(self.as_ptr())) }
     }
 
     fn set_min_ccd_advance_coefficient(&mut self, advance_coefficient: f32) {

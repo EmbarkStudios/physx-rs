@@ -11,10 +11,10 @@ Trait for RigidActor
 use super::{
     actor::Actor,
     constraint::Constraint,
-    traits::Class,
+    math::{PxQuat, PxTransform, PxVec3},
     shape::CollisionLayer,
     shape::Shape,
-    math::{PxTransform, PxQuat, PxVec3},
+    traits::Class,
 };
 use enumflags2::BitFlags;
 
@@ -24,16 +24,15 @@ use physx_sys::{
     //PxContactPairPoint,
     PxRigidActor_attachShape_mut,
     PxRigidActor_detachShape_mut,
-    PxRigidActor_getShapes,
-    PxRigidActor_getNbShapes,
     PxRigidActor_getConstraints,
-    PxRigidActor_getNbConstraints,
     PxRigidActor_getGlobalPose,
+    PxRigidActor_getNbConstraints,
+    PxRigidActor_getNbShapes,
+    PxRigidActor_getShapes,
     PxRigidActor_setGlobalPose_mut,
-    //PxRigidActor_release_mut,  isn't PxRigidActor a non-instantiable super-class? is this needed?
+    //PxRigidActor_release_mut,
 };
 
-//impl <T, H, M> RigidActor<H, M> for T where T: Class<PxRigidActor> + Actor {}
 pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
     fn get_nb_constraints(&self) -> u32 {
         unsafe { PxRigidActor_getNbConstraints(self.as_ptr()) }
@@ -47,7 +46,7 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
         }
@@ -65,9 +64,7 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
     }
 
     fn get_global_rotation(&self) -> PxQuat {
-        unsafe {
-            PxRigidActor_getGlobalPose(self.as_ptr()).q.into()
-        }
+        unsafe { PxRigidActor_getGlobalPose(self.as_ptr()).q.into() }
     }
 
     /// Set the global pose of this rigid actor
@@ -83,7 +80,23 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
     }
 
     /// Get a reference to every Shape attached to this actor.
-    fn get_shapes(&mut self) -> Vec<&mut Shape<H, M>> {
+    fn get_shapes(&self) -> Vec<&Shape<H, M>> {
+        let capacity = self.get_nb_shapes();
+        let mut buffer: Vec<&Shape<H, M>> = Vec::with_capacity(capacity as usize);
+        unsafe {
+            let len = PxRigidActor_getShapes(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+        }
+        buffer
+    }
+
+    /// Get a mutable reference to every Shape attached to this actor.
+    fn get_shapes_mut(&mut self) -> Vec<&mut Shape<H, M>> {
         let capacity = self.get_nb_shapes();
         let mut buffer: Vec<&mut Shape<H, M>> = Vec::with_capacity(capacity as usize);
         unsafe {
@@ -91,7 +104,7 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
         }
@@ -106,22 +119,20 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
         word3: u32,
         word4: u32,
     ) {
-        for shape in self.get_shapes() {
+        for shape in self.get_shapes_mut() {
             shape.set_simulation_filter_data(this_layers, other_layers, word3, word4);
         }
     }
 
     /// Set the query filter. Queries will only find this item if queried with one of the flags.
     fn set_query_filter(&mut self, this_layers: BitFlags<CollisionLayer>) {
-        for shape in self.get_shapes() {
+        for shape in self.get_shapes_mut() {
             shape.set_query_filter_data(this_layers);
         }
     }
 
     fn attach_shape(&mut self, shape: &mut Shape<H, M>) -> bool {
-        unsafe {
-            PxRigidActor_attachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr())
-        }
+        unsafe { PxRigidActor_attachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr()) }
     }
 
     fn detach_shape(&mut self, shape: &mut Shape<H, M>) {

@@ -2,27 +2,20 @@ use crate::{
     articulation_base::ArticulationBase,
     articulation_link::ArticulationLink,
     math::PxVec3,
-    traits::{Class, UserData},
     owner::Owner,
+    traits::{Class, UserData},
 };
 
 use std::marker::PhantomData;
 
 use physx_sys::{
-    PxArticulationDriveCache,
-    PxArticulation_applyImpulse_mut,
-    PxArticulation_computeImpulseResponse,
-    PxArticulation_createDriveCache,
-    PxArticulation_getExternalDriveIterations,
-    PxArticulation_getInternalDriveIterations,
-    PxArticulation_getMaxProjectionIterations,
-    PxArticulation_getSeparationTolerance,
-    PxArticulation_release_mut,
-    PxArticulation_releaseDriveCache,
-    PxArticulation_setExternalDriveIterations_mut,
-    PxArticulation_setInternalDriveIterations_mut,
-    PxArticulation_setMaxProjectionIterations_mut,
-    PxArticulation_setSeparationTolerance_mut,
+    PxArticulationDriveCache, PxArticulation_applyImpulse_mut,
+    PxArticulation_computeImpulseResponse, PxArticulation_createDriveCache,
+    PxArticulation_getExternalDriveIterations, PxArticulation_getInternalDriveIterations,
+    PxArticulation_getMaxProjectionIterations, PxArticulation_getSeparationTolerance,
+    PxArticulation_releaseDriveCache, PxArticulation_release_mut,
+    PxArticulation_setExternalDriveIterations_mut, PxArticulation_setInternalDriveIterations_mut,
+    PxArticulation_setMaxProjectionIterations_mut, PxArticulation_setSeparationTolerance_mut,
     PxArticulation_updateDriveCache,
 };
 
@@ -38,7 +31,10 @@ pub struct Articulation<U, L, H, M> {
 }
 
 impl<U, L, H, M> ArticulationBase<L, H, M> for Articulation<U, L, H, M> {}
-unsafe impl<S, U, L, H, M> Class<S> for Articulation<U, L, H, M> where physx_sys::PxArticulation: Class<S> {
+unsafe impl<S, U, L, H, M> Class<S> for Articulation<U, L, H, M>
+where
+    physx_sys::PxArticulation: Class<S>,
+{
     fn as_ptr(&self) -> *const S {
         self.obj.as_ptr()
     }
@@ -49,7 +45,10 @@ unsafe impl<S, U, L, H, M> Class<S> for Articulation<U, L, H, M> where physx_sys
 }
 
 impl<U, L, H, M> Articulation<U, L, H, M> {
-    pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxArticulation, user_data: U) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw(
+        ptr: *mut physx_sys::PxArticulation,
+        user_data: U,
+    ) -> Option<Owner<Self>> {
         Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 
@@ -86,7 +85,7 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
         link: &mut ArticulationLink<L, H, M>,
         cache: &PxArticulationDriveCache,
         linear_impulse: &PxVec3,
-        angular_impulse: &PxVec3
+        angular_impulse: &PxVec3,
     ) -> ImpulseResponse {
         unsafe {
             let mut angular = PxVec3::default();
@@ -100,81 +99,63 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
                 linear_impulse.as_ptr(),
                 angular_impulse.as_ptr(),
             );
-            ImpulseResponse{
-                angular,
-                linear,
-            }
+            ImpulseResponse { angular, linear }
         }
     }
 
-    pub fn create_drive_cache(&self, compliance: f32, drive_iterations: u32) -> Option<&mut PxArticulationDriveCache> {
+    pub fn create_drive_cache(
+        &self,
+        compliance: f32,
+        drive_iterations: u32,
+    ) -> Option<&mut PxArticulationDriveCache> {
         unsafe {
-            PxArticulation_createDriveCache(
-                self.as_ptr(),
-                compliance,
-                drive_iterations
-            ).as_mut()
+            PxArticulation_createDriveCache(self.as_ptr(), compliance, drive_iterations).as_mut()
         }
     }
 
-    pub fn update_drive_cache(&self, cache: &mut PxArticulationDriveCache, compliance: f32, iterations: u32) {
-        unsafe {
-            PxArticulation_updateDriveCache(self.as_ptr(), cache, compliance, iterations)
-        }
+    pub fn update_drive_cache(
+        &self,
+        cache: &mut PxArticulationDriveCache,
+        compliance: f32,
+        iterations: u32,
+    ) {
+        unsafe { PxArticulation_updateDriveCache(self.as_ptr(), cache, compliance, iterations) }
     }
 
     pub fn get_external_drive_iterations(&self) -> u32 {
-        unsafe {
-            PxArticulation_getExternalDriveIterations(self.as_ptr())
-        }
+        unsafe { PxArticulation_getExternalDriveIterations(self.as_ptr()) }
     }
 
     pub fn get_internal_drive_iterations(&self) -> u32 {
-        unsafe {
-            PxArticulation_getInternalDriveIterations(self.as_ptr())
-        }
+        unsafe { PxArticulation_getInternalDriveIterations(self.as_ptr()) }
     }
 
     pub fn get_max_projection_iterations(&self) -> u32 {
-        unsafe {
-            PxArticulation_getMaxProjectionIterations(self.as_ptr())
-        }
+        unsafe { PxArticulation_getMaxProjectionIterations(self.as_ptr()) }
     }
 
     pub fn get_separation_tolerance(&self) -> f32 {
-        unsafe {
-            PxArticulation_getSeparationTolerance(self.as_ptr())
-        }
+        unsafe { PxArticulation_getSeparationTolerance(self.as_ptr()) }
     }
 
     pub fn release_drive_cache(&self, cache: &mut PxArticulationDriveCache) {
-        unsafe {
-            PxArticulation_releaseDriveCache(self.as_ptr(), cache) 
-        }
+        unsafe { PxArticulation_releaseDriveCache(self.as_ptr(), cache) }
     }
 
     pub fn set_external_drive_iterations(&mut self, iterations: u32) {
-        unsafe {
-            PxArticulation_setExternalDriveIterations_mut(self.as_mut_ptr(),iterations)
-        }
+        unsafe { PxArticulation_setExternalDriveIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
     pub fn set_internal_drive_iterations(&mut self, iterations: u32) {
-        unsafe {
-            PxArticulation_setInternalDriveIterations_mut(self.as_mut_ptr(), iterations)
-        }
+        unsafe { PxArticulation_setInternalDriveIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
     pub fn set_max_projection_iterations(&mut self, iterations: u32) {
-        unsafe {
-            PxArticulation_setMaxProjectionIterations_mut(self.as_mut_ptr(), iterations)
-        }
+        unsafe { PxArticulation_setMaxProjectionIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
     pub fn set_separation_tolerance(&mut self, tolerance: f32) {
-        unsafe {
-            PxArticulation_setSeparationTolerance_mut(self.as_mut_ptr(), tolerance)
-        }
+        unsafe { PxArticulation_setSeparationTolerance_mut(self.as_mut_ptr(), tolerance) }
     }
 }
 
@@ -188,8 +169,6 @@ impl<U, L, H, M> Drop for Articulation<U, L, H, M> {
             drop(link);
         }
         drop(self.get_user_data_mut());
-        unsafe {
-            PxArticulation_release_mut(self.as_mut_ptr())
-        }
+        unsafe { PxArticulation_release_mut(self.as_mut_ptr()) }
     }
 }

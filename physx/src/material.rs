@@ -11,10 +11,10 @@ use physx_sys::{
     PxCombineMode,
     PxMaterialFlags,
     PxMaterial_acquireReference_mut,
-    PxMaterial_getReferenceCount,
     PxMaterial_getDynamicFriction,
     PxMaterial_getFlags,
     PxMaterial_getFrictionCombineMode,
+    PxMaterial_getReferenceCount,
     PxMaterial_getRestitution,
     PxMaterial_getRestitutionCombineMode,
     PxMaterial_getStaticFriction,
@@ -23,8 +23,8 @@ use physx_sys::{
     PxMaterial_setFlag_mut,
     PxMaterial_setFlags_mut,
     PxMaterial_setFrictionCombineMode_mut,
-    PxMaterial_setRestitution_mut,
     PxMaterial_setRestitutionCombineMode_mut,
+    PxMaterial_setRestitution_mut,
     PxMaterial_setStaticFriction_mut,
     //PxMaterial_getConcreteTypeName,
 };
@@ -57,7 +57,7 @@ impl From<PxCombineMode::Enum> for CombineMode {
             PxCombineMode::eMIN => CombineMode::Min,
             PxCombineMode::eMULTIPLY => CombineMode::Multiply,
             PxCombineMode::eMAX => CombineMode::Max,
-            _ => unimplemented!("Invalid enum variant: {:?}.", mode)
+            _ => unimplemented!("Invalid enum variant: {:?}.", mode),
         }
     }
 }
@@ -68,7 +68,10 @@ pub struct Material<U> {
     phantom_user_data: PhantomData<U>,
 }
 
-unsafe impl<P, U> Class<P> for Material<U> where physx_sys::PxMaterial: Class<P> {
+unsafe impl<P, U> Class<P> for Material<U>
+where
+    physx_sys::PxMaterial: Class<P>,
+{
     fn as_ptr(&self) -> *const P {
         self.obj.as_ptr()
     }
@@ -79,26 +82,24 @@ unsafe impl<P, U> Class<P> for Material<U> where physx_sys::PxMaterial: Class<P>
 }
 
 impl<U> Material<U> {
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxMaterial, user_data: U) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw<'a>(
+        ptr: *mut physx_sys::PxMaterial,
+        user_data: U,
+    ) -> Option<Owner<Self>> {
         let material = (ptr as *mut Self).as_mut();
         Owner::from_raw(material?.init_user_data(user_data))
     }
 
     pub fn get_user_data(&self) -> &U {
         // Safety: all constructors go through from_raw which calls init_user_data
-        unsafe {
-            UserData::get_user_data(self)
-        }
+        unsafe { UserData::get_user_data(self) }
     }
 
     pub fn get_user_data_mut(&mut self) -> &mut U {
         // Safety: all constructors go through from_raw which calls init_user_data
-        unsafe {
-            UserData::get_user_data_mut(self)
-        }
+        unsafe { UserData::get_user_data_mut(self) }
     }
 
-    
     #[inline]
     pub unsafe fn get_ref_count(&self) -> u32 {
         PxMaterial_getReferenceCount(self.as_ptr())
@@ -106,7 +107,6 @@ impl<U> Material<U> {
 
     #[inline]
     pub unsafe fn acquire_reference(&mut self) {
-        // wtf
         PxMaterial_acquireReference_mut(self.as_mut_ptr())
     }
 
@@ -149,13 +149,15 @@ impl<U> Material<U> {
     pub unsafe fn set_flags(&mut self, flags: MaterialFlags) {
         PxMaterial_setFlags_mut(
             self.as_mut_ptr(),
-            PxMaterialFlags{mBits:flags.bits()},
+            PxMaterialFlags {
+                mBits: flags.bits(),
+            },
         );
     }
 
     #[inline]
     pub unsafe fn get_flags(&self) -> MaterialFlags {
-        let PxMaterialFlags{ mBits } = PxMaterial_getFlags(self.as_ptr());
+        let PxMaterialFlags { mBits } = PxMaterial_getFlags(self.as_ptr());
         BitFlags::new(mBits)
     }
 

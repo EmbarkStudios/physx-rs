@@ -16,51 +16,45 @@ use crate::{
     bvh_structure::BVHStructure,
     constraint::Constraint,
     convex_mesh::ConvexMesh,
-    foundation::Foundation,
+    foundation::{DefaultAllocator, Foundation},
     geometry::Geometry,
     height_field::HeightField,
     material::Material,
-    math::{PxVec3, PxTransform},
+    math::{PxTransform, PxVec3},
     owner::Owner,
     pruning_structure::PruningStructure,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
     rigid_static::RigidStatic,
-    scene::{SceneDescriptor, Scene},
+    scene::{Scene, SceneDescriptor},
     shape::{Shape, ShapeFlags},
     traits::{Class, PxFlags},
     triangle_mesh::TriangleMesh,
     visual_debugger::VisualDebugger,
 };
 
-use std::{
-    ptr::null_mut,
-    marker::PhantomData,
-};
+use std::{marker::PhantomData, ptr::null_mut};
 
 use physx_sys::{
-    // TODO write wrappers and import from them instead
-    PxInputStream,
-    PxConstraintShaderTable,
-    PxConstraintConnector,
-    // TODO move PxTolerancesScale, callbacks and ContactPair stuff to their own files?
-    PxTolerancesScale,
-    PxTolerancesScale_new,
-    FilterShaderCallbackInfo,
-    PxPhysicsInsertionCallback,
-    PxPairFlag,
-    PxFilterFlag,
-    physx_create_physics, // TODO remove this? it just calls through to PxCreatePhysics
+    phys_PxCloseExtensions,
     phys_PxCreatePhysics,
     // TODO implement the extensions interface, move these there isntead of here?
     //phys_PxCreateBasePhysics,  used with extentions
     phys_PxInitExtensions,
-    phys_PxCloseExtensions,
+    physx_create_physics, // TODO remove this? it just calls through to PxCreatePhysics
+    FilterShaderCallbackInfo,
+    PxConstraintConnector,
+    PxConstraintShaderTable,
+    PxFilterFlag,
+    // TODO write wrappers and import from them instead
+    PxInputStream,
+    PxPairFlag,
+    PxPhysicsInsertionCallback,
     // TODO unify creation into `fn create<D: Descriptor<T>>(descriptor: &D) -> Option<&mut T>`
     // or `fn create<T>(descriptor: Descriptor<T>) -> Option<&mut T>`
     PxPhysics_createAggregate_mut,
-    PxPhysics_createArticulation_mut,
     PxPhysics_createArticulationReducedCoordinate_mut,
+    PxPhysics_createArticulation_mut,
     PxPhysics_createBVHStructure_mut,
     PxPhysics_createConstraint_mut,
     PxPhysics_createConvexMesh_mut,
@@ -73,21 +67,21 @@ use physx_sys::{
     PxPhysics_createShape_mut_1,
     PxPhysics_createTriangleMesh_mut,
     PxPhysics_getBVHStructures,
-    PxPhysics_getNbBVHStructures,
     PxPhysics_getConvexMeshes,
-    PxPhysics_getNbConvexMeshes,
     PxPhysics_getHeightFields,
-    PxPhysics_getNbHeightFields,
     PxPhysics_getMaterials,
+    PxPhysics_getNbBVHStructures,
+    PxPhysics_getNbConvexMeshes,
+    PxPhysics_getNbHeightFields,
     PxPhysics_getNbMaterials,
-    PxPhysics_getScenes,
     PxPhysics_getNbScenes,
-    PxPhysics_getShapes,
     PxPhysics_getNbShapes,
-    PxPhysics_getTriangleMeshes,
     PxPhysics_getNbTriangleMeshes,
     PxPhysics_getPhysicsInsertionCallback_mut,
+    PxPhysics_getScenes,
+    PxPhysics_getShapes,
     PxPhysics_getTolerancesScale,
+    PxPhysics_getTriangleMeshes,
     PxPhysics_release_mut,
     //PxPhysics_registerDeletionListener_mut,
     //PxPhysics_registerDeletionListenerObjects_mut,
@@ -95,6 +89,9 @@ use physx_sys::{
     //PxPhysics_unregisterDeletionListenerObjects_mut,
     //PxPhysics_getFoundation_mut, // probably not necessary? also sketch wrt obrm
     // PxPhysics_createShape_mut, PxPhysics_createShape_mut_1 is the same but more
+    // TODO move PxTolerancesScale, callbacks and ContactPair stuff to their own files?
+    PxTolerancesScale,
+    PxTolerancesScale_new,
 };
 
 pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
@@ -143,17 +140,16 @@ pub extern "C" fn simulation_filter_shader(info: *mut FilterShaderCallbackInfo) 
 pub struct PhysicsFoundation<H, M> {
     pub physics: Owner<Physics<H, M>>,
     pub pvd: Option<VisualDebugger>,
-    foundation: Owner<Foundation>,
-    extensions_loaded: bool
+    pub foundation: Owner<Foundation>,
+    extensions_loaded: bool,
 }
 
 impl<H, M> Default for PhysicsFoundation<H, M> {
     fn default() -> Self {
-        let mut foundation = Foundation::new(
-            crate::version(4,1,1))
+        let mut foundation = Foundation::new::<DefaultAllocator>()
             .expect("Create Foundation returned a null pointer");
-        let physics = Physics::new(foundation.as_mut())
-            .expect("Create Physics returned a null pointer.");
+        let physics =
+            Physics::new(foundation.as_mut()).expect("Create Physics returned a null pointer.");
         Self {
             foundation,
             physics,
@@ -166,11 +162,10 @@ impl<H, M> Default for PhysicsFoundation<H, M> {
 impl<H, M> Drop for PhysicsFoundation<H, M> {
     fn drop(&mut self) {
         if self.extensions_loaded {
-            unsafe { phys_PxCloseExtensions(); }
+            unsafe {
+                phys_PxCloseExtensions();
+            }
         };
-        drop(&mut self.physics);
-        drop(&mut self.pvd);
-        drop(&mut self.foundation)
     }
 }
 
@@ -187,10 +182,13 @@ impl<H, M> PhysicsFoundation<H, M> {
 #[repr(transparent)]
 pub struct Physics<H, M> {
     obj: physx_sys::PxPhysics,
-    phantom_user_data: PhantomData<(H, M)>
+    phantom_user_data: PhantomData<(H, M)>,
 }
 
-unsafe impl<T, H, M> Class<T> for Physics<H, M> where physx_sys::PxPhysics: Class<T> {
+unsafe impl<T, H, M> Class<T> for Physics<H, M>
+where
+    physx_sys::PxPhysics: Class<T>,
+{
     fn as_ptr(&self) -> *const T {
         self.obj.as_ptr()
     }
@@ -213,9 +211,7 @@ impl<H, M> Drop for Physics<H, M> {
 
 impl<H, M> Physics<H, M> {
     pub fn new(foundation: &mut Foundation) -> Option<Owner<Self>> {
-        unsafe {
-            Physics::from_raw(physx_create_physics(foundation.as_mut_ptr()))
-        }
+        unsafe { Physics::from_raw(physx_create_physics(foundation.as_mut_ptr())) }
     }
 
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPhysics) -> Option<Owner<Physics<H, M>>> {
@@ -230,55 +226,54 @@ impl<H, M> Physics<H, M> {
         scene_descriptor: SceneDescriptor<E, L, S, D, T, C>,
     ) -> Option<Owner<Scene<E, L, S, D, M, H, T, C>>> {
         let desc = scene_descriptor.into_desc(self);
+        unsafe { Scene::from_raw(PxPhysics_createScene_mut(self.as_mut_ptr(), &desc)) }
+    }
+
+    pub fn create_aggregate<L, S, D>(
+        &mut self,
+        max_size: u32,
+        self_collision: bool,
+    ) -> Option<Owner<Aggregate<L, S, D, H, M>>> {
         unsafe {
-            Scene::from_raw(
-                PxPhysics_createScene_mut(
-                    self.as_mut_ptr(),
-                    &desc
-                )
-            )
+            Aggregate::from_raw(PxPhysics_createAggregate_mut(
+                self.as_mut_ptr(),
+                max_size,
+                self_collision,
+            ))
         }
     }
 
-    pub fn create_aggregate<L, S, D>(&mut self, max_size: u32, self_collision: bool) -> Option<Owner<Aggregate<L, S, D, H, M>>> {
-        unsafe {
-            Aggregate::from_raw(
-                PxPhysics_createAggregate_mut(
-                    self.as_mut_ptr(),
-                    max_size,
-                    self_collision
-                )
-            )
-        }
-    }
-
-    pub fn create_articulation<U, L>(&mut self, user_data: U) -> Option<Owner<Articulation<U, L, H, M>>> {
+    pub fn create_articulation<U, L>(
+        &mut self,
+        user_data: U,
+    ) -> Option<Owner<Articulation<U, L, H, M>>> {
         unsafe {
             Articulation::from_raw(
                 PxPhysics_createArticulation_mut(self.as_mut_ptr()),
-                user_data
+                user_data,
             )
         }
     }
 
     pub fn create_articulation_reduced_coordiante<U, L>(
         &mut self,
-        user_data: U
+        user_data: U,
     ) -> Option<Owner<ArticulationReducedCoordinate<U, L, H, M>>> {
         unsafe {
             ArticulationReducedCoordinate::from_raw(
                 PxPhysics_createArticulationReducedCoordinate_mut(self.as_mut_ptr()),
-                user_data
+                user_data,
             )
         }
     }
 
     /// Missing BVHStructure trait
-    pub fn create_bvh_structure(&mut self, stream: &mut PxInputStream) -> Option<Owner<BVHStructure>> {
+    pub fn create_bvh_structure(
+        &mut self,
+        stream: &mut PxInputStream,
+    ) -> Option<Owner<BVHStructure>> {
         unsafe {
-            BVHStructure::from_raw(
-                PxPhysics_createBVHStructure_mut(self.as_mut_ptr(), stream)
-            )
+            BVHStructure::from_raw(PxPhysics_createBVHStructure_mut(self.as_mut_ptr(), stream))
         }
     }
 
@@ -292,32 +287,27 @@ impl<H, M> Physics<H, M> {
         data_size: u32,
     ) -> Option<Owner<Constraint>> {
         unsafe {
-            Constraint::from_raw(
-                PxPhysics_createConstraint_mut(
-                    self.as_mut_ptr(),
-                    first_actor.as_mut_ptr(),
-                    second_actor.as_mut_ptr(),
-                    connector,
-                    shaders,
-                    data_size
-                )
-            )
+            Constraint::from_raw(PxPhysics_createConstraint_mut(
+                self.as_mut_ptr(),
+                first_actor.as_mut_ptr(),
+                second_actor.as_mut_ptr(),
+                connector,
+                shaders,
+                data_size,
+            ))
         }
     }
 
     /// Missing ConvexMesh trait
     pub fn create_convex_mesh(&mut self, stream: &mut PxInputStream) -> Option<Owner<ConvexMesh>> {
-        unsafe {
-            ConvexMesh::from_raw(PxPhysics_createConvexMesh_mut(self.as_mut_ptr(), stream))
-        }
+        unsafe { ConvexMesh::from_raw(PxPhysics_createConvexMesh_mut(self.as_mut_ptr(), stream)) }
     }
 
-    pub fn create_height_field(&mut self, stream: &mut PxInputStream) -> Option<Owner<HeightField>> {
-        unsafe {
-            HeightField::from_raw(
-                PxPhysics_createHeightField_mut(self.as_mut_ptr(), stream)
-            )
-        }
+    pub fn create_height_field(
+        &mut self,
+        stream: &mut PxInputStream,
+    ) -> Option<Owner<HeightField>> {
+        unsafe { HeightField::from_raw(PxPhysics_createHeightField_mut(self.as_mut_ptr(), stream)) }
     }
 
     pub fn create_material(
@@ -325,7 +315,7 @@ impl<H, M> Physics<H, M> {
         static_friction: f32,
         dynamic_friction: f32,
         restitution: f32,
-        user_data: M
+        user_data: M,
     ) -> Option<Owner<Material<M>>> {
         unsafe {
             Material::from_raw(
@@ -333,7 +323,7 @@ impl<H, M> Physics<H, M> {
                     self.as_mut_ptr(),
                     static_friction,
                     dynamic_friction,
-                    restitution
+                    restitution,
                 ),
                 user_data,
             )
@@ -341,23 +331,28 @@ impl<H, M> Physics<H, M> {
     }
 
     /// Missing PruningStructure impl
-    pub fn create_pruning_structure(&mut self, actors: Vec<&mut impl RigidActor<H, M>>) -> Option<Owner<PruningStructure>> {
-        unsafe { 
-            PruningStructure::from_raw(
-                PxPhysics_createPruningStructure_mut(
-                    self.as_mut_ptr(),
-                    actors.as_ptr() as *const *mut _,
-                    actors.len() as u32
-                )
-            )
+    pub fn create_pruning_structure(
+        &mut self,
+        actors: Vec<&mut impl RigidActor<H, M>>,
+    ) -> Option<Owner<PruningStructure>> {
+        unsafe {
+            PruningStructure::from_raw(PxPhysics_createPruningStructure_mut(
+                self.as_mut_ptr(),
+                actors.as_ptr() as *const *mut _,
+                actors.len() as u32,
+            ))
         }
     }
 
-    pub fn create_dynamic<U>(&mut self, transform: &PxTransform, user_data: U) -> Option<Owner<RigidDynamic<U, H, M>>> {
+    pub fn create_dynamic<U>(
+        &mut self,
+        transform: &PxTransform,
+        user_data: U,
+    ) -> Option<Owner<RigidDynamic<U, H, M>>> {
         unsafe {
             RigidDynamic::from_raw(
                 PxPhysics_createRigidDynamic_mut(self.as_mut_ptr(), transform.as_ptr()),
-                user_data
+                user_data,
             )
         }
     }
@@ -365,12 +360,12 @@ impl<H, M> Physics<H, M> {
     pub fn create_static<U>(
         &mut self,
         transform: PxTransform,
-        user_data: U
+        user_data: U,
     ) -> Option<Owner<RigidStatic<U, H, M>>> {
         unsafe {
             RigidStatic::from_raw(
                 PxPhysics_createRigidStatic_mut(self.as_mut_ptr(), transform.as_ptr()),
-                user_data
+                user_data,
             )
         }
     }
@@ -381,7 +376,7 @@ impl<H, M> Physics<H, M> {
         materials: &[&mut Material<M>],
         is_exclusive: bool,
         shape_flags: ShapeFlags,
-        user_data: U
+        user_data: U,
     ) -> Option<Owner<Shape<U, M>>> {
         unsafe {
             Shape::from_raw(
@@ -393,13 +388,16 @@ impl<H, M> Physics<H, M> {
                     is_exclusive,
                     shape_flags.into_px(),
                 ),
-                user_data
+                user_data,
             )
         }
     }
 
     /// Missing TriangleMesh impl
-    pub fn create_triangle_mesh(&mut self, stream: &mut PxInputStream) -> Option<Owner<TriangleMesh>> {
+    pub fn create_triangle_mesh(
+        &mut self,
+        stream: &mut PxInputStream,
+    ) -> Option<Owner<TriangleMesh>> {
         unsafe {
             TriangleMesh::from_raw(PxPhysics_createTriangleMesh_mut(self.as_mut_ptr(), stream))
         }
@@ -431,9 +429,16 @@ impl<H, M> Physics<H, M> {
         geometry: &impl Geometry,
         material: &mut Material<M>,
         shape_transform: PxTransform,
-        user_data: U
+        user_data: U,
     ) -> Option<Owner<RigidStatic<U, H, M>>> {
-        RigidStatic::new(self, transform, geometry, material, shape_transform, user_data)
+        RigidStatic::new(
+            self,
+            transform,
+            geometry,
+            material,
+            shape_transform,
+            user_data,
+        )
     }
 
     pub fn create_plane<U>(
@@ -448,7 +453,7 @@ impl<H, M> Physics<H, M> {
                 physx_sys::phys_PxCreatePlane(
                     self.as_mut_ptr(),
                     &physx_sys::PxPlane_new_2(normal.as_ptr(), offset),
-                    material.as_mut_ptr()
+                    material.as_mut_ptr(),
                 ),
                 user_data,
             )
@@ -463,7 +468,7 @@ impl<H, M> Physics<H, M> {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -508,7 +513,7 @@ impl<H, M> Physics<H, M> {
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
-                0
+                0,
             );
             buffer.set_len(len as usize);
             buffer
@@ -518,11 +523,15 @@ impl<H, M> Physics<H, M> {
     /// Safety: Scenes may have different user data type parameters, and this method is happy
     /// to perform a cast to whatever type it is told to without regard for safety.  Either
     /// set them all to () so they can't be used, or pass in the appriopriate types for the desired scene.
+    /// If possible, store the scenes separately so that type info is not lost.
+    // TODO should this type info just be part of Physics? I think creating scenes with different
+    // user data types could prove useful, and getting rid of this may be a batter approach.
     pub unsafe fn get_scenes<U, L, S, D, T, C>(&self) -> Vec<&Scene<U, L, S, D, M, H, T, C>> {
         //unsafe
         {
             let capacity = PxPhysics_getNbScenes(self.as_ptr());
-            let mut buffer: Vec<&Scene<U, L, S, D, M, H, T, C>> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&Scene<U, L, S, D, M, H, T, C>> =
+                Vec::with_capacity(capacity as usize);
             let len = PxPhysics_getScenes(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
@@ -533,7 +542,7 @@ impl<H, M> Physics<H, M> {
             buffer
         }
     }
-    
+
     pub fn get_shapes(&self) -> Vec<&Shape<H, M>> {
         unsafe {
             let capacity = PxPhysics_getNbShapes(self.as_ptr());
@@ -632,27 +641,25 @@ impl PhysicsFoundationBuilder {
         self
     }
 
-    pub fn build<H, M>(&self, mut foundation: Owner<Foundation>) -> Option<PhysicsFoundation<H, M>> {
+    pub fn build<H, M>(
+        &self,
+        mut foundation: Owner<Foundation>,
+    ) -> Option<PhysicsFoundation<H, M>> {
         let (mut pvd, mut physics) = unsafe {
             if self.enable_pvd {
                 let mut pvd = VisualDebugger::new(foundation.as_mut(), self.pvd_port)?;
 
-                let physics = Physics::from_raw(
-                    phys_PxCreatePhysics(
-                        PX_PHYSICS_VERSION,
-                        foundation.as_mut_ptr(),
-                        &self.tolerances as *const _,
-                        true,
-                        pvd.as_mut_ptr(),
-                    )
-                )?;
+                let physics = Physics::from_raw(phys_PxCreatePhysics(
+                    PX_PHYSICS_VERSION,
+                    foundation.as_mut_ptr(),
+                    &self.tolerances as *const _,
+                    true,
+                    pvd.as_mut_ptr(),
+                ))?;
 
                 (Some(pvd), physics)
             } else {
-                (
-                    None,
-                    Physics::new(foundation.as_mut())?,
-                )
+                (None, Physics::new(foundation.as_mut())?)
             }
         };
 
