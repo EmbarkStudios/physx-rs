@@ -7,6 +7,8 @@ use crate::{
 use physx_sys::{
     PxControllerManager_createController_mut, PxControllerManager_purgeControllers_mut,
     PxControllerManager_release_mut,
+    PxControllerManager_getController_mut,
+    PxControllerManager_getNbControllers,
 };
 
 #[repr(transparent)]
@@ -33,6 +35,43 @@ impl ControllerManager {
                 desc.into_desc()?.as_ptr(),
             ) as *mut _)
         }
+    }
+
+    pub fn get_nb_controllers(&self) -> u32 {
+        unsafe {
+            PxControllerManager_getNbControllers(self.as_ptr())
+        }
+    }
+
+    // TODO make this type aware
+    pub fn get_controller(&mut self, idx: u32) -> Option<&mut CapsuleController<()>> {
+        unsafe {
+            if idx < self.get_nb_controllers() {
+                Some(
+                    &mut *(PxControllerManager_getController_mut(
+                        self.as_mut_ptr(), idx
+                    ) as *mut CapsuleController<()>)
+                )
+            } else {
+                None
+            }
+        }
+    }
+
+    // TODO make this type aware
+    pub fn get_controllers(&mut self) -> Vec<&mut CapsuleController<()>> {
+        let count = self.get_nb_controllers();
+        let mut vec = Vec::with_capacity(count as usize);
+        for idx in 0..count {
+            vec.push(
+                unsafe {
+                    &mut *(PxControllerManager_getController_mut(
+                        self.as_mut_ptr(), idx
+                    ) as *mut CapsuleController<()>)
+                }
+            );
+        }
+        vec
     }
 }
 

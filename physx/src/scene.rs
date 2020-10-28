@@ -34,7 +34,7 @@ use std::{
     ffi::c_void,
     marker::PhantomData,
     mem::{forget, size_of},
-    ptr::{null, null_mut},
+    ptr::{null, null_mut, drop_in_place},
 };
 
 // TODO write proper wrappers for these rather than re-export
@@ -611,9 +611,9 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
 
     /// Get a Vec of the articulations in the scene.  This is intended for use when getting data out of
     /// PhysX after running a simulation step along with [get_actors], [get_active_actors], and [get_aggregates].
-    pub unsafe fn get_articulations(&mut self) -> Vec<&mut ArticulationMap<T, C, L, H, M>> {
+    pub unsafe fn get_articulations(&mut self) -> Vec<ArticulationMap<T, C, L, H, M>> {
         let capacity = PxScene_getNbArticulations(self.as_ptr());
-        let mut buffer: Vec<&mut ArticulationMap<T, C, L, H, M>> =
+        let mut buffer: Vec<ArticulationMap<T, C, L, H, M>> =
             Vec::with_capacity(capacity as usize);
         let len = PxScene_getArticulations(
             self.as_ptr(),
@@ -625,11 +625,11 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         buffer
     }
 
-    pub fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<&mut ActorMap<L, S, D, H, M>> {
+    pub fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<ActorMap<L, S, D, H, M>> {
         unsafe {
             let flags = actor_type.into_px();
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
-            let mut buffer: Vec<&mut ActorMap<L, S, D, H, M>> =
+            let mut buffer: Vec<ActorMap<L, S, D, H, M>> =
                 Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
                 self.as_ptr(),
@@ -645,12 +645,12 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
 
     // This cannot return a Vec.  Vec has specific allocation/alignment requirements
     // that the C++-allocated buffer does not meet, and dropping the fake vec causes a crash.
-    pub fn get_active_actors(&mut self) -> &mut [&mut ActorMap<L, S, D, H, M>] {
+    pub fn get_active_actors(&mut self) -> &mut [ActorMap<L, S, D, H, M>] {
         unsafe {
             let mut length = 0;
             let actors = PxScene_getActiveActors_mut(self.as_mut_ptr(), &mut length);
             std::slice::from_raw_parts_mut(
-                actors as *mut &mut ActorMap<L, S, D, H, M>,
+                actors as *mut ActorMap<L, S, D, H, M>,
                 length as usize,
             )
         }
@@ -694,10 +694,10 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         }
     }
 
-    pub fn get_aggregates(&self) -> Vec<&Aggregate<L, S, D, H, M>> {
+    pub fn get_aggregates(&mut self) -> Vec<&mut Aggregate<L, S, D, H, M>> {
         unsafe {
             let capacity = PxScene_getNbAggregates(self.as_ptr());
-            let mut buffer: Vec<&Aggregate<L, S, D, H, M>> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&mut Aggregate<L, S, D, H, M>> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getAggregates(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut physx_sys::PxAggregate,
@@ -840,7 +840,27 @@ unsafe impl<U: Sync, L: Sync, S: Sync, D: Sync, M: Sync, H: Sync, T: Sync, C: Sy
 
 impl<U, L, S, D, M, H, T, C> Drop for Scene<U, L, S, D, M, H, T, C> {
     fn drop(&mut self) {
+        // do the callbacks need to be explicitly dropped as well?
+        // is dropping all the physics objects like this correct? do they need to be removed from the scene first?
         unsafe {
+            for ptr in self.get_aggregates(){drop_in_place(ptr as *mut _)};
+            for ptr in self.get_constraints(){drop_in_place(ptr as *mut _)};
+            for mut ptr in self.get_articulations(){
+                ptr.map(
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |ptr| drop_in_place(ptr as *mut _),
+                )
+            };
+            for mut ptr in self.get_actors(
+                ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic
+            ) {
+                ptr.map(
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |_| (), // ArticulationLinks are dropped when the articulation theya re in is dropped
+                )
+            };
+            drop_in_place(self.get_user_data_mut() as *mut _);
             PxScene_release_mut(self.as_mut_ptr());
         }
     }

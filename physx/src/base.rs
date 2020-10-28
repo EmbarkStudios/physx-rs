@@ -111,7 +111,7 @@ pub trait Base: Class<PxBase> + Sized {
 
     /// Returns an enumerated value identifying the type. You can match this against the raw values in ConcreteType to identify the type of this object
     fn get_concrete_type(&self) -> ConcreteType {
-        unsafe { PxBase_getConcreteType(self.as_ptr() as *const _).into() }
+        unsafe { PxBase_getConcreteType(self.as_ptr()).into() }
     }
 
     /// Set or unset the specified flag on this object.

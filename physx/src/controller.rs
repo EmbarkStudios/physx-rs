@@ -7,7 +7,12 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{ffi::c_void, marker::PhantomData, mem::size_of};
+use std::{
+    ffi::c_void,
+    marker::PhantomData,
+    mem::size_of,
+    ptr::drop_in_place,
+};
 
 use thiserror::Error;
 
@@ -108,9 +113,12 @@ impl<C> Drop for CapsuleController<C> {
     fn drop(&mut self) {
         unsafe {
             if size_of::<C>() > size_of::<*mut c_void>() {
-                // Cast *mut c_void to appropriate type and reborrow
-                let user_data = Box::from_raw(PxController_getUserData(self.as_ptr()) as *mut C);
-                drop(user_data);
+                drop_in_place(PxController_getUserData(self.as_ptr()) as *mut C);
+            } else {
+                drop_in_place(
+                    (&mut PxController_getUserData(self.as_ptr()))
+                    as *mut *mut c_void as *mut C
+                );
             };
             PxController_release_mut(self.as_mut_ptr())
         }
@@ -136,6 +144,7 @@ impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
             desc.obj.radius = self.radius;
             desc.obj.stepOffset = self.step_offset;
             desc.obj.material = self.material.as_mut_ptr();
+            desc.obj.upDirection = PxVec3::new(0.0, 1.0, 0.0).into();
 
             if desc.is_valid() {
                 Some(desc)
@@ -178,7 +187,7 @@ impl<U> PxCapsuleControllerDesc<U> {
 impl<U> Drop for PxCapsuleControllerDesc<U> {
     fn drop(&mut self) {
         unsafe {
-            drop(UserData::get_user_data_mut(self));
+            drop_in_place(UserData::get_user_data_mut(self) as *mut _);
             PxCapsuleControllerDesc_delete(self.as_mut_ptr());
         }
     }

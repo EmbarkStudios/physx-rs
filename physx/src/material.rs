@@ -191,7 +191,6 @@ unsafe impl<U: Sync> Sync for Material<U> {}
 
 impl<U> Drop for Material<U> {
     fn drop(&mut self) {
-        drop(self.get_user_data_mut());
         unsafe {
             PxMaterial_release_mut(self.as_mut_ptr());
         }

@@ -19,7 +19,10 @@ use super::{
     traits::{Class, PxFlags, UserData},
 };
 
-use std::{marker::PhantomData, ptr::NonNull};
+use std::{
+    marker::PhantomData,
+    ptr::{NonNull, drop_in_place},
+};
 
 use enumflags2::BitFlags;
 
@@ -457,11 +460,11 @@ unsafe impl<U: Sync, L: Send, H: Sync, M: Send> Sync for ArticulationReducedCoor
 impl<U, L, H, M> Drop for ArticulationReducedCoordinate<U, L, H, M> {
     fn drop(&mut self) {
         // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
-        for link in self.get_links().drain(..).rev() {
-            drop(link);
-        }
-        drop(self.get_user_data_mut());
         unsafe {
+            for link in self.get_links_mut().drain(..).rev() {
+                drop_in_place(link as *mut _);
+            }
+            drop_in_place(self.get_user_data_mut() as *mut _);
             PxArticulationReducedCoordinate_release_mut(self.as_mut_ptr());
         }
     }

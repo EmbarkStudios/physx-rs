@@ -204,6 +204,7 @@ unsafe impl<H: Sync, M: Sync> Sync for Physics<H, M> {}
 impl<H, M> Drop for Physics<H, M> {
     fn drop(&mut self) {
         unsafe {
+            // should materials and shapes be dropped here? Physics seems to be their owner.
             PxPhysics_release_mut(self.as_mut_ptr());
         }
     }

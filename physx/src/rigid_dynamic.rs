@@ -21,7 +21,10 @@ use crate::{
 
 use enumflags2::BitFlags;
 
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    ptr::drop_in_place,
+};
 
 use physx_sys::{
     phys_PxCreateDynamic, PxRigidActor_release_mut, PxRigidDynamicLockFlag,
@@ -271,14 +274,14 @@ unsafe impl<D: Sync, H: Sync, M: Sync> Sync for RigidDynamic<D, H, M> {}
 
 impl<D, H, M> Drop for RigidDynamic<D, H, M> {
     fn drop(&mut self) {
-        dbg!("drop dynamic actor");
         for shape in self.get_shapes() {
-            for material in shape.get_materials() {
-                drop(material)
+            for _material in shape.get_materials() {
+                // is PxMaterial_release thread safe?
             }
+            // is PxShape_release thread safe?
         }
-        drop(self.get_user_data_mut());
         unsafe {
+            drop_in_place(self.get_user_data_mut() as *mut _);
             PxRigidActor_release_mut(self.as_mut_ptr());
         }
     }

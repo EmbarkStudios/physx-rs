@@ -6,7 +6,10 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    ptr::drop_in_place,
+};
 
 use physx_sys::{
     PxArticulationDriveCache, PxArticulation_applyImpulse_mut,
@@ -165,10 +168,12 @@ unsafe impl<U: Sync, L: Sync, H: Sync, M: Sync> Sync for Articulation<U, L, H, M
 impl<U, L, H, M> Drop for Articulation<U, L, H, M> {
     fn drop(&mut self) {
         // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
-        for link in self.get_links().drain(..).rev() {
-            drop(link);
+        unsafe {
+            for link in self.get_links_mut().drain(..).rev() {
+                drop_in_place(link as *mut _);
+            }
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            PxArticulation_release_mut(self.as_mut_ptr())
         }
-        drop(self.get_user_data_mut());
-        unsafe { PxArticulation_release_mut(self.as_mut_ptr()) }
     }
 }

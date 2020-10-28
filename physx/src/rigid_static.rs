@@ -8,7 +8,10 @@
 
 */
 
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    ptr::drop_in_place,
+};
 
 use crate::{
     geometry::PxGeometry,
@@ -103,11 +106,14 @@ unsafe impl<S: Sync, H: Sync, M: Sync> Sync for RigidStatic<S, H, M> {}
 impl<S, H, M> Drop for RigidStatic<S, H, M> {
     fn drop(&mut self) {
         for shape in self.get_shapes() {
-            for material in shape.get_materials() {
-                drop(material)
+            for _material in shape.get_materials() {
+                // is PxMAterial_release thread safe?
             }
+            // is PxShape_release thread safe?
         }
-        drop(self.get_user_data_mut());
-        unsafe { PxRigidActor_release_mut(self.as_mut_ptr()) }
+        unsafe {
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            PxRigidActor_release_mut(self.as_mut_ptr())
+        }
     }
 }

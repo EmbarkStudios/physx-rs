@@ -17,7 +17,9 @@ use crate::{
 /// but implementation is left to the concrete type's Drop impl.
 pub(crate) unsafe trait UserData: Sized {
     type U;
+    /// Returns a reference to the userData field
     fn user_data_ptr(&self) -> &*mut c_void;
+    /// Returns a mutable reference to the userData field.
     fn user_data_mut_ptr(&mut self) -> &mut *mut c_void;
 
     fn init_user_data(&mut self, user_data: Self::U) -> &mut Self {
@@ -26,7 +28,7 @@ pub(crate) unsafe trait UserData: Sized {
             let data = Box::new(user_data);
             *self.user_data_mut_ptr() = Box::into_raw(data) as *mut c_void;
         } else {
-            // DATA_SIZE < VOID_SIZE
+            // DATA_SIZE <= VOID_SIZE
             unsafe {
                 *self.user_data_mut_ptr() = *(&user_data as *const Self::U as *const *mut c_void)
             }
@@ -37,9 +39,9 @@ pub(crate) unsafe trait UserData: Sized {
     /// Safety: The user data field must have previously been initialized via `init_user_data`.
     unsafe fn get_user_data(this: &Self) -> &Self::U {
         if size_of::<Self::U>() > size_of::<*mut c_void>() {
-            &*(*this.user_data_ptr() as *const Self::U)
+            &*((*this.user_data_ptr()) as *const Self::U)
         } else {
-            // DATA_SIZE < VOID_SIZE
+            // DATA_SIZE <= VOID_SIZE
             // Data is stored directly in the userData field.
             &*(this.user_data_ptr() as *const *mut c_void as *const Self::U)
         }
@@ -49,9 +51,9 @@ pub(crate) unsafe trait UserData: Sized {
     unsafe fn get_user_data_mut(this: &mut Self) -> &mut Self::U {
         if size_of::<Self::U>() > size_of::<*mut c_void>() {
             // Data is stored in a Box<U> on the heap, and userData is just a pointer to it.
-            &mut *(*this.user_data_mut_ptr() as *mut Self::U)
+            &mut *((*this.user_data_mut_ptr()) as *mut Self::U)
         } else {
-            // DATA_SIZE < VOID_SIZE
+            // DATA_SIZE <= VOID_SIZE
             // Data is stored directly in the userData field.
             &mut *(this.user_data_mut_ptr() as *mut *mut c_void as *mut Self::U)
         }

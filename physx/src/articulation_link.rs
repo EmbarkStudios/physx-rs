@@ -17,7 +17,10 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    ptr::drop_in_place,
+};
 
 use physx_sys::{
     PxArticulationDriveType,
@@ -57,9 +60,6 @@ impl Into<PxArticulationDriveType::Enum> for ArticulationDriveType {
 #[repr(transparent)]
 pub struct ArticulationLink<L, H, M> {
     pub(crate) obj: physx_sys::PxArticulationLink,
-    // U is this objects user data type, M is the user data of the shapes
-    // that may be attached to this body, which must be dropped :/
-    // Tracking M is necessary for proper Drop impl, but it's a pain.
     phantom_user_data: PhantomData<(L, H, M)>,
 }
 
@@ -107,7 +107,10 @@ impl<L, H, M> ArticulationLink<L, H, M> {
 
     /// Get inbound joint for this link
     pub unsafe fn get_inbound_joint(&self) -> Option<&JointMap> {
-        (PxArticulationLink_getInboundJoint(self.as_ptr()) as *const JointMap).as_ref()
+        (
+            &PxArticulationLink_getInboundJoint(self.as_ptr())
+            as *const *mut physx_sys::PxArticulationJointBase as *const JointMap
+        ).as_ref()
     }
 
     pub fn get_link_index(&self) -> u32 {
@@ -144,12 +147,14 @@ unsafe impl<L: Sync, H: Sync, M: Sync> Sync for ArticulationLink<L, H, M> {}
 impl<L, H, M> Drop for ArticulationLink<L, H, M> {
     fn drop(&mut self) {
         for shape in self.get_shapes() {
-            for material in shape.get_materials() {
-                drop(material)
+            for _material in shape.get_materials() {
+                // is PxMaterail_release thread safe?
             }
+            // is PxShape_release thread safe?
         }
-        drop(self.get_user_data_mut());
         unsafe {
+            drop_in_place(self.get_user_data_mut() as *mut _);
+
             PxArticulationLink_release_mut(self.as_mut_ptr());
         }
     }

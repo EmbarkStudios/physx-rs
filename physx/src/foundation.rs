@@ -108,7 +108,7 @@ impl Drop for Foundation {
     }
 }
 
-/// An trait for creating allocator callbacks for PhysX.
+/// A trait for creating allocator callbacks for PhysX.
 /// Implement the interface on a ZST.  Currently, user_data is unused
 /// since there isn't a good way of communicating ownership, or calling
 /// it's dtor.  If user_data is needed, call `physx_sys::create_alloc_callback`

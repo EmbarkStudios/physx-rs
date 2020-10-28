@@ -1,4 +1,4 @@
-use std::ptr::NonNull;
+use std::ptr::{NonNull, drop_in_place};
 
 use crate::traits::Class;
 
@@ -41,7 +41,7 @@ unsafe impl<T: Sync> Sync for Owner<T> {}
 
 impl<T> Drop for Owner<T> {
     fn drop(&mut self) {
-        unsafe { std::ptr::drop_in_place(self.ptr.as_ptr()) }
+        unsafe { drop_in_place(self.ptr.as_ptr()) }
     }
 }
 

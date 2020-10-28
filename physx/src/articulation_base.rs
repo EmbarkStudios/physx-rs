@@ -12,6 +12,7 @@ use crate::{
     articulation::Articulation, articulation_joint_base::ArticulationJointBase,
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate, base::Base, math::PxBounds3,
+    base::ConcreteType,
     math::PxTransform, owner::Owner, traits::Class,
 };
 //use glam::Mat4;
@@ -256,19 +257,60 @@ where
 }
 
 impl<T, C, L, H, M> ArticulationMap<T, C, L, H, M> {
-    pub fn map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Ret
+    /// Safety: get_concrete_type seems to return undefined in some situations
+    /// where it really shouldn't.  try_map is technically safe, it will return
+    /// None when this call would crash.
+    pub unsafe fn map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Ret
     where
         ArtFn: FnOnce(&mut Articulation<T, L, H, M>) -> Ret,
         ArcFn: FnOnce(&mut ArticulationReducedCoordinate<C, L, H, M>) -> Ret,
     {
         match self.get_concrete_type() {
-            crate::base::ConcreteType::Articulation => {
-                art_fn(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) })
-            }
-            crate::base::ConcreteType::ArticulationReducedCoordinate => arc_fn(unsafe {
-                &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
-            }),
-            _ => unreachable!(),
+            ConcreteType::Articulation => {
+                art_fn(//unsafe 
+                    &mut *(self.obj as *mut Articulation<T, L, H, M>)
+                )
+            },
+            ConcreteType::ArticulationReducedCoordinate => {
+                arc_fn(
+                    &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
+                )
+            },
+            _ => panic!("get_concrete_type returned an invalid ConcreteType: {:?}", self.get_concrete_type()),
+        }
+    }
+
+    pub fn try_map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Option<Ret>
+    where
+        ArtFn: FnOnce(&mut Articulation<T, L, H, M>) -> Ret,
+        ArcFn: FnOnce(&mut ArticulationReducedCoordinate<C, L, H, M>) -> Ret,
+    {
+        match self.get_concrete_type() {
+            ConcreteType::Articulation => {
+                Some(art_fn(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) }))
+            },
+            ConcreteType::ArticulationReducedCoordinate => {
+                Some(arc_fn(unsafe { &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)}))
+            },
+            _ => None,
+        }
+    }
+
+    pub fn as_articulation(&mut self) -> Option<&mut Articulation<T, L, H, M>> {
+        match self.get_concrete_type() {
+            ConcreteType::Articulation => {
+                Some(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) })
+            },
+            _ => None
+        }
+    }
+
+    pub fn as_articulation_reduced_coordinate(&mut self) -> Option<&mut ArticulationReducedCoordinate<T, L, H, M>> {
+        match self.get_concrete_type() {
+            ConcreteType::ArticulationReducedCoordinate => {
+                Some(unsafe { &mut *(self.obj as *mut ArticulationReducedCoordinate<T, L, H, M>) })
+            },
+            _ => None
         }
     }
 }

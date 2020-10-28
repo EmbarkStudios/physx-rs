@@ -90,19 +90,35 @@ where
 }
 
 impl JointMap {
-    pub fn map<Ret, ArtJoFn, ArcJoFn>(&mut self, art_fn: ArtJoFn, arc_fn: ArcJoFn) -> Ret
+    pub unsafe fn map<Ret, ArtJoFn, ArcJoFn>(&mut self, art_fn: ArtJoFn, arc_fn: ArcJoFn) -> Ret
     where
         ArtJoFn: FnOnce(&mut ArticulationJoint) -> Ret,
         ArcJoFn: FnOnce(&mut ArticulationJointReducedCoordinate) -> Ret,
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => {
-                art_fn(unsafe { &mut *(self.obj as *mut ArticulationJoint) })
+                art_fn(&mut *(self.obj as *mut ArticulationJoint) )
             }
             crate::base::ConcreteType::ArticulationJointReducedCoordinate => {
-                arc_fn(unsafe { &mut *(self.obj as *mut ArticulationJointReducedCoordinate) })
+                arc_fn(&mut *(self.obj as *mut ArticulationJointReducedCoordinate) )
             }
-            _ => unreachable!(),
+            _ => panic!("get_concrete_type returned an invalid type: {:?}", self.get_concrete_type()),
+        }
+    }
+
+    pub fn try_map<Ret, ArtJoFn, ArcJoFn>(&mut self, art_fn: ArtJoFn, arc_fn: ArcJoFn) -> Option<Ret>
+    where
+        ArtJoFn: FnOnce(&mut ArticulationJoint) -> Ret,
+        ArcJoFn: FnOnce(&mut ArticulationJointReducedCoordinate) -> Ret,
+    {
+        match self.get_concrete_type() {
+            crate::base::ConcreteType::ArticulationJoint => {
+                Some(art_fn(unsafe{&mut *(self.obj as *mut ArticulationJoint)}))
+            }
+            crate::base::ConcreteType::ArticulationJointReducedCoordinate => {
+                Some(arc_fn(unsafe{&mut *(self.obj as *mut ArticulationJointReducedCoordinate)}))
+            }
+            _ => None,
         }
     }
 
