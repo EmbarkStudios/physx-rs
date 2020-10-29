@@ -81,7 +81,7 @@ impl<L, H, M> RigidActor for ArticulationLink<L, H, M> {
 }
 
 impl<L, H, M> ArticulationLink<L, H, M> {
-    pub(crate) unsafe fn from_raw<'a>(
+    pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulationLink,
         user_data: L,
     ) -> Option<Owner<Self>> {

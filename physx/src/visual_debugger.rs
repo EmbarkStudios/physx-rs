@@ -95,7 +95,7 @@ pub struct PvdTransport {
 crate::ClassObj!(PvdTransport: PxPvdTransport);
 
 impl PvdTransport {
-    pub(crate) unsafe fn from_raw<'a>(
+    pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPvdTransport,
     ) -> Option<Owner<PvdTransport>> {
         Owner::from_raw(ptr as *mut Self)

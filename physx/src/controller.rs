@@ -2,7 +2,7 @@
 
 use crate::{
     material::Material,
-    math::PxVec3,
+    math::{PxExtendedVec3, PxVec3},
     owner::Owner,
     traits::{Class, UserData},
 };
@@ -23,15 +23,14 @@ use physx_sys::{
     PxController_setPosition_mut,
     PxController_setUserData_mut,
     //PxController_getActor,
-    PxExtendedVec3,
 };
 
 impl<T> Controller for T where T: Class<PxController> {}
 pub trait Controller: Class<PxController> {
-    fn set_position(&mut self, position: PxVec3) {
+    fn set_position(&mut self, position: impl Into<PxExtendedVec3>) {
         unsafe {
             let position: PxExtendedVec3 = position.into();
-            PxController_setPosition_mut(self.as_mut_ptr(), &position);
+            PxController_setPosition_mut(self.as_mut_ptr(), position.as_ptr());
         }
     }
 
@@ -125,6 +124,7 @@ pub struct CapsuleControllerDescriptor<'a, U, M> {
     pub step_offset: f32,
     pub material: &'a mut Material<M>,
     pub user_data: U,
+    pub position: PxExtendedVec3,
 }
 
 impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
@@ -139,11 +139,12 @@ impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
             desc.obj.stepOffset = self.step_offset;
             desc.obj.material = self.material.as_mut_ptr();
             desc.obj.upDirection = PxVec3::new(0.0, 1.0, 0.0).into();
+            desc.obj.position = self.position.into();
 
             if desc.is_valid() {
                 Some(desc)
             } else {
-                drop(desc);
+                drop_in_place(desc as *mut _);
                 None
             }
         }

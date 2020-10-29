@@ -18,7 +18,7 @@ pub struct ControllerManager {
 crate::ClassObj!(ControllerManager: PxControllerManager);
 
 impl ControllerManager {
-    pub(crate) unsafe fn from_raw<'a>(
+    pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxControllerManager,
     ) -> Option<Owner<ControllerManager>> {
         Owner::from_raw(ptr as *mut Self)

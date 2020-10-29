@@ -82,7 +82,7 @@ where
 }
 
 impl<U> Material<U> {
-    pub(crate) unsafe fn from_raw<'a>(
+    pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxMaterial,
         user_data: U,
     ) -> Option<Owner<Self>> {

@@ -208,16 +208,16 @@ where
 }
 
 impl<L, S, D, H, M> ActorMap<L, S, D, H, M> {
-    pub fn map<'a, Ret: 'a, RDFn, RSFn, ALFn>(
-        &'a mut self,
+    pub fn map<Ret, RDFn, RSFn, ALFn>(
+        &mut self,
         rigid_dynamic_fn: RDFn,
         rigid_static_fn: RSFn,
         articulation_link_fn: ALFn,
     ) -> Ret
     where
-        RDFn: FnOnce(&'a mut RigidDynamic<D, H, M>) -> Ret,
-        RSFn: FnOnce(&'a mut RigidStatic<S, H, M>) -> Ret,
-        ALFn: FnOnce(&'a mut ArticulationLink<L, H, M>) -> Ret,
+        RDFn: FnOnce(&mut RigidDynamic<D, H, M>) -> Ret,
+        RSFn: FnOnce(&mut RigidStatic<S, H, M>) -> Ret,
+        ALFn: FnOnce(&mut ArticulationLink<L, H, M>) -> Ret,
     {
         match self.get_type() {
             ActorType::RigidDynamic => {

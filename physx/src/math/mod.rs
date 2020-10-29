@@ -23,6 +23,30 @@ pub struct PxExtendedVec3 {
 
 crate::ClassObj!(PxExtendedVec3: PxExtendedVec3);
 
+impl From<(f64, f64, f64)> for PxExtendedVec3 {
+    fn from(vec: (f64, f64, f64)) -> Self {
+        Self {
+            obj: physx_sys::PxExtendedVec3 {
+                x: vec.0,
+                y: vec.1,
+                z: vec.2,
+            },
+        }
+    }
+}
+
+impl From<glam::Vec3> for PxExtendedVec3 {
+    fn from(vec: glam::Vec3) -> Self {
+        Self {
+            obj: physx_sys::PxExtendedVec3 {
+                x: vec.x() as f64,
+                y: vec.y() as f64,
+                z: vec.z() as f64,
+            },
+        }
+    }
+}
+
 impl From<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
     fn from(bounds: physx_sys::PxExtendedVec3) -> Self {
         PxExtendedVec3 { obj: bounds }

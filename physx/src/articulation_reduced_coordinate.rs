@@ -125,7 +125,7 @@ where
 }
 
 impl<U, L, H, M> ArticulationReducedCoordinate<U, L, H, M> {
-    pub(crate) unsafe fn from_raw<'a>(
+    pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulationReducedCoordinate,
         user_data: U,
     ) -> Option<Owner<Self>> {

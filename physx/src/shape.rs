@@ -16,7 +16,7 @@ use crate::{
 
 use enumflags2::BitFlags;
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use physx_sys::{
     PxFilterData, PxFilterData_new_1, PxShapeFlag, PxShapeFlags, PxShape_getMaterials,
@@ -181,10 +181,10 @@ unsafe impl<H: Sync, M: Send> Sync for Shape<H, M> {}
 impl<H, M> Drop for Shape<H, M> {
     fn drop(&mut self) {
         unsafe {
-            for material in (self).get_materials() {
-                drop(material)
+            for _material in (self).get_materials() {
+                // is PxMaterial_release thread safe?
             }
-            drop(self.get_user_data_mut());
+            drop_in_place(self.get_user_data_mut());
             PxShape_release_mut(self.as_mut_ptr());
         }
     }

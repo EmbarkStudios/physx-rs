@@ -11,7 +11,7 @@ crate::ClassObj!(Constraint: PxConstraint, PxBase);
 
 impl Constraint {
     #[allow(dead_code)]
-    pub(crate) unsafe fn from_raw<'a>(ptr: *mut physx_sys::PxConstraint) -> Option<Owner<Self>> {
+    pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxConstraint) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)
     }
 }

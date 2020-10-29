@@ -205,7 +205,7 @@ pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
         scaling: &impl Class<PxMeshScale>,
         flags: PxConvexMeshGeometryFlags,
     ) -> PxConvexMeshGeometry {
-        unsafe { PxConvexMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags.into()) }
+        unsafe { PxConvexMeshGeometry_new_1(mesh.as_mut_ptr(), scaling.as_ptr(), flags) }
     }
 
     fn default() -> PxConvexMeshGeometry {
