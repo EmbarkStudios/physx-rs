@@ -125,7 +125,7 @@ impl From<PxForceMode::Enum> for ForceMode {
     }
 }
 
-pub trait RigidBody<H, M>: Class<PxRigidBody> + RigidActor<H, M> {
+pub trait RigidBody: Class<PxRigidBody> + RigidActor {
     /// Set the mass of this body
     fn set_mass(&mut self, mass: f32) {
         unsafe {

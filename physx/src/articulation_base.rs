@@ -11,9 +11,8 @@ Wrapper for PxArticulationBase
 use crate::{
     articulation::Articulation, articulation_joint_base::ArticulationJointBase,
     articulation_link::ArticulationLink,
-    articulation_reduced_coordinate::ArticulationReducedCoordinate, base::Base, math::PxBounds3,
-    base::ConcreteType,
-    math::PxTransform, owner::Owner, traits::Class,
+    articulation_reduced_coordinate::ArticulationReducedCoordinate, base::Base, base::ConcreteType,
+    math::PxBounds3, math::PxTransform, owner::Owner, traits::Class,
 };
 //use glam::Mat4;
 
@@ -45,7 +44,10 @@ use physx_sys::{
     //PxArticulationBase_getAggregate,
 };
 
-pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
+pub trait ArticulationBase: Class<PxArticulationBase> + Base {
+    type LinkData;
+    type ShapeData;
+    type MaterialData;
     /*
     fixme[tgolsson]: Unsupported so far!
         pub fn set_name(&mut self, name: *const i8) {}
@@ -143,9 +145,13 @@ pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
         unsafe { PxArticulationBase_getNbLinks(self.as_ptr()) as usize }
     }
 
-    fn root_link(&self) -> Option<&ArticulationLink<L, H, M>> {
+    fn root_link(
+        &self,
+    ) -> Option<&ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>> {
         unsafe {
-            let mut buffer: Vec<*const ArticulationLink<L, H, M>> = vec![null_mut()];
+            let mut buffer: Vec<
+                *const ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>,
+            > = vec![null_mut()];
             PxArticulationBase_getLinks(self.as_ptr(), buffer.as_mut_ptr() as *mut *mut _, 1, 0);
             // Safety: if there is no root link, rather than crash on an invalid index,
             // let as_ref return None.
@@ -155,10 +161,14 @@ pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
     }
 
     /// Get a vec of all the links
-    fn get_links(&self) -> Vec<&ArticulationLink<L, H, M>> {
+    fn get_links(
+        &self,
+    ) -> Vec<&ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>> {
         unsafe {
             let capacity = PxArticulationBase_getNbLinks(self.as_ptr());
-            let mut buffer: Vec<&ArticulationLink<L, H, M>> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<
+                &ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>,
+            > = Vec::with_capacity(capacity as usize);
             let len = PxArticulationBase_getLinks(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
@@ -171,11 +181,14 @@ pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
     }
 
     /// Get a mutable vec of all the links
-    fn get_links_mut(&mut self) -> Vec<&mut ArticulationLink<L, H, M>> {
+    fn get_links_mut(
+        &mut self,
+    ) -> Vec<&mut ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>> {
         unsafe {
             let capacity = PxArticulationBase_getNbLinks(self.as_ptr());
-            let mut buffer: Vec<&mut ArticulationLink<L, H, M>> =
-                Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<
+                &mut ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>,
+            > = Vec::with_capacity(capacity as usize);
             let len = PxArticulationBase_getLinks(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
@@ -195,10 +208,10 @@ pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
     /// Add a link to this articulation
     fn create_link(
         &mut self,
-        parent: Option<&mut ArticulationLink<L, H, M>>,
+        parent: Option<&mut ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>>,
         pose: &PxTransform,
-        user_data: L,
-    ) -> Option<Owner<ArticulationLink<L, H, M>>> {
+        user_data: Self::LinkData,
+    ) -> Option<Owner<ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>>> {
         unsafe {
             ArticulationLink::from_raw(
                 PxArticulationBase_createLink_mut(
@@ -217,9 +230,9 @@ pub trait ArticulationBase<L, H, M>: Class<PxArticulationBase> + Base {
     // when creating a link, and shows how to manipulate them not what creating one on it's own is for/if it's useful.
     fn create_articulation_joint<J: ArticulationJointBase>(
         &mut self,
-        parent: &mut ArticulationLink<L, H, M>,
+        parent: &mut ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>,
         parent_frame: &PxTransform,
-        child: &mut ArticulationLink<L, H, M>,
+        child: &mut ArticulationLink<Self::LinkData, Self::ShapeData, Self::MaterialData>,
         child_frame: &PxTransform,
     ) -> Option<Owner<J>> {
         unsafe {
@@ -267,16 +280,18 @@ impl<T, C, L, H, M> ArticulationMap<T, C, L, H, M> {
     {
         match self.get_concrete_type() {
             ConcreteType::Articulation => {
-                art_fn(//unsafe 
-                    &mut *(self.obj as *mut Articulation<T, L, H, M>)
+                art_fn(
+                    //unsafe
+                    &mut *(self.obj as *mut Articulation<T, L, H, M>),
                 )
-            },
+            }
             ConcreteType::ArticulationReducedCoordinate => {
-                arc_fn(
-                    &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
-                )
-            },
-            _ => panic!("get_concrete_type returned an invalid ConcreteType: {:?}", self.get_concrete_type()),
+                arc_fn(&mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>))
+            }
+            _ => panic!(
+                "get_concrete_type returned an invalid ConcreteType: {:?}",
+                self.get_concrete_type()
+            ),
         }
     }
 
@@ -286,12 +301,12 @@ impl<T, C, L, H, M> ArticulationMap<T, C, L, H, M> {
         ArcFn: FnOnce(&mut ArticulationReducedCoordinate<C, L, H, M>) -> Ret,
     {
         match self.get_concrete_type() {
-            ConcreteType::Articulation => {
-                Some(art_fn(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) }))
-            },
-            ConcreteType::ArticulationReducedCoordinate => {
-                Some(arc_fn(unsafe { &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)}))
-            },
+            ConcreteType::Articulation => Some(art_fn(unsafe {
+                &mut *(self.obj as *mut Articulation<T, L, H, M>)
+            })),
+            ConcreteType::ArticulationReducedCoordinate => Some(arc_fn(unsafe {
+                &mut *(self.obj as *mut ArticulationReducedCoordinate<C, L, H, M>)
+            })),
             _ => None,
         }
     }
@@ -300,17 +315,19 @@ impl<T, C, L, H, M> ArticulationMap<T, C, L, H, M> {
         match self.get_concrete_type() {
             ConcreteType::Articulation => {
                 Some(unsafe { &mut *(self.obj as *mut Articulation<T, L, H, M>) })
-            },
-            _ => None
+            }
+            _ => None,
         }
     }
 
-    pub fn as_articulation_reduced_coordinate(&mut self) -> Option<&mut ArticulationReducedCoordinate<T, L, H, M>> {
+    pub fn as_articulation_reduced_coordinate(
+        &mut self,
+    ) -> Option<&mut ArticulationReducedCoordinate<T, L, H, M>> {
         match self.get_concrete_type() {
             ConcreteType::ArticulationReducedCoordinate => {
                 Some(unsafe { &mut *(self.obj as *mut ArticulationReducedCoordinate<T, L, H, M>) })
-            },
-            _ => None
+            }
+            _ => None,
         }
     }
 }

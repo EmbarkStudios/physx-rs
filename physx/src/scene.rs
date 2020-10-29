@@ -34,7 +34,7 @@ use std::{
     ffi::c_void,
     marker::PhantomData,
     mem::{forget, size_of},
-    ptr::{null, null_mut, drop_in_place},
+    ptr::{drop_in_place, null, null_mut},
 };
 
 // TODO write proper wrappers for these rather than re-export
@@ -353,7 +353,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     }
 
     /// Add an articulation to the world.
-    pub fn add_articulation(&mut self, mut articulation: Owner<impl ArticulationBase<L, H, M>>) {
+    pub fn add_articulation(&mut self, mut articulation: Owner<impl ArticulationBase>) {
         unsafe {
             PxScene_addArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr());
             forget(articulation);
@@ -363,7 +363,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     /// Remove an articulation from the world
     pub fn remove_articulation(
         &mut self,
-        articulation: &mut impl ArticulationBase<L, H, M>,
+        articulation: &mut impl ArticulationBase,
         wake_touching: bool,
     ) {
         unsafe {
@@ -613,8 +613,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     /// PhysX after running a simulation step along with [get_actors], [get_active_actors], and [get_aggregates].
     pub unsafe fn get_articulations(&mut self) -> Vec<ArticulationMap<T, C, L, H, M>> {
         let capacity = PxScene_getNbArticulations(self.as_ptr());
-        let mut buffer: Vec<ArticulationMap<T, C, L, H, M>> =
-            Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<ArticulationMap<T, C, L, H, M>> = Vec::with_capacity(capacity as usize);
         let len = PxScene_getArticulations(
             self.as_ptr(),
             buffer.as_mut_ptr() as *mut *mut _,
@@ -629,8 +628,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         unsafe {
             let flags = actor_type.into_px();
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
-            let mut buffer: Vec<ActorMap<L, S, D, H, M>> =
-                Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<ActorMap<L, S, D, H, M>> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
                 self.as_ptr(),
                 flags,
@@ -649,10 +647,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
         unsafe {
             let mut length = 0;
             let actors = PxScene_getActiveActors_mut(self.as_mut_ptr(), &mut length);
-            std::slice::from_raw_parts_mut(
-                actors as *mut ActorMap<L, S, D, H, M>,
-                length as usize,
-            )
+            std::slice::from_raw_parts_mut(actors as *mut ActorMap<L, S, D, H, M>, length as usize)
         }
     }
 
@@ -697,7 +692,8 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
     pub fn get_aggregates(&mut self) -> Vec<&mut Aggregate<L, S, D, H, M>> {
         unsafe {
             let capacity = PxScene_getNbAggregates(self.as_ptr());
-            let mut buffer: Vec<&mut Aggregate<L, S, D, H, M>> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&mut Aggregate<L, S, D, H, M>> =
+                Vec::with_capacity(capacity as usize);
             let len = PxScene_getAggregates(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut physx_sys::PxAggregate,
@@ -809,7 +805,7 @@ impl<U, L, S, D, M, H, T, C> Scene<U, L, S, D, M, H, T, C> {
 
     pub unsafe fn reset_rigid_actor_filtering(
         &mut self,
-        actor: &mut impl RigidActor<H, M>,
+        actor: &mut impl RigidActor,
         shapes: &[&mut Shape<H, M>],
     ) {
         PxScene_resetFiltering_mut_1(
@@ -843,23 +839,26 @@ impl<U, L, S, D, M, H, T, C> Drop for Scene<U, L, S, D, M, H, T, C> {
         // do the callbacks need to be explicitly dropped as well?
         // is dropping all the physics objects like this correct? do they need to be removed from the scene first?
         unsafe {
-            for ptr in self.get_aggregates(){drop_in_place(ptr as *mut _)};
-            for ptr in self.get_constraints(){drop_in_place(ptr as *mut _)};
-            for mut ptr in self.get_articulations(){
+            for ptr in self.get_aggregates() {
+                drop_in_place(ptr as *mut _)
+            }
+            for ptr in self.get_constraints() {
+                drop_in_place(ptr as *mut _)
+            }
+            for mut ptr in self.get_articulations() {
                 ptr.map(
                     |ptr| drop_in_place(ptr as *mut _),
                     |ptr| drop_in_place(ptr as *mut _),
                 )
-            };
-            for mut ptr in self.get_actors(
-                ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic
-            ) {
+            }
+            for mut ptr in self.get_actors(ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic)
+            {
                 ptr.map(
                     |ptr| drop_in_place(ptr as *mut _),
                     |ptr| drop_in_place(ptr as *mut _),
-                    |_| (), // ArticulationLinks are dropped when the articulation theya re in is dropped
+                    |_| (), // ArticulationLinks are dropped when the articulation they are in is dropped
                 )
-            };
+            }
             drop_in_place(self.get_user_data_mut() as *mut _);
             PxScene_release_mut(self.as_mut_ptr());
         }

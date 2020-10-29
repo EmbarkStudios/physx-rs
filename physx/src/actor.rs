@@ -66,11 +66,10 @@ impl From<PxActorType::Enum> for ActorType {
             0 => ActorType::RigidStatic,
             1 => ActorType::RigidDynamic,
             2 => ActorType::ArticulationLink,
-            _ => panic!("invalid enum variant")
+            _ => panic!("invalid enum variant"),
         }
     }
 }
-
 
 #[derive(Debug, Copy, Clone, BitFlags)]
 #[repr(u8)]

@@ -281,8 +281,8 @@ impl<H, M> Physics<H, M> {
     /// Missing Constraint trait
     pub fn create_constraint(
         &mut self,
-        first_actor: &mut impl RigidActor<H, M>,
-        second_actor: &mut impl RigidActor<H, M>,
+        first_actor: &mut impl RigidActor,
+        second_actor: &mut impl RigidActor,
         connector: &mut PxConstraintConnector,
         shaders: &PxConstraintShaderTable,
         data_size: u32,
@@ -334,7 +334,7 @@ impl<H, M> Physics<H, M> {
     /// Missing PruningStructure impl
     pub fn create_pruning_structure(
         &mut self,
-        actors: Vec<&mut impl RigidActor<H, M>>,
+        actors: Vec<&mut impl RigidActor>,
     ) -> Option<Owner<PruningStructure>> {
         unsafe {
             PruningStructure::from_raw(PxPhysics_createPruningStructure_mut(

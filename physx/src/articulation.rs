@@ -6,10 +6,7 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{
-    marker::PhantomData,
-    ptr::drop_in_place,
-};
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use physx_sys::{
     PxArticulationDriveCache, PxArticulation_applyImpulse_mut,
@@ -33,7 +30,13 @@ pub struct Articulation<U, L, H, M> {
     phantom_user_data: PhantomData<(U, L, H, M)>,
 }
 
-impl<U, L, H, M> ArticulationBase<L, H, M> for Articulation<U, L, H, M> {}
+impl<U, L, H, M> ArticulationBase for Articulation<U, L, H, M> {
+    type LinkData = L;
+
+    type ShapeData = H;
+
+    type MaterialData = M;
+}
 unsafe impl<S, U, L, H, M> Class<S> for Articulation<U, L, H, M>
 where
     physx_sys::PxArticulation: Class<S>,

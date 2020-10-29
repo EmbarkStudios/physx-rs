@@ -21,7 +21,7 @@ use super::{
 
 use std::{
     marker::PhantomData,
-    ptr::{NonNull, drop_in_place},
+    ptr::{drop_in_place, NonNull},
 };
 
 use enumflags2::BitFlags;
@@ -104,7 +104,13 @@ pub struct ArticulationReducedCoordinate<U, L, H, M> {
     phantom_user_data: PhantomData<(U, L, H, M)>,
 }
 
-impl<U, L, H, M> ArticulationBase<L, H, M> for ArticulationReducedCoordinate<U, L, H, M> {}
+impl<U, L, H, M> ArticulationBase for ArticulationReducedCoordinate<U, L, H, M> {
+    type LinkData = L;
+
+    type ShapeData = H;
+
+    type MaterialData = M;
+}
 unsafe impl<S, U, L, H, M> Class<S> for ArticulationReducedCoordinate<U, L, H, M>
 where
     physx_sys::PxArticulationReducedCoordinate: Class<S>,

@@ -15,23 +15,21 @@ use crate::{
 /// and it may need to be explicitly dropped by turning the field back into a Box and droppig it.
 /// If U implements Drop, this may be as simple as calling `get_user_data_mut` and then calling drop(),
 /// but implementation is left to the concrete type's Drop impl.
-pub(crate) unsafe trait UserData: Sized {
+pub unsafe trait UserData: Sized {
     type U;
     /// Returns a reference to the userData field
     fn user_data_ptr(&self) -> &*mut c_void;
     /// Returns a mutable reference to the userData field.
-    fn user_data_mut_ptr(&mut self) -> &mut *mut c_void;
+    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void;
 
-    fn init_user_data(&mut self, user_data: Self::U) -> &mut Self {
+    unsafe fn init_user_data(&mut self, user_data: Self::U) -> &mut Self {
         if size_of::<Self::U>() > size_of::<*mut c_void>() {
             // Too big to pack into a *mut c_void, kick it to the heap.
             let data = Box::new(user_data);
-            *self.user_data_mut_ptr() = Box::into_raw(data) as *mut c_void;
+            *self.user_data_ptr_mut() = Box::into_raw(data) as *mut c_void;
         } else {
             // DATA_SIZE <= VOID_SIZE
-            unsafe {
-                *self.user_data_mut_ptr() = *(&user_data as *const Self::U as *const *mut c_void)
-            }
+            *self.user_data_ptr_mut() = *(&user_data as *const Self::U as *const *mut c_void)
         }
         self
     }
@@ -51,11 +49,11 @@ pub(crate) unsafe trait UserData: Sized {
     unsafe fn get_user_data_mut(this: &mut Self) -> &mut Self::U {
         if size_of::<Self::U>() > size_of::<*mut c_void>() {
             // Data is stored in a Box<U> on the heap, and userData is just a pointer to it.
-            &mut *((*this.user_data_mut_ptr()) as *mut Self::U)
+            &mut *((*this.user_data_ptr_mut()) as *mut Self::U)
         } else {
             // DATA_SIZE <= VOID_SIZE
             // Data is stored directly in the userData field.
-            &mut *(this.user_data_mut_ptr() as *mut *mut c_void as *mut Self::U)
+            &mut *(this.user_data_ptr_mut() as *mut *mut c_void as *mut Self::U)
         }
     }
 }
@@ -69,7 +67,7 @@ macro_rules! UserData {
                 &self.obj.userData
             }
 
-            fn user_data_mut_ptr(&mut self) -> &mut *mut c_void {
+            fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
                 &mut self.obj.userData
             }
         }
@@ -78,10 +76,13 @@ macro_rules! UserData {
 
 UserData!(RigidStatic<S, H, M>);
 UserData!(RigidDynamic<D, H, M>);
+UserData!(ArticulationLink<L, H, M>);
+
 UserData!(Articulation<U, L, H, M>);
 UserData!(ArticulationReducedCoordinate<U, L, H, M>);
+
 UserData!(Scene<U, L, S, D, M, H, T, C>);
-UserData!(Material<U>);
-UserData!(Shape<U, M>);
-UserData!(ArticulationLink<L, H, M>);
 UserData!(PxCapsuleControllerDesc<U>);
+
+UserData!(Shape<U, M>);
+UserData!(Material<U>);

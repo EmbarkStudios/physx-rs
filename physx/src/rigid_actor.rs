@@ -33,7 +33,10 @@ use physx_sys::{
     //PxRigidActor_release_mut,
 };
 
-pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
+pub trait RigidActor: Class<PxRigidActor> + Actor {
+    type ShapeData;
+    type MaterialData;
+
     fn get_nb_constraints(&self) -> u32 {
         unsafe { PxRigidActor_getNbConstraints(self.as_ptr()) }
     }
@@ -80,9 +83,10 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
     }
 
     /// Get a reference to every Shape attached to this actor.
-    fn get_shapes(&self) -> Vec<&Shape<H, M>> {
+    fn get_shapes(&self) -> Vec<&Shape<Self::ShapeData, Self::MaterialData>> {
         let capacity = self.get_nb_shapes();
-        let mut buffer: Vec<&Shape<H, M>> = Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&Shape<Self::ShapeData, Self::MaterialData>> =
+            Vec::with_capacity(capacity as usize);
         unsafe {
             let len = PxRigidActor_getShapes(
                 self.as_ptr(),
@@ -96,9 +100,10 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
     }
 
     /// Get a mutable reference to every Shape attached to this actor.
-    fn get_shapes_mut(&mut self) -> Vec<&mut Shape<H, M>> {
+    fn get_shapes_mut(&mut self) -> Vec<&mut Shape<Self::ShapeData, Self::MaterialData>> {
         let capacity = self.get_nb_shapes();
-        let mut buffer: Vec<&mut Shape<H, M>> = Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&mut Shape<Self::ShapeData, Self::MaterialData>> =
+            Vec::with_capacity(capacity as usize);
         unsafe {
             let len = PxRigidActor_getShapes(
                 self.as_ptr(),
@@ -131,11 +136,11 @@ pub trait RigidActor<H, M>: Class<PxRigidActor> + Actor {
         }
     }
 
-    fn attach_shape(&mut self, shape: &mut Shape<H, M>) -> bool {
+    fn attach_shape(&mut self, shape: &mut Shape<Self::ShapeData, Self::MaterialData>) -> bool {
         unsafe { PxRigidActor_attachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr()) }
     }
 
-    fn detach_shape(&mut self, shape: &mut Shape<H, M>) {
+    fn detach_shape(&mut self, shape: &mut Shape<Self::ShapeData, Self::MaterialData>) {
         unsafe { PxRigidActor_detachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr(), true) };
     }
 }

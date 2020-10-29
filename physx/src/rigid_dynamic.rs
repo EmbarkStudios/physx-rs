@@ -21,10 +21,7 @@ use crate::{
 
 use enumflags2::BitFlags;
 
-use std::{
-    marker::PhantomData,
-    ptr::drop_in_place,
-};
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use physx_sys::{
     phys_PxCreateDynamic, PxRigidActor_release_mut, PxRigidDynamicLockFlag,
@@ -125,8 +122,12 @@ where
     }
 }
 
-impl<D, H, M> RigidActor<H, M> for RigidDynamic<D, H, M> {}
-impl<D, H, M> RigidBody<H, M> for RigidDynamic<D, H, M> {}
+impl<D, H, M> RigidActor for RigidDynamic<D, H, M> {
+    type ShapeData = H;
+
+    type MaterialData = M;
+}
+impl<D, H, M> RigidBody for RigidDynamic<D, H, M> {}
 
 impl<D, H, M> RigidDynamic<D, H, M> {
     pub fn new(

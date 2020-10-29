@@ -17,10 +17,7 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{
-    marker::PhantomData,
-    ptr::drop_in_place,
-};
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use physx_sys::{
     PxArticulationDriveType,
@@ -76,8 +73,12 @@ where
     }
 }
 
-impl<L, H, M> RigidActor<H, M> for ArticulationLink<L, H, M> {}
-impl<L, H, M> RigidBody<H, M> for ArticulationLink<L, H, M> {}
+impl<L, H, M> RigidBody for ArticulationLink<L, H, M> {}
+impl<L, H, M> RigidActor for ArticulationLink<L, H, M> {
+    type ShapeData = H;
+
+    type MaterialData = M;
+}
 
 impl<L, H, M> ArticulationLink<L, H, M> {
     pub(crate) unsafe fn from_raw<'a>(
@@ -107,10 +108,9 @@ impl<L, H, M> ArticulationLink<L, H, M> {
 
     /// Get inbound joint for this link
     pub unsafe fn get_inbound_joint(&self) -> Option<&JointMap> {
-        (
-            &PxArticulationLink_getInboundJoint(self.as_ptr())
-            as *const *mut physx_sys::PxArticulationJointBase as *const JointMap
-        ).as_ref()
+        (&PxArticulationLink_getInboundJoint(self.as_ptr())
+            as *const *mut physx_sys::PxArticulationJointBase as *const JointMap)
+            .as_ref()
     }
 
     pub fn get_link_index(&self) -> u32 {

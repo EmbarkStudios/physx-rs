@@ -1,4 +1,4 @@
-use std::ptr::{NonNull, drop_in_place};
+use std::ptr::{drop_in_place, NonNull};
 
 use crate::traits::Class;
 

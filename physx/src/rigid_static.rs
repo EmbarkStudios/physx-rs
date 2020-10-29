@@ -8,10 +8,7 @@
 
 */
 
-use std::{
-    marker::PhantomData,
-    ptr::drop_in_place,
-};
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use crate::{
     geometry::PxGeometry,
@@ -31,7 +28,11 @@ pub struct RigidStatic<S, H, M> {
     phantom_user_data: PhantomData<(S, H, M)>,
 }
 
-impl<S, H, M> RigidActor<H, M> for RigidStatic<S, H, M> {}
+impl<S, H, M> RigidActor for RigidStatic<S, H, M> {
+    type ShapeData = H;
+
+    type MaterialData = M;
+}
 
 unsafe impl<P, S, H, M> Class<P> for RigidStatic<S, H, M>
 where

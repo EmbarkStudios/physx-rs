@@ -7,12 +7,7 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{
-    ffi::c_void,
-    marker::PhantomData,
-    mem::size_of,
-    ptr::drop_in_place,
-};
+use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
 
 use thiserror::Error;
 
@@ -116,8 +111,7 @@ impl<C> Drop for CapsuleController<C> {
                 drop_in_place(PxController_getUserData(self.as_ptr()) as *mut C);
             } else {
                 drop_in_place(
-                    (&mut PxController_getUserData(self.as_ptr()))
-                    as *mut *mut c_void as *mut C
+                    (&mut PxController_getUserData(self.as_ptr())) as *mut *mut c_void as *mut C,
                 );
             };
             PxController_release_mut(self.as_mut_ptr())

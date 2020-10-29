@@ -58,7 +58,7 @@ impl<L, S, D, H, M> Aggregate<L, S, D, H, M> {
         }
     }
 
-    pub fn add_articulation(&mut self, articulation: &mut impl ArticulationBase<L, H, M>) -> bool {
+    pub fn add_articulation(&mut self, articulation: &mut impl ArticulationBase) -> bool {
         unsafe { PxAggregate_addArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr()) }
     }
 
@@ -94,10 +94,7 @@ impl<L, S, D, H, M> Aggregate<L, S, D, H, M> {
         unsafe { PxAggregate_removeActor_mut(self.as_mut_ptr(), actor.as_mut_ptr()) }
     }
 
-    pub fn remove_articulation(
-        &mut self,
-        articulation: &mut impl ArticulationBase<L, H, M>,
-    ) -> bool {
+    pub fn remove_articulation(&mut self, articulation: &mut impl ArticulationBase) -> bool {
         unsafe { PxAggregate_removeArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr()) }
     }
 }
