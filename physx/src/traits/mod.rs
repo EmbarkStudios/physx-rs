@@ -8,9 +8,6 @@
 
 */
 
-mod collidable;
-//pub use collidable::Collidable;
-
 mod class;
 pub use class::Class;
 
@@ -18,7 +15,15 @@ mod user_data;
 pub(crate) use user_data::UserData;
 
 pub trait PxFlags: Copy {
+    /// The target physx_sys flags type.
     type Target;
+    /// Convert to Px type.
     fn into_px(self) -> Self::Target;
+    /// Convert to BitFlags<> type.
     fn from_px(flags: Self::Target) -> Self;
+}
+
+pub(crate) trait IntoPx {
+    type Target;
+    unsafe fn into_px(self) -> Self::Target;
 }

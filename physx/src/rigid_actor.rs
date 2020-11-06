@@ -34,13 +34,14 @@ use physx_sys::{
 };
 
 pub trait RigidActor: Class<PxRigidActor> + Actor {
-    type ShapeData;
-    type MaterialData;
+    type Shape: Shape;
 
+    /// Get the number of constraints on this rigid actor.
     fn get_nb_constraints(&self) -> u32 {
         unsafe { PxRigidActor_getNbConstraints(self.as_ptr()) }
     }
 
+    /// Get the constraints effecting this rigid actor.
     fn get_constraints(&mut self) -> Vec<&mut Constraint> {
         let capacity = self.get_nb_constraints();
         let mut buffer: Vec<&mut Constraint> = Vec::with_capacity(capacity as usize);
@@ -56,16 +57,17 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
         buffer
     }
 
-    /// Get the global pose of this rigid actor
+    /// Get the global pose of this rigid actor. The scale is implicitly 1.0.
     fn get_global_pose(&self) -> PxTransform {
         unsafe { PxRigidActor_getGlobalPose(self.as_ptr()).into() }
     }
 
-    /// Get the global pose of this rigid actor
+    /// Get the global pose of this rigid actor.
     fn get_global_position(&self) -> PxVec3 {
         unsafe { PxRigidActor_getGlobalPose(self.as_ptr()).p.into() }
     }
 
+    /// Get the global rotation of this rigid actor.
     fn get_global_rotation(&self) -> PxQuat {
         unsafe { PxRigidActor_getGlobalPose(self.as_ptr()).q.into() }
     }
@@ -83,10 +85,9 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
     }
 
     /// Get a reference to every Shape attached to this actor.
-    fn get_shapes(&self) -> Vec<&Shape<Self::ShapeData, Self::MaterialData>> {
+    fn get_shapes(&self) -> Vec<&Self::Shape> {
         let capacity = self.get_nb_shapes();
-        let mut buffer: Vec<&Shape<Self::ShapeData, Self::MaterialData>> =
-            Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&Self::Shape> = Vec::with_capacity(capacity as usize);
         unsafe {
             let len = PxRigidActor_getShapes(
                 self.as_ptr(),
@@ -100,10 +101,9 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
     }
 
     /// Get a mutable reference to every Shape attached to this actor.
-    fn get_shapes_mut(&mut self) -> Vec<&mut Shape<Self::ShapeData, Self::MaterialData>> {
+    fn get_shapes_mut(&mut self) -> Vec<&mut Self::Shape> {
         let capacity = self.get_nb_shapes();
-        let mut buffer: Vec<&mut Shape<Self::ShapeData, Self::MaterialData>> =
-            Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&mut Self::Shape> = Vec::with_capacity(capacity as usize);
         unsafe {
             let len = PxRigidActor_getShapes(
                 self.as_ptr(),
@@ -136,67 +136,13 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
         }
     }
 
-    fn attach_shape(&mut self, shape: &mut Shape<Self::ShapeData, Self::MaterialData>) -> bool {
+    /// Attach a shape.
+    fn attach_shape(&mut self, shape: &mut Self::Shape) -> bool {
         unsafe { PxRigidActor_attachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr()) }
     }
 
-    fn detach_shape(&mut self, shape: &mut Shape<Self::ShapeData, Self::MaterialData>) {
+    /// Detach a shape.
+    fn detach_shape(&mut self, shape: &mut Self::Shape) {
         unsafe { PxRigidActor_detachShape_mut(self.as_mut_ptr(), shape.as_mut_ptr(), true) };
     }
 }
-/*
-impl <R> Collidable for R
-where R: RigidActor {
-    fn on_collide(&mut self, _other: &impl Class<PxRigidActor>, _pairs: &[PxContactPair]) {
-        todo!()
-        /* TODO figure out a solution for contact callbacks that works better than this
-        let this_data = self.get_shapes()[0].get_simulation_filter_data();
-        let other_data = other.get_shapes()[0].get_simulation_filter_data();
-
-        // Intersect collision masks (n.b. assymetric)
-        if (this_data.word0 & other_data.word1) == 0 {
-            return;
-        }
-
-        let count = pairs
-            .iter()
-            .fold(0, |acc, pair| acc + pair.contactCount as usize);
-
-        let user_data = self.user_data_mut();
-
-        let collision_points = &mut user_data.collision_points;
-        unsafe {
-            collision_points.reserve(count);
-            collision_points.set_len(count);
-        }
-
-        let mut offset = 0;
-        for pair in pairs {
-            let slice = &mut collision_points[offset..offset + pair.contactCount as usize];
-            unsafe {
-                PxContactPair_extractContacts(
-                    pair as *const _,
-                    slice.as_ptr() as *mut PxContactPairPoint,
-                    u32::from(pair.contactCount),
-                );
-            }
-            offset += pair.contactCount as usize;
-        }
-
-        user_data.has_collide = true;
-        */
-    }
-
-    fn reset_collide(&mut self) {
-        todo!()
-    }
-
-    fn has_collide(&self) -> bool {
-        todo!()
-    }
-
-    fn read_collision_points(&self) -> &[PxContactPairPoint] {
-        todo!()
-    }
-}
-*/

@@ -137,6 +137,7 @@ pub mod rigid_dynamic;
 pub mod rigid_static;
 pub mod scene;
 pub mod shape;
+pub mod simulation_event_callback;
 pub mod triangle_mesh;
 pub mod visual_debugger;
 

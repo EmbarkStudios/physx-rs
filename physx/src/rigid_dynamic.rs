@@ -10,12 +10,12 @@ Wrapper implementation for PxRigidDynamic
 
 use crate::{
     geometry::Geometry,
-    material::Material,
     math::PxTransform,
     owner::Owner,
     physics::Physics,
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
+    shape::Shape,
     traits::{Class, PxFlags, UserData},
 };
 
@@ -55,8 +55,6 @@ impl PxFlags for RigidDynamicLockFlags {
     }
 }
 
-// TODO why is the sizing here all over the place? Docs and source code have PxU8,
-// the ::Enum type is u32, and the PxRigidDynamicLockFlags is u16. What gives?
 #[derive(Copy, Clone, Debug, BitFlags)]
 #[repr(u8)]
 pub enum RigidDynamicLockFlag {
@@ -95,21 +93,44 @@ impl From<PxRigidDynamicLockFlag::Enum> for RigidDynamicLockFlag {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct SolverIterationCounts {
-    pub min_position_iterations: u32,
-    pub min_velocity_iterations: u32,
-}
-
 ///////////////////////////////////////////////////
 
+/// A new type wrapper for PxRigidDynamic.  Parametrized by it's user data type,
+/// and the type of it's Shapes.
 #[repr(transparent)]
-pub struct RigidDynamic<D, H, M> {
+pub struct PxRigidDynamic<D, Geom: Shape> {
     pub(crate) obj: physx_sys::PxRigidDynamic,
-    phantom_user_data: PhantomData<(D, H, M)>,
+    phantom_user_data: PhantomData<(D, Geom)>,
 }
 
-unsafe impl<P, D, H, M> Class<P> for RigidDynamic<D, H, M>
+unsafe impl<U, Geom: Shape> UserData for PxRigidDynamic<U, Geom> {
+    type UserData = U;
+
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
+    }
+
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
+}
+
+impl<D, Geom: Shape> Drop for PxRigidDynamic<D, Geom> {
+    fn drop(&mut self) {
+        for shape in self.get_shapes() {
+            for _material in shape.get_materials() {
+                // is PxMaterial_release thread safe?
+            }
+            // is PxShape_release thread safe?
+        }
+        unsafe {
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            PxRigidActor_release_mut(self.as_mut_ptr());
+        }
+    }
+}
+
+unsafe impl<P, D, Geom: Shape> Class<P> for PxRigidDynamic<D, Geom>
 where
     physx_sys::PxRigidDynamic: Class<P>,
 {
@@ -122,22 +143,24 @@ where
     }
 }
 
-impl<D, H, M> RigidActor for RigidDynamic<D, H, M> {
-    type ShapeData = H;
+unsafe impl<D: Send, Geom: Shape + Send> Send for PxRigidDynamic<D, Geom> {}
+unsafe impl<D: Sync, Geom: Shape + Sync> Sync for PxRigidDynamic<D, Geom> {}
 
-    type MaterialData = M;
+impl<D, Geom: Shape> RigidActor for PxRigidDynamic<D, Geom> {
+    type Shape = Geom;
 }
-impl<D, H, M> RigidBody for RigidDynamic<D, H, M> {}
 
-impl<D, H, M> RigidDynamic<D, H, M> {
-    pub fn new(
-        physics: &mut Physics<H, M>,
+impl<D, Geom: Shape> RigidDynamic for PxRigidDynamic<D, Geom> {}
+
+pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData {
+    fn new(
+        physics: &mut impl Physics,
         transform: PxTransform,
         geometry: &impl Geometry,
-        material: &mut Material<M>,
+        material: &mut <Self::Shape as Shape>::Material,
         density: f32,
         shape_transform: PxTransform,
-        user_data: D,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
         unsafe {
             RigidDynamic::from_raw(
@@ -154,31 +177,33 @@ impl<D, H, M> RigidDynamic<D, H, M> {
         }
     }
 
-    pub(crate) unsafe fn from_raw(
+    unsafe fn from_raw(
         ptr: *mut physx_sys::PxRigidDynamic,
-        user_data: D,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let actor = (ptr as *mut RigidDynamic<D, H, M>).as_mut();
+        let actor = (ptr as *mut Self).as_mut();
         Owner::from_raw(actor?.init_user_data(user_data))
     }
 
-    pub fn get_user_data(&self) -> &D {
-        // Safety: construction must go through `from_raw` which calls `init_user_data`
+    fn get_user_data(&self) -> &Self::UserData {
+        // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
-    pub fn get_user_data_mut(&mut self) -> &mut D {
-        // Safety: construction must go through `from_raw` which calls `init_user_data`
+    fn get_user_data_mut(&mut self) -> &mut Self::UserData {
+        // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
     }
 
-    pub fn get_contact_report_threshold(&self) -> f32 {
+    /// Get the contact report threshold.  If the force between two actors exceeds this threshold for either actor,
+    /// a contact report will be generated in accordance with the filter shader.
+    fn get_contact_report_threshold(&self) -> f32 {
         unsafe { PxRigidDynamic_getContactReportThreshold(self.as_ptr()) }
     }
 
     /// Returns a copy of the target transform if the actor is knematically controlled and has a target set,
     /// otherwise it returns None.
-    pub fn get_kinematic_target(&self) -> Option<PxTransform> {
+    fn get_kinematic_target(&self) -> Option<PxTransform> {
         let mut transform = PxTransform::default();
         unsafe {
             if PxRigidDynamic_getKinematicTarget(self.as_ptr(), transform.as_mut_ptr()) {
@@ -189,101 +214,116 @@ impl<D, H, M> RigidDynamic<D, H, M> {
         }
     }
 
-    pub fn get_rigid_dynamic_lock_flags(&self) -> RigidDynamicLockFlags {
+    /// Get the lock flags.
+    fn get_rigid_dynamic_lock_flags(&self) -> RigidDynamicLockFlags {
         unsafe {
             RigidDynamicLockFlags::from_px(PxRigidDynamic_getRigidDynamicLockFlags(self.as_ptr()))
         }
     }
 
-    pub fn get_sleep_threshold(&self) -> f32 {
+    /// Get the sleep threshold.  If the actor's mass-normalized kinetic energy is below this value,
+    /// the actor might go to sleep.
+    fn get_sleep_threshold(&self) -> f32 {
         unsafe { PxRigidDynamic_getSleepThreshold(self.as_ptr()) }
     }
 
-    pub fn get_solver_iteration_counts(&self) -> SolverIterationCounts {
-        let mut vel_iters = 0;
+    /// Get the number of (position, velocity) iterations done by the solver.
+    fn get_solver_iteration_counts(&self) -> (u32, u32) {
         let mut pos_iters = 0;
+        let mut vel_iters = 0;
         unsafe {
             PxRigidDynamic_getSolverIterationCounts(self.as_ptr(), &mut vel_iters, &mut pos_iters);
         }
-        SolverIterationCounts {
-            min_position_iterations: pos_iters,
-            min_velocity_iterations: vel_iters,
-        }
+        (pos_iters, vel_iters)
     }
 
-    pub fn get_stabilization_threshold(&self) -> f32 {
+    /// Get the stabilization threshold.  Actors with mass-normalized kinetic energy may participate in stabilization.
+    fn get_stabilization_threshold(&self) -> f32 {
         unsafe { PxRigidDynamic_getStabilizationThreshold(self.as_ptr()) }
     }
 
-    pub fn get_wake_counter(&self) -> f32 {
+    /// Get the wake counter.
+    fn get_wake_counter(&self) -> f32 {
         unsafe { PxRigidDynamic_getWakeCounter(self.as_ptr()) }
     }
 
-    pub fn is_sleeping(&self) -> bool {
+    /// Returns true if the actor is sleeping.  Sleeping actors are not simulated.  If an actor is sleeping,
+    /// it's linear and angular velocities are zero, no force or torque updates are pending, and the wake counter is zero.
+    fn is_sleeping(&self) -> bool {
         unsafe { PxRigidDynamic_isSleeping(self.as_ptr()) }
     }
 
-    pub fn put_to_sleep(&mut self) {
+    /// Put the actor to sleep.  Pending force and torque is cleared, and the wake counter and linear and angular
+    /// velocities are all set to zero.
+    fn put_to_sleep(&mut self) {
         unsafe { PxRigidDynamic_putToSleep_mut(self.as_mut_ptr()) }
     }
 
-    pub fn set_contact_report_threshold(&mut self, threshold: f32) {
+    /// Set the contact report threshold, used when determining if a contact report should be generated.
+    fn set_contact_report_threshold(&mut self, threshold: f32) {
         unsafe { PxRigidDynamic_setContactReportThreshold_mut(self.as_mut_ptr(), threshold) }
     }
 
-    pub fn set_kinematic_target(&mut self, target: &PxTransform) {
+    /// Set the kinematic target of the actor.  Set an actor as kinematic using `RigidBodyFlag::Kinematic`.
+    /// The actor will have it's velocity set such that it gets moved to the desired pose in a single timestep,
+    /// then the velocity will be zeroed.  Movement along a path requires continuous calls.  Consecutive calls
+    /// in a single frame will overwrite the prior.
+    fn set_kinematic_target(&mut self, target: &PxTransform) {
         unsafe { PxRigidDynamic_setKinematicTarget_mut(self.as_mut_ptr(), target.as_ptr()) }
     }
 
-    pub fn set_rigid_dynamic_lock_flag(&mut self, flag: RigidDynamicLockFlag, value: bool) {
+    /// Set a lock flag, preventing movement along or about an axis.
+    fn set_rigid_dynamic_lock_flag(&mut self, flag: RigidDynamicLockFlag, value: bool) {
         unsafe { PxRigidDynamic_setRigidDynamicLockFlag_mut(self.as_mut_ptr(), flag.into(), value) }
     }
 
-    pub fn set_rigid_dynamic_lock_flags(&mut self, flags: RigidDynamicLockFlags) {
+    /// Set the lock flags.
+    fn set_rigid_dynamic_lock_flags(&mut self, flags: RigidDynamicLockFlags) {
         unsafe { PxRigidDynamic_setRigidDynamicLockFlags_mut(self.as_mut_ptr(), flags.into_px()) }
     }
 
-    pub fn set_sleep_threshold(&mut self, threshold: f32) {
+    /// Set the mass normalized kinetic energy under which an actor is a candidate for being slept.  Default is
+    /// 5e-5f * PxTolerancesScale.speed ^ 2.  Value is clamped to range [0.0 .. ].
+    fn set_sleep_threshold(&mut self, mut threshold: f32) {
+        if threshold.is_sign_negative() {
+            threshold = 0.0
+        };
         unsafe { PxRigidDynamic_setSleepThreshold_mut(self.as_mut_ptr(), threshold) }
     }
 
-    pub fn set_solver_iteration_counts(&mut self, iter_counts: SolverIterationCounts) {
+    /// Set the number of solver iterations for the position and velocity solvers clamped to range [1..=255].
+    /// Defualt is position = 4 and velocity = 1. If bodies are oscillating, increase the position iterations.
+    /// If bodies are being depenetrated too quickly, increase the velocity iterations.
+    fn set_solver_iteration_counts(
+        &mut self,
+        min_position_iterations: u32,
+        min_velocity_iterations: u32,
+    ) {
         unsafe {
             PxRigidDynamic_setSolverIterationCounts_mut(
                 self.as_mut_ptr(),
-                iter_counts.min_position_iterations,
-                iter_counts.min_velocity_iterations,
+                min_position_iterations,
+                min_velocity_iterations,
             )
         }
     }
 
-    pub fn set_stabilization_threshold(&mut self, threshold: f32) {
+    /// Set the stabilization threshold.  Actors with mass-normalized kinetic energy above this value will
+    /// not participate in stabilization.
+    fn set_stabilization_threshold(&mut self, threshold: f32) {
         unsafe { PxRigidDynamic_setStabilizationThreshold_mut(self.as_mut_ptr(), threshold) }
     }
 
-    pub fn set_wake_counter(&mut self, wake_counter: f32) {
+    /// Sets the wake counter.  This is the minimum amount of time until an actor must spend below the
+    /// sleep threshold before it is put to sleep.  Setting this to a positive value will wake the actor.
+    /// Default is 0.4, value is in seconds.
+    fn set_wake_counter(&mut self, wake_counter: f32) {
         unsafe { PxRigidDynamic_setWakeCounter_mut(self.as_mut_ptr(), wake_counter) }
     }
 
-    pub fn wake_up(&mut self) {
+    /// Wake the actor.  May wake touching actors.  Sets the wake counter to the `wake_counter_reset_value`
+    /// set at scene creation.
+    fn wake_up(&mut self) {
         unsafe { PxRigidDynamic_wakeUp_mut(self.as_mut_ptr()) }
-    }
-}
-
-unsafe impl<D: Send, H: Send, M: Send> Send for RigidDynamic<D, H, M> {}
-unsafe impl<D: Sync, H: Sync, M: Sync> Sync for RigidDynamic<D, H, M> {}
-
-impl<D, H, M> Drop for RigidDynamic<D, H, M> {
-    fn drop(&mut self) {
-        for shape in self.get_shapes() {
-            for _material in shape.get_materials() {
-                // is PxMaterial_release thread safe?
-            }
-            // is PxShape_release thread safe?
-        }
-        unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
-            PxRigidActor_release_mut(self.as_mut_ptr());
-        }
     }
 }

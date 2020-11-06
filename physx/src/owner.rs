@@ -11,7 +11,7 @@ pub struct Owner<T> {
 }
 
 impl<T> Owner<T> {
-    /// Create a new owner from a raw pointer.
+    /// Create a new owner from a raw pointer.  Use the `from_raw` method on the type!
     /// Safety: Only one of these may be constructed per pointer.  In particular,
     /// this must not be called on a pointer attained via Class::as_mut_ptr.  The
     /// intended pattern is to wrap the raw FFI constructors in this call, so that
@@ -20,6 +20,16 @@ impl<T> Owner<T> {
         Some(Self {
             ptr: NonNull::new(ptr)?,
         })
+    }
+
+    /// Consumes the Owner without calling Drop and returns the raw pointer it was wrapping.
+    pub fn into_ptr<S>(mut self) -> *mut S
+    where
+        T: Class<S>,
+    {
+        let ptr = self.as_mut_ptr();
+        std::mem::forget(self);
+        ptr
     }
 }
 

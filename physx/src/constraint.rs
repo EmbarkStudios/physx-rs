@@ -7,7 +7,7 @@ pub struct Constraint {
     obj: physx_sys::PxConstraint,
 }
 
-crate::ClassObj!(Constraint: PxConstraint, PxBase);
+crate::DeriveClassForNewType!(Constraint: PxConstraint, PxBase);
 
 impl Constraint {
     #[allow(dead_code)]

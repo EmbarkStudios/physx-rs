@@ -7,7 +7,7 @@ pub struct BVHStructure {
     obj: physx_sys::PxBVHStructure,
 }
 
-crate::ClassObj!(BVHStructure: PxBVHStructure, PxBase);
+crate::DeriveClassForNewType!(BVHStructure: PxBVHStructure, PxBase);
 
 impl BVHStructure {
     #[allow(dead_code)]

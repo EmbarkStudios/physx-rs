@@ -8,7 +8,7 @@
 
 */
 use crate::{
-    articulation_base::ArticulationBase,
+    articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     math::{PxTransform, PxVec3},
     traits::Class,
@@ -154,9 +154,9 @@ impl ArticulationCache {
         }
     }
 
-    pub unsafe fn compute_dof_information<U, L, H, M>(
+    pub unsafe fn compute_dof_information(
         &mut self,
-        articulation: &ArticulationReducedCoordinate<U, L, H, M>,
+        articulation: &impl ArticulationReducedCoordinate,
     ) {
         let mut offsets = [0u32; 64];
         let mut dofs = [0u8; 64];

@@ -7,7 +7,7 @@ pub struct PruningStructure {
     obj: physx_sys::PxPruningStructure,
 }
 
-crate::ClassObj!(PruningStructure: PxPruningStructure, PxBase);
+crate::DeriveClassForNewType!(PruningStructure: PxPruningStructure, PxBase);
 
 impl PruningStructure {
     pub(crate) unsafe fn from_raw(

@@ -14,7 +14,6 @@ use super::{
     geometry::*,
 };
 use physx_sys::{
-    // TODO import things individually and fix safety holes
 };
 
 todo[tolsson]: Make these into builder parameters
@@ -118,7 +117,6 @@ pub trait Cooking {
         }
     }
 
-    /* TODO make sense of  PxGeometry creation :)
     fn make_geometry<T>(&mut self, desc: ColliderDesc) -> Geometry<T> {
         unsafe {
             match desc {
@@ -151,6 +149,5 @@ pub trait Cooking {
             }
         }
     }
-    */
 }
 */

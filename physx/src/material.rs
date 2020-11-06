@@ -39,6 +39,8 @@ pub enum MaterialFlag {
 
 pub type MaterialFlags = BitFlags<MaterialFlag>;
 
+/// Determines how the restitution and friction properties of materials are combined
+/// to produce the coefficients for that interaction.
 #[derive(Copy, Clone, Debug)]
 #[repr(u32)]
 pub enum CombineMode {
@@ -62,13 +64,34 @@ impl From<PxCombineMode::Enum> for CombineMode {
     }
 }
 
+/// A new type wrapper for PxMaterial.  Parametrized by it's user data type.
 #[repr(transparent)]
-pub struct Material<U> {
+pub struct PxMaterial<U> {
     pub(crate) obj: physx_sys::PxMaterial,
     phantom_user_data: PhantomData<U>,
 }
 
-unsafe impl<P, U> Class<P> for Material<U>
+unsafe impl<U> UserData for PxMaterial<U> {
+    type UserData = U;
+
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
+    }
+
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
+}
+
+impl<U> Drop for PxMaterial<U> {
+    fn drop(&mut self) {
+        unsafe {
+            PxMaterial_release_mut(self.as_mut_ptr());
+        }
+    }
+}
+
+unsafe impl<P, U> Class<P> for PxMaterial<U>
 where
     physx_sys::PxMaterial: Class<P>,
 {
@@ -81,72 +104,110 @@ where
     }
 }
 
-impl<U> Material<U> {
-    pub(crate) unsafe fn from_raw(
+unsafe impl<U: Send> Send for PxMaterial<U> {}
+unsafe impl<U: Sync> Sync for PxMaterial<U> {}
+
+impl<M> Material for PxMaterial<M> {}
+
+pub trait Material: Class<physx_sys::PxMaterial> + UserData {
+    /// Safety: Owners drop the wrapped pointer, uuse of the material after the owner is dropped
+    /// is UB.
+    unsafe fn from_raw(
         ptr: *mut physx_sys::PxMaterial,
-        user_data: U,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let material = (ptr as *mut Self).as_mut();
-        Owner::from_raw(material?.init_user_data(user_data))
+        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 
-    pub fn get_user_data(&self) -> &U {
+    /// Get a reference to the user data.
+    #[inline]
+    fn get_user_data(&self) -> &Self::UserData {
         // Safety: all constructors go through from_raw which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
-    pub fn get_user_data_mut(&mut self) -> &mut U {
+    /// Get a mutable reference to the user data.
+    #[inline]
+    fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all constructors go through from_raw which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
     }
 
+    /// Get the current ref count of the material.
     #[inline]
-    pub unsafe fn get_ref_count(&self) -> u32 {
+    unsafe fn get_ref_count(&self) -> u32 {
         PxMaterial_getReferenceCount(self.as_ptr())
     }
 
+    /// Increment the ref count of the material.
     #[inline]
-    pub unsafe fn acquire_reference(&mut self) {
+    unsafe fn acquire_reference(&mut self) {
         PxMaterial_acquireReference_mut(self.as_mut_ptr())
     }
 
+    /// Set the dynamic friction.
+    /// - Friction must be positive.
+    /// - If greater than static friction, effective static friction will be increased to match.
+    /// - Will not wake actors.
     #[inline]
-    pub unsafe fn set_dynamic_friction(&mut self, coefficient: f32) {
+    unsafe fn set_dynamic_friction(&mut self, mut coefficient: f32) {
+        if coefficient.is_sign_negative() {
+            coefficient = 0.0;
+        }
         PxMaterial_setDynamicFriction_mut(self.as_mut_ptr(), coefficient);
     }
 
+    /// Get the dynamic friction.
     #[inline]
-    pub unsafe fn get_dynamic_friction(&self) -> f32 {
+    unsafe fn get_dynamic_friction(&self) -> f32 {
         PxMaterial_getDynamicFriction(self.as_ptr())
     }
 
+    /// Set the static friction.
+    /// - Friction must be positive, negative friction is set to 0.0.
+    /// - Will not wake actors.
     #[inline]
-    pub unsafe fn set_static_friction(&mut self, coefficient: f32) {
+    unsafe fn set_static_friction(&mut self, mut coefficient: f32) {
+        if coefficient.is_sign_negative() {
+            coefficient = 0.0;
+        }
         PxMaterial_setStaticFriction_mut(self.as_mut_ptr(), coefficient);
     }
 
+    /// Get the static frction.
     #[inline]
-    pub unsafe fn get_static_friction(&self) -> f32 {
+    unsafe fn get_static_friction(&self) -> f32 {
         PxMaterial_getStaticFriction(self.as_ptr())
     }
 
+    /// Set the restitution.
+    /// - Restitution must be in [0.0 ..= 1.0], values outside tyhe range are clamped.
+    /// - A reitution of 0.0 minimizes bouncing, higher values mean more bounce.
     #[inline]
-    pub unsafe fn set_restitution(&mut self, restitution: f32) {
+    unsafe fn set_restitution(&mut self, mut restitution: f32) {
+        if restitution.is_sign_negative() {
+            restitution = 0.0;
+        } else if restitution > 1.0 {
+            restitution = 1.0
+        };
         PxMaterial_setRestitution_mut(self.as_mut_ptr(), restitution);
     }
 
+    /// Get the restitution.
     #[inline]
-    pub unsafe fn get_restitution(&self) -> f32 {
+    unsafe fn get_restitution(&self) -> f32 {
         PxMaterial_getRestitution(self.as_ptr())
     }
 
+    /// Set a material flag.
     #[inline]
-    pub unsafe fn set_flag(&mut self, flag: MaterialFlag, set: bool) {
+    unsafe fn set_flag(&mut self, flag: MaterialFlag, set: bool) {
         PxMaterial_setFlag_mut(self.as_mut_ptr(), flag as _, set)
     }
 
+    /// Set all the material flags.
     #[inline]
-    pub unsafe fn set_flags(&mut self, flags: MaterialFlags) {
+    unsafe fn set_flags(&mut self, flags: MaterialFlags) {
         PxMaterial_setFlags_mut(
             self.as_mut_ptr(),
             PxMaterialFlags {
@@ -155,44 +216,38 @@ impl<U> Material<U> {
         );
     }
 
+    /// Get the material flags.
     #[inline]
-    pub unsafe fn get_flags(&self) -> MaterialFlags {
+    unsafe fn get_flags(&self) -> MaterialFlags {
         let PxMaterialFlags { mBits } = PxMaterial_getFlags(self.as_ptr());
         BitFlags::new(mBits)
     }
 
+    /// Set the friction combine mode.
     #[inline]
-    pub unsafe fn set_friction_combined_mode(&mut self, combine_mode: CombineMode) {
+    unsafe fn set_friction_combined_mode(&mut self, combine_mode: CombineMode) {
         PxMaterial_setFrictionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
     }
 
+    /// Get the friction combine mode.
     #[inline]
-    pub unsafe fn get_friction_combine_mode(&self) -> CombineMode {
+    unsafe fn get_friction_combine_mode(&self) -> CombineMode {
         let combine_mode = PxMaterial_getFrictionCombineMode(self.as_ptr());
         debug_assert!(combine_mode < PxCombineMode::eN_VALUES);
         combine_mode.into()
     }
 
+    /// Set the restitution combine mode.
     #[inline]
-    pub unsafe fn set_restitution_combine_mode(&mut self, combine_mode: CombineMode) {
+    unsafe fn set_restitution_combine_mode(&mut self, combine_mode: CombineMode) {
         PxMaterial_setRestitutionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
     }
 
+    /// Get the restitution combine mode.
     #[inline]
-    pub unsafe fn get_restitution_combine_mode(&self) -> CombineMode {
+    unsafe fn get_restitution_combine_mode(&self) -> CombineMode {
         let combine_mode = PxMaterial_getRestitutionCombineMode(self.as_ptr());
         debug_assert!(combine_mode < PxCombineMode::eN_VALUES);
         combine_mode.into()
-    }
-}
-
-unsafe impl<U: Send> Send for Material<U> {}
-unsafe impl<U: Sync> Sync for Material<U> {}
-
-impl<U> Drop for Material<U> {
-    fn drop(&mut self) {
-        unsafe {
-            PxMaterial_release_mut(self.as_mut_ptr());
-        }
     }
 }

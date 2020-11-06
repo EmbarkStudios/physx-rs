@@ -20,7 +20,7 @@ pub struct PxTransform {
     obj: physx_sys::PxTransform,
 }
 
-crate::ClassObj!(PxTransform: PxTransform);
+crate::DeriveClassForNewType!(PxTransform: PxTransform);
 
 impl Default for PxTransform {
     fn default() -> Self {

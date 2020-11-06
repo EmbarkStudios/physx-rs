@@ -74,11 +74,14 @@ pub struct ArticulationJoint {
     obj: physx_sys::PxArticulationJoint,
 }
 
-crate::ClassObj!(
+crate::DeriveClassForNewType!(
     ArticulationJoint: PxArticulationJoint,
     PxArticulationJointBase,
     PxBase
 );
+
+unsafe impl Send for ArticulationJoint {}
+unsafe impl Sync for ArticulationJoint {}
 
 impl ArticulationJoint {
     /// set drive type of the associated joints
@@ -91,6 +94,3 @@ impl ArticulationJoint {
         unsafe { PxArticulationJoint_setTargetOrientation_mut(self.as_mut_ptr(), quat.as_ptr()) };
     }
 }
-
-unsafe impl Send for ArticulationJoint {}
-unsafe impl Sync for ArticulationJoint {}

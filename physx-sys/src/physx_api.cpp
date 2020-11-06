@@ -121,7 +121,6 @@ class SimulationEventTrampoline : public PxSimulationEventCallback
         }
     }
 
-  private:
     SimulationEventCallbackInfo mCallbacks;
 };
 
@@ -197,6 +196,7 @@ public:
 private:
     AllocCallback mAllocCallback;
     DeallocCallback mDeallocCallback;
+public:
     void *mUserData;
 };
 
@@ -248,6 +248,11 @@ extern "C"
         return new CustomAllocatorTrampoline(alloc_callback, dealloc_callback, userdata);
     }
 
+    void *get_alloc_callback_user_data(PxAllocatorCallback *allocator) {
+        CustomAllocatorTrampoline *trampoline = static_cast<CustomAllocatorTrampoline *>(allocator);
+        return trampoline->mUserData;
+    }
+
     void *get_default_simulation_filter_shader()
     {
         return (void *)PxDefaultSimulationFilterShader;
@@ -257,6 +262,12 @@ extern "C"
     {
         SimulationEventTrampoline *trampoline = new SimulationEventTrampoline(callbacks);
         return static_cast<PxSimulationEventCallback *>(trampoline);
+    }
+
+    SimulationEventCallbackInfo get_simulation_event_info(PxSimulationEventCallback *callback)
+    {
+        SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
+        return trampoline->mCallbacks;
     }
 
     void destroy_simulation_event_callbacks(PxSimulationEventCallback *callback)

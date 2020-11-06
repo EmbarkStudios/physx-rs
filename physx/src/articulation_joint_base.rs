@@ -14,8 +14,6 @@ use crate::{
     math::PxTransform, traits::Class,
 };
 
-pub(crate) use physx_sys::PxArticulationJointBase;
-
 use physx_sys::{
     PxArticulationJointBase_getChildPose,
     PxArticulationJointBase_getParentArticulationLink,
@@ -30,8 +28,8 @@ use physx_sys::{
  * Section IMPLEMENTATION                                                      *
  ******************************************************************************/
 
-impl<T> ArticulationJointBase for T where T: Class<PxArticulationJointBase> + Base {}
-pub trait ArticulationJointBase: Class<PxArticulationJointBase> + Base {
+impl<T> ArticulationJointBase for T where T: Class<physx_sys::PxArticulationJointBase> + Base {}
+pub trait ArticulationJointBase: Class<physx_sys::PxArticulationJointBase> + Base {
     /// Set the pose of the joint in the child frame
     fn set_child_pose(&mut self, pose: &PxTransform) {
         unsafe {
@@ -73,19 +71,19 @@ pub trait ArticulationJointBase: Class<PxArticulationJointBase> + Base {
 }
 
 pub struct JointMap {
-    obj: *mut physx_sys::PxArticulationJointBase,
+    obj: physx_sys::PxArticulationJointBase,
 }
 
 unsafe impl<P> Class<P> for JointMap
 where
-    physx_sys::PxArticulationBase: Class<P>,
+    physx_sys::PxArticulationJointBase: Class<P>,
 {
     fn as_ptr(&self) -> *const P {
-        self.obj as *const _ as *const _
+        self.obj.as_ptr()
     }
 
     fn as_mut_ptr(&mut self) -> *mut P {
-        self.obj as *mut _
+        self.obj.as_mut_ptr()
     }
 }
 
@@ -97,10 +95,10 @@ impl JointMap {
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => {
-                art_fn(&mut *(self.obj as *mut ArticulationJoint))
+                art_fn(&mut *(self as *mut _ as *mut ArticulationJoint))
             }
             crate::base::ConcreteType::ArticulationJointReducedCoordinate => {
-                arc_fn(&mut *(self.obj as *mut ArticulationJointReducedCoordinate))
+                arc_fn(&mut *(self as *mut _ as *mut ArticulationJointReducedCoordinate))
             }
             _ => panic!(
                 "get_concrete_type returned an invalid type: {:?}",
@@ -120,10 +118,10 @@ impl JointMap {
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => Some(art_fn(unsafe {
-                &mut *(self.obj as *mut ArticulationJoint)
+                &mut *(self as *mut _ as *mut ArticulationJoint)
             })),
             crate::base::ConcreteType::ArticulationJointReducedCoordinate => Some(arc_fn(unsafe {
-                &mut *(self.obj as *mut ArticulationJointReducedCoordinate)
+                &mut *(self as *mut _ as *mut ArticulationJointReducedCoordinate)
             })),
             _ => None,
         }
@@ -132,7 +130,7 @@ impl JointMap {
     pub fn as_articulation_joint(&mut self) -> Option<&mut ArticulationJoint> {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => unsafe {
-                Some(&mut *(self.obj as *mut ArticulationJoint))
+                Some(&mut *(self as *mut _ as *mut ArticulationJoint))
             },
             _ => None,
         }
@@ -143,7 +141,7 @@ impl JointMap {
     ) -> Option<&mut ArticulationJointReducedCoordinate> {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJointReducedCoordinate => unsafe {
-                Some(&mut *(self.obj as *mut ArticulationJointReducedCoordinate))
+                Some(&mut *(self as *mut _ as *mut ArticulationJointReducedCoordinate))
             },
             _ => None,
         }

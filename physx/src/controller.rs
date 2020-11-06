@@ -1,7 +1,7 @@
 #![warn(clippy::all)]
 
 use crate::{
-    material::Material,
+    material::PxMaterial,
     math::{PxExtendedVec3, PxVec3},
     owner::Owner,
     traits::{Class, UserData},
@@ -40,12 +40,12 @@ pub trait Controller: Class<PxController> {
 }
 
 #[repr(transparent)]
-pub struct CapsuleController<C> {
+pub struct CapsuleController<U> {
     obj: physx_sys::PxCapsuleController,
-    phantom_user_data: PhantomData<C>,
+    phantom_user_data: PhantomData<U>,
 }
 
-unsafe impl<T, C> Class<T> for CapsuleController<C>
+unsafe impl<T, U> Class<T> for CapsuleController<U>
 where
     physx_sys::PxCapsuleController: Class<T>,
 {
@@ -100,17 +100,14 @@ impl<U> CapsuleController<U> {
     }
 }
 
-unsafe impl<C: Send> Send for CapsuleController<C> {}
-unsafe impl<C: Sync> Sync for CapsuleController<C> {}
-
-impl<C> Drop for CapsuleController<C> {
+impl<U> Drop for CapsuleController<U> {
     fn drop(&mut self) {
         unsafe {
-            if size_of::<C>() > size_of::<*mut c_void>() {
-                drop_in_place(PxController_getUserData(self.as_ptr()) as *mut C);
+            if size_of::<U>() > size_of::<*mut c_void>() {
+                drop_in_place(PxController_getUserData(self.as_ptr()) as *mut U);
             } else {
                 drop_in_place(
-                    (&mut PxController_getUserData(self.as_ptr())) as *mut *mut c_void as *mut C,
+                    (&mut PxController_getUserData(self.as_ptr())) as *mut *mut c_void as *mut U,
                 );
             };
             PxController_release_mut(self.as_mut_ptr())
@@ -118,17 +115,20 @@ impl<C> Drop for CapsuleController<C> {
     }
 }
 
+unsafe impl<U: Send> Send for CapsuleController<U> {}
+unsafe impl<U: Sync> Sync for CapsuleController<U> {}
+
 pub struct CapsuleControllerDescriptor<'a, U, M> {
     pub height: f32,
     pub radius: f32,
     pub step_offset: f32,
-    pub material: &'a mut Material<M>,
+    pub material: &'a mut PxMaterial<M>,
     pub user_data: U,
     pub position: PxExtendedVec3,
 }
 
 impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
-    pub(crate) fn into_desc(self) -> Option<&'a mut PxCapsuleControllerDesc<U>> {
+    pub(crate) fn into_desc(self) -> Option<Owner<PxCapsuleControllerDesc<U>>> {
         unsafe {
             let mut desc = PxCapsuleControllerDesc::from_raw(
                 PxCapsuleControllerDesc_new_alloc(),
@@ -144,7 +144,6 @@ impl<'a, U, M> CapsuleControllerDescriptor<'a, U, M> {
             if desc.is_valid() {
                 Some(desc)
             } else {
-                drop_in_place(desc as *mut _);
                 None
             }
         }
@@ -174,8 +173,8 @@ impl<U> PxCapsuleControllerDesc<U> {
     unsafe fn from_raw<'a>(
         ptr: *mut physx_sys::PxCapsuleControllerDesc,
         user_data: U,
-    ) -> Option<&'a mut Self> {
-        Some((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+    ) -> Option<Owner<Self>> {
+        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 }
 

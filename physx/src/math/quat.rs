@@ -16,7 +16,7 @@ pub struct PxQuat {
     obj: physx_sys::PxQuat,
 }
 
-crate::ClassObj!(PxQuat: PxQuat);
+crate::DeriveClassForNewType!(PxQuat: PxQuat);
 
 impl Default for PxQuat {
     fn default() -> PxQuat {

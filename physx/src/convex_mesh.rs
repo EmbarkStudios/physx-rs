@@ -7,7 +7,7 @@ pub struct ConvexMesh {
     obj: physx_sys::PxConvexMesh,
 }
 
-crate::ClassObj!(ConvexMesh: PxConvexMesh, PxBase);
+crate::DeriveClassForNewType!(ConvexMesh: PxConvexMesh, PxBase);
 
 impl ConvexMesh {
     #[allow(dead_code)]

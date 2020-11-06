@@ -17,7 +17,7 @@ use physx_sys::{
     PxArticulationJointReducedCoordinate_setJointType_mut,
     PxArticulationJointReducedCoordinate_setLimit_mut,
     PxArticulationJointReducedCoordinate_setMotion_mut,
-    /* TODO implement
+    /*
     PxArticulationJointReducedCoordinate_getDrive_mut,
     PxArticulationJointReducedCoordinate_getDriveTarget_mut,
     PxArticulationJointReducedCoordinate_getDriveVelocity_mut,
@@ -180,11 +180,14 @@ pub struct ArticulationJointReducedCoordinate {
     obj: physx_sys::PxArticulationJointReducedCoordinate,
 }
 
-crate::ClassObj!(
+crate::DeriveClassForNewType!(
     ArticulationJointReducedCoordinate: PxArticulationJointReducedCoordinate,
     PxArticulationBase,
     PxBase
 );
+
+unsafe impl Send for ArticulationJointReducedCoordinate {}
+unsafe impl Sync for ArticulationJointReducedCoordinate {}
 
 impl ArticulationJointReducedCoordinate {
     /// Set target angle around axis for this joint

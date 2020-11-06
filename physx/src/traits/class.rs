@@ -88,7 +88,25 @@ pub unsafe trait Class<S> {
     fn as_mut_ptr(&mut self) -> *mut S;
 }
 
-macro_rules! Class {
+#[macro_export(crate)]
+/// Macro for quickly defining Class<...> impls for new type wrappers.
+/// The type must be repr(transparent), and have the Px object in a field
+/// named obj.  Will not work if the type parameters have trait bounds.
+macro_rules! DeriveClassForNewType {
+    ($PxWrap:ident : $($PxClass:ident),+) => {
+        $(unsafe impl Class<::physx_sys::$PxClass> for $PxWrap {
+            fn as_ptr(&self) -> *const ::physx_sys::$PxClass {
+                &self.obj as *const _ as *const _
+            }
+            fn as_mut_ptr(&mut self) -> *mut ::physx_sys::$PxClass {
+                &mut self.obj as *mut _ as *mut _
+            }
+        })+
+    }
+}
+
+/// Derive Class<T> for the raw Px* types.
+macro_rules! DeriveClass {
     ($PxType:ty $(: $($PxClass:ty),*)?) => {
         unsafe impl Class<$PxType> for $PxType {
             fn as_ptr(&self) -> *const $PxType {
@@ -110,99 +128,77 @@ macro_rules! Class {
     }
 }
 
-#[macro_export(crate)]
-/// Macro for quickly defining Class<...> impls for new type wrapeprs.
-/// The type must be reprp(transparent), and have the Px object in a field
-/// named obj.
-// TODO remove this? It's only used in a couple places now.
-macro_rules! ClassObj {
-    ($PxWrap:ident : $($PxClass:ident),+) => {
-        $(unsafe impl Class<::physx_sys::$PxClass> for $PxWrap {
-            fn as_ptr(&self) -> *const ::physx_sys::$PxClass {
-                &self.obj as *const _ as *const _
-            }
-            fn as_mut_ptr(&mut self) -> *mut ::physx_sys::$PxClass {
-                &mut self.obj as *mut _ as *mut _
-            }
-        })+
-    }
-}
-
-// TODO most of these aren't instantiable, so they really don't matter.  OTOH,
-// if someone needed to use the raw types via the physx_sys crate, having these defined
-// would probably make them very happy.  The instantiable ones need to stay due to the
-// bound on the Class impl for the newtype wrappers.
-Class!(PxBase);
-Class!(PxActor: PxBase);
-Class!(PxRigidActor: PxActor, PxBase);
-Class!(PxRigidStatic: PxRigidActor, PxActor, PxBase);
-Class!(PxRigidBody: PxRigidActor, PxActor, PxBase);
-Class!(PxRigidDynamic: PxRigidBody, PxRigidActor, PxActor, PxBase);
-Class!(
+DeriveClass!(PxBase);
+DeriveClass!(PxActor: PxBase);
+DeriveClass!(PxRigidActor: PxActor, PxBase);
+DeriveClass!(PxRigidStatic: PxRigidActor, PxActor, PxBase);
+DeriveClass!(PxRigidBody: PxRigidActor, PxActor, PxBase);
+DeriveClass!(PxRigidDynamic: PxRigidBody, PxRigidActor, PxActor, PxBase);
+DeriveClass!(
     PxArticulationLink: PxRigidBody,
     PxRigidActor,
     PxActor,
     PxBase
 );
-Class!(PxAggregate: PxBase);
-Class!(PxArticulationBase: PxBase);
-Class!(PxArticulation: PxArticulationBase, PxBase);
-Class!(PxArticulationReducedCoordinate: PxArticulationBase, PxBase);
-Class!(PxArticulationJointBase: PxBase);
-Class!(PxArticulationJoint: PxArticulationJointBase, PxBase);
-Class!(
+DeriveClass!(PxAggregate: PxBase);
+DeriveClass!(PxArticulationBase: PxBase);
+DeriveClass!(PxArticulation: PxArticulationBase, PxBase);
+DeriveClass!(PxArticulationReducedCoordinate: PxArticulationBase, PxBase);
+DeriveClass!(PxArticulationJointBase: PxBase);
+DeriveClass!(PxArticulationJoint: PxArticulationJointBase, PxBase);
+DeriveClass!(
     PxArticulationJointReducedCoordinate: PxArticulationJointBase,
     PxBase
 );
-Class!(PxBVHStructure: PxBase);
-Class!(PxConstraint: PxBase);
-Class!(PxConvexMesh: PxBase);
-Class!(PxHeightField: PxBase);
-Class!(PxJoint: PxBase);
-Class!(PxContactJoint: PxJoint, PxBase);
-Class!(PxD6Joint: PxJoint, PxBase);
-Class!(PxDistanceJoint: PxJoint, PxBase);
-Class!(PxFixedJoint: PxJoint, PxBase);
-Class!(PxPrismaticJoint: PxJoint, PxBase);
-Class!(PxRevoluteJoint: PxJoint, PxBase);
-Class!(PxSphericalJoint: PxJoint, PxBase);
-Class!(PxMaterial: PxBase);
-Class!(PxPruningStructure: PxBase);
-Class!(PxShape: PxBase);
-Class!(PxTriangleMesh: PxBase);
-Class!(PxVehicleWheels: PxBase);
-Class!(PxVehicleNoDrive: PxVehicleWheels, PxBase);
-Class!(PxVehicleDrive: PxVehicleWheels, PxBase);
-Class!(PxVehicleDrive4W: PxVehicleDrive, PxVehicleWheels, PxBase);
-Class!(PxVehicleDriveNW: PxVehicleDrive, PxVehicleWheels, PxBase);
-Class!(PxVehicleDriveTank: PxVehicleDrive, PxVehicleWheels, PxBase);
+DeriveClass!(PxBVHStructure: PxBase);
+DeriveClass!(PxConstraint: PxBase);
+DeriveClass!(PxConvexMesh: PxBase);
+DeriveClass!(PxHeightField: PxBase);
+DeriveClass!(PxJoint: PxBase);
+DeriveClass!(PxContactJoint: PxJoint, PxBase);
+DeriveClass!(PxD6Joint: PxJoint, PxBase);
+DeriveClass!(PxDistanceJoint: PxJoint, PxBase);
+DeriveClass!(PxFixedJoint: PxJoint, PxBase);
+DeriveClass!(PxPrismaticJoint: PxJoint, PxBase);
+DeriveClass!(PxRevoluteJoint: PxJoint, PxBase);
+DeriveClass!(PxSphericalJoint: PxJoint, PxBase);
+DeriveClass!(PxMaterial: PxBase);
+DeriveClass!(PxPruningStructure: PxBase);
+DeriveClass!(PxShape: PxBase);
+DeriveClass!(PxTriangleMesh: PxBase);
+DeriveClass!(PxVehicleWheels: PxBase);
+DeriveClass!(PxVehicleNoDrive: PxVehicleWheels, PxBase);
+DeriveClass!(PxVehicleDrive: PxVehicleWheels, PxBase);
+DeriveClass!(PxVehicleDrive4W: PxVehicleDrive, PxVehicleWheels, PxBase);
+DeriveClass!(PxVehicleDriveNW: PxVehicleDrive, PxVehicleWheels, PxBase);
+DeriveClass!(PxVehicleDriveTank: PxVehicleDrive, PxVehicleWheels, PxBase);
 
-Class!(PxFoundation);
-Class!(PxPhysics);
-Class!(PxScene);
-Class!(PxPvd);
-Class!(PxPvdSceneClient);
-Class!(PxPvdTransport);
-Class!(PxCooking);
+DeriveClass!(PxFoundation);
+DeriveClass!(PxPhysics);
+DeriveClass!(PxScene);
+DeriveClass!(PxPvd);
+DeriveClass!(PxPvdSceneClient);
+DeriveClass!(PxPvdTransport);
+DeriveClass!(PxCooking);
 
-Class!(PxControllerManager);
-Class!(PxController);
-Class!(PxCapsuleController: PxController);
-Class!(PxBoxController: PxController);
-Class!(PxControllerDesc);
-Class!(PxCapsuleControllerDesc: PxControllerDesc);
-Class!(PxBoxControllerDesc: PxControllerDesc);
+DeriveClass!(PxControllerManager);
+DeriveClass!(PxController);
+DeriveClass!(PxCapsuleController: PxController);
+DeriveClass!(PxBoxController: PxController);
+DeriveClass!(PxControllerDesc);
+DeriveClass!(PxCapsuleControllerDesc: PxControllerDesc);
+DeriveClass!(PxBoxControllerDesc: PxControllerDesc);
 
-Class!(PxTransform);
-Class!(PxQuat);
-Class!(PxVec3);
-Class!(PxExtendedVec3);
-Class!(PxMeshScale);
-Class!(PxBounds3);
+DeriveClass!(PxTransform);
+DeriveClass!(PxQuat);
+DeriveClass!(PxVec3);
+DeriveClass!(PxExtendedVec3);
+DeriveClass!(PxMeshScale);
+DeriveClass!(PxBounds3);
 
-Class!(PxArticulationCache);
+DeriveClass!(PxArticulationCache);
 
-macro_rules! ImplClassForGeometries {
+macro_rules! DeriveClassForGeometries {
     ($($Px: ty,)*) => {
         $(
             unsafe impl Class<$Px> for $Px {
@@ -225,7 +221,7 @@ macro_rules! ImplClassForGeometries {
     }
 }
 
-ImplClassForGeometries!(
+DeriveClassForGeometries!(
     PxSphereGeometry,
     PxBoxGeometry,
     PxCapsuleGeometry,

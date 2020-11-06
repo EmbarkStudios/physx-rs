@@ -15,7 +15,7 @@ pub struct PxVec3 {
     obj: physx_sys::PxVec3,
 }
 
-crate::ClassObj!(PxVec3: PxVec3);
+crate::DeriveClassForNewType!(PxVec3: PxVec3);
 
 impl Default for PxVec3 {
     fn default() -> Self {

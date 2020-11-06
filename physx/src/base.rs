@@ -146,21 +146,4 @@ pub trait Base: Class<PxBase> + Sized {
     fn is_releasable(&self) -> bool {
         unsafe { PxBase_isReleasable(self.as_ptr() as *const _) }
     }
-
-    /// Checks if the concrete type of this object matches the string. N.B: This
-    /// is NOT equivalent to the PhysX `is_kind_of`, which accounts for derived
-    /// types. This function does exact matching.
-    // TODO why? match self.get_concrete_type() {} is better, no?
-    fn is_type_name(&self, name: &str) -> bool {
-        self.get_concrete_type_name()
-            .map(|n| n == name)
-            .unwrap_or(false)
-    }
-
-    /// Checks if the concrete type of this object matches the string. N.B: This
-    /// is NOT equivalent to the PhysX `is_kind_of`, which accounts for derived
-    /// types. This function does exact matching.
-    fn is_type(&self, concrete_type: ConcreteType) -> bool {
-        self.get_concrete_type() == concrete_type
-    }
 }

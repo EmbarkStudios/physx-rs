@@ -12,29 +12,52 @@ use std::{marker::PhantomData, ptr::drop_in_place};
 
 use crate::{
     geometry::PxGeometry,
-    material::Material,
     math::PxTransform,
     owner::Owner,
     physics::Physics,
     rigid_actor::RigidActor,
+    shape::Shape,
     traits::{Class, UserData},
 };
 
 use physx_sys::{phys_PxCreateStatic, PxRigidActor_release_mut, PxRigidStatic_getConcreteTypeName};
 
+/// A new type wrapper for PxArticulation.  Parametrized by it's user data type,
+/// and the type of it's Shapes.
 #[repr(transparent)]
-pub struct RigidStatic<S, H, M> {
+pub struct PxRigidStatic<S, Geom: Shape> {
     pub(crate) obj: physx_sys::PxRigidStatic,
-    phantom_user_data: PhantomData<(S, H, M)>,
+    phantom_user_data: PhantomData<(S, Geom)>,
 }
 
-impl<S, H, M> RigidActor for RigidStatic<S, H, M> {
-    type ShapeData = H;
+unsafe impl<U, Geom: Shape> UserData for PxRigidStatic<U, Geom> {
+    type UserData = U;
 
-    type MaterialData = M;
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
+    }
+
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
 }
 
-unsafe impl<P, S, H, M> Class<P> for RigidStatic<S, H, M>
+impl<S, Geom: Shape> Drop for PxRigidStatic<S, Geom> {
+    fn drop(&mut self) {
+        for shape in self.get_shapes() {
+            for _material in shape.get_materials() {
+                // is PxMAterial_release thread safe?
+            }
+            // is PxShape_release thread safe?
+        }
+        unsafe {
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            PxRigidActor_release_mut(self.as_mut_ptr())
+        }
+    }
+}
+
+unsafe impl<P, S, Geom: Shape> Class<P> for PxRigidStatic<S, Geom>
 where
     physx_sys::PxRigidStatic: Class<P>,
 {
@@ -47,14 +70,23 @@ where
     }
 }
 
-impl<S, H, M> RigidStatic<S, H, M> {
-    pub fn new(
-        physics: &mut Physics<H, M>,
+unsafe impl<S: Send, Geom: Shape + Send> Send for PxRigidStatic<S, Geom> {}
+unsafe impl<S: Sync, Geom: Shape + Sync> Sync for PxRigidStatic<S, Geom> {}
+
+impl<S, Geom: Shape> RigidActor for PxRigidStatic<S, Geom> {
+    type Shape = Geom;
+}
+
+impl<S, Geom: Shape> RigidStatic for PxRigidStatic<S, Geom> {}
+
+pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
+    fn new(
+        physics: &mut impl Physics,
         transform: PxTransform,
         geometry: &impl Class<PxGeometry>,
-        material: &mut Material<M>,
+        material: &mut <Self::Shape as Shape>::Material,
         shape_transform: PxTransform,
-        user_data: S,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
         unsafe {
             Self::from_raw(
@@ -72,49 +104,31 @@ impl<S, H, M> RigidStatic<S, H, M> {
 
     /// Safety: Calling this twice on the same pointer may result in a double-free or other use-after-free.
     /// FFI calls that return a *mut PxRigidStatic should be wrapped in this to avoid working with raw pointers.
-    pub(crate) unsafe fn from_raw(
+    unsafe fn from_raw(
         ptr: *mut physx_sys::PxRigidStatic,
-        user_data: S,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
         let actor = (ptr as *mut Self).as_mut();
         Owner::from_raw(actor?.init_user_data(user_data))
     }
 
-    pub fn get_user_data(&self) -> &S {
-        // Safety: user data was initiliazed during construction, see `from_raw`.
+    fn get_user_data(&self) -> &Self::UserData {
+        // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
-    pub fn get_user_data_mut(&mut self) -> &mut S {
-        // Safety: user data was initiliazed during construction, see `from_raw`.
+    fn get_user_data_mut(&mut self) -> &mut Self::UserData {
+        // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
     // TODO does this leak memory? or is it returning a pointer into the object or maybe an interned string?
-    pub fn get_concrete_type_name(&self) -> Option<&str> {
+    fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
             std::ffi::CStr::from_ptr(PxRigidStatic_getConcreteTypeName(self.as_ptr()) as _)
                 .to_str()
                 .ok()
-        }
-    }
-}
-
-unsafe impl<S: Send, H: Send, M: Send> Send for RigidStatic<S, H, M> {}
-unsafe impl<S: Sync, H: Sync, M: Sync> Sync for RigidStatic<S, H, M> {}
-
-impl<S, H, M> Drop for RigidStatic<S, H, M> {
-    fn drop(&mut self) {
-        for shape in self.get_shapes() {
-            for _material in shape.get_materials() {
-                // is PxMAterial_release thread safe?
-            }
-            // is PxShape_release thread safe?
-        }
-        unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
-            PxRigidActor_release_mut(self.as_mut_ptr())
         }
     }
 }

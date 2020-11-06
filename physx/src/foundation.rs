@@ -11,8 +11,8 @@ Wrapper for PxFoundation class
 use crate::{owner::Owner, traits::Class, version};
 use enumflags2::BitFlags;
 use physx_sys::{
-    create_alloc_callback, get_default_allocator, get_default_error_callback,
-    phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
+    create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
+    get_default_error_callback, phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
     PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
@@ -20,7 +20,8 @@ use physx_sys::{
 use std::{
     alloc::{alloc, dealloc, Layout},
     ffi::c_void,
-    ptr::null_mut,
+    marker::PhantomData,
+    mem::{align_of, size_of},
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 
@@ -37,74 +38,110 @@ pub enum ErrorCode {
     PerfWarning = 128u32,
 }
 
+/// A new type wrapper for PxFoundation.  Parametrized by it's Allocator type.
 #[repr(transparent)]
-pub struct Foundation {
+pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,
+    phantom_interface: PhantomData<Allocator>,
 }
 
-crate::ClassObj!(Foundation: PxFoundation);
-
-impl Foundation {
-    /// Tries to create a Foundation of the given version with the default allocator and error callbacks.
-    /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
-    pub fn new<A: AllocatorCallback>() -> Option<Owner<Self>> {
-        let allocator = unsafe { A::new() };
+impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
+    fn drop(&mut self) {
         unsafe {
-            Foundation::from_raw(phys_PxCreateFoundation(
+            if let Some(allocator) = self.get_allocator_callback() {
+                Box::from_raw(allocator);
+            };
+            PxFoundation_release_mut(self.as_mut_ptr())
+        }
+    }
+}
+
+unsafe impl<P, Allocator: AllocatorCallback> Class<P> for PxFoundation<Allocator>
+where
+    physx_sys::PxFoundation: Class<P>,
+{
+    fn as_ptr(&self) -> *const P {
+        self.obj.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut P {
+        self.obj.as_mut_ptr()
+    }
+}
+
+unsafe impl<Allocator: AllocatorCallback + Send> Send for PxFoundation<Allocator> {}
+unsafe impl<Allocator: AllocatorCallback + Sync> Sync for PxFoundation<Allocator> {}
+
+impl<Allocator: AllocatorCallback> Foundation for PxFoundation<Allocator> {
+    type Allocator = Allocator;
+}
+
+pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
+    type Allocator: AllocatorCallback;
+
+    /// Tries to create a PxFoundation of the given version with the default allocator and error callbacks.
+    /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    fn new(allocator: Self::Allocator) -> Option<Owner<Self>> {
+        unsafe {
+            Owner::from_raw(phys_PxCreateFoundation(
                 version(4, 1, 1),
-                allocator,
+                allocator.into_px(),
                 get_default_error_callback() as *mut PxErrorCallback,
-            ))
+            ) as *mut Self)
         }
     }
 
-    pub(crate) fn from_raw(ptr: *mut physx_sys::PxFoundation) -> Option<Owner<Foundation>> {
-        unsafe { Owner::from_raw(ptr as *mut Foundation) }
-    }
-
-    pub fn get_error_callback(&mut self) -> Option<&mut PxErrorCallback> {
+    fn get_error_callback(&mut self) -> Option<&mut PxErrorCallback> {
         unsafe { PxFoundation_getErrorCallback_mut(self.as_mut_ptr()).as_mut() }
     }
 
-    pub fn set_error_level(&mut self, mask: BitFlags<ErrorCode>) {
+    fn set_error_level(&mut self, mask: BitFlags<ErrorCode>) {
         unsafe { PxFoundation_setErrorLevel_mut(self.as_mut_ptr(), mask.bits() as i32) }
     }
 
-    pub fn get_error_level(&self) -> BitFlags<ErrorCode> {
+    fn get_error_level(&self) -> BitFlags<ErrorCode> {
         unsafe {
             BitFlags::from_bits(PxFoundation_getErrorLevel(self.as_ptr()) as u32)
                 .expect("got invalid bits for error flags")
         }
     }
 
-    pub fn get_allocator_callback(&mut self) -> Option<&mut PxAllocatorCallback> {
-        unsafe { PxFoundation_getAllocatorCallback_mut(self.as_mut_ptr()).as_mut() }
+    fn get_allocator_callback(&mut self) -> Option<&mut Self::Allocator> {
+        unsafe {
+            (get_alloc_callback_user_data(PxFoundation_getAllocatorCallback_mut(self.as_mut_ptr()))
+                as *mut Self::Allocator)
+                .as_mut()
+        }
     }
 
-    pub fn get_report_allocation_names(&self) -> bool {
+    fn get_report_allocation_names(&self) -> bool {
         unsafe { PxFoundation_getReportAllocationNames(self.as_ptr()) }
     }
 
-    pub fn set_report_allocation_names(&mut self, value: bool) {
+    fn set_report_allocation_names(&mut self, value: bool) {
         unsafe { PxFoundation_setReportAllocationNames_mut(self.as_mut_ptr(), value) }
     }
 }
 
-unsafe impl Send for Foundation {}
-unsafe impl Sync for Foundation {}
+#[repr(align(16))]
+struct ScratchBufferBlock([u8; 16384]);
 
-impl Drop for Foundation {
-    fn drop(&mut self) {
-        let allocated = ALLOCATED.load(SeqCst);
-        let deallocated = ALLOCATED.load(SeqCst);
-        let leaked = allocated - deallocated;
-        if allocated != 0 {
-            println!(
-                "Allocated: {} | Deallocated: {} | Leaked: {}",
-                allocated, deallocated, leaked
-            );
-        }
-        unsafe { PxFoundation_release_mut(self.as_mut_ptr()) }
+pub struct ScratchBuffer {
+    ptr: *mut c_void,
+    size: usize,
+}
+
+impl ScratchBuffer {
+    pub(crate) fn as_ptr_and_size(&mut self) -> (*mut c_void, u32) {
+        (self.ptr, self.size as u32)
+    }
+
+    /// Safety: the buffer must live at least until fetch_results returns.
+    pub unsafe fn new(nb_blocks: usize) -> Self {
+        let size = size_of::<ScratchBufferBlock>() * nb_blocks;
+        let align = align_of::<ScratchBufferBlock>();
+        let ptr = alloc(Layout::from_size_align(size, align).unwrap()) as *mut c_void;
+        Self { ptr, size }
     }
 }
 
@@ -124,8 +161,12 @@ pub unsafe trait AllocatorCallback: Sized {
 
     unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void);
 
-    unsafe fn new() -> *mut PxAllocatorCallback {
-        create_alloc_callback(Self::allocate, Self::deallocate, null_mut())
+    unsafe fn into_px(self) -> *mut PxAllocatorCallback {
+        create_alloc_callback(
+            Self::allocate,
+            Self::deallocate,
+            Box::into_raw(Box::new(self)) as *mut c_void,
+        )
     }
 }
 
@@ -142,7 +183,6 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
     ) -> *mut c_void {
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
-        println!("alloc: {}", layout.size());
         let allocation = alloc(layout) as *mut u64;
         *allocation = alloc_size as u64;
         (allocation as usize + 16) as *mut c_void
@@ -152,7 +192,6 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
         let ptr = (ptr as usize - 16) as *mut u64;
         let size = *ptr;
         let layout = Layout::from_size_align(size as usize, 16).unwrap();
-        println!("dealloc: {}", layout.size());
         dealloc(ptr as *mut u8, layout)
     }
 }
@@ -195,7 +234,7 @@ unsafe impl AllocatorCallback for TrackingAllocator {
 pub struct DefaultAllocator;
 
 unsafe impl AllocatorCallback for DefaultAllocator {
-    unsafe fn new() -> *mut PxAllocatorCallback {
+    unsafe fn into_px(self) -> *mut PxAllocatorCallback {
         get_default_allocator() as *mut PxAllocatorCallback
     }
 

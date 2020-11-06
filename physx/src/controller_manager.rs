@@ -15,7 +15,7 @@ pub struct ControllerManager {
     obj: physx_sys::PxControllerManager,
 }
 
-crate::ClassObj!(ControllerManager: PxControllerManager);
+crate::DeriveClassForNewType!(ControllerManager: PxControllerManager);
 
 impl ControllerManager {
     pub(crate) unsafe fn from_raw(

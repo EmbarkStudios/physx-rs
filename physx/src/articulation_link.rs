@@ -13,7 +13,7 @@ use crate::{
     owner::Owner,
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
-    shape::ShapeFlag,
+    shape::{Shape, ShapeFlag},
     traits::{Class, UserData},
 };
 
@@ -51,16 +51,43 @@ impl Into<PxArticulationDriveType::Enum> for ArticulationDriveType {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Section ArticulationLink
+// Section PxArticulationLink
 // /////////////////////////////////////////////////////////////////////////////
 
+/// A new type wrapper for PxArticulationLink.  Parametrized by it's user data type,
+/// and the type of it's Shapes.
 #[repr(transparent)]
-pub struct ArticulationLink<L, H, M> {
+pub struct PxArticulationLink<L, Geom: Shape> {
     pub(crate) obj: physx_sys::PxArticulationLink,
-    phantom_user_data: PhantomData<(L, H, M)>,
+    phantom_user_data: PhantomData<(L, Geom)>,
 }
 
-unsafe impl<P, L, H, M> Class<P> for ArticulationLink<L, H, M>
+unsafe impl<L, Geom: Shape> UserData for PxArticulationLink<L, Geom> {
+    type UserData = L;
+
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
+    }
+
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
+}
+
+impl<L, Geom: Shape> Drop for PxArticulationLink<L, Geom> {
+    fn drop(&mut self) {
+        unsafe {
+            for shape in self.get_shapes_mut() {
+                drop_in_place(shape as *mut _);
+            }
+            drop_in_place(self.get_user_data_mut() as *mut _);
+
+            PxArticulationLink_release_mut(self.as_mut_ptr());
+        }
+    }
+}
+
+unsafe impl<P, L, Geom: Shape> Class<P> for PxArticulationLink<L, Geom>
 where
     physx_sys::PxArticulationLink: Class<P>,
 {
@@ -73,61 +100,70 @@ where
     }
 }
 
-impl<L, H, M> RigidBody for ArticulationLink<L, H, M> {}
-impl<L, H, M> RigidActor for ArticulationLink<L, H, M> {
-    type ShapeData = H;
+unsafe impl<L: Send, Geom: Shape + Send> Send for PxArticulationLink<L, Geom> {}
+unsafe impl<L: Sync, Geom: Shape + Sync> Sync for PxArticulationLink<L, Geom> {}
 
-    type MaterialData = M;
+impl<L, Geom: Shape> RigidActor for PxArticulationLink<L, Geom> {
+    type Shape = Geom;
 }
 
-impl<L, H, M> ArticulationLink<L, H, M> {
-    pub(crate) unsafe fn from_raw(
+impl<L, Geom: Shape> ArticulationLink for PxArticulationLink<L, Geom> {}
+
+pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + UserData {
+    /// Safety: Construction must pass through here to initialize userData properly,
+    /// but this method may only be used once per newly created PhysX object.  When
+    /// Owner<> is dropped, it will also drop the object it is wrapping.  If ownership
+    /// needs to be passed across the FFI barreir, use `Owner::into_ptr`.
+    unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulationLink,
-        user_data: L,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let link = (ptr as *mut Self).as_mut();
-        Owner::from_raw(link?.init_user_data(user_data))
+        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 
-    pub fn get_user_data(&self) -> &L {
+    fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
-    pub fn get_user_data_mut(&mut self) -> &mut L {
+    fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Enable collisions for this link. Equivalent to setting SimulationShape to false for all attached shapes.
-    pub fn enable_collision(&mut self, enable: bool) {
+    fn enable_collision(&mut self, enable: bool) {
         for shape in self.get_shapes_mut() {
             shape.set_flag(ShapeFlag::SimulationShape, enable);
         }
     }
 
     /// Get inbound joint for this link
-    pub unsafe fn get_inbound_joint(&self) -> Option<&JointMap> {
+    unsafe fn get_inbound_joint(&self) -> Option<&JointMap> {
         (&PxArticulationLink_getInboundJoint(self.as_ptr())
             as *const *mut physx_sys::PxArticulationJointBase as *const JointMap)
             .as_ref()
     }
 
-    pub fn get_link_index(&self) -> u32 {
+    /// Get the index of the this link in it's parent articulation's link list.
+    fn get_link_index(&self) -> u32 {
         unsafe { PxArticulationLink_getLinkIndex(self.as_ptr()) }
     }
 
-    pub fn get_inbound_joint_dof(&self) -> u32 {
+    /// Get the degrees of freedom of the inbound joint.
+    fn get_inbound_joint_dof(&self) -> u32 {
         unsafe { PxArticulationLink_getInboundJointDof(self.as_ptr()) }
     }
 
-    pub fn get_nb_children(&self) -> u32 {
+    /// Get the number of children links this link has.
+    fn get_nb_children(&self) -> u32 {
         unsafe { PxArticulationLink_getNbChildren(self.as_ptr()) }
     }
 
-    pub fn get_children(&self) -> Vec<&ArticulationLink<L, H, M>> {
+    /// Gets a Vec of the child links of this link.
+    fn get_children(&self) -> Vec<&Self> {
         let capacity = self.get_nb_children();
-        let mut buffer: Vec<&ArticulationLink<L, H, M>> = Vec::with_capacity(capacity as usize);
+        let mut buffer: Vec<&Self> = Vec::with_capacity(capacity as usize);
         unsafe {
             let new_len = PxArticulationLink_getChildren(
                 self.as_ptr(),
@@ -140,90 +176,3 @@ impl<L, H, M> ArticulationLink<L, H, M> {
         }
     }
 }
-
-unsafe impl<L: Send, H: Send, M: Send> Send for ArticulationLink<L, H, M> {}
-unsafe impl<L: Sync, H: Sync, M: Sync> Sync for ArticulationLink<L, H, M> {}
-
-impl<L, H, M> Drop for ArticulationLink<L, H, M> {
-    fn drop(&mut self) {
-        for shape in self.get_shapes() {
-            for _material in shape.get_materials() {
-                // is PxMaterail_release thread safe?
-            }
-            // is PxShape_release thread safe?
-        }
-        unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
-
-            PxArticulationLink_release_mut(self.as_mut_ptr());
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/* TODO collision callback!
-impl Collidable for PxArticulationLink {
-    fn on_collide(&mut self, _other: &impl RigidActor, _pairs: &[PxContactPair]) {
-        todo!()
-        /* TODO figure out contact callbacks, this solution is unworkable.
-        let this_data = self.get_shapes()[0].get_simulation_filter_data();
-        let other_data = other.get_shapes()[0].get_simulation_filter_data();
-
-        // Intersect collision masks (n.b. assymetric)
-        if (this_data.word0 & other_data.word1) == 0 {
-            return;
-        }
-
-        // for multibodies, we use upper two words for pointer-wise to not trigger self-collisions
-        if this_data.word2 == other_data.word2 && this_data.word3 == other_data.word3 {
-            return;
-        }
-
-        let count = pairs
-            .iter()
-            .fold(0, |acc, pair| acc + pair.contactCount as usize);
-
-        let user_data = self.user_data_mut();
-
-        unsafe {
-            let vec = &mut user_data.collision_points;
-            vec.clear();
-            vec.reserve(count);
-            vec.set_len(count);
-        }
-
-        let mut offset = 0;
-        for pair in pairs {
-            let slice =
-                &mut user_data.collision_points[offset..offset + pair.contactCount as usize];
-            unsafe {
-                PxContactPair_extractContacts(
-                    pair,
-                    slice.as_ptr() as *mut PxContactPairPoint,
-                    u32::from(pair.contactCount),
-                );
-            }
-            offset += pair.contactCount as usize;
-        }
-
-        user_data.has_collide = true;
-        */
-    }
-
-    fn reset_collide(&mut self) {
-        todo!()
-    }
-
-    fn has_collide(&self) -> bool {
-        todo!()
-    }
-
-    fn read_collision_points(&self) -> &[PxContactPairPoint] {
-        todo!()
-    }
-}
-*/
-////////////////////////////////////////////////////////////////////////////////
-// Section BUILDER
-////////////////////////////////////////////////////////////////////////////////
-// TODO write a descriptor,

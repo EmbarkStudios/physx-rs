@@ -9,23 +9,38 @@ Prelude for commonly useful types
 
  */
 
-pub use super::actor::Actor;
-pub use super::articulation_base::ArticulationBase;
-pub use super::articulation_cache::ArticulationCache;
-pub use super::articulation_joint::*;
-pub use super::articulation_joint_base::*;
-pub use super::articulation_joint_reduced_coordinate::*;
-pub use super::articulation_link::ArticulationLink;
-pub use super::articulation_reduced_coordinate::ArticulationReducedCoordinate;
-pub use super::base::Base;
-pub use super::controller::Controller;
-pub use super::cooking::*;
-pub use super::foundation::*;
-pub use super::geometry::*;
-pub use super::height_field::*;
-pub use super::physics::{Physics, PhysicsFoundationBuilder};
-pub use super::rigid_actor::RigidActor;
-pub use super::rigid_body::RigidBody;
-pub use super::scene::{BroadPhaseType, Scene, SceneDescriptor, SimulationThreadType};
-pub use super::shape::*;
-pub use super::traits::*;
+pub use crate::actor::{Actor, ActorFlag, ActorFlags};
+pub use crate::aggregate::Aggregate;
+pub use crate::articulation::Articulation;
+pub use crate::articulation_base::ArticulationBase;
+pub use crate::articulation_cache::*;
+pub use crate::articulation_joint::{ArticulationJoint, ArticulationJointDriveType};
+pub use crate::articulation_joint_base::ArticulationJointBase;
+pub use crate::articulation_joint_reduced_coordinate::*;
+pub use crate::articulation_link::{ArticulationDriveType, ArticulationLink};
+pub use crate::articulation_reduced_coordinate::{
+    ArticulationFlag, ArticulationFlags, ArticulationReducedCoordinate,
+};
+pub use crate::base::{Base, BaseFlag, ConcreteType};
+pub use crate::controller::Controller;
+pub use crate::controller_manager::ControllerManager;
+//pub use crate::cooking::*;
+pub use crate::foundation::{AllocatorCallback, Foundation, ScratchBuffer};
+pub use crate::geometry::*;
+pub use crate::height_field::*;
+pub use crate::math::*;
+pub use crate::owner::Owner;
+pub use crate::physics::{Physics, PhysicsFoundation, PX_PHYSICS_VERSION};
+pub use crate::rigid_actor::RigidActor;
+pub use crate::rigid_body::{ForceMode, RigidBody, RigidBodyFlag, RigidBodyFlags};
+pub use crate::rigid_dynamic::{RigidDynamic, RigidDynamicLockFlag, RigidDynamicLockFlags};
+pub use crate::rigid_static::RigidStatic;
+pub use crate::scene::{
+    BroadPhaseType, FilterShaderDescriptor, PairFilteringMode, PruningStructureType, PxSceneDesc,
+    Scene, SceneFlag, SimulationThreadType, SolverType,
+};
+pub use crate::shape::{CollisionLayer, Shape, ShapeFlag, ShapeFlags};
+pub use crate::simulation_event_callback::{
+    AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
+    TriggerCallback, WakeSleepCallback,
+};

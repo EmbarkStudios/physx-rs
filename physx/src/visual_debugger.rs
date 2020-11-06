@@ -15,7 +15,8 @@ use enumflags2::BitFlags;
 use physx_sys::{
     phys_PxCreatePvd, phys_PxDefaultPvdSocketTransportCreate, PxPvdInstrumentationFlag,
     PxPvdInstrumentationFlags, PxPvdSceneClient_setScenePvdFlags_mut, PxPvdSceneFlags,
-    PxPvdTransport_release_mut, PxPvd_connect_mut, PxPvd_disconnect_mut, PxPvd_release_mut,
+    PxPvdTransport_release_mut, PxPvd_connect_mut, PxPvd_disconnect_mut, PxPvd_getTransport_mut,
+    PxPvd_isConnected_mut, PxPvd_release_mut,
 };
 
 #[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
@@ -28,7 +29,7 @@ pub enum VisualDebuggerSceneFlag {
 
 pub struct VisualDebugger {
     pvd: Owner<Pvd>,
-    transport: Owner<PvdTransport>,
+    transport: Option<Owner<PvdTransport>>,
 }
 
 unsafe impl Class<physx_sys::PxPvd> for VisualDebugger {
@@ -49,12 +50,16 @@ impl VisualDebugger {
     ///
     /// This function internally calls `new_with_timeout` with a default timeout
     /// of 10 ms.
-    pub fn new(foundation: &mut Foundation, port: i32) -> Option<Self> {
+    pub fn new(foundation: &mut impl Foundation, port: i32) -> Option<Self> {
         VisualDebugger::new_with_timeout(foundation, port, 10)
     }
 
     /// See description of `new`
-    pub fn new_with_timeout(foundation: &mut Foundation, port: i32, timeout: u32) -> Option<Self> {
+    pub fn new_with_timeout(
+        foundation: &mut impl Foundation,
+        port: i32,
+        timeout: u32,
+    ) -> Option<Self> {
         use std::ffi::CStr;
 
         let flags = PxPvdInstrumentationFlags {
@@ -68,22 +73,63 @@ impl VisualDebugger {
                 oshost.as_ptr() as _,
                 port,
                 timeout,
-            ))?
+            ))
         };
 
         let mut visual_debugger = Self { pvd, transport };
 
-        visual_debugger.connect(flags);
-
+        if !visual_debugger.connect(flags) {
+            return None;
+        };
         Some(visual_debugger)
     }
 
+    /// Connect the Pvd to the PvdTransport.
     pub fn connect(&mut self, flags: PxPvdInstrumentationFlags) -> bool {
-        self.pvd.connect(self.transport.as_mut(), flags)
+        if let Some(transport) = self.transport.as_mut() {
+            self.pvd.connect(transport.as_mut(), flags)
+        } else {
+            false
+        }
     }
 
+    /// Disconnect the Pvd it's transport.
     pub fn disconnect(&mut self) {
         self.pvd.disconnect();
+    }
+
+    /// Check if the Pvd is connected.  The cached status may be up to one frame out of date.
+    /// When `use_cached_status` is false, the low-level status is checked which requires locking
+    /// the network stream.
+    pub fn is_connected(&mut self, use_cached_status: bool) -> bool {
+        self.pvd.is_connected(use_cached_status)
+    }
+
+    /// Get the transport connected to the Pvd, if there is one.
+    pub fn get_transport(&mut self) -> Option<&mut PvdTransport> {
+        self.pvd.get_transport()
+    }
+
+    /// Connect to a new transport, disconnecting from and dropping the old one.
+    /// Returns true if the connection succeeded.
+    pub fn set_transport(
+        &mut self,
+        transport: Owner<PvdTransport>,
+        flags: PxPvdInstrumentationFlags,
+    ) -> bool {
+        if self.is_connected(false) {
+            self.disconnect();
+        };
+        self.transport.replace(transport);
+        self.connect(flags)
+    }
+}
+
+impl Drop for VisualDebugger {
+    fn drop(&mut self) {
+        if self.is_connected(false) {
+            self.disconnect();
+        };
     }
 }
 
@@ -92,7 +138,7 @@ pub struct PvdTransport {
     obj: physx_sys::PxPvdTransport,
 }
 
-crate::ClassObj!(PvdTransport: PxPvdTransport);
+crate::DeriveClassForNewType!(PvdTransport: PxPvdTransport);
 
 impl PvdTransport {
     pub(crate) unsafe fn from_raw(
@@ -118,9 +164,10 @@ pub struct Pvd {
     obj: physx_sys::PxPvd,
 }
 
-crate::ClassObj!(Pvd: PxPvd);
+crate::DeriveClassForNewType!(Pvd: PxPvd);
 
 impl Pvd {
+    /// Safety: Owner frees the object it wraps, creating two from the same pointer may cause a double free.
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvd) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)
     }
@@ -135,8 +182,21 @@ impl Pvd {
         unsafe { PxPvd_connect_mut(self.as_mut_ptr(), transport.as_mut_ptr(), flags) }
     }
 
+    /// Disconnect from the transport.
     pub fn disconnect(&mut self) {
         unsafe { PxPvd_disconnect_mut(self.as_mut_ptr()) }
+    }
+
+    /// Check if the Pvd is connected.  The cached status may be up to one frame out of date.
+    /// When `use_cached_status` is false, the low-level status is checked which requires locking
+    /// the network stream.
+    pub fn is_connected(&mut self, use_cached_status: bool) -> bool {
+        unsafe { PxPvd_isConnected_mut(self.as_mut_ptr(), use_cached_status) }
+    }
+
+    /// Get the transport connected to the Pvd, if there is one.
+    pub fn get_transport(&mut self) -> Option<&mut PvdTransport> {
+        unsafe { (PxPvd_getTransport_mut(self.as_mut_ptr()) as *mut PvdTransport).as_mut() }
     }
 }
 
@@ -155,7 +215,7 @@ pub struct PvdSceneClient {
     obj: physx_sys::PxPvdSceneClient,
 }
 
-crate::ClassObj!(PvdSceneClient: PxPvdSceneClient);
+crate::DeriveClassForNewType!(PvdSceneClient: PxPvdSceneClient);
 
 impl PvdSceneClient {
     #[allow(dead_code)]

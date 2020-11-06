@@ -22,7 +22,7 @@ pub struct HeightField {
     obj: physx_sys::PxHeightField,
 }
 
-crate::ClassObj!(HeightField: PxHeightField, PxBase);
+crate::DeriveClassForNewType!(HeightField: PxHeightField, PxBase);
 
 impl HeightField {
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxHeightField) -> Option<Owner<Self>> {

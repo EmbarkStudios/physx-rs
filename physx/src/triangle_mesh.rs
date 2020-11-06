@@ -7,7 +7,7 @@ pub struct TriangleMesh {
     obj: physx_sys::PxTriangleMesh,
 }
 
-crate::ClassObj!(TriangleMesh: PxTriangleMesh, PxBase);
+crate::DeriveClassForNewType!(TriangleMesh: PxTriangleMesh, PxBase);
 
 impl TriangleMesh {
     pub(crate) unsafe fn from_raw(

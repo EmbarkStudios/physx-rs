@@ -24,20 +24,40 @@ pub struct ImpulseResponse {
     pub linear: PxVec3,
 }
 
+/// A new type wrapper for PxArticulation.  Parametrized by it's user data type,
+/// and the type of it's ArticulationLinks.
 #[repr(transparent)]
-pub struct Articulation<U, L, H, M> {
+pub struct PxArticulation<U, Link: ArticulationLink> {
     pub(crate) obj: physx_sys::PxArticulation,
-    phantom_user_data: PhantomData<(U, L, H, M)>,
+    phantom_user_data: PhantomData<(U, Link)>,
 }
 
-impl<U, L, H, M> ArticulationBase for Articulation<U, L, H, M> {
-    type LinkData = L;
+unsafe impl<U, Link: ArticulationLink> UserData for PxArticulation<U, Link> {
+    type UserData = U;
 
-    type ShapeData = H;
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
+    }
 
-    type MaterialData = M;
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
 }
-unsafe impl<S, U, L, H, M> Class<S> for Articulation<U, L, H, M>
+
+impl<U, Link: ArticulationLink> Drop for PxArticulation<U, Link> {
+    fn drop(&mut self) {
+        // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
+        unsafe {
+            for link in self.get_links_mut().drain(..).rev() {
+                drop_in_place(link as *mut _);
+            }
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            PxArticulation_release_mut(self.as_mut_ptr())
+        }
+    }
+}
+
+unsafe impl<S, U, Link: ArticulationLink> Class<S> for PxArticulation<U, Link>
 where
     physx_sys::PxArticulation: Class<S>,
 {
@@ -50,27 +70,41 @@ where
     }
 }
 
-impl<U, L, H, M> Articulation<U, L, H, M> {
-    pub(crate) unsafe fn from_raw(
+unsafe impl<U: Send, Link: ArticulationLink + Send> Send for PxArticulation<U, Link> {}
+unsafe impl<U: Sync, Link: ArticulationLink + Sync> Sync for PxArticulation<U, Link> {}
+
+impl<U, Link: ArticulationLink> ArticulationBase for PxArticulation<U, Link> {
+    type ArticulationLink = Link;
+}
+
+impl<U, Link: ArticulationLink> Articulation for PxArticulation<U, Link> {}
+
+pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + UserData {
+    /// Safety: Owner takes ownership of the pointer, and will call drop on it when it is dropped.
+    /// This sets the user data.  All construction of this object must initialize user data.
+    unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulation,
-        user_data: U,
+        user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        let articulation = (ptr as *mut Self).as_mut();
+        Owner::from_raw(articulation?.init_user_data(user_data))
     }
 
-    pub fn get_user_data(&self) -> &U {
+    // Get a reference to the user data.
+    fn get_user_data(&self) -> &Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
         unsafe { UserData::get_user_data(self) }
     }
 
-    pub fn get_user_data_mut(&mut self) -> &mut U {
+    // Get a mutable reference to the user data.
+    fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
         unsafe { UserData::get_user_data_mut(self) }
     }
 
-    pub fn apply_impulse(
+    fn apply_impulse(
         &mut self,
-        link: &mut ArticulationLink<L, H, M>,
+        link: &mut Self::ArticulationLink,
         cache: &PxArticulationDriveCache,
         linear_impulse: &PxVec3,
         angular_impulse: &PxVec3,
@@ -86,9 +120,9 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
         }
     }
 
-    pub fn compute_impulse_response(
+    fn compute_impulse_response(
         &self,
-        link: &mut ArticulationLink<L, H, M>,
+        link: &mut Self::ArticulationLink,
         cache: &PxArticulationDriveCache,
         linear_impulse: &PxVec3,
         angular_impulse: &PxVec3,
@@ -109,7 +143,7 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
         }
     }
 
-    pub fn create_drive_cache(
+    fn create_drive_cache(
         &self,
         compliance: f32,
         drive_iterations: u32,
@@ -119,7 +153,7 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
         }
     }
 
-    pub fn update_drive_cache(
+    fn update_drive_cache(
         &self,
         cache: &mut PxArticulationDriveCache,
         compliance: f32,
@@ -128,55 +162,39 @@ impl<U, L, H, M> Articulation<U, L, H, M> {
         unsafe { PxArticulation_updateDriveCache(self.as_ptr(), cache, compliance, iterations) }
     }
 
-    pub fn get_external_drive_iterations(&self) -> u32 {
+    fn get_external_drive_iterations(&self) -> u32 {
         unsafe { PxArticulation_getExternalDriveIterations(self.as_ptr()) }
     }
 
-    pub fn get_internal_drive_iterations(&self) -> u32 {
+    fn get_internal_drive_iterations(&self) -> u32 {
         unsafe { PxArticulation_getInternalDriveIterations(self.as_ptr()) }
     }
 
-    pub fn get_max_projection_iterations(&self) -> u32 {
+    fn get_max_projection_iterations(&self) -> u32 {
         unsafe { PxArticulation_getMaxProjectionIterations(self.as_ptr()) }
     }
 
-    pub fn get_separation_tolerance(&self) -> f32 {
+    fn get_separation_tolerance(&self) -> f32 {
         unsafe { PxArticulation_getSeparationTolerance(self.as_ptr()) }
     }
 
-    pub fn release_drive_cache(&self, cache: &mut PxArticulationDriveCache) {
+    fn release_drive_cache(&self, cache: &mut PxArticulationDriveCache) {
         unsafe { PxArticulation_releaseDriveCache(self.as_ptr(), cache) }
     }
 
-    pub fn set_external_drive_iterations(&mut self, iterations: u32) {
+    fn set_external_drive_iterations(&mut self, iterations: u32) {
         unsafe { PxArticulation_setExternalDriveIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
-    pub fn set_internal_drive_iterations(&mut self, iterations: u32) {
+    fn set_internal_drive_iterations(&mut self, iterations: u32) {
         unsafe { PxArticulation_setInternalDriveIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
-    pub fn set_max_projection_iterations(&mut self, iterations: u32) {
+    fn set_max_projection_iterations(&mut self, iterations: u32) {
         unsafe { PxArticulation_setMaxProjectionIterations_mut(self.as_mut_ptr(), iterations) }
     }
 
-    pub fn set_separation_tolerance(&mut self, tolerance: f32) {
+    fn set_separation_tolerance(&mut self, tolerance: f32) {
         unsafe { PxArticulation_setSeparationTolerance_mut(self.as_mut_ptr(), tolerance) }
-    }
-}
-
-unsafe impl<U: Send, L: Send, H: Send, M: Send> Send for Articulation<U, L, H, M> {}
-unsafe impl<U: Sync, L: Sync, H: Sync, M: Sync> Sync for Articulation<U, L, H, M> {}
-
-impl<U, L, H, M> Drop for Articulation<U, L, H, M> {
-    fn drop(&mut self) {
-        // All parents are before the children, so popping one at a time ensures proper deletion order (from child to parent)
-        unsafe {
-            for link in self.get_links_mut().drain(..).rev() {
-                drop_in_place(link as *mut _);
-            }
-            drop_in_place(self.get_user_data_mut() as *mut _);
-            PxArticulation_release_mut(self.as_mut_ptr())
-        }
     }
 }
