@@ -124,8 +124,10 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
 
     /// Create a new owning wrapper around a raw `physx_sys::PxAggregate`.
     ///
-    /// Safety: When the Owner is dropped, that actor will be freed, any use of the actor after
-    /// that is UB.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(ptr: *mut physx_sys::PxAggregate) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)
     }

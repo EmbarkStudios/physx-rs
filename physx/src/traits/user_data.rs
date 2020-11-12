@@ -2,7 +2,8 @@ use std::{ffi::c_void, mem::size_of};
 
 /// UserData allows easy access and initialization of userData *mut c_void fields on Px objects.
 /// Not all Px objects with user data expose them as a field, so not all objects with user data can use this.
-/// Safety: all constructors of implementing types must call `init_user_data` during construction.
+/// # Safety
+/// all constructors of implementing types must call `init_user_data` during construction.
 /// If this does not happen, calling get_user_data or get_user_data_mut may return garbage data, or
 /// dereference an invalid pointer.  If UserData is larger than a *mut ptr it will be stored on the heap,
 /// and it may need to be explicitly dropped by turning the field back into a Box and droppig it.
@@ -27,7 +28,8 @@ pub unsafe trait UserData: Sized {
         self
     }
 
-    /// Safety: The user data field must have previously been initialized via `init_user_data`.
+    /// # Safety
+    /// The user data field must have previously been initialized via `init_user_data`.
     unsafe fn get_user_data(this: &Self) -> &Self::UserData {
         if size_of::<Self::UserData>() > size_of::<*mut c_void>() {
             &*((*this.user_data_ptr()) as *const Self::UserData)
@@ -38,7 +40,8 @@ pub unsafe trait UserData: Sized {
         }
     }
 
-    /// Safety: The user data field must have previously been initialized via `init_user_data`.
+    /// # Safety
+    /// The user data field must have previously been initialized via `init_user_data`.
     unsafe fn get_user_data_mut(this: &mut Self) -> &mut Self::UserData {
         if size_of::<Self::UserData>() > size_of::<*mut c_void>() {
             // Data is stored in a Box<UserData> on the heap, and userData is just a pointer to it.

@@ -179,7 +179,11 @@ pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData 
     }
 
     /// Create a new Owner wrapper around a raw pointer.
-    /// Safety: Owner will drop the pointee when it is dropped, use of the pointee after this is UB.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    /// Initializes user data.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxRigidDynamic,
         user_data: Self::UserData,

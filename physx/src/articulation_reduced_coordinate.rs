@@ -132,8 +132,11 @@ impl<U, L: ArticulationLink> ArticulationReducedCoordinate
 pub trait ArticulationReducedCoordinate:
     Class<physx_sys::PxArticulationReducedCoordinate> + ArticulationBase + UserData
 {
-    /// Safety: Owner takes ownership of the pointer, and will call drop on it when it is dropped.
-    /// This sets the user data.  All construction of this object must initialize user data.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    /// This also sets the user data field, all constructors must initialize user data.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulationReducedCoordinate,
         user_data: Self::UserData,

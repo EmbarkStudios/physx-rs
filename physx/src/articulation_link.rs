@@ -110,10 +110,11 @@ impl<L, Geom: Shape> RigidActor for PxArticulationLink<L, Geom> {
 impl<L, Geom: Shape> ArticulationLink for PxArticulationLink<L, Geom> {}
 
 pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + UserData {
-    /// Safety: Construction must pass through here to initialize userData properly,
-    /// but this method may only be used once per newly created PhysX object.  When
-    /// Owner<> is dropped, it will also drop the object it is wrapping.  If ownership
-    /// needs to be passed across the FFI barreir, use `Owner::into_ptr`.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    /// Initializes user data.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulationLink,
         user_data: Self::UserData,
@@ -141,10 +142,12 @@ pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + U
     }
 
     /// Get inbound joint for this link
-    unsafe fn get_inbound_joint(&self) -> Option<&JointMap> {
-        (&PxArticulationLink_getInboundJoint(self.as_ptr())
-            as *const *mut physx_sys::PxArticulationJointBase as *const JointMap)
-            .as_ref()
+    fn get_inbound_joint(&self) -> Option<&JointMap> {
+        unsafe {
+            (&PxArticulationLink_getInboundJoint(self.as_ptr())
+                as *const *mut physx_sys::PxArticulationJointBase as *const JointMap)
+                .as_ref()
+        }
     }
 
     /// Get the index of the this link in it's parent articulation's link list.

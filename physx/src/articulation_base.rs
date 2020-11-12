@@ -257,7 +257,8 @@ pub trait ArticulationBase: Class<physx_sys::PxArticulationBase> + Base {
     }
 
     /// Release an articulation joint, freeing it.
-    /// Safety: attempting to use the joint after this call is invalid.
+    /// # Safety
+    /// attempting to use the joint after this call is invalid.
     unsafe fn release_articulation_joint(&mut self, joint: &mut impl ArticulationJointBase) {
         PxArticulationBase_releaseArticulationJoint_mut(self.as_mut_ptr(), joint.as_mut_ptr())
     }
@@ -304,7 +305,8 @@ where
     T: Articulation,
     C: ArticulationReducedCoordinate,
 {
-    /// Safety: this relies on `get_concrete_type` to determine the articulation type,
+    /// # Safety
+    /// this relies on `get_concrete_type` to determine the articulation type,
     /// which has had issues with returning ConcreteType::Undefined for Actor subclasses.
     /// `try_cast_map` will return `None` when this would crash.
     pub unsafe fn cast_map<'a, Ret, ArtFn, ArcFn>(

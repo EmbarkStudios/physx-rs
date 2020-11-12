@@ -90,7 +90,8 @@ where
 }
 
 impl JointMap {
-    /// Safety: this relies on `get_concrete_type` to determine the joint type,
+    /// # Safety
+    /// this relies on `get_concrete_type` to determine the joint type,
     /// which has had issues with returning ConcreteType::Undefined for Actor subclasses.
     /// `try_cast_map` will return `None` when this would crash.
     pub unsafe fn cast_map<'a, Ret, ArtJoFn, ArcJoFn>(

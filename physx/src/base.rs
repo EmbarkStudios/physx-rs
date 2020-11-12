@@ -100,7 +100,6 @@ impl From<u16> for ConcreteType {
 impl<T> Base for T where T: Class<PxBase> + Sized {}
 pub trait Base: Class<PxBase> + Sized {
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
-    // TODO is this useful? The ConcreteType enum has the same info neatly packed into a u16, and C strings are sketch.
     fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
             std::ffi::CStr::from_ptr(PxBase_getConcreteTypeName(self.as_ptr() as *const _) as _)

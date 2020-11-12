@@ -218,7 +218,10 @@ impl<U> PxCapsuleControllerDesc<U> {
         }
     }
 
-    /// Safety: Using the pointer after dropping the Owner will cause a UAF.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxCapsuleControllerDesc,
         user_data: U,
@@ -374,7 +377,10 @@ impl<U> PxBoxControllerDesc<U> {
         }
     }
 
-    /// Safety: Using the pointer after dropping the Owner will cause a UAF.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxBoxControllerDesc,
         user_data: U,

@@ -43,9 +43,6 @@ use std::{
     ptr::{drop_in_place, null, null_mut},
 };
 
-// TODO write proper wrappers for these rather than re-export
-pub use physx_sys::PxRaycastCallback;
-
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
 use physx_sys::{
@@ -393,7 +390,10 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     type ArticulationMap: ArticulationBase;
     type Aggregate: Aggregate;
 
-    /// Safety: Owners will free the wrapped pointer on drop, use of it after this point is UB.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(ptr: *mut physx_sys::PxScene) -> Option<Owner<Self>> {
         // userData is initialized by the descriptor.
         Owner::from_raw(ptr as *mut Self)
@@ -760,17 +760,20 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     //////////////////////////////////////////////////////////////////////////
     // Callbacks
 
-    /// Safety: PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
         PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
     }
 
-    /// Safety: PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn get_contact_modify_callback(&self) -> &PxContactModifyCallback {
         &*PxScene_getContactModifyCallback(self.as_ptr())
     }
 
-    /// Safety: PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn set_ccd_contact_modify_callback(
         &mut self,
         callback: &mut PxCCDContactModifyCallback,
@@ -778,17 +781,20 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
     }
 
-    /// Safety: PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn get_ccd_contact_callback(&self) -> &PxCCDContactModifyCallback {
         &*PxScene_getCCDContactModifyCallback(self.as_ptr())
     }
 
-    /// Safety: PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn set_broad_phase_callback(&mut self, callback: &mut PxBroadPhaseCallback) {
         PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
     }
 
-    /// Safety: PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// # Safety
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
     unsafe fn get_broad_phase_callback(&self) -> &PxBroadPhaseCallback {
         &*PxScene_getBroadPhaseCallback(self.as_ptr())
     }

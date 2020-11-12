@@ -80,8 +80,11 @@ impl<U, Link: ArticulationLink> ArticulationBase for PxArticulation<U, Link> {
 impl<U, Link: ArticulationLink> Articulation for PxArticulation<U, Link> {}
 
 pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + UserData {
-    /// Safety: Owner takes ownership of the pointer, and will call drop on it when it is dropped.
-    /// This sets the user data.  All construction of this object must initialize user data.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    /// All construction of this object must initialize user data.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxArticulation,
         user_data: Self::UserData,

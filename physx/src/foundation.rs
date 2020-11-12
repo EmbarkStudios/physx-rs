@@ -142,7 +142,8 @@ impl ScratchBuffer {
         (self.ptr, self.size as u32)
     }
 
-    /// Safety: the buffer must live at least until fetch_results returns.
+    /// # Safety
+    /// the buffer must live at least until fetch_results returns.
     pub unsafe fn new(nb_blocks: usize) -> Self {
         let size = size_of::<ScratchBufferBlock>() * nb_blocks;
         let align = align_of::<ScratchBufferBlock>();
@@ -156,6 +157,9 @@ impl ScratchBuffer {
 /// Reporting the name, file and line is not enabled by default.
 /// Use `set_report_allocation_names` to toggle this on or off.
 pub unsafe trait AllocatorCallback: Sized {
+    /// # Safety
+    /// allocations must be align 16.  This should not panic, since it is
+    /// called in an FFI context and unwinding across the FFI barrier is UB.
     unsafe extern "C" fn allocate(
         size: u64,
         name: *const c_void,
@@ -164,8 +168,12 @@ pub unsafe trait AllocatorCallback: Sized {
         user_data: *const c_void,
     ) -> *mut c_void;
 
+    /// # Safety
+    /// must not panic.
     unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void);
 
+    /// # Safety
+    /// do not override this method.
     unsafe fn into_px(self) -> *mut PxAllocatorCallback {
         create_alloc_callback(
             Self::allocate,

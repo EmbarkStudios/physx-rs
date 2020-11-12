@@ -145,6 +145,10 @@ impl ArticulationCache {
         }
     }
 
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) fn from_raw(
         px_articulation_cache: *mut PxArticulationCache,
     ) -> Option<ArticulationCache> {

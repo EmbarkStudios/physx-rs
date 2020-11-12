@@ -103,8 +103,11 @@ pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
         }
     }
 
-    /// Safety: Calling this twice on the same pointer may result in a double-free or other use-after-free.
-    /// FFI calls that return a *mut PxRigidStatic should be wrapped in this to avoid working with raw pointers.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    /// Initializes user data.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxRigidStatic,
         user_data: Self::UserData,

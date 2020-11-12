@@ -50,12 +50,9 @@ use physx_sys::{
     PxConstraintConnector,
     PxConstraintShaderTable,
     //PxFilterFlag,
-    // TODO write wrappers and import from them instead
     PxInputStream,
     //PxPairFlag,
     PxPhysicsInsertionCallback,
-    // TODO unify creation into `fn create<D: Descriptor<T>>(descriptor: &D) -> Option<&mut T>`
-    // or `fn create<T>(descriptor: Descriptor<T>) -> Option<&mut T>`
     PxPhysics_createAggregate_mut,
     PxPhysics_createArticulationReducedCoordinate_mut,
     PxPhysics_createArticulation_mut,
@@ -165,6 +162,10 @@ impl<Geom: Shape> PxPhysics<Geom> {
         unsafe { PxPhysics::from_raw(physx_create_physics(foundation.as_mut_ptr())) }
     }
 
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPhysics,
     ) -> Option<Owner<PxPhysics<Geom>>> {

@@ -13,7 +13,8 @@ pub struct Owner<T> {
 impl<T> Owner<T> {
     /// Create a new owner from a raw pointer.  Use the `from_raw` method on the type!
     ///
-    /// Safety: Only one of these may be constructed per pointer.  In particular,
+    /// # Safety
+    /// Only one of these may be constructed per pointer.  In particular,
     /// this must not be called on a pointer attained via Class::as_mut_ptr.  The
     /// intended pattern is to wrap the raw FFI constructors in this call, so that
     /// the amount of time spent dealing with raw pointers is as little as possible.

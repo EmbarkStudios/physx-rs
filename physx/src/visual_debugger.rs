@@ -142,6 +142,10 @@ pub struct PvdTransport {
 crate::DeriveClassForNewType!(PvdTransport: PxPvdTransport);
 
 impl PvdTransport {
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPvdTransport,
     ) -> Option<Owner<PvdTransport>> {
@@ -169,7 +173,10 @@ pub struct Pvd {
 crate::DeriveClassForNewType!(Pvd: PxPvd);
 
 impl Pvd {
-    /// Safety: Owner frees the object it wraps, creating two from the same pointer may cause a double free.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvd) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)
     }
@@ -221,6 +228,10 @@ pub struct PvdSceneClient {
 crate::DeriveClassForNewType!(PvdSceneClient: PxPvdSceneClient);
 
 impl PvdSceneClient {
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     #[allow(dead_code)]
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvdSceneClient) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)

@@ -245,6 +245,12 @@ unsafe impl Class<physx_sys::PxConvexMeshDesc> for PxConvexMeshDesc {
     }
 }
 
+impl Default for PxConvexMeshDesc {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PxConvexMeshDesc {
     /// Create a new convex mesh descriptor.
     pub fn new() -> Self {
@@ -280,6 +286,12 @@ unsafe impl Class<physx_sys::PxTriangleMeshDesc> for PxTriangleMeshDesc {
 
     fn as_mut_ptr(&mut self) -> *mut physx_sys::PxTriangleMeshDesc {
         &mut self.obj
+    }
+}
+
+impl Default for PxTriangleMeshDesc {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -321,6 +333,12 @@ unsafe impl Class<physx_sys::PxHeightFieldDesc> for PxHeightFieldDesc {
     }
 }
 
+impl Default for PxHeightFieldDesc {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PxHeightFieldDesc {
     /// Create a new height field descriptor.
     pub fn new() -> Self {
@@ -356,6 +374,12 @@ unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBVHStructureDesc {
 
     fn as_mut_ptr(&mut self) -> *mut physx_sys::PxBVHStructureDesc {
         &mut self.obj
+    }
+}
+
+impl Default for PxBVHStructureDesc {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

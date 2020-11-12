@@ -18,8 +18,10 @@ pub struct BVHStructure {
 crate::DeriveClassForNewType!(BVHStructure: PxBVHStructure, PxBase);
 
 impl BVHStructure {
-    /// Safety: Owner's drop the pointer they wrap when they are dropped.  Use `into_ptr`
-    /// to retrieve the pointer and consume the Owner without dropping the pointee.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxBVHStructure) -> Option<Owner<Self>> {
         Owner::from_raw(ptr as *mut Self)
     }

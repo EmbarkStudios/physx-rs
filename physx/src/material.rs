@@ -110,8 +110,10 @@ unsafe impl<U: Sync> Sync for PxMaterial<U> {}
 impl<M> Material for PxMaterial<M> {}
 
 pub trait Material: Class<physx_sys::PxMaterial> + UserData {
-    /// Safety: Owners drop the wrapped pointer, uuse of the material after the owner is dropped
-    /// is UB.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxMaterial,
         user_data: Self::UserData,
@@ -235,8 +237,10 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
 
     /// Set the friction combine mode.
     #[inline]
-    unsafe fn set_friction_combined_mode(&mut self, combine_mode: CombineMode) {
-        PxMaterial_setFrictionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
+    fn set_friction_combined_mode(&mut self, combine_mode: CombineMode) {
+        unsafe {
+            PxMaterial_setFrictionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
+        }
     }
 
     /// Get the friction combine mode.

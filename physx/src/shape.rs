@@ -126,7 +126,10 @@ impl<U, M: Material> Shape for PxShape<U, M> {
 pub trait Shape: Class<physx_sys::PxShape> + UserData {
     type Material: Material;
 
-    /// Safety: Owners free the wrapped pointer on drop, use of the pointer after this is UB.
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxShape,
         user_data: Self::UserData,
