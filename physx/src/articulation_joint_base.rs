@@ -110,7 +110,8 @@ impl JointMap {
                 arc_fn(&mut *(self as *mut _ as *mut ArticulationJointReducedCoordinate))
             }
             _ => panic!(
-                "get_concrete_type returned an invalid type: {:?}",
+                "get_concrete_type for {:?} returned an invalid type: {:?}",
+                self.get_concrete_type_name(),
                 self.get_concrete_type()
             ),
         }

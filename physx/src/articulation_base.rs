@@ -325,7 +325,8 @@ where
             }
             ConcreteType::ArticulationReducedCoordinate => arc_fn(&mut *(self as *mut _ as *mut C)),
             _ => panic!(
-                "get_concrete_type returned an invalid ConcreteType: {:?}",
+                "get_concrete_type for {:?} returned an invalid ConcreteType: {:?}",
+                self.get_concrete_type_name(),
                 self.get_concrete_type()
             ),
         }
