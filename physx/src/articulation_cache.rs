@@ -145,6 +145,17 @@ impl ArticulationCache {
         }
     }
 
+    pub(crate) fn from_raw(
+        px_articulation_cache: *mut PxArticulationCache,
+    ) -> Option<ArticulationCache> {
+        Some(Self {
+            px_articulation_cache: NonNull::new(px_articulation_cache)?,
+            link_offsets: [0; 64],
+            link_dofs: [0; 64],
+            total_dofs: 0,
+        })
+    }
+
     pub fn proxy(&self) -> Self {
         Self {
             px_articulation_cache: self.px_articulation_cache,
@@ -154,10 +165,7 @@ impl ArticulationCache {
         }
     }
 
-    pub unsafe fn compute_dof_information(
-        &mut self,
-        articulation: &impl ArticulationReducedCoordinate,
-    ) {
+    pub fn compute_dof_information(&mut self, articulation: &impl ArticulationReducedCoordinate) {
         let mut offsets = [0u32; 64];
         let mut dofs = [0u8; 64];
         offsets[0] = 0; //We know that the root link does not have a joint
@@ -170,11 +178,7 @@ impl ArticulationCache {
         }
 
         let mut count = 0;
-        for offset in offsets
-            .iter_mut()
-            .take(articulation.get_nb_links())
-            .skip(1)
-        {
+        for offset in offsets.iter_mut().take(articulation.get_nb_links()).skip(1) {
             let link_dofs = *offset;
             *offset = count;
             count += link_dofs;

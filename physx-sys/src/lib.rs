@@ -297,7 +297,7 @@ extern "C" {
 
     pub fn get_simulation_event_info(
         callback: *mut PxSimulationEventCallback,
-    ) -> SimulationEventCallbackInfo;
+    ) -> *mut SimulationEventCallbackInfo;
 
     pub fn destroy_simulation_event_callbacks(callback: *mut PxSimulationEventCallback);
 

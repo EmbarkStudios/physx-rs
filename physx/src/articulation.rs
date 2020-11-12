@@ -112,7 +112,7 @@ pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + Us
         unsafe {
             PxArticulation_applyImpulse_mut(
                 self.as_mut_ptr(),
-                link.as_mut_ptr(),
+                Class::<physx_sys::PxArticulationLink>::as_mut_ptr(link),
                 cache,
                 linear_impulse.as_ptr(),
                 angular_impulse.as_ptr(),
@@ -132,7 +132,7 @@ pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + Us
             let mut linear = PxVec3::default();
             PxArticulation_computeImpulseResponse(
                 self.as_ptr(),
-                link.as_mut_ptr(),
+                Class::<physx_sys::PxArticulationLink>::as_mut_ptr(link),
                 linear.as_mut_ptr(),
                 angular.as_mut_ptr(),
                 cache,

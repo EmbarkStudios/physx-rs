@@ -131,7 +131,7 @@ where
 {
     fn drop(&mut self) {
         unsafe {
-            let info = get_simulation_event_info(self.as_mut_ptr());
+            let info = &mut *get_simulation_event_info(self.as_mut_ptr());
             {
                 if !info.collision_user_data.is_null() {
                     Box::from_raw(info.collision_user_data as *mut OC);

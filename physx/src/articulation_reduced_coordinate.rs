@@ -20,10 +20,7 @@ use super::{
     traits::{Class, PxFlags, UserData},
 };
 
-use std::{
-    marker::PhantomData,
-    ptr::{drop_in_place, NonNull},
-};
+use std::{marker::PhantomData, ptr::drop_in_place};
 
 use enumflags2::BitFlags;
 
@@ -220,11 +217,13 @@ pub trait ArticulationReducedCoordinate:
 
     /// Create a new cache for this articulation
     fn create_cache(&self) -> Option<ArticulationCache> {
-        let mut articulation_cache = ArticulationCache::new(NonNull::new(unsafe {
-            PxArticulationReducedCoordinate_createCache(self.as_ptr())
-        })?);
-        unsafe { articulation_cache.compute_dof_information(self) };
-        Some(articulation_cache)
+        unsafe {
+            let mut articulation_cache = ArticulationCache::from_raw(
+                PxArticulationReducedCoordinate_createCache(self.as_ptr()),
+            )?;
+            articulation_cache.compute_dof_information(self);
+            Some(articulation_cache)
+        }
     }
 
     /// Release the cache and free the memory
@@ -408,12 +407,12 @@ pub trait ArticulationReducedCoordinate:
             .iter()
             .fold(0, |accum, link| accum + link.get_nb_shapes());
         let mut shape_ptrs = Vec::with_capacity(nb_shapes as usize);
-        let props = unsafe {
-            for link in links {
-                for shape in link.get_shapes() {
-                    shape_ptrs.push(shape.as_ptr());
-                }
+        for link in links {
+            for shape in link.get_shapes() {
+                shape_ptrs.push(shape.as_ptr());
             }
+        }
+        let props = unsafe {
             PxRigidBodyExt_computeMassPropertiesFromShapes_mut(shape_ptrs.as_ptr(), nb_shapes)
         };
         PxVec3::new(
@@ -426,16 +425,19 @@ pub trait ArticulationReducedCoordinate:
     /// Compute the total center of mass and velocity w.r.t. all attached shapes
     fn get_center_of_mass_and_velocity(&self) -> (PxVec3, PxVec3) {
         let center_of_mass = self.get_center_of_mass();
+        if let Some(body) = self.root_link() {
+            let com_vel = unsafe {
+                PxRigidBodyExt_getVelocityAtPos_mut(
+                    Class::<physx_sys::PxRigidBody>::as_ptr(body),
+                    &center_of_mass.into(),
+                )
+                .into()
+            };
 
-        let com_vel = unsafe {
-            PxRigidBodyExt_getVelocityAtPos_mut(
-                self.root_link().expect("root link is null").as_ptr(),
-                &center_of_mass.into(),
-            )
-            .into()
-        };
-
-        (center_of_mass, com_vel)
+            (center_of_mass, com_vel)
+        } else {
+            (center_of_mass, PxVec3::new(0.0, 0.0, 0.0))
+        }
     }
 
     /// Set the collision layer on all links and shapes of this body

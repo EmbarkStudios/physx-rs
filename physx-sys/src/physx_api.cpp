@@ -264,10 +264,10 @@ extern "C"
         return static_cast<PxSimulationEventCallback *>(trampoline);
     }
 
-    SimulationEventCallbackInfo get_simulation_event_info(PxSimulationEventCallback *callback)
+    SimulationEventCallbackInfo *get_simulation_event_info(PxSimulationEventCallback *callback)
     {
         SimulationEventTrampoline *trampoline = static_cast<SimulationEventTrampoline *>(callback);
-        return trampoline->mCallbacks;
+        return &trampoline->mCallbacks;
     }
 
     void destroy_simulation_event_callbacks(PxSimulationEventCallback *callback)
