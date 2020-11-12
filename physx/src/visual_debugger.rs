@@ -27,6 +27,7 @@ pub enum VisualDebuggerSceneFlag {
     TransmitConstraints = 4,
 }
 
+/// Combines the Pvd and it's current PvdTransport, if there is one.
 pub struct VisualDebugger {
     pvd: Owner<Pvd>,
     transport: Option<Owner<PvdTransport>>,
@@ -159,6 +160,7 @@ impl Drop for PvdTransport {
     }
 }
 
+/// A new type wrapper for PxPvd.
 #[repr(transparent)]
 pub struct Pvd {
     obj: physx_sys::PxPvd,
@@ -211,6 +213,7 @@ impl Drop for Pvd {
     }
 }
 
+/// A new type wrapper for PxPvdSceneClient.
 pub struct PvdSceneClient {
     obj: physx_sys::PxPvdSceneClient,
 }

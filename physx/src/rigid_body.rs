@@ -362,7 +362,6 @@ pub trait RigidBody: Class<PxRigidBody> + RigidActor {
     }
 }
 
-
 /// A wrapper for RigidBody, parametrized by the ArticulationLink and
 /// RigidDynamic that may be it's most derived type.  Use `cast_map`
 /// or `as_*` to cast to it's most derived type if specialized functionality is needed.
@@ -396,17 +395,22 @@ where
     L: ArticulationLink,
     D: RigidDynamic,
 {
-    pub fn cast_map<Ret, RDFn, ALFn>(
-        &mut self,
-        rigid_dynamic_fn: RDFn,
-        articulation_link_fn: ALFn,
+    /// Cast to the most-derived type as determined by `get_type`, which returns the ActorType.
+    /// Because this does not use `get_concrete_type`, this method does not have the safety
+    /// concerns of the other `cast_map`s, and a `try_cast_map` method is unneded.
+    pub fn cast_map<'a, Ret, RDFn, ALFn>(
+        &'a mut self,
+        mut rigid_dynamic_fn: RDFn,
+        mut articulation_link_fn: ALFn,
     ) -> Ret
     where
-        RDFn: FnOnce(&mut D) -> Ret,
-        ALFn: FnOnce(&mut L) -> Ret,
+        RDFn: FnMut(&'a mut D) -> Ret,
+        ALFn: FnMut(&'a mut L) -> Ret,
     {
         match self.get_type() {
-            ActorType::RigidDynamic => rigid_dynamic_fn(unsafe { &mut *(self as *mut _ as *mut D) }),
+            ActorType::RigidDynamic => {
+                rigid_dynamic_fn(unsafe { &mut *(self as *mut _ as *mut D) })
+            }
             ActorType::ArticulationLink => {
                 articulation_link_fn(unsafe { &mut *(self as *mut _ as *mut L) })
             }

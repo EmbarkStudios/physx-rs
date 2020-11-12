@@ -99,7 +99,10 @@ use physx_sys::{
 
 pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 
+/// A PxPhysics, PxFoundation and optional PxPvd combined into one struct for ease of use.
+/// Parametrized by the Foundation's Allocator and the Physics' Shape type.
 pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
+    // Order matters here for Drop. Foundation must be dropped last.
     pub physics: Owner<PxPhysics<Geom>>,
     pub pvd: Option<VisualDebugger>,
     pub foundation: Owner<PxFoundation<Allocator>>,
@@ -107,8 +110,17 @@ pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
 }
 
 impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geom> {
-    pub fn create(allocator: Allocator) -> PhysicsFoundationBuilder<Allocator> {
-        PhysicsFoundationBuilder::new(allocator)
+    pub fn new(allocator: Allocator) -> PhysicsFoundation<Allocator, Geom> {
+        let mut foundation =
+            PxFoundation::new(allocator).expect("Create Foundation returned a null pointer");
+        let physics =
+            PxPhysics::new(foundation.as_mut()).expect("Create PxPhysics returned a null pointer.");
+        Self {
+            foundation,
+            physics,
+            pvd: None,
+            extensions_loaded: false,
+        }
     }
 
     pub fn physics(&mut self) -> &mut PxPhysics<Geom> {
@@ -339,7 +351,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     }
 
     /// Create a dynamic actor with given transform and user data.  Other fields are initialized
-    /// to their defaults.  Notably, this has no collision geometry.
+    /// to their defaults.
     fn create_dynamic<U>(
         &mut self,
         transform: &PxTransform,
@@ -354,7 +366,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     }
 
     /// Create a static actor with given transform and user data.  Other fields are initialized
-    /// to their defaults.  Notably, this has no collision geometry.
+    /// to their defaults.
     fn create_static<U>(
         &mut self,
         transform: PxTransform,
@@ -523,40 +535,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
             buffer
         }
     }
-    /*
-        /// Get the scenes created by this physics object.
-        ///
-        /// Safety: Scenes may have different user data type parameters, and this method is happy
-        /// to perform a cast to whatever type it is told to without regard for safety.  Either
-        /// set them all to () so they can't be used, or pass in the appriopriate types for the desired scene.
-        /// If possible, store the scenes separately so that type info is not lost.  The data layout is not
-        /// effected by the type, `physx::PxScene` is a repr(transparent) wrapper around `physx_sys::PxScene`
-        /// with additional phantom types for user data.
-        // TODO make this safe somehow.  Maybe using Any?
-        unsafe fn get_scenes<U, L, S, D, T, C>(&self) -> Vec<&PxScene<U, L, S, D, T, C>>
-        where
-            L: ArticulationLink,
-            S: RigidStatic,
-            D: RigidDynamic,
-            T: Articulation,
-            C: ArticulationReducedCoordinate
-        {
-            //unsafe
-            {
-                let capacity = PxPhysics_getNbScenes(self.as_ptr());
-                let mut buffer: Vec<&PxScene<U, L, S, D, T, C>> =
-                    Vec::with_capacity(capacity as usize);
-                let len = PxPhysics_getScenes(
-                    self.as_ptr(),
-                    buffer.as_mut_ptr() as *mut *mut _,
-                    capacity,
-                    0,
-                );
-                buffer.set_len(len as usize);
-                buffer
-            }
-        }
-    */
+
     /// Get the shapes created by this physics object.
     fn get_shapes(&self) -> Vec<&Self::Shape> {
         unsafe {
@@ -674,6 +653,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         self
     }
 
+    /// Build the PhysicsFoundation.
     pub fn build<Geom: Shape>(self) -> Option<PhysicsFoundation<Allocator, Geom>> {
         let mut foundation = PxFoundation::new(self.allocator)?;
         let (mut pvd, mut physics) = unsafe {

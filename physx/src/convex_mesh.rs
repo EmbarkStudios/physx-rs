@@ -10,7 +10,8 @@ pub struct ConvexMesh {
 crate::DeriveClassForNewType!(ConvexMesh: PxConvexMesh, PxBase);
 
 impl ConvexMesh {
-    #[allow(dead_code)]
+    /// Safety: Owner's drop the pointer they wrap when they are dropped.  Use `into_ptr`
+    /// to retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxConvexMesh) -> Option<Owner<ConvexMesh>> {
         Owner::from_raw(ptr as *mut Self)
     }

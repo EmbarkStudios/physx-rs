@@ -1,7 +1,5 @@
 use std::{ffi::c_void, mem::size_of};
 
-use crate::controller::PxCapsuleControllerDesc;
-
 /// UserData allows easy access and initialization of userData *mut c_void fields on Px objects.
 /// Not all Px objects with user data expose them as a field, so not all objects with user data can use this.
 /// Safety: all constructors of implementing types must call `init_user_data` during construction.
@@ -52,20 +50,3 @@ pub unsafe trait UserData: Sized {
         }
     }
 }
-
-macro_rules! UserData {
-    ($PxType:ident <$UserType:ident$(,$UserTypes:ident)*>) => {
-        unsafe impl<$UserType$(,$UserTypes)*> $crate::traits::UserData for $PxType<$UserType$(,$UserTypes)*> {
-            type UserData = $UserType;
-
-            fn user_data_ptr(&self) -> &*mut c_void {
-                &self.obj.userData
-            }
-
-            fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
-                &mut self.obj.userData
-            }
-        }
-    }
-}
-UserData!(PxCapsuleControllerDesc<U>);

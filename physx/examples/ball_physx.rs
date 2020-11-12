@@ -4,6 +4,16 @@
 
 use physx::prelude::*;
 
+/// This is a WIP example for how the rustified wrappers lets your reduced the
+/// amount of unsafe in your code, and make it clearer where we cannot abstract
+/// away the underlying dangers.
+///
+/// The overall goal is to maintain a close mapping to the underlying PhysX API
+/// while improving safety and reliability of the code.
+
+/// Many of the main types in PhysX have a userData *mut c_void field.
+/// Representing this safely in Rust requires generics everywhere,
+/// and pre-defining all the generic parameters makes things more usable.
 type PxMaterial = physx::material::PxMaterial<()>;
 type PxShape = physx::shape::PxShape<(), PxMaterial>;
 type PxArticulationLink = physx::articulation_link::PxArticulationLink<(), PxShape>;
@@ -26,6 +36,8 @@ type PxScene = physx::scene::PxScene<
     OnAdvance,
 >;
 
+/// Next up, the simulation event callbacks need to be defined, and possibly an
+/// allocator callback as well.
 struct OnCollision;
 impl CollisionCallback for OnCollision {
     fn on_collision(
@@ -56,7 +68,7 @@ impl WakeSleepCallback<PxArticulationLink, PxRigidStatic, PxRigidDynamic> for On
 
 struct OnAdvance;
 impl AdvanceCallback<PxArticulationLink, PxRigidDynamic> for OnAdvance {
-    unsafe fn on_advance(
+    fn on_advance(
         &self,
         _actors: &[&physx::rigid_body::RigidBodyMap<PxArticulationLink, PxRigidDynamic>],
         _transforms: &[PxTransform],
@@ -64,27 +76,16 @@ impl AdvanceCallback<PxArticulationLink, PxRigidDynamic> for OnAdvance {
     }
 }
 
-/// This is a WIP example for how the rustified wrappers lets your reduced the
-/// amount of unsafe in your code, and make it clearer where we cannot abstract
-/// away the underlying dangers.
-///
-/// Some of these will go away over time, when we add abstractions for Material
-/// and Geometry, while some will remain for performance such as
-/// `get_rigid_actor_unchecked`.
-///
-/// The overall goal is to maintain a close mapping to the underlying PhysX API
-/// while improving safety and reliability of the code.
-
 fn main() -> Result<(), ()> {
-    // Holds a PxFoundation and a PxPhysics built from it.
+    // Holds a PxFoundation and a PxPhysics.
     // Also has an optional Pvd and transport, not enabled by default.
-    // The type parameters are for shape and material user data, which
-    // isn't used in this demo, so they are set to (). If the never-type feature
-    // is enabled, that is an even better choice.
+    // The default allocator is the one provided by PhysX.
     let mut physics_foundation = PhysicsFoundation::<_, PxShape>::default();
 
-    let physics = physics_foundation.physics.as_mut();
+    let physics = physics_foundation.physics();
 
+    // Setup the scene object.  The PxScene type alias makes this much cleaner.
+    // There are lots of unwrap calls due to potential null pointers.
     let mut scene: Owner<PxScene> = physics
         .create_scene(
             PxSceneDesc::new(
@@ -104,6 +105,8 @@ fn main() -> Result<(), ()> {
         .create_plane(PxVec3::new(0.0, 1.0, 0.0), 0.0, material.as_mut(), ())
         .unwrap();
 
+    // The scene owns actors that are added to it.  They can be retrieved using the
+    // various getters on the scene.
     scene.add_static_actor(ground_plane);
 
     let sphere_geo = PxSphereGeometry::new(10.0);
@@ -126,7 +129,7 @@ fn main() -> Result<(), ()> {
     // Updating
     let heights_over_time = (0..100)
         .map(|_| {
-            // Calls both update and fetch_results.  More complex simulation update
+            // Calls both simulate and fetch_results.  More complex simulation update
             // controls are not fully supported.
             scene
                 .step(
@@ -137,9 +140,9 @@ fn main() -> Result<(), ()> {
                 )
                 .expect("error occured during simulation");
             // For simplicity, just read out the only dynamic actor in the scene.
-            // getActiveActors is also supported, it returns a Vec<&mut ActorMap> that has
-            // a map method that takes a function for each actor type, and as_* methods
-            // that return an Option<&mut>.
+            // getActiveActors is also supported, it returns a Vec<&mut ActorMap> which has
+            // a map method that takes a function for each actor type, and as_<T> methods
+            // that return an Option<&mut T>.
             let actors = scene.get_dynamic_actors();
             actors[0].get_global_position().y() as i32 - 10
         })

@@ -153,6 +153,7 @@ impl<D, Geom: Shape> RigidActor for PxRigidDynamic<D, Geom> {
 impl<D, Geom: Shape> RigidDynamic for PxRigidDynamic<D, Geom> {}
 
 pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData {
+    /// Create a new RigidDynamic.
     fn new(
         physics: &mut impl Physics,
         transform: PxTransform,
@@ -177,6 +178,8 @@ pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData 
         }
     }
 
+    /// Create a new Owner wrapper around a raw pointer.
+    /// Safety: Owner will drop the pointee when it is dropped, use of the pointee after this is UB.
     unsafe fn from_raw(
         ptr: *mut physx_sys::PxRigidDynamic,
         user_data: Self::UserData,
@@ -185,11 +188,13 @@ pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData 
         Owner::from_raw(actor?.init_user_data(user_data))
     }
 
+    /// Get the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
+    /// Get the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }

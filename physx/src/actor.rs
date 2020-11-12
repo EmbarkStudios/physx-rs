@@ -187,22 +187,29 @@ where
     S: RigidStatic,
     D: RigidDynamic,
 {
-    pub fn cast_map<Ret, RDFn, RSFn, ALFn>(
-        &mut self,
-        rigid_dynamic_fn: RDFn,
-        rigid_static_fn: RSFn,
-        articulation_link_fn: ALFn,
+    /// Cast to the most-derived type as determined by `get_type`, which returns the ActorType.
+    /// Because this does not use `get_concrete_type`, this method does not have the safety
+    /// concerns of the other `cast_map`s, and a `try_cast_map` method is unneded.
+    pub fn cast_map<'a, Ret, ALFn, RSFn, RDFn>(
+        &'a mut self,
+        mut articulation_link_fn: ALFn,
+        mut rigid_static_fn: RSFn,
+        mut rigid_dynamic_fn: RDFn,
     ) -> Ret
     where
-        RDFn: FnOnce(&mut D) -> Ret,
-        RSFn: FnOnce(&mut S) -> Ret,
-        ALFn: FnOnce(&mut L) -> Ret,
+        ALFn: FnMut(&'a mut L) -> Ret,
+        RSFn: FnMut(&'a mut S) -> Ret,
+        RDFn: FnMut(&'a mut D) -> Ret,
     {
+        // This uses get_type not get_concrete_type because get_concrete_type does not seem to
+        // work for actors retrieved via get_active_actors.
         match self.get_type() {
-            ActorType::RigidDynamic => rigid_dynamic_fn(unsafe { &mut*(self as *mut _ as *mut D) }),
-            ActorType::RigidStatic => rigid_static_fn(unsafe { &mut*(self as *mut _ as *mut S) }),
+            ActorType::RigidDynamic => {
+                rigid_dynamic_fn(unsafe { &mut *(self as *mut _ as *mut D) })
+            }
+            ActorType::RigidStatic => rigid_static_fn(unsafe { &mut *(self as *mut _ as *mut S) }),
             ActorType::ArticulationLink => {
-                articulation_link_fn(unsafe { &mut*(self as *mut _ as *mut L) })
+                articulation_link_fn(unsafe { &mut *(self as *mut _ as *mut L) })
             }
         }
     }

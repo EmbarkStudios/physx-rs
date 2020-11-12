@@ -109,7 +109,9 @@ pub trait Base: Class<PxBase> + Sized {
         }
     }
 
-    /// Returns an enumerated value identifying the type. You can match this against the raw values in ConcreteType to identify the type of this object
+    /// Returns an enumerated value identifying the type.  This may return ConcreteType::Undefined
+    /// in surprising situations, notably this does not seem to work with `get_active_actors`.  Use
+    /// `get_type` for actors if possible.
     fn get_concrete_type(&self) -> ConcreteType {
         unsafe { PxBase_getConcreteType(self.as_ptr()).into() }
     }

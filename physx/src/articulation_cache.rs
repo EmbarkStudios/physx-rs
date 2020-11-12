@@ -172,7 +172,7 @@ impl ArticulationCache {
         let mut count = 0;
         for offset in offsets
             .iter_mut()
-            .take(articulation.get_number_links())
+            .take(articulation.get_nb_links())
             .skip(1)
         {
             let link_dofs = *offset;

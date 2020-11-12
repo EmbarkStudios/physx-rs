@@ -63,6 +63,7 @@ where
     OWS: WakeSleepCallback<L, S, D>,
     OA: AdvanceCallback<L, D>,
 {
+    /// Create a new simulation event callback.
     pub fn new(
         on_collide: Option<OC>,
         on_trigger: Option<OT>,
@@ -284,7 +285,7 @@ where
 pub trait AdvanceCallback<L: ArticulationLink, D: RigidDynamic>: Sized {
     /// All actors with  PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW set will be passed into here
     /// once the simulate call has updated their position.
-    unsafe fn on_advance(&self, actors: &[&RigidBodyMap<L, D>], transforms: &[PxTransform]);
+    fn on_advance(&self, actors: &[&RigidBodyMap<L, D>], transforms: &[PxTransform]);
 }
 
 impl<T, L, D> AdvanceCallbackRaw<L, D> for T

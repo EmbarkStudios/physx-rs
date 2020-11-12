@@ -80,6 +80,7 @@ impl<S, Geom: Shape> RigidActor for PxRigidStatic<S, Geom> {
 impl<S, Geom: Shape> RigidStatic for PxRigidStatic<S, Geom> {}
 
 pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
+    /// Create a new RigidStatic.
     fn new(
         physics: &mut impl Physics,
         transform: PxTransform,
@@ -112,18 +113,19 @@ pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
         Owner::from_raw(actor?.init_user_data(user_data))
     }
 
+    /// Get the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
+    /// Get the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid
-    // TODO does this leak memory? or is it returning a pointer into the object or maybe an interned string?
     fn get_concrete_type_name(&self) -> Option<&str> {
         unsafe {
             std::ffi::CStr::from_ptr(PxRigidStatic_getConcreteTypeName(self.as_ptr()) as _)

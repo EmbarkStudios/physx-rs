@@ -190,7 +190,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
 
     // Get a Vec of all the actors in the aggregate.
     fn get_actors(&mut self) -> Vec<&mut Self::ActorMap> {
-        let capacity = self.get_number_actors();
+        let capacity = self.get_nb_actors();
         let mut buffer: Vec<&mut Self::ActorMap> = Vec::with_capacity(capacity as usize);
         unsafe {
             let len = PxAggregate_getActors(
@@ -210,7 +210,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     }
 
     // Returns the number of actors in the aggregate.
-    fn get_number_actors(&self) -> u32 {
+    fn get_nb_actors(&self) -> u32 {
         unsafe { PxAggregate_getNbActors(self.as_ptr()) }
     }
 

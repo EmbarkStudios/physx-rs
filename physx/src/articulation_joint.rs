@@ -69,6 +69,7 @@ impl Into<PxArticulationJointDriveType::Enum> for ArticulationJointDriveType {
  * Section ARTICULATIONJOINT                                                   *
 *******************************************************************************/
 
+/// A new type wrapper for PxArticulationJoint.
 #[repr(transparent)]
 pub struct ArticulationJoint {
     obj: physx_sys::PxArticulationJoint,

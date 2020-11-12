@@ -144,7 +144,7 @@ pub trait ArticulationBase: Class<physx_sys::PxArticulationBase> + Base {
     }
 
     /// Get the total number of links on this articulation
-    fn get_number_links(&self) -> usize {
+    fn get_nb_links(&self) -> usize {
         unsafe { PxArticulationBase_getNbLinks(self.as_ptr()) as usize }
     }
 
@@ -230,8 +230,9 @@ pub trait ArticulationBase: Class<physx_sys::PxArticulationBase> + Base {
                     .map(|parent| parent.as_mut_ptr())
                     .unwrap_or(null_mut()),
                 pose.as_ptr(),
-            ) as *mut Self::ArticulationLink).as_mut()
-            .map(|link| UserData::init_user_data(link, user_data))
+            ) as *mut Self::ArticulationLink)
+                .as_mut()
+                .map(|link| UserData::init_user_data(link, user_data))
         }
     }
 
@@ -250,7 +251,8 @@ pub trait ArticulationBase: Class<physx_sys::PxArticulationBase> + Base {
                 parent_frame.as_ptr(),
                 child.as_mut_ptr(),
                 child_frame.as_ptr(),
-            ) as *mut J).as_mut()
+            ) as *mut J)
+                .as_mut()
         }
     }
 
@@ -302,13 +304,17 @@ where
     T: Articulation,
     C: ArticulationReducedCoordinate,
 {
-    /// Safety: get_concrete_type seems to return Undefined in some situations
-    /// where it seems like it shouldn't.  `try_cast_map` will return `None`
-    /// when this call would crash.
-    pub unsafe fn cast_map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Ret
+    /// Safety: this relies on `get_concrete_type` to determine the articulation type,
+    /// which has had issues with returning ConcreteType::Undefined for Actor subclasses.
+    /// `try_cast_map` will return `None` when this would crash.
+    pub unsafe fn cast_map<'a, Ret, ArtFn, ArcFn>(
+        &'a mut self,
+        mut art_fn: ArtFn,
+        mut arc_fn: ArcFn,
+    ) -> Ret
     where
-        ArtFn: FnOnce(&mut T) -> Ret,
-        ArcFn: FnOnce(&mut C) -> Ret,
+        ArtFn: FnMut(&'a mut T) -> Ret,
+        ArcFn: FnMut(&'a mut C) -> Ret,
     {
         match self.get_concrete_type() {
             ConcreteType::Articulation => {
@@ -328,10 +334,14 @@ where
     /// Calls one of the given functions and returns the result if the articulation can be
     /// safely cast to that type. If `get_concrete_type` does not return `ConcreteType::Articulation`
     /// or `ConcreteType::ArticulationReducedCoordinate` this call returns `None`.
-    pub fn try_cast_map<Ret, ArtFn, ArcFn>(&mut self, art_fn: ArtFn, arc_fn: ArcFn) -> Option<Ret>
+    pub fn try_cast_map<'a, Ret, ArtFn, ArcFn>(
+        &'a mut self,
+        mut art_fn: ArtFn,
+        mut arc_fn: ArcFn,
+    ) -> Option<Ret>
     where
-        ArtFn: FnOnce(&mut T) -> Ret,
-        ArcFn: FnOnce(&mut C) -> Ret,
+        ArtFn: FnMut(&'a mut T) -> Ret,
+        ArcFn: FnMut(&'a mut C) -> Ret,
     {
         match self.get_concrete_type() {
             ConcreteType::Articulation => Some(art_fn(unsafe { &mut *(self as *mut _ as *mut T) })),

@@ -8,7 +8,7 @@
 Wrapper for PxFoundation class
 */
 
-use crate::{owner::Owner, traits::Class, version};
+use crate::{owner::Owner, traits::Class};
 use enumflags2::BitFlags;
 use physx_sys::{
     create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
@@ -84,21 +84,24 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     fn new(allocator: Self::Allocator) -> Option<Owner<Self>> {
         unsafe {
             Owner::from_raw(phys_PxCreateFoundation(
-                version(4, 1, 1),
+                crate::physics::PX_PHYSICS_VERSION,
                 allocator.into_px(),
                 get_default_error_callback() as *mut PxErrorCallback,
             ) as *mut Self)
         }
     }
 
+    /// Get the error callback.
     fn get_error_callback(&mut self) -> Option<&mut PxErrorCallback> {
         unsafe { PxFoundation_getErrorCallback_mut(self.as_mut_ptr()).as_mut() }
     }
 
+    /// Set the error level.
     fn set_error_level(&mut self, mask: BitFlags<ErrorCode>) {
         unsafe { PxFoundation_setErrorLevel_mut(self.as_mut_ptr(), mask.bits() as i32) }
     }
 
+    /// Get the error level.
     fn get_error_level(&self) -> BitFlags<ErrorCode> {
         unsafe {
             BitFlags::from_bits(PxFoundation_getErrorLevel(self.as_ptr()) as u32)
@@ -106,6 +109,7 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
         }
     }
 
+    /// Get the allocator callback.
     fn get_allocator_callback(&mut self) -> Option<&mut Self::Allocator> {
         unsafe {
             (get_alloc_callback_user_data(PxFoundation_getAllocatorCallback_mut(self.as_mut_ptr()))
@@ -114,10 +118,12 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
         }
     }
 
+    /// Get whether allocation names are reported.
     fn get_report_allocation_names(&self) -> bool {
         unsafe { PxFoundation_getReportAllocationNames(self.as_ptr()) }
     }
 
+    /// Set whether allocation names are reported.
     fn set_report_allocation_names(&mut self, value: bool) {
         unsafe { PxFoundation_setReportAllocationNames_mut(self.as_mut_ptr(), value) }
     }
@@ -146,10 +152,9 @@ impl ScratchBuffer {
 }
 
 /// A trait for creating allocator callbacks for PhysX.
-/// Implement the interface on a ZST.  Currently, user_data is unused
-/// since there isn't a good way of communicating ownership, or calling
-/// it's dtor.  If user_data is needed, call `physx_sys::create_alloc_callback`
-/// directly.
+///
+/// Reporting the name, file and line is not enabled by default.
+/// Use `set_report_allocation_names` to toggle this on or off.
 pub unsafe trait AllocatorCallback: Sized {
     unsafe extern "C" fn allocate(
         size: u64,
@@ -198,12 +203,20 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
 
 /// A simple tracking allocator that calls through to Rust's GlobalAllocator.
 /// Note that it tracks the amount of space needed for storing the allocation sizes
-/// as well as the actual data.  PhysX seems to allocate a fair few 4 byte align-16
-/// objects, so the 16 bytes of overhead per alloc is a huge waste: 32 bytes, 4 are data.
-// "You dont pay for what you dont use" (:
-pub struct TrackingAllocator;
-pub static ALLOCATED: AtomicUsize = AtomicUsize::new(0);
-pub static DEALLOCATED: AtomicUsize = AtomicUsize::new(0);
+/// as well as the actual data.
+pub struct TrackingAllocator {
+    pub allocated: AtomicUsize,
+    pub deallocated: AtomicUsize,
+}
+
+impl Default for TrackingAllocator {
+    fn default() -> Self {
+        Self {
+            allocated: AtomicUsize::new(0),
+            deallocated: AtomicUsize::new(0),
+        }
+    }
+}
 
 unsafe impl AllocatorCallback for TrackingAllocator {
     unsafe extern "C" fn allocate(
@@ -211,21 +224,23 @@ unsafe impl AllocatorCallback for TrackingAllocator {
         _name: *const c_void,
         _file: *const c_void,
         _line: u32,
-        _user_data: *const c_void,
+        user_data: *const c_void,
     ) -> *mut c_void {
+        let user_data = &*(user_data as *const Self);
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
-        ALLOCATED.fetch_add(layout.size(), SeqCst);
+        user_data.allocated.fetch_add(layout.size(), SeqCst);
         let allocation = alloc(layout) as *mut u64;
         *allocation = alloc_size as u64;
         (allocation as usize + 16) as *mut c_void
     }
 
-    unsafe extern "C" fn deallocate(ptr: *const c_void, _user_data: *const c_void) {
+    unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void) {
+        let user_data = &*(user_data as *const Self);
         let ptr = (ptr as usize - 16) as *mut u64;
         let size = *ptr;
         let layout = Layout::from_size_align(size as usize, 16).unwrap();
-        DEALLOCATED.fetch_add(layout.size(), SeqCst);
+        user_data.deallocated.fetch_add(layout.size(), SeqCst);
         dealloc(ptr as *mut u8, layout)
     }
 }

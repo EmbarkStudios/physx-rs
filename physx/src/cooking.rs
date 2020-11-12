@@ -1,153 +1,409 @@
-// Author: Tom Olsson <tom.olsson@embark-studios.com>
-// Copyright © 2019, Embark Studios, all rights reserved.
-// Created: 12 April 2019
-
-#![warn(clippy::all)]
-
-/*!
-
-*/
-
-/*
-use super::{
-    foundation::*,
-    geometry::*,
+use crate::{
+    bvh_structure::BVHStructure, convex_mesh::ConvexMesh, foundation::Foundation,
+    height_field::HeightField, owner::Owner, physics::Physics, traits::Class,
+    triangle_mesh::TriangleMesh,
 };
+
 use physx_sys::{
+    phys_PxCreateCooking,
+    PxBVHStructureDesc_isValid,
+    PxBVHStructureDesc_new,
+    PxBVHStructureDesc_setToDefault_mut,
+    PxConvexMeshDesc_isValid,
+    PxConvexMeshDesc_new,
+    PxConvexMeshDesc_setToDefault_mut,
+    PxCookingParams_new,
+    //PxCooking_getParams,
+    //PxCooking_setParams_mut,
+    //PxCooking_platformMismatch,
+    //PxCooking_computeHullPolygons,
+    //PxCooking_cookBVHStructure,
+    //PxCooking_cookConvexMesh,
+    //PxCooking_cookHeightField,
+    //PxCooking_cookTriangleMesh,
+    PxCooking_createBVHStructure,
+    PxCooking_createConvexMesh,
+    PxCooking_createHeightField,
+    PxCooking_createTriangleMesh,
+    PxCooking_release_mut,
+    PxCooking_validateConvexMesh,
+    PxCooking_validateTriangleMesh,
+    PxHeightFieldDesc_isValid,
+    PxHeightFieldDesc_new,
+    PxHeightFieldDesc_setToDefault_mut,
+    PxTriangleMeshDesc_isValid,
+    PxTriangleMeshDesc_new,
+    PxTriangleMeshDesc_setToDefault_mut,
 };
 
-todo[tolsson]: Make these into builder parameters
-*/
-pub const HEIGHT_SCALE: f32 = 1.0;
-pub const XZ_SCALE: f32 = 100.0;
-/*
-impl Release for PxCooking {
-    unsafe fn release(pointer: &mut Self) {
-        PxCooking_release_mut(pointer)
+/// A new-type wrapper around `physx_sys::PxCooking`.
+pub struct PxCooking {
+    obj: physx_sys::PxCooking,
+}
+
+unsafe impl Class<physx_sys::PxCooking> for PxCooking {
+    fn as_ptr(&self) -> *const physx_sys::PxCooking {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxCooking {
+        &mut self.obj
     }
 }
+
+impl Drop for PxCooking {
+    fn drop(&mut self) {
+        unsafe { PxCooking_release_mut(self.as_mut_ptr()) }
+    }
+}
+
+unsafe impl Send for PxCooking {}
+unsafe impl Sync for PxCooking {}
 
 impl PxCooking {
-    pub fn new(
-        physx_version: u32,
-        foundation: &mut impl Foundation,
-        cook_params: PxCookingParams,
-    ) -> Option<Self> {
+    /// Create a new cooking instance.
+    pub fn new(foundation: &mut impl Foundation, params: &PxCookingParams) -> Option<Owner<Self>> {
         unsafe {
-            PxCooking::from_raw(
-                phys_PxCreateCooking(
-                    physx_version,
-                    foundation.as_mut_ptr(),
-                    &cook_params
-                )
-            )
+            Owner::from_raw(phys_PxCreateCooking(
+                crate::physics::PX_PHYSICS_VERSION,
+                foundation.as_mut_ptr(),
+                params.as_ptr(),
+            ) as *mut _)
         }
     }
-}
 
-pub trait Cooking {
-    fn as_ptr(&self) -> *const PxCooking;
-
-    fn as_mut_ptr(&mut self) -> *mut PxCooking {
-        self.as_ptr() as *mut PxCooking
-    }
-
-    /// Validate that the provided description is valid
-    fn validate_triangle_mesh(&self, mesh_desc: &PxTriangleMeshDesc) -> bool {
-        unsafe { PxCooking_validateTriangleMesh(self.as_ptr(), mesh_desc) }
-    }
-
-    fn create_triangle_mesh(
+    /// Cook a new BVH structure.
+    pub fn create_bvh_structure(
         &self,
-        mesh_desc: &PxTriangleMeshDesc,
-        mesh_scale: &PxVec3,
-    ) -> Result<PxTriangleMeshGeometry, ()> {
-        let mut cooking_result = PxTriangleMeshCookingResult::eSUCCESS;
+        physics: &mut impl Physics,
+        desc: &PxBVHStructureDesc,
+    ) -> Option<Owner<BVHStructure>> {
         unsafe {
-            if !self.validate_triangle_mesh(mesh_desc) {
-                Err(())
-            } else {
-                let insertion_callback =
-                    PxPhysics_getPhysicsInsertionCallback_mut(phys_PxGetPhysics());
+            BVHStructure::from_raw(PxCooking_createBVHStructure(
+                self.as_ptr(),
+                desc.as_ptr(),
+                physics.get_physics_insertion_callback()?,
+            ))
+        }
+    }
 
-                let tri_mesh = PxTriangleMesh::from_raw(PxCooking_createTriangleMesh(
+    /// Cook a new convex mesh if the descriptor is validated.
+    pub fn create_convex_mesh(
+        &self,
+        physics: &mut impl Physics,
+        desc: &PxConvexMeshDesc,
+    ) -> ConvexMeshCookingResult {
+        if !self.validate_convex_mesh(desc) {
+            return ConvexMeshCookingResult::InvalidDescriptor;
+        };
+        if let Some(callback) = physics.get_physics_insertion_callback() {
+            let mut result = physx_sys::PxConvexMeshCookingResult::eFAILURE;
+            let ptr = unsafe {
+                ConvexMesh::from_raw(PxCooking_createConvexMesh(
                     self.as_ptr(),
-                    mesh_desc,
-                    insertion_callback,
-                    &mut cooking_result,
-                ));
-
-                let mesh_scale = PxMeshScale_new_2(mesh_scale);
-
-                Ok(<PxTriangleMeshGeometry as TriangleMeshGeometry>::new(
-                    tri_mesh,
-                    &mesh_scale,
-                    PxMeshGeometryFlags { mBits: 0 },
+                    desc.as_ptr(),
+                    callback,
+                    &mut result,
                 ))
-            }
-        }
-    }
-
-    /// Build heightfield geometry from a description
-    fn create_heightfield(
-        &self,
-        heightfield_desc: PxHeightFieldDesc,
-        double_sided: bool,
-    ) -> PxHeightFieldGeometry {
-        unsafe {
-            let insertion_callback = PxPhysics_getPhysicsInsertionCallback_mut(phys_PxGetPhysics());
-
-            let heightfield =
-                PxCooking_createHeightField(self.as_ptr(), &heightfield_desc, insertion_callback);
-            let mesh_flags = if double_sided {
-                PxMeshGeometryFlag::eDOUBLE_SIDED
-            } else {
-                0
             };
-
-            <PxHeightFieldGeometry as HeightFieldGeometry>::new(
-                &mut*heightfield,
-                PxMeshGeometryFlags {
-                    mBits: mesh_flags as u8,
-                },
-                HEIGHT_SCALE,
-                XZ_SCALE,
-                XZ_SCALE,
-            )
+            ConvexMeshCookingResult::from_raw(result, ptr)
+        } else {
+            ConvexMeshCookingResult::Failure
         }
     }
 
-    fn make_geometry<T>(&mut self, desc: ColliderDesc) -> Geometry<T> {
+    /// Cook a new height field.
+    pub fn create_height_field(
+        &self,
+        physics: &mut impl Physics,
+        desc: &PxHeightFieldDesc,
+    ) -> Option<Owner<HeightField>> {
         unsafe {
-            match desc {
-                ColliderDesc::Sphere(radius) => Geometry::<PxSphereGeometry>(PxSphereGeometry_new_1(radius)),
-                ColliderDesc::Box(x, y, z) => Geometry::Box(PxBoxGeometry_new_1(x, y, z)),
-                ColliderDesc::Capsule(r, h) => {
-                    Geometry::Capsule(PxCapsuleGeometry_new_1(r, h / 2.0))
-                }
-                ColliderDesc::Cylinder(r, h) => {
-                    Geometry::Capsule(PxCapsuleGeometry_new_1(r, h / 2.0))
-                }
-                ColliderDesc::TriMesh {
-                    vertices,
-                    indices,
-                    mesh_scale,
-                } => {
-                    let mut mesh_desc = PxTriangleMeshDesc_new();
+            HeightField::from_raw(PxCooking_createHeightField(
+                self.as_ptr(),
+                desc.as_ptr(),
+                physics.get_physics_insertion_callback()?,
+            ))
+        }
+    }
 
-                    mesh_desc.points.count = vertices.len() as u32;
-                    mesh_desc.points.stride = (3 * std::mem::size_of::<f32>()) as u32;
-                    mesh_desc.points.data = vertices.as_ptr() as *const std::ffi::c_void;
+    /// Cook a new triangle mesh if the descriptor is validated.
+    pub fn create_triangle_mesh(
+        &self,
+        physics: &mut impl Physics,
+        desc: &PxTriangleMeshDesc,
+    ) -> TriangleMeshCookingResult {
+        if !self.validate_triangle_mesh(desc) {
+            return TriangleMeshCookingResult::InvalidDescriptor;
+        };
+        if let Some(callback) = physics.get_physics_insertion_callback() {
+            let mut result = physx_sys::PxTriangleMeshCookingResult::eFAILURE;
+            let ptr = unsafe {
+                TriangleMesh::from_raw(PxCooking_createTriangleMesh(
+                    self.as_ptr(),
+                    desc.as_ptr(),
+                    callback,
+                    &mut result,
+                ))
+            };
+            TriangleMeshCookingResult::from_raw(result, ptr)
+        } else {
+            TriangleMeshCookingResult::Failure
+        }
+    }
 
-                    mesh_desc.triangles.count = (indices.len() as u32) / 3;
-                    mesh_desc.triangles.stride = (3 * std::mem::size_of::<u32>()) as u32;
-                    mesh_desc.triangles.data = indices.as_ptr() as *const std::ffi::c_void;
+    /// Validate a convex mesh descriptor.
+    pub fn validate_convex_mesh(&self, desc: &PxConvexMeshDesc) -> bool {
+        unsafe { PxCooking_validateConvexMesh(self.as_ptr(), desc.as_ptr()) }
+    }
 
-                    self.create_triangle_mesh(&mesh_desc, mesh_scale)
-                        .expect("failed creating triangle mesh")
+    /// Validate a triangle mesh descriptor.
+    pub fn validate_triangle_mesh(&self, desc: &PxTriangleMeshDesc) -> bool {
+        unsafe { PxCooking_validateTriangleMesh(self.as_ptr(), desc.as_ptr()) }
+    }
+}
+
+pub enum ConvexMeshCookingResult {
+    Success(Owner<ConvexMesh>),
+    ZeroAreaTestFailed,
+    PolygonsLimitReached,
+    Failure,
+    InvalidDescriptor,
+}
+
+impl ConvexMeshCookingResult {
+    fn from_raw(
+        px_result: physx_sys::PxConvexMeshCookingResult::Enum,
+        ptr: Option<Owner<ConvexMesh>>,
+    ) -> Self {
+        match px_result {
+            physx_sys::PxConvexMeshCookingResult::eSUCCESS => {
+                if let Some(ptr) = ptr {
+                    ConvexMeshCookingResult::Success(ptr)
+                } else {
+                    ConvexMeshCookingResult::Failure
                 }
             }
+            physx_sys::PxConvexMeshCookingResult::eZERO_AREA_TEST_FAILED => {
+                ConvexMeshCookingResult::ZeroAreaTestFailed
+            }
+            physx_sys::PxConvexMeshCookingResult::ePOLYGONS_LIMIT_REACHED => {
+                ConvexMeshCookingResult::PolygonsLimitReached
+            }
+            physx_sys::PxConvexMeshCookingResult::eFAILURE => ConvexMeshCookingResult::Failure,
+            _ => unreachable!(
+                "invalid PxConvexMeshCookingResult enum variant: {:?}",
+                px_result
+            ),
         }
     }
 }
-*/
+
+pub enum TriangleMeshCookingResult {
+    Success(Owner<TriangleMesh>),
+    LargeTriangle,
+    Failure,
+    InvalidDescriptor,
+}
+
+impl TriangleMeshCookingResult {
+    fn from_raw(
+        px_result: physx_sys::PxTriangleMeshCookingResult::Enum,
+        ptr: Option<Owner<TriangleMesh>>,
+    ) -> Self {
+        match px_result {
+            physx_sys::PxTriangleMeshCookingResult::eSUCCESS => {
+                if let Some(ptr) = ptr {
+                    TriangleMeshCookingResult::Success(ptr)
+                } else {
+                    TriangleMeshCookingResult::Failure
+                }
+            }
+            physx_sys::PxTriangleMeshCookingResult::eLARGE_TRIANGLE => {
+                TriangleMeshCookingResult::LargeTriangle
+            }
+            physx_sys::PxTriangleMeshCookingResult::eFAILURE => TriangleMeshCookingResult::Failure,
+            _ => unreachable!(
+                "invalid PxTriangleMeshCookingResult enum variant: {:?}",
+                px_result
+            ),
+        }
+    }
+}
+
+pub struct PxConvexMeshDesc {
+    pub obj: physx_sys::PxConvexMeshDesc,
+}
+
+unsafe impl Class<physx_sys::PxConvexMeshDesc> for PxConvexMeshDesc {
+    fn as_ptr(&self) -> *const physx_sys::PxConvexMeshDesc {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxConvexMeshDesc {
+        &mut self.obj
+    }
+}
+
+impl PxConvexMeshDesc {
+    /// Create a new convex mesh descriptor.
+    pub fn new() -> Self {
+        unsafe {
+            Self {
+                obj: PxConvexMeshDesc_new(),
+            }
+        }
+    }
+
+    /// Check if the descriptor is valid.
+    pub fn is_valid(&self) -> bool {
+        unsafe { PxConvexMeshDesc_isValid(self.as_ptr()) }
+    }
+
+    /// Set the descriptor to its default values.
+    pub fn set_to_default(&mut self) -> &mut Self {
+        unsafe {
+            PxConvexMeshDesc_setToDefault_mut(self.as_mut_ptr());
+        }
+        self
+    }
+}
+
+pub struct PxTriangleMeshDesc {
+    pub obj: physx_sys::PxTriangleMeshDesc,
+}
+
+unsafe impl Class<physx_sys::PxTriangleMeshDesc> for PxTriangleMeshDesc {
+    fn as_ptr(&self) -> *const physx_sys::PxTriangleMeshDesc {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxTriangleMeshDesc {
+        &mut self.obj
+    }
+}
+
+impl PxTriangleMeshDesc {
+    /// Create a new triangle mesh descriptor.
+    pub fn new() -> Self {
+        unsafe {
+            Self {
+                obj: PxTriangleMeshDesc_new(),
+            }
+        }
+    }
+
+    /// Check if the descriptor is valid.
+    pub fn is_valid(&self) -> bool {
+        unsafe { PxTriangleMeshDesc_isValid(self.as_ptr()) }
+    }
+
+    /// Set the descriptor to its default values.
+    pub fn set_to_default(&mut self) -> &mut Self {
+        unsafe {
+            PxTriangleMeshDesc_setToDefault_mut(self.as_mut_ptr());
+        }
+        self
+    }
+}
+
+pub struct PxHeightFieldDesc {
+    pub obj: physx_sys::PxHeightFieldDesc,
+}
+
+unsafe impl Class<physx_sys::PxHeightFieldDesc> for PxHeightFieldDesc {
+    fn as_ptr(&self) -> *const physx_sys::PxHeightFieldDesc {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxHeightFieldDesc {
+        &mut self.obj
+    }
+}
+
+impl PxHeightFieldDesc {
+    /// Create a new height field descriptor.
+    pub fn new() -> Self {
+        unsafe {
+            Self {
+                obj: PxHeightFieldDesc_new(),
+            }
+        }
+    }
+
+    /// Check if the descriptor is valid.
+    pub fn is_valid(&self) -> bool {
+        unsafe { PxHeightFieldDesc_isValid(self.as_ptr()) }
+    }
+
+    /// Set the descriptor to its default values.
+    pub fn set_to_default(&mut self) -> &mut Self {
+        unsafe {
+            PxHeightFieldDesc_setToDefault_mut(self.as_mut_ptr());
+        }
+        self
+    }
+}
+
+pub struct PxBVHStructureDesc {
+    pub obj: physx_sys::PxBVHStructureDesc,
+}
+
+unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBVHStructureDesc {
+    fn as_ptr(&self) -> *const physx_sys::PxBVHStructureDesc {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxBVHStructureDesc {
+        &mut self.obj
+    }
+}
+
+impl PxBVHStructureDesc {
+    /// Create a new BVH structure descriptor.
+    pub fn new() -> Self {
+        unsafe {
+            Self {
+                obj: PxBVHStructureDesc_new(),
+            }
+        }
+    }
+
+    /// Check if the descriptor is valid.
+    pub fn is_valid(&self) -> bool {
+        unsafe { PxBVHStructureDesc_isValid(self.as_ptr()) }
+    }
+
+    /// Set the descriptor to its default values.
+    pub fn set_to_default(&mut self) -> &mut Self {
+        unsafe {
+            PxBVHStructureDesc_setToDefault_mut(self.as_mut_ptr());
+        }
+        self
+    }
+}
+
+pub struct PxCookingParams {
+    pub obj: physx_sys::PxCookingParams,
+}
+
+unsafe impl Class<physx_sys::PxCookingParams> for PxCookingParams {
+    fn as_ptr(&self) -> *const physx_sys::PxCookingParams {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxCookingParams {
+        &mut self.obj
+    }
+}
+
+impl PxCookingParams {
+    /// Create a new cooking params.
+    pub fn new(physics: &impl Physics) -> Option<Self> {
+        unsafe {
+            physics.get_tolerances_scale().map(|tolerances| Self {
+                obj: PxCookingParams_new(tolerances),
+            })
+        }
+    }
+}

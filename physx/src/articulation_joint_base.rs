@@ -54,6 +54,7 @@ pub trait ArticulationJointBase: Class<physx_sys::PxArticulationJointBase> + Bas
         unsafe { PxArticulationJointBase_getParentPose(self.as_ptr()).into() }
     }
 
+    /// Get the global pose of this joint.
     fn get_joint_transform_global(&self) -> PxTransform {
         // Avoid dealing with ArticulationLink directly so it's user data
         // type info doesn't need to be passed in here, since it's not needed.
@@ -70,6 +71,7 @@ pub trait ArticulationJointBase: Class<physx_sys::PxArticulationJointBase> + Bas
     }
 }
 
+/// A PxArticulatiopnJointBase new type wrapper with methods for safe casts.
 pub struct JointMap {
     obj: physx_sys::PxArticulationJointBase,
 }
@@ -88,10 +90,17 @@ where
 }
 
 impl JointMap {
-    pub unsafe fn map<Ret, ArtJoFn, ArcJoFn>(&mut self, art_fn: ArtJoFn, arc_fn: ArcJoFn) -> Ret
+    /// Safety: this relies on `get_concrete_type` to determine the joint type,
+    /// which has had issues with returning ConcreteType::Undefined for Actor subclasses.
+    /// `try_cast_map` will return `None` when this would crash.
+    pub unsafe fn cast_map<'a, Ret, ArtJoFn, ArcJoFn>(
+        &'a mut self,
+        mut art_fn: ArtJoFn,
+        mut arc_fn: ArcJoFn,
+    ) -> Ret
     where
-        ArtJoFn: FnOnce(&mut ArticulationJoint) -> Ret,
-        ArcJoFn: FnOnce(&mut ArticulationJointReducedCoordinate) -> Ret,
+        ArtJoFn: FnMut(&'a mut ArticulationJoint) -> Ret,
+        ArcJoFn: FnMut(&'a mut ArticulationJointReducedCoordinate) -> Ret,
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => {
@@ -107,14 +116,14 @@ impl JointMap {
         }
     }
 
-    pub fn try_map<Ret, ArtJoFn, ArcJoFn>(
+    pub fn try_cast_map<'a, Ret, ArtJoFn, ArcJoFn>(
         &mut self,
-        art_fn: ArtJoFn,
-        arc_fn: ArcJoFn,
+        mut art_fn: ArtJoFn,
+        mut arc_fn: ArcJoFn,
     ) -> Option<Ret>
     where
-        ArtJoFn: FnOnce(&mut ArticulationJoint) -> Ret,
-        ArcJoFn: FnOnce(&mut ArticulationJointReducedCoordinate) -> Ret,
+        ArtJoFn: FnMut(&'a mut ArticulationJoint) -> Ret,
+        ArcJoFn: FnMut(&'a mut ArticulationJointReducedCoordinate) -> Ret,
     {
         match self.get_concrete_type() {
             crate::base::ConcreteType::ArticulationJoint => Some(art_fn(unsafe {

@@ -175,6 +175,7 @@ impl From<PxArticulationJointType::Enum> for ArticulationJointType {
 ////////////////////////////////////////////////////////////////////////////////
 // Section ArticulationJointReducedCoordinate
 
+/// PxArticulationJointReducedCoordinate new type wrapper.
 #[repr(transparent)]
 pub struct ArticulationJointReducedCoordinate {
     obj: physx_sys::PxArticulationJointReducedCoordinate,
@@ -201,7 +202,7 @@ impl ArticulationJointReducedCoordinate {
         };
     }
 
-    /// set joint type
+    /// Set the Joint type.
     pub fn set_joint_type(&mut self, joint_type: ArticulationJointType) {
         unsafe {
             PxArticulationJointReducedCoordinate_setJointType_mut(
@@ -211,7 +212,7 @@ impl ArticulationJointReducedCoordinate {
         }
     }
 
-    /// get joint type
+    /// Get the joint type.
     pub fn get_joint_type(&self) -> ArticulationJointType {
         ArticulationJointType::from(unsafe {
             PxArticulationJointReducedCoordinate_getJointType(self.as_ptr())
@@ -251,6 +252,7 @@ impl ArticulationJointReducedCoordinate {
         }
     }
 
+    /// Set the ArticulationMotion for an axis.
     pub fn set_motion(&mut self, axis: ArticulationAxis, motion: ArticulationMotion) {
         unsafe {
             PxArticulationJointReducedCoordinate_setMotion_mut(

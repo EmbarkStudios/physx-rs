@@ -121,11 +121,13 @@ pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + U
         Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
     }
 
+    /// Get the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data(self) }
     }
 
+    /// Get the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }

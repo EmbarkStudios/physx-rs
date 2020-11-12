@@ -136,8 +136,6 @@ pub trait Geometry: Class<PxGeometry> {
     }
 }
 
-// TODO these should be changed to newtype wrappers instead of traits
-
 impl<T> SphereGeometry for T where T: Class<PxSphereGeometry> + Geometry {}
 pub trait SphereGeometry: Class<PxSphereGeometry> + Geometry {
     fn new(radius: f32) -> PxSphereGeometry {
