@@ -47,7 +47,7 @@ pub fn gl_to_px_tf(trans: Mat4) -> PxTransform {
 /// Convert a reference to a Mat4 to a PxTransform
 pub fn gl_to_px_tf_ref(trans: &Mat4) -> PxTransform {
     let quat: PxQuatWrap = Quat::from_rotation_mat4(&trans).into();
-    let (x, y, z, _) = trans.w_axis().into();
+    let (x, y, z, _) = trans.w_axis.into();
     unsafe { PxTransform_new_4(x, y, z, quat.0) }
 }
 

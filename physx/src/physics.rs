@@ -205,7 +205,7 @@ impl Physics {
         offset: f32,
         material: *mut PxMaterial,
     ) -> RigidStatic {
-        let plane = PxPlane_new_1(normal.x(), normal.y(), normal.z(), offset);
+        let plane = PxPlane_new_1(normal.x, normal.y, normal.z, offset);
         RigidStatic::new(phys_PxCreatePlane(self.get_raw_mut(), &plane, material))
     }
 

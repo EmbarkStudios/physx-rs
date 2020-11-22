@@ -98,9 +98,9 @@ impl Controller {
 
 fn to_extended(vec: &Vec3) -> PxExtendedVec3 {
     PxExtendedVec3 {
-        x: vec.x() as f64,
-        y: vec.y() as f64,
-        z: vec.z() as f64,
+        x: vec.x as f64,
+        y: vec.y as f64,
+        z: vec.z as f64,
     }
 }
 
