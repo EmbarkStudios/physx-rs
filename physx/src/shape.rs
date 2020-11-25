@@ -20,9 +20,9 @@ use std::{marker::PhantomData, ptr::drop_in_place};
 
 use physx_sys::{
     PxFilterData, PxFilterData_new_1, PxShapeFlag, PxShapeFlags, PxShape_getMaterials,
-    PxShape_getNbMaterials, PxShape_getQueryFilterData, PxShape_getSimulationFilterData,
-    PxShape_release_mut, PxShape_setFlag_mut, PxShape_setQueryFilterData_mut,
-    PxShape_setSimulationFilterData_mut,
+    PxShape_getNbMaterials, PxShape_getQueryFilterData, PxShape_getReferenceCount,
+    PxShape_getSimulationFilterData, PxShape_release_mut, PxShape_setFlag_mut,
+    PxShape_setQueryFilterData_mut, PxShape_setSimulationFilterData_mut,
 };
 
 /// Layers used for collision/querying of shapes
@@ -172,6 +172,11 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
     /// Read the collision filter data of this shape
     fn get_simulation_filter_data(&self) -> PxFilterData {
         unsafe { PxShape_getSimulationFilterData(self.as_ptr()) }
+    }
+
+    /// Get the reference count
+    fn get_reference_count(&self) -> u32 {
+        unsafe { PxShape_getReferenceCount(self.as_ptr()) }
     }
 
     /// Set the query filter of this shape

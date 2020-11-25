@@ -104,7 +104,6 @@ fn main() {
     let ground_plane = physics
         .create_plane(PxVec3::new(0.0, 1.0, 0.0), 0.0, material.as_mut(), ())
         .unwrap();
-
     // The scene owns actors that are added to it.  They can be retrieved using the
     // various getters on the scene.
     scene.add_static_actor(ground_plane);
@@ -121,7 +120,6 @@ fn main() {
             (),
         )
         .unwrap();
-
     sphere_actor.set_angular_damping(0.5);
     sphere_actor.set_rigid_body_flag(RigidBodyFlag::EnablePoseIntegrationPreview, true);
     scene.add_dynamic_actor(sphere_actor);

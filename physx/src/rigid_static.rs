@@ -45,9 +45,6 @@ unsafe impl<U, Geom: Shape> UserData for PxRigidStatic<U, Geom> {
 impl<S, Geom: Shape> Drop for PxRigidStatic<S, Geom> {
     fn drop(&mut self) {
         unsafe {
-            for shape in self.get_shapes_mut() {
-                drop_in_place(shape as *mut Geom)
-            }
             drop_in_place(self.get_user_data_mut() as *mut _);
             PxRigidActor_release_mut(self.as_mut_ptr())
         }

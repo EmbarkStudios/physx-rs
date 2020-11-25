@@ -77,11 +77,7 @@ unsafe impl<L, Geom: Shape> UserData for PxArticulationLink<L, Geom> {
 impl<L, Geom: Shape> Drop for PxArticulationLink<L, Geom> {
     fn drop(&mut self) {
         unsafe {
-            for shape in self.get_shapes_mut() {
-                drop_in_place(shape as *mut _);
-            }
             drop_in_place(self.get_user_data_mut() as *mut _);
-
             PxArticulationLink_release_mut(self.as_mut_ptr());
         }
     }

@@ -387,7 +387,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     fn create_shape(
         &mut self,
         geometry: &impl Geometry,
-        materials: &[&mut <Self::Shape as Shape>::Material],
+        materials: &mut [&mut <Self::Shape as Shape>::Material],
         is_exclusive: bool,
         shape_flags: ShapeFlags,
         user_data: <Self::Shape as UserData>::UserData,

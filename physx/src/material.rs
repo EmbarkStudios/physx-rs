@@ -137,7 +137,7 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
 
     /// Get the current ref count of the material.
     #[inline]
-    fn get_ref_count(&self) -> u32 {
+    fn get_reference_count(&self) -> u32 {
         unsafe { PxMaterial_getReferenceCount(self.as_ptr()) }
     }
 
