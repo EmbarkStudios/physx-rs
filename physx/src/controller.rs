@@ -198,7 +198,6 @@ pub trait CapsuleControllerDesc:
 
 impl<T> ControllerDesc for T where T: Class<PxControllerDesc> {}
 pub trait ControllerDesc: Class<PxControllerDesc> {
-    // ???
 }
 
 #[derive(Error, Debug)]
