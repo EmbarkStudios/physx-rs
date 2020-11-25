@@ -138,6 +138,7 @@ pub trait Geometry: Class<PxGeometry> {
 
 impl<T> SphereGeometry for T where T: Class<PxSphereGeometry> + Geometry {}
 pub trait SphereGeometry: Class<PxSphereGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(radius: f32) -> PxSphereGeometry {
         unsafe { PxSphereGeometry_new_1(radius) }
     }
@@ -153,6 +154,7 @@ pub trait SphereGeometry: Class<PxSphereGeometry> + Geometry {
 
 impl<T> PlaneGeometry for T where T: Class<PxPlaneGeometry> + Geometry {}
 pub trait PlaneGeometry: Class<PxPlaneGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new() -> PxPlaneGeometry {
         unsafe { PxPlaneGeometry_new() }
     }
@@ -168,6 +170,7 @@ pub trait PlaneGeometry: Class<PxPlaneGeometry> + Geometry {
 
 impl<T> CapsuleGeometry for T where T: Class<PxCapsuleGeometry> + Geometry {}
 pub trait CapsuleGeometry: Class<PxCapsuleGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(radius: f32, half_height: f32) -> PxCapsuleGeometry {
         unsafe { PxCapsuleGeometry_new_1(radius, half_height) }
     }
@@ -183,6 +186,7 @@ pub trait CapsuleGeometry: Class<PxCapsuleGeometry> + Geometry {
 
 impl<T> BoxGeometry for T where T: Class<PxBoxGeometry> + Geometry {}
 pub trait BoxGeometry: Class<PxBoxGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(half_x: f32, half_y: f32, half_z: f32) -> PxBoxGeometry {
         unsafe { PxBoxGeometry_new_1(half_x, half_y, half_z) }
     }
@@ -198,6 +202,7 @@ pub trait BoxGeometry: Class<PxBoxGeometry> + Geometry {
 
 impl<T> ConvexMeshGeometry for T where T: Class<PxConvexMeshGeometry> + Geometry {}
 pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(
         mesh: &mut ConvexMesh,
         scaling: &impl Class<PxMeshScale>,
@@ -217,6 +222,7 @@ pub trait ConvexMeshGeometry: Class<PxConvexMeshGeometry> + Geometry {
 
 impl<T> TriangleMeshGeometry for T where T: Class<PxTriangleMeshGeometry> + Geometry {}
 pub trait TriangleMeshGeometry: Class<PxTriangleMeshGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(
         mesh: &mut TriangleMesh,
         scaling: &impl Class<PxMeshScale>,
@@ -236,6 +242,7 @@ pub trait TriangleMeshGeometry: Class<PxTriangleMeshGeometry> + Geometry {
 
 impl<T> HeightFieldGeometry for T where T: Class<PxHeightFieldGeometry> + Geometry {}
 pub trait HeightFieldGeometry: Class<PxHeightFieldGeometry> + Geometry {
+    #[allow(clippy::new_ret_no_self)]
     fn new(
         height_field: &mut HeightField,
         flags: PxMeshGeometryFlags,

@@ -76,7 +76,7 @@ impl AdvanceCallback<PxArticulationLink, PxRigidDynamic> for OnAdvance {
     }
 }
 
-fn main() -> Result<(), ()> {
+fn main() {
     // Holds a PxFoundation and a PxPhysics.
     // Also has an optional Pvd and transport, not enabled by default.
     // The default allocator is the one provided by PhysX.
@@ -160,6 +160,4 @@ fn main() -> Result<(), ()> {
                 .collect::<String>()
         })
         .for_each(|line| println!("{}", line));
-
-    Ok(())
 }
