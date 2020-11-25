@@ -39,9 +39,9 @@ impl From<glam::Vec3> for PxExtendedVec3 {
     fn from(vec: glam::Vec3) -> Self {
         Self {
             obj: physx_sys::PxExtendedVec3 {
-                x: vec.x() as f64,
-                y: vec.y() as f64,
-                z: vec.z() as f64,
+                x: vec.x as f64,
+                y: vec.y as f64,
+                z: vec.z as f64,
             },
         }
     }
