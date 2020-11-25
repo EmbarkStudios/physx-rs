@@ -16,6 +16,7 @@ use physx_sys::{
 /// RigidStatic, and RigidDynamic actors the callbacks expect, and the Collision, Trigger,
 /// ConstraintBreak, WakeSleep, and Advance Callbacks themselves.
 #[repr(transparent)]
+#[allow(clippy::type_complexity)]
 pub struct PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
@@ -64,6 +65,7 @@ where
     OA: AdvanceCallback<L, D>,
 {
     /// Create a new simulation event callback.
+    #[allow(clippy::type_complexity)]
     pub fn new(
         on_collide: Option<OC>,
         on_trigger: Option<OT>,

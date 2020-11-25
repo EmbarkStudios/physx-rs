@@ -46,7 +46,7 @@ pub trait Controller: Class<PxController> + Sized {
     /// Retrieve the user data from the controller.
     // Due to the size trick employed and the API decision to expose this userData via method calls,
     // get_user_data_mut will not work for small sizes of U, since getUserData returns a copy of the field,
-    // rather than being able to write a method that returns a pointer to the field or the field itself. Shame :/
+    // rather than being able to write a method that returns a pointer to the field or the field itself.
     fn get_user_data(&self) -> &Self::UserData {
         unsafe {
             if size_of::<Self::UserData>() > size_of::<*mut c_void>() {

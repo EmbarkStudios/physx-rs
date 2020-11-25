@@ -132,7 +132,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         Owner::from_raw(ptr as *mut Self)
     }
 
-    // Add an actor to the aggregate.
+    /// Add an actor to the aggregate.
     fn add_articulation_link(
         &mut self,
         actor: &mut Self::ArticulationLink,
@@ -147,7 +147,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         }
     }
 
-    // Add an actor to the aggregate.
+    /// Add an actor to the aggregate.
     fn add_rigid_static(
         &mut self,
         actor: &mut Self::RigidStatic,
@@ -162,7 +162,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         }
     }
 
-    // Add an actor to the aggregate.
+    /// Add an actor to the aggregate.
     fn add_rigid_dynamic(
         &mut self,
         actor: &mut Self::RigidDynamic,
@@ -177,12 +177,12 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         }
     }
 
-    // Add an articulation to the aggregate.
+    /// Add an articulation to the aggregate.
     fn add_articulation(&mut self, articulation: &mut Self::Articulation) -> bool {
         unsafe { PxAggregate_addArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr()) }
     }
 
-    // Add an articulation to the aggregate.
+    /// Add an articulation to the aggregate.
     fn add_articulation_reduced_coordinate(
         &mut self,
         articulation: &mut Self::ArticulationReducedCoordinate,
@@ -190,7 +190,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         unsafe { PxAggregate_addArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr()) }
     }
 
-    // Get a Vec of all the actors in the aggregate.
+    /// Get a Vec of all the actors in the aggregate.
     fn get_actors(&mut self) -> Vec<&mut Self::ActorMap> {
         let capacity = self.get_nb_actors();
         let mut buffer: Vec<&mut Self::ActorMap> = Vec::with_capacity(capacity as usize);
@@ -206,27 +206,27 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
         buffer
     }
 
-    // Return the maximum possible number of actors in the aggregate.
-    fn get_max_number_actors(&self) -> u32 {
+    /// Return the maximum possible number of actors in the aggregate.
+    fn get_max_nb_actors(&self) -> u32 {
         unsafe { PxAggregate_getMaxNbActors(self.as_ptr()) }
     }
 
-    // Returns the number of actors in the aggregate.
+    /// Returns the number of actors in the aggregate.
     fn get_nb_actors(&self) -> u32 {
         unsafe { PxAggregate_getNbActors(self.as_ptr()) }
     }
 
-    // Returns whether the aggregate will collide with itself.
+    /// Returns whether the aggregate will collide with itself.
     fn get_self_collision(&self) -> bool {
         unsafe { PxAggregate_getSelfCollision(self.as_ptr()) }
     }
 
-    // Remove an actor from the aggregate.
+    /// Remove an actor from the aggregate.
     fn remove_actor(&mut self, actor: &mut impl Actor) -> bool {
         unsafe { PxAggregate_removeActor_mut(self.as_mut_ptr(), actor.as_mut_ptr()) }
     }
 
-    // Remove an articulation from the aggregate.
+    /// Remove an articulation from the aggregate.
     fn remove_articulation(&mut self, articulation: &mut impl ArticulationBase) -> bool {
         unsafe { PxAggregate_removeArticulation_mut(self.as_mut_ptr(), articulation.as_mut_ptr()) }
     }

@@ -145,13 +145,13 @@ pub trait ArticulationReducedCoordinate:
         Owner::from_raw(articulation?.init_user_data(user_data))
     }
 
-    // Get a reference to the user data.
+    /// Get a reference to the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
         unsafe { UserData::get_user_data(self) }
     }
 
-    // Get a mutable reference to the user data.
+    /// Get a mutable reference to the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
         unsafe { UserData::get_user_data_mut(self) }

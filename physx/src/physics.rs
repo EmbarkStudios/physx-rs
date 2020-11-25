@@ -206,6 +206,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     type Shape: Shape;
 
     /// Create a new scene with from a descriptor.
+    #[allow(clippy::type_complexity)]
     fn create_scene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>(
         &mut self,
         scene_descriptor: Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>,
@@ -231,6 +232,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     }
 
     /// Create a new aggregate.  Must be added to a scene with the same actor user data types.
+    #[allow(clippy::type_complexity)]
     fn create_aggregate<L, S, D, T, C>(
         &mut self,
         max_size: u32,

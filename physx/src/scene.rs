@@ -215,6 +215,7 @@ pub enum ActorTypeFlag {
 /// WakeSleep and Advance Callbacks.  Due to the number of generic type parameters,
 /// creating a type alias is recommended.
 #[repr(transparent)]
+#[allow(clippy::type_complexity)]
 pub struct PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
@@ -987,6 +988,7 @@ pub enum SceneFlag {
 /// A new typoe wrapper for PxSceneDesc.  Parametrized by it's user data type,
 /// the ArticulationLink, RigidStatic, and RigidDynamic actor types, and the
 /// Collision, Trigger, ConstraintBreak, WakeSleep, and Advance Callbacks.
+#[allow(clippy::type_complexity)]
 pub struct PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
@@ -1014,6 +1016,7 @@ where
     OA: AdvanceCallback<L, D>,
 {
     /// Create a new scene descriptor.
+    #[allow(clippy::type_complexity)]
     pub fn new(
         physics: &impl Physics,
         user_data: U,

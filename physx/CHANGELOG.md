@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [0.9.0] - 2020-11-25
+
+### Refactored
+
+- [PR#98](https://github.com/EmbarkStudios/physx-rs/pull/98) Use Class<T> instead of Deref, track user data types
+
+This change is a significant refactor.  The API is now very close to the underlying PhysX API, but with
+Rust's type and memory safety.  Method names mirror the C++ API, but `like_this` instead of `likeThis`.
+Much of the additional behaviour that was built on top of the underlying API has been removed.  The prelude exports the
+class-traits, but intentionally does not export the new-type wrappers.  Instead of importing them, create type
+aliases for them with the generic params filled in to cut down on the amount of typing (see the example).
+The PR has a detailed summary of the changes, with links to the relevant code.
+
 ## [0.8.0] - 2020-11-10
 
 ### Added

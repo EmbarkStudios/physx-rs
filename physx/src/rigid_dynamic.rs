@@ -117,13 +117,10 @@ unsafe impl<U, Geom: Shape> UserData for PxRigidDynamic<U, Geom> {
 
 impl<D, Geom: Shape> Drop for PxRigidDynamic<D, Geom> {
     fn drop(&mut self) {
-        for shape in self.get_shapes() {
-            for _material in shape.get_materials() {
-                // is PxMaterial_release thread safe?
-            }
-            // is PxShape_release thread safe?
-        }
         unsafe {
+            for shape in self.get_shapes_mut() {
+                drop_in_place(shape as *mut Geom)
+            }
             drop_in_place(self.get_user_data_mut() as *mut _);
             PxRigidActor_release_mut(self.as_mut_ptr());
         }

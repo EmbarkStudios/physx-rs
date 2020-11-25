@@ -141,7 +141,7 @@ fn main() -> Result<(), ()> {
                 .expect("error occured during simulation");
             // For simplicity, just read out the only dynamic actor in the scene.
             // getActiveActors is also supported, it returns a Vec<&mut ActorMap> which has
-            // a map method that takes a function for each actor type, and as_<T> methods
+            // a map method that takes a function for each actor type, and `as_<T>` methods
             // that return an Option<&mut T>.
             let actors = scene.get_dynamic_actors();
             actors[0].get_global_position().y() as i32 - 10
