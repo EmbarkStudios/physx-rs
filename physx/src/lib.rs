@@ -3,7 +3,7 @@
 // Created:  2 April 2019
 
 #![warn(clippy::all)]
-#![warn(rust_2018_idioms)]
+#![deny(rust_2018_idioms)]
 
 //! # 🎳 physx
 //!
@@ -101,18 +101,15 @@
 //! conditions.
 
 // Utility traits
-mod px_type;
 pub mod traits;
-
-// Utility data
-pub mod user_data;
 
 // Conversion utilities
 pub mod math;
-pub mod transform;
 
 // Wrappers
 pub mod actor;
+pub mod aggregate;
+pub mod articulation;
 pub mod articulation_base;
 pub mod articulation_cache;
 pub mod articulation_joint;
@@ -121,19 +118,27 @@ pub mod articulation_joint_reduced_coordinate;
 pub mod articulation_link;
 pub mod articulation_reduced_coordinate;
 pub mod base;
-pub mod body;
+pub mod bvh_structure;
+pub mod constraint;
 pub mod controller;
+pub mod controller_manager;
+pub mod convex_mesh;
 pub mod cooking;
 pub mod foundation;
 pub mod geometry;
-pub mod heightfield;
+pub mod height_field;
+pub mod material;
+pub mod owner;
 pub mod physics;
+pub mod pruning_structure;
 pub mod rigid_actor;
 pub mod rigid_body;
 pub mod rigid_dynamic;
 pub mod rigid_static;
 pub mod scene;
 pub mod shape;
+pub mod simulation_event_callback;
+pub mod triangle_mesh;
 pub mod visual_debugger;
 
 pub mod prelude;

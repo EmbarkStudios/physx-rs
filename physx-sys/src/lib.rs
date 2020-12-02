@@ -275,6 +275,8 @@ extern "C" {
         userdata: *mut c_void,
     ) -> *mut PxAllocatorCallback;
 
+    pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;
+
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 
     /// Create a C++ proxy callback which will forward contact events to `Callback`.
@@ -292,6 +294,11 @@ extern "C" {
     pub fn create_simulation_event_callbacks(
         callbacks: *const SimulationEventCallbackInfo,
     ) -> *mut PxSimulationEventCallback;
+
+    pub fn get_simulation_event_info(
+        callback: *mut PxSimulationEventCallback,
+    ) -> *mut SimulationEventCallbackInfo;
+
     pub fn destroy_simulation_event_callbacks(callback: *mut PxSimulationEventCallback);
 
     /// Override the default filter shader in the scene with a custom function.

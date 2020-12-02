@@ -7,490 +7,918 @@
 #![allow(deprecated)]
 
 /*!
-Wrapper for PhysX Scene
+Wrapper for PhysX PxScene
  */
 
-use super::{
-    articulation_reduced_coordinate::*,
-    body::*,
-    controller::*,
+use crate::{
+    actor::{Actor, ActorMap},
+    aggregate::{Aggregate, PxAggregate},
+    articulation::Articulation,
+    articulation_base::{ArticulationBase, ArticulationMap},
+    articulation_link::ArticulationLink,
+    articulation_reduced_coordinate::ArticulationReducedCoordinate,
+    constraint::Constraint,
+    controller::Controller,
+    controller_manager::{ControllerManager, PxControllerManager},
+    foundation::ScratchBuffer,
+    math::PxVec3,
+    owner::Owner,
     physics::Physics,
+    pruning_structure::PruningStructure,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
-    rigid_static::*,
-    traits::*,
-    transform::{gl_to_px_v3, px_to_gl_v3},
-    user_data::UserData,
-    visual_debugger::*,
+    rigid_static::RigidStatic,
+    simulation_event_callback::{
+        AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
+        TriggerCallback, WakeSleepCallback,
+    },
+    traits::{Class, PxFlags, UserData},
+    visual_debugger::PvdSceneClient,
 };
+
 use enumflags2::BitFlags;
-use glam::Vec3;
+use std::{
+    ffi::c_void,
+    marker::PhantomData,
+    ptr::{drop_in_place, null, null_mut},
+};
 
-use physx_sys::*;
-use std::ops::{Deref, DerefMut};
-use std::ptr::{null, null_mut};
-use std::sync::RwLock;
+// A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
+// so those types cannot be in scope.  Plus, it easier to see what's been implemented.
+use physx_sys::{
+    get_default_simulation_filter_shader,
+    phys_PxCreateControllerManager,
+    phys_PxDefaultCpuDispatcherCreate,
+    PxActorTypeFlags,
+    PxBaseTask,
+    PxBroadPhaseCallback,
+    PxBroadPhaseType,
+    PxCCDContactModifyCallback,
+    /*
+    PxOverlapCallback,
+    PxSweepCallback,
+    PxQueryFilterData,
+    PxQueryFilterData_new,
+    PxQueryFilterCallback,
+    PxQueryCache,
+    */
+    PxContactModifyCallback,
+    PxCpuDispatcher,
+    PxPairFilteringMode,
+    PxPruningStructureType,
+    PxSceneDesc_new,
+    //PxHitFlags,
+    //PxSceneFlags,
+    PxScene_addActor_mut,
+    PxScene_addActors_mut,
+    PxScene_addActors_mut_1,
+    PxScene_addAggregate_mut,
+    PxScene_addArticulation_mut,
+    PxScene_fetchResults_mut,
+    /*
+    PxScene_advance_mut,
+    PxScene_collide_mut,
+    PxScene_checkQueries_mut,
+    PxScene_checkResults_mut,
+    PxScene_createBatchQuery_mut,
+    PxScene_createClient_mut,
+    PxScene_fetchCollision_mut,
+    PxScene_fetchResultsStart_mut,
+    PxScene_fetchResultsFinish_mut,
+    PxScene_flushSimulation_mut,
+    PxScene_fetchQueries_mut,
+    */
+    PxScene_flushQueryUpdates_mut,
+    // PxScene_overlap,
+    // PxScene_raycast,
+    // PxScene_sweep,
+    PxScene_getActiveActors_mut,
+    PxScene_getActors,
+    PxScene_getAggregates,
+    PxScene_getArticulations,
+    PxScene_getBroadPhaseCallback,
+    PxScene_getCCDContactModifyCallback,
+    PxScene_getConstraints,
+    PxScene_getContactModifyCallback,
+    PxScene_getDynamicStructure,
+    //PxScene_getFilterCallback,
+    //PxScene_getFilterShader,
+    //PxScene_getFilterShaderData,
+    //PxScene_getFilterShaderDataSize,
+    PxScene_getKinematicKinematicFilteringMode,
+    PxScene_getNbActors,
+    PxScene_getNbAggregates,
+    PxScene_getNbArticulations,
+    PxScene_getNbConstraints,
+    PxScene_getScenePvdClient_mut,
+    PxScene_getSimulationEventCallback,
+    PxScene_getStaticKinematicFilteringMode,
+    PxScene_getStaticStructure,
+    PxScene_release_mut,
+    PxScene_removeActor_mut,
+    PxScene_removeActors_mut,
+    PxScene_removeAggregate_mut,
+    PxScene_removeArticulation_mut,
+    PxScene_resetFiltering_mut,
+    PxScene_resetFiltering_mut_1,
+    PxScene_setBroadPhaseCallback_mut,
+    PxScene_setCCDContactModifyCallback_mut,
+    PxScene_setContactModifyCallback_mut,
+    //PxScene_setFilterShaderData_mut,
+    //PxScene_setSimulationEventCallback_mut,
+    /*
+    PxScene_addBroadPhaseRegion_mut,
+    PxScene_addCollection_mut,
+    PxScene_forceDynamicTreeRebuild_mut,
+    PxScene_getBounceThresholdVelocity,
+    PxScene_getBroadPhaseCaps,
+    PxScene_getBroadPhaseRegions,
+    PxScene_getBroadPhaseType,
+    PxScene_getCCDMaxPasses,
+    PxScene_getContactReportStreamBufferSize,
+    PxScene_getCpuDispatcher,
+    PxScene_getCudaContextManager,
+    PxScene_getDominanceGroupPair,
+    PxScene_getDynamicTreeRebuildRateHint,
+    PxScene_getFlags,
+    PxScene_getFrictionOffsetThreshold,
+    PxScene_getFrictionType,
+    PxScene_getGravity,
+    PxScene_getLimits,
+    PxScene_getMaxNbContactDataBlocksUsed,
+    PxScene_getNbBroadPhaseRegions,
+    PxScene_getNbContactDataBlocksUsed,
+    PxScene_getRenderBuffer_mut,
+    PxScene_getSceneQueryStaticTimestamp,
+    PxScene_getSceneQueryUpdateMode,
+    PxScene_getSimulationStatistics,
+    PxScene_getSolverArticulationBatchSize,
+    PxScene_getSolverBatchSize,
+    PxScene_getTaskManager,
+    PxScene_getTimestamp,
+    PxScene_getVisualizationCullingBox,
+    PxScene_getVisualizationParameter,
+    PxScene_getWakeCounterResetValue,
+    PxScene_processCallbacks_mut,
+    PxScene_removeBroadPhaseRegion_mut,
+    PxScene_sceneQueriesUpdate_mut,
+    PxScene_setBounceThresholdVelocity_mut,
+    PxScene_setCCDMaxPasses_mut,
+    PxScene_setDominanceGroupPair_mut,
+    PxScene_setDynamicTreeRebuildRateHint_mut,
+    PxScene_setFlag_mut,
+    PxScene_setFrictionType_mut,
+    PxScene_setGravity_mut,
+    PxScene_setLimits_mut,
+    PxScene_setNbContactDataBlocks_mut,
+    PxScene_setSceneQueryUpdateMode_mut,
+    PxScene_setSolverArticulationBatchSize_mut,
+    PxScene_setSolverBatchSize_mut,
+    PxScene_setVisualizationCullingBox_mut,
+    PxScene_setVisualizationParameter_mut,
+    PxScene_shiftOrigin_mut,
+    */
+    // PxScene_getPhysics_mut,
+    // PxScene_lockRead_mut,
+    // PxScene_unlockRead_mut,
+    // PxScene_lockWrite_mut,
+    // PxScene_unlockWrite_mut,
+    PxScene_simulate_mut,
+    //PxSimulationFilterCallback,
+    PxSolverType,
+};
 
-pub struct Scene {
-    px_scene: RwLock<Option<*mut PxScene>>,
-    bodies: Vec<ArticulationReducedCoordinate>,
-    statics: Vec<RigidStatic>,
-    dynamics: Vec<RigidDynamic>,
-    simulation_callback: Option<*mut PxSimulationEventCallback>,
-    controller_manager: Option<ControllerManager>,
+pub type ActorTypeFlags = BitFlags<ActorTypeFlag>;
+
+impl PxFlags for ActorTypeFlags {
+    type Target = PxActorTypeFlags;
+
+    fn into_px(self) -> Self::Target {
+        PxActorTypeFlags { mBits: self.bits() }
+    }
+
+    fn from_px(flags: Self::Target) -> Self {
+        unsafe { BitFlags::new(flags.mBits) }
+    }
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// #[physx_type]
-impl Scene {
-    pub fn new(scene: *mut PxScene) -> Self {
-        let mut _self = Self {
-            px_scene: RwLock::new(Some(scene)),
-            bodies: Vec::new(),
-            dynamics: Vec::new(),
-            statics: Vec::new(),
-            simulation_callback: None,
-            controller_manager: None,
-        };
-        _self.allocate_user_data();
-        _self
+#[derive(BitFlags, Copy, Clone, Debug)]
+#[repr(u16)]
+pub enum ActorTypeFlag {
+    RigidStatic = 1,
+    RigidDynamic = 1 << 1,
+}
+
+/// A new type wrapper for PxScene.  Parametrized by it's user data type,
+/// the ArticulationLink, RigidStatic, and RigidDynamic actors, Articulation, and
+/// ArticulationReducedCoordinate articulations, and Collision, Trigger, ConstraintBreak,
+/// WakeSleep and Advance Callbacks.  Due to the number of generic type parameters,
+/// creating a type alias is recommended.
+#[repr(transparent)]
+#[allow(clippy::type_complexity)]
+pub struct PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    T: Articulation,
+    C: ArticulationReducedCoordinate,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    pub(crate) obj: physx_sys::PxScene,
+    phantom_user_data: PhantomData<(U, L, S, D, T, C, OC, OT, OCB, OWS, OA)>,
+}
+
+unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> UserData
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    T: Articulation,
+    C: ArticulationReducedCoordinate,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    type UserData = U;
+
+    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+        &self.obj.userData
     }
 
-    fn allocate_user_data(&mut self) {
-        let userdata = Box::new(UserData::new_scene());
-        let scene = self.px_scene.write().unwrap().unwrap();
+    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+        &mut self.obj.userData
+    }
+}
+
+impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Drop
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    T: Articulation,
+    C: ArticulationReducedCoordinate,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    fn drop(&mut self) {
         unsafe {
-            (*scene).userData = Box::into_raw(userdata) as *mut std::ffi::c_void;
+            for ptr in self.get_aggregates() {
+                drop_in_place(ptr as *mut _)
+            }
+            for ptr in self.get_constraints() {
+                drop_in_place(ptr as *mut _)
+            }
+            for ptr in self.get_articulations() {
+                ptr.cast_map(
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |ptr| drop_in_place(ptr as *mut _),
+                )
+            }
+            for ptr in self.get_actors(ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic) {
+                ptr.cast_map(
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |ptr| drop_in_place(ptr as *mut _),
+                    |_| (), // ArticulationLinks are dropped when the articulation they are in is dropped
+                )
+            }
+            drop_in_place(self.get_user_data_mut() as *mut _);
+            drop_in_place(PxScene_getSimulationEventCallback(self.as_ptr())
+                as *mut PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>);
+            PxScene_release_mut(self.as_mut_ptr());
         }
     }
+}
 
-    pub unsafe fn release(&mut self) {
-        self.bodies.drain(..).for_each(|mut e| e.release());
-        self.statics.drain(..).for_each(|mut e| e.release());
-        self.dynamics.drain(..).for_each(|mut e| e.release());
+unsafe impl<P, U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Class<P>
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    physx_sys::PxScene: Class<P>,
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    T: Articulation,
+    C: ArticulationReducedCoordinate,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    fn as_ptr(&self) -> *const P {
+        self.obj.as_ptr()
+    }
 
-        // destroy simulation callback if we have one
-        if let Some(callback) = self.simulation_callback.take() {
-            destroy_simulation_event_callbacks(callback);
-        }
+    fn as_mut_ptr(&mut self) -> *mut P {
+        self.obj.as_mut_ptr()
+    }
+}
 
-        if let Some(manager) = self.controller_manager.take() {
-            manager.release();
-        }
+unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Send
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink + Send,
+    S: RigidStatic + Send,
+    D: RigidDynamic + Send,
+    T: Articulation + Send,
+    C: ArticulationReducedCoordinate + Send,
+    OC: CollisionCallback + Send,
+    OT: TriggerCallback + Send,
+    OCB: ConstraintBreakCallback + Send,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+}
 
-        // Release the scene object
-        let mut scene = self.px_scene.write().unwrap();
-        let scene = scene.take().expect("scene already released");
-        let b: Box<UserData> = Box::from_raw((*scene).userData as *mut _);
+unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Sync
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink + Sync,
+    S: RigidStatic + Sync,
+    D: RigidDynamic + Sync,
+    T: Articulation + Sync,
+    C: ArticulationReducedCoordinate + Sync,
+    OC: CollisionCallback + Sync,
+    OT: TriggerCallback + Sync,
+    OCB: ConstraintBreakCallback + Sync,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+}
 
-        drop(b);
-        PxScene_release_mut(scene);
+impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Scene
+    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    T: Articulation,
+    C: ArticulationReducedCoordinate,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    type ArticulationLink = L;
+    type RigidStatic = S;
+    type RigidDynamic = D;
+    type Articulation = T;
+    type ArticulationReducedCoordinate = C;
+    type ActorMap = ActorMap<L, S, D>;
+    type ArticulationMap = ArticulationMap<T, C>;
+    type Aggregate = PxAggregate<L, S, D, T, C>;
+}
+
+pub trait Scene: Class<physx_sys::PxScene> + UserData {
+    type ArticulationLink: ArticulationLink;
+    type RigidStatic: RigidStatic;
+    type RigidDynamic: RigidDynamic;
+    type Articulation: Articulation;
+    type ArticulationReducedCoordinate: ArticulationReducedCoordinate;
+    type ActorMap: RigidActor;
+    type ArticulationMap: ArticulationBase;
+    type Aggregate: Aggregate;
+
+    /// # Safety
+    /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
+    /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
+    /// retrieve the pointer and consume the Owner without dropping the pointee.
+    unsafe fn from_raw(ptr: *mut physx_sys::PxScene) -> Option<Owner<Self>> {
+        // userData is initialized by the descriptor.
+        Owner::from_raw(ptr as *mut Self)
+    }
+
+    /// Get the user data.
+    fn get_user_data(&self) -> &Self::UserData {
+        // Safety: Scenes are constructed from SceneDescriptor which sets up user data appropriately
+        unsafe { UserData::get_user_data(self) }
+    }
+
+    /// Get the user data.
+    fn get_user_data_mut(&mut self) -> *mut Self::UserData {
+        // Safety: Scenes are constructed from SceneDescriptor which sets up user data appropriately
+        unsafe { UserData::get_user_data_mut(self) }
     }
 
     /// Get the visual debugger client
-    pub fn get_pvd_client(&self) -> PvdSceneClient {
-        PvdSceneClient::from_ptr(unsafe {
-            PxScene_getScenePvdClient_mut(
-                self.px_scene.write().unwrap().expect("accessing null ptr"),
-            )
-        })
+    fn get_pvd_client(&mut self) -> Option<&mut PvdSceneClient> {
+        unsafe {
+            (PxScene_getScenePvdClient_mut(self.as_mut_ptr()) as *mut PvdSceneClient).as_mut()
+        }
     }
 
-    pub fn add_capsule_controller(
+    /// Create a controller manager.
+    fn create_controller_manager<C: Controller>(
         &mut self,
-        desc: &CapsuleControllerDesc,
-    ) -> Result<Controller, ControllerError> {
-        if self.controller_manager.is_none() {
-            return Err(ControllerError::NoControllerManager);
+        locking_enabled: bool,
+    ) -> Option<Owner<PxControllerManager<C>>> {
+        unsafe {
+            ControllerManager::from_raw(phys_PxCreateControllerManager(
+                self.as_mut_ptr(),
+                locking_enabled,
+            ))
         }
-
-        let mut controller = self
-            .controller_manager
-            .as_ref()
-            .unwrap()
-            .create_controller(desc);
-
-        Ok(Controller::new(controller.get_raw_mut()))
     }
 
-    pub fn add_actor(&mut self, mut actor: RigidStatic) -> BodyHandle {
+    ///////////////////////////////////////////////////////////////////////////////
+    // Adding/removing objects
+
+    /// Add a dynamic actor to the world.
+    fn add_dynamic_actor(&mut self, actor: Owner<Self::RigidDynamic>) {
         unsafe {
-            PxScene_addActor_mut(
-                self.px_scene.write().unwrap().expect("accessing null ptr"),
-                actor.get_raw_mut() as *mut PxActor,
-                null(),
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.into_ptr(), null());
+        }
+    }
+
+    /// Add dynamic actors to the world.
+    fn add_dynamic_actors(&mut self, mut actors: Vec<Owner<Self::RigidDynamic>>) {
+        unsafe {
+            PxScene_addActors_mut(
+                self.as_mut_ptr(),
+                actors.as_ptr() as *const *mut _,
+                actors.len() as u32,
+            );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
+        }
+    }
+
+    /// Add a static actor to the world.
+    fn add_static_actor(&mut self, actor: Owner<Self::RigidStatic>) {
+        unsafe {
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.into_ptr(), null());
+        }
+    }
+
+    /// Add dynamic actors to the world.
+    fn add_static_actors(&mut self, mut actors: Vec<Owner<Self::RigidStatic>>) {
+        unsafe {
+            PxScene_addActors_mut(
+                self.as_mut_ptr(),
+                actors.as_ptr() as *const *mut _,
+                actors.len() as u32,
+            );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
+        }
+    }
+
+    /// Add an articulation link to the world.
+    fn add_articulation_link(&mut self, actor: Owner<Self::ArticulationLink>) {
+        unsafe {
+            PxScene_addActor_mut(self.as_mut_ptr(), actor.into_ptr(), null());
+        }
+    }
+
+    /// Add articulation links to the world.
+    fn add_articulation_links(&mut self, mut actors: Vec<Owner<Self::ArticulationLink>>) {
+        unsafe {
+            PxScene_addActors_mut(
+                self.as_mut_ptr(),
+                actors.as_ptr() as *const *mut _,
+                actors.len() as u32,
+            );
+            // set len to zero instead of calling forget so the Vec itself is cleaned up,
+            // but the actors in the vec are not.
+            actors.set_len(0);
+        }
+    }
+
+    /// Remove an actor from the scene.
+    fn remove_actor(&mut self, actor: &mut impl Actor, wake_touching: bool) {
+        unsafe {
+            PxScene_removeActor_mut(self.as_mut_ptr(), actor.as_mut_ptr(), wake_touching);
+        }
+    }
+
+    /// Remove actors from the scene.
+    fn remove_actors(&mut self, mut actors: Vec<&mut impl Actor>, wake_touching: bool) {
+        unsafe {
+            PxScene_removeActors_mut(
+                self.as_mut_ptr(),
+                actors.as_mut_ptr() as *const *mut _,
+                actors.len() as u32,
+                wake_touching,
             );
         }
-
-        let handle = BodyHandle(actor.get_raw() as usize);
-        self.statics.push(actor);
-        handle
     }
 
-    pub fn add_dynamic(&mut self, mut actor: RigidDynamic) -> BodyHandle {
+    /// Add an articulation to the scene.
+    fn add_articulation(&mut self, articulation: Owner<impl ArticulationBase>) {
         unsafe {
-            PxScene_addActor_mut(
-                self.px_scene.write().unwrap().expect("accessing null ptr"),
-                actor.get_raw_mut() as *mut PxActor,
-                null(),
-            );
-        }
-
-        let handle = BodyHandle(actor.get_raw() as usize);
-        self.dynamics.push(actor);
-        handle
+            PxScene_addArticulation_mut(self.as_mut_ptr(), articulation.into_ptr());
+        };
     }
 
-    /// Add a multibody articulation to the world
-    /// TODO: Make this take a boxed-trait object or similar instead
-    pub fn add_articulation<T: FnOnce(&mut ArticulationReducedCoordinate)>(
+    /// Remove an articulation from the scene.
+    fn remove_articulation(
         &mut self,
-        mut mb: ArticulationReducedCoordinate,
-        func: T,
-    ) -> PartHandle {
-        let handle = mb.root_handle();
-        func(&mut mb);
-
-        let scene = self.px_scene.write().unwrap();
+        articulation: &mut impl ArticulationBase,
+        wake_touching: bool,
+    ) {
         unsafe {
-            PxScene_addArticulation_mut(
-                scene.expect("accessing null ptr"),
-                mb.deref_mut().get_raw_mut(),
-            );
-        }
-        mb.common_init();
-        self.bodies.push(mb);
-        handle
-    }
-
-    /// Remove an articulation from the world
-    pub fn remove_articulation(&mut self, handle: BodyHandle) {
-        unsafe {
-            let articulation = handle.0 as *const PxArticulationBase;
             PxScene_removeArticulation_mut(
-                self.px_scene.write().unwrap().expect("accessing null ptr"),
-                articulation as *mut PxArticulationBase,
-                false,
+                self.as_mut_ptr(),
+                articulation.as_mut_ptr(),
+                wake_touching,
             );
+        }
+    }
 
-            if let Some(idx) = self
-                .bodies
-                .iter()
-                .position(|b| b.deref().get_raw() == articulation)
-            {
-                let mut body = self.bodies.swap_remove(idx);
-                body.release();
-            }
+    /// Add an aggregate to the scene.
+    fn add_aggregate(&mut self, aggregate: Owner<Self::Aggregate>) {
+        unsafe {
+            PxScene_addAggregate_mut(self.as_mut_ptr(), aggregate.into_ptr());
+        }
+    }
+
+    /// Remove an aggregate from the scene.
+    fn remove_aggregate(&mut self, aggregate: &mut Self::Aggregate, wake_touching: bool) {
+        unsafe {
+            PxScene_removeAggregate_mut(self.as_mut_ptr(), aggregate.as_mut_ptr(), wake_touching);
+        }
+    }
+
+    /// Add a rpuning structure to the scene.
+    fn add_pruning_structure(&mut self, pruning_structure: Owner<PruningStructure>) {
+        unsafe {
+            PxScene_addActors_mut_1(self.as_mut_ptr(), pruning_structure.into_ptr());
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // Simulation
 
-    pub fn simulate(&mut self, duration: f32) {
-        let scene = self.px_scene.write().unwrap();
+    /// Run a simulation update step.
+    fn simulate(
+        &mut self,
+        time_step: f32,
+        completion_task: Option<&mut PxBaseTask>,
+        scratch: Option<&mut ScratchBuffer>,
+    ) {
+        let completion_task = completion_task.map(|t| t as *mut _).unwrap_or(null_mut());
+
+        let (scratch_ptr, scratch_size) = if let Some(scratch) = scratch {
+            scratch.as_ptr_and_size()
+        } else {
+            (null_mut(), 0)
+        };
+
         unsafe {
             PxScene_simulate_mut(
-                scene.expect("accessing null ptr"),
-                duration,
-                null_mut(),
-                null_mut(),
-                0,
+                self.as_mut_ptr(),
+                time_step,
+                completion_task,
+                scratch_ptr,
+                scratch_size,
                 true,
             );
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-
-    pub fn fetch_results(&mut self, block: bool) -> Result<(), u32> {
-        let scene = self.px_scene.write().unwrap();
+    /// Check if or wait until `simulate` has completed.  Returns Ok(()) when it has, Err otherwise.
+    fn fetch_results(&mut self, block: bool) -> Result<(), u32> {
         unsafe {
             let mut error: u32 = 0;
-            PxScene_fetchResults_mut(scene.expect("accessing null ptr"), block, &mut error);
-            if error == 0 {
+            let fetched = PxScene_fetchResults_mut(self.as_mut_ptr(), block, &mut error);
+            if fetched && error == 0 {
                 Ok(())
             } else {
                 Err(error)
             }
         }
     }
-    //    fn read(self) -> std::sync::RwLockReadGuard<Px>
 
-    pub fn get_multibody(&self, handle: BodyHandle) -> Option<&ArticulationReducedCoordinate> {
-        self.bodies.iter().find(|bod| bod.handle() == handle)
-    }
-
-    pub fn get_multibody_mut(
+    /// Combines `simulate` and `fetch_results` into one call.
+    fn step(
         &mut self,
-        handle: BodyHandle,
-    ) -> Option<&mut ArticulationReducedCoordinate> {
-        self.bodies.iter_mut().find(|bod| bod.handle() == handle)
+        time_step: f32,
+        completion_task: Option<&mut PxBaseTask>,
+        scratch: Option<&mut ScratchBuffer>,
+        block: bool,
+    ) -> Result<(), u32> {
+        self.simulate(time_step, completion_task, scratch);
+        self.fetch_results(block)
     }
 
-    pub fn sample_height(
-        &self,
-        position: Vec3,
-        ignored: Option<&RigidActor>,
-        ignore_dynamic: bool,
-    ) -> Option<Vec3> {
-        // todo[tolsson]: clean this up
-        let ignored_body = if let Some(body) = ignored {
-            body.get_raw()
-        } else {
-            null_mut()
-        };
+    // TODO implement the rest of the simulation methods.
 
-        let down = -Vec3::unit_y();
-        let max_dist = 1e5;
+    ////////////////////////////////////////////////////////////////////////////////
+    // Queries
 
+    /// Get the pruning structure type for static physics objects that was set when creating the scene.
+    fn get_static_structure(&self) -> PruningStructureType {
+        unsafe { PxScene_getStaticStructure(self.as_ptr()).into() }
+    }
+
+    /// Get the pruning structure type for dynamic physics objects that was set when creating the scene.
+    fn get_dynamic_structure(&self) -> PruningStructureType {
+        unsafe { PxScene_getDynamicStructure(self.as_ptr()).into() }
+    }
+
+    /// Fluish any changes to the scene query represenation, forcing any buffered changes to be applied now,
+    /// rather than when the next scene query is executed.
+    fn flush_query_updates(&mut self) {
         unsafe {
-            let mut filter_data = PxQueryFilterData_new_2(PxQueryFlags {
-                mBits: (PxQueryFlag::ePREFILTER | PxQueryFlag::eSTATIC) as u16,
-            });
-
-            if !ignore_dynamic {
-                filter_data.flags.mBits |= PxQueryFlag::eDYNAMIC as u16;
-            }
-
-            let filter_callback = create_raycast_filter_callback(ignored_body);
-            let mut hit = std::mem::MaybeUninit::uninit();
-
-            let hit_anything = PxSceneQueryExt_raycastSingle_mut(
-                self.px_scene
-                    .read()
-                    .expect("failed reading from scene")
-                    .expect("accessing null ptr"),
-                &gl_to_px_v3(position),
-                &gl_to_px_v3(down),
-                max_dist,
-                PxSceneQueryFlags {
-                    mBits: PxHitFlag::ePOSITION as u16,
-                },
-                hit.as_mut_ptr(),
-                &filter_data as *const PxQueryFilterData as *const PxSceneQueryFilterData,
-                filter_callback as *mut PxQueryFilterCallback as *mut PxSceneQueryFilterCallback,
-                null_mut(),
-            );
-
-            let hit = hit.assume_init();
-
-            PxQueryFilterCallback_delete(filter_callback);
-
-            if hit_anything {
-                Some(px_to_gl_v3(hit.position))
-            } else {
-                None
-            }
+            PxScene_flushQueryUpdates_mut(self.as_mut_ptr());
         }
-    }
-
-    // See below function `set_simulation_event_callbacks`.
-    #[deprecated]
-    pub fn set_simulation_event_callback<T>(
-        &mut self,
-        callback: physx_sys::CollisionCallback,
-        userdata: *mut T,
-    ) {
-        unsafe {
-            let callback_info = physx_sys::SimulationEventCallbackInfo {
-                collision_callback: Some(callback),
-                collision_user_data: userdata as *mut std::ffi::c_void,
-                ..Default::default()
-            };
-            let callback = physx_sys::create_simulation_event_callbacks(&callback_info);
-            self.simulation_callback = Some(callback);
-            PxScene_setSimulationEventCallback_mut(
-                self.px_scene
-                    .write()
-                    .expect("failed reading scene")
-                    .expect("accessing null ptr"),
-                callback,
-            );
-        }
-    }
-
-    pub fn set_simulation_event_callbacks(
-        &mut self,
-        callbacks: &physx_sys::SimulationEventCallbackInfo,
-    ) {
-        unsafe {
-            let callback = physx_sys::create_simulation_event_callbacks(&*callbacks);
-            self.simulation_callback = Some(callback);
-            PxScene_setSimulationEventCallback_mut(
-                self.px_scene
-                    .write()
-                    .expect("failed reading scene")
-                    .expect("accessing null ptr"),
-                callback,
-            );
-        }
-    }
-
-    /// Lookup and retrieve a RigidStatic reference for this handle
-    pub fn get_static(&self, handle: BodyHandle) -> Option<&RigidStatic> {
-        self.statics.iter().find(|elem| handle == elem.handle())
-    }
-
-    /// Lookup and retrieve a RigidStatic reference for this handle
-    pub fn get_static_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidStatic> {
-        self.statics.iter_mut().find(|elem| handle == elem.handle())
-    }
-
-    /// Lookup and retrieve a RigidDynamic reference for this handle
-    pub fn get_dynamic(&self, handle: BodyHandle) -> Option<&RigidDynamic> {
-        self.dynamics.iter().find(|elem| handle == elem.handle())
-    }
-
-    /// Lookup and retrieve a RigidDynamic reference for this handle
-    pub fn get_dynamic_mut(&mut self, handle: BodyHandle) -> Option<&mut RigidDynamic> {
-        self.dynamics
-            .iter_mut()
-            .find(|elem| handle == elem.handle())
-    }
-
-    /// Lookup and retrieve a RigidActor reference for this handle
-    pub fn get_rigid_actor(&self, handle: BodyHandle) -> Option<&RigidActor> {
-        if let Some(dynamic) = self.get_dynamic(handle) {
-            Some(dynamic)
-        } else if let Some(static_) = self.get_static(handle) {
-            Some(static_)
-        } else {
-            for body in &self.bodies {
-                let art_handle = body.handle();
-                let part_handle = PartHandle(art_handle.0, handle.0);
-                let part = body.part_from_handle(part_handle);
-                if part.is_some() {
-                    return part.map(|link| link.deref().deref());
-                }
-            }
-            None
-        }
-    }
-
-    /// Retrieve a RigidActor based on the bodyhandle. Note: This API is unsafe
-    /// and bypasses a lot of safety checks for lifetimes and ownership.
-    pub unsafe fn get_rigid_actor_unchecked(&self, handle: &BodyHandle) -> &RigidActor {
-        // Clippy this is the right way to do it instead of a transmute...
-        &*(handle as *const BodyHandle as *const super::px_type::PxType<PxRigidActor>)
-    }
-
-    pub fn find_matching_rigid_actor_mut(
-        &mut self,
-        actor: *const PxRigidActor,
-    ) -> Option<&mut RigidActor> {
-        if let Some(rigid) = self
-            .statics
-            .iter_mut()
-            .find(|elem| actor == elem.get_raw() as *const PxRigidActor)
-        {
-            return Some(rigid);
-        } else if let Some(rigid) = self
-            .dynamics
-            .iter_mut()
-            .find(|elem| actor == elem.get_raw() as *const PxRigidActor)
-        {
-            return Some(rigid);
-        };
-
-        for body in &mut self.bodies {
-            let handle = body.handle();
-            let handle = PartHandle(handle.0, actor as usize);
-            let part = body.part_from_handle_mut(handle);
-            if part.is_some() {
-                return part.map(|link| link.deref_mut().deref_mut());
-            }
-        }
-
-        None
-    }
-
-    // pub fn find_matching_rigid_actor(&self, actor: *const PxRigidActor) -> Option<&RigidActor> {
-    //     if let Some(rigid) = self.statics.iter().find_map(|elem| {
-    //         let actor_ptr = elem.get_raw() as *const PxRigidActor;
-    //         if actor == actor_ptr {
-    //             Some(elem)
-    //         } else {
-    //             None
-    //         }
-    //     }) {
-    //         return Some(rigid);
-    //     };
-
-    //     for body in &self.bodies {
-    //         let handle = body.handle();
-    //         let handle = PartHandle(handle.0, actor as usize);
-    //         let part = body.part_from_handle(handle);
-    //         if part.is_some() {
-    //             return part.map(|link| link.deref().deref());
-    //         }
-    //     }
-
-    //     None
-    // }
-
-    /// Looking
-    pub fn collide_raw_pair(
-        &mut self,
-        first_px_actor: *mut PxRigidActor,
-        second_px_actor: *mut PxRigidActor,
-        pairs: &[PxContactPair],
-    ) {
-        // This function is really unrustic, but I can't find a nice way to do it
-        // since the lookup of either collision member will take a mutable borrow on the scene...
-        // However doing it with two pointers bypasses this, disgustingly enough. The NonNull
-        // probably adds a bit of overhead, but in comparison to the search it's likely fine.
-        if first_px_actor != second_px_actor {
-            unsafe {
-                // Since each lookup might traverse a lot of pointers we verify each lookup directly.
-                let first_actor = self
-                    .find_matching_rigid_actor_mut(first_px_actor)
-                    .map(|val| val as *mut RigidActor);
-
-                if let Some(first) = first_actor {
-                    #[allow(clippy::transmute_ptr_to_ref)]
-                    let first: &mut RigidActor = std::mem::transmute(first);
-                    let second_actor = self
-                        .find_matching_rigid_actor_mut(second_px_actor)
-                        .map(|val| val as *mut RigidActor);
-
-                    if let Some(second) = second_actor {
-                        #[allow(clippy::transmute_ptr_to_ref)]
-                        let second: &mut RigidActor = std::mem::transmute(second);
-                        first.on_collide(second, pairs);
-                        second.on_collide(first, pairs);
-                    }
-                }
-            }
-        }
-    }
-
-    pub fn get_bodies(&self) -> &Vec<ArticulationReducedCoordinate> {
-        &self.bodies
     }
 
     ////////////////////////////////////////////////////////////////////////////////
+    // Bulk Getters
 
-    pub fn step(&mut self, step: f32, block: bool) {
-        let scene = self.px_scene.write().unwrap();
+    /// Get a Vec of the articulations in the scene.
+    fn get_articulations(&mut self) -> Vec<&mut Self::ArticulationMap> {
         unsafe {
-            PxScene_simulate_mut(
-                scene.expect("accessing null ptr"),
-                step,
-                null_mut(),
-                null_mut(),
+            let capacity = PxScene_getNbArticulations(self.as_ptr());
+            let mut buffer: Vec<&mut Self::ArticulationMap> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getArticulations(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
                 0,
-                true,
             );
-            PxScene_fetchResults_mut(scene.expect("accessing null ptr"), block, null_mut());
+            buffer.set_len(len as usize);
+            buffer
         }
     }
 
-    fn add_controller_manager(&mut self, locking_enabled: bool) {
-        if self.controller_manager.is_none() {
-            self.controller_manager = Some(ControllerManager::new(
-                self.px_scene.write().unwrap().expect("accessing null ptr"),
-                locking_enabled,
-            ))
+    /// Get the actors in the scene, filtered by ActorTypeFlags.
+    fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<&mut Self::ActorMap> {
+        unsafe {
+            let flags = actor_type.into_px();
+            let capacity = PxScene_getNbActors(self.as_ptr(), flags);
+            let mut buffer: Vec<&mut Self::ActorMap> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getActors(
+                self.as_ptr(),
+                flags,
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    /// Get the active actor buffer of actors that were updated during the last `simulate` call.
+    fn get_active_actors(&mut self) -> &mut [&mut Self::ActorMap] {
+        // This cannot return a Vec.  Vec has specific allocation/alignment requirements
+        // that the C++-allocated buffer does not meet, and dropping the fake vec causes a crash.
+        unsafe {
+            let mut length = 0;
+            let actors = PxScene_getActiveActors_mut(self.as_mut_ptr(), &mut length);
+            std::slice::from_raw_parts_mut(actors as *mut &mut Self::ActorMap, length as usize)
+        }
+    }
+
+    /// Get the static actors in the scene.
+    fn get_static_actors(&mut self) -> Vec<&mut Self::RigidStatic> {
+        unsafe {
+            let flags = PxActorTypeFlags {
+                mBits: ActorTypeFlag::RigidStatic as u16,
+            };
+            let capacity = PxScene_getNbActors(self.as_ptr(), flags);
+            let mut buffer: Vec<&mut Self::RigidStatic> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getActors(
+                self.as_ptr(),
+                flags,
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    /// Get the dynamic actors in the scene.
+    fn get_dynamic_actors(&mut self) -> Vec<&mut Self::RigidDynamic> {
+        unsafe {
+            let flags = PxActorTypeFlags {
+                mBits: ActorTypeFlag::RigidDynamic as u16,
+            };
+            let capacity = PxScene_getNbActors(self.as_ptr(), flags);
+            let mut buffer: Vec<&mut Self::RigidDynamic> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getActors(
+                self.as_ptr(),
+                flags,
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    /// Get the aggregates in the scene.
+    fn get_aggregates(&mut self) -> Vec<&mut Self::Aggregate> {
+        unsafe {
+            let capacity = PxScene_getNbAggregates(self.as_ptr());
+            let mut buffer: Vec<&mut Self::Aggregate> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getAggregates(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut physx_sys::PxAggregate,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    /// Get all the constraints currently in this scene.
+    fn get_constraints(&mut self) -> Vec<&mut Constraint> {
+        unsafe {
+            let capacity = PxScene_getNbConstraints(self.as_ptr());
+            let mut buffer: Vec<&mut Constraint> = Vec::with_capacity(capacity as usize);
+            let len = PxScene_getConstraints(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut physx_sys::PxConstraint,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Callbacks
+
+    /// # Safety
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
+        PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
+    }
+
+    /// # Safety
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn get_contact_modify_callback(&self) -> &PxContactModifyCallback {
+        &*PxScene_getContactModifyCallback(self.as_ptr())
+    }
+
+    /// # Safety
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn set_ccd_contact_modify_callback(
+        &mut self,
+        callback: &mut PxCCDContactModifyCallback,
+    ) {
+        PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
+    }
+
+    /// # Safety
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn get_ccd_contact_callback(&self) -> &PxCCDContactModifyCallback {
+        &*PxScene_getCCDContactModifyCallback(self.as_ptr())
+    }
+
+    /// # Safety
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn set_broad_phase_callback(&mut self, callback: &mut PxBroadPhaseCallback) {
+        PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
+    }
+
+    /// # Safety
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    unsafe fn get_broad_phase_callback(&self) -> &PxBroadPhaseCallback {
+        &*PxScene_getBroadPhaseCallback(self.as_ptr())
+    }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Collision Filtering
+
+    /// Reset the collision filtering for an actor.
+    fn reset_filtering(&mut self, actor: &mut impl Actor) {
+        unsafe { PxScene_resetFiltering_mut(self.as_mut_ptr(), actor.as_mut_ptr()) }
+    }
+
+    /// Reset collision filtering for a RigidActor and shapes.
+    fn reset_rigid_actor_filtering<R: RigidActor>(
+        &mut self,
+        actor: &mut R,
+        shapes: &[&mut R::Shape],
+    ) {
+        unsafe {
+            PxScene_resetFiltering_mut_1(
+                self.as_mut_ptr(),
+                actor.as_mut_ptr(),
+                shapes.as_ptr() as *const *mut physx_sys::PxShape,
+                shapes.len() as u32,
+            );
+        }
+    }
+
+    /// Get the kinematic-kinematic filtering mode.
+    fn get_kinematic_kinematic_filtering_mode(&self) -> PairFilteringMode {
+        unsafe { PxScene_getKinematicKinematicFilteringMode(self.as_ptr()).into() }
+    }
+
+    /// Get the static-kinematic filtering mode.
+    fn get_static_kinematic_filtering_mode(&self) -> PairFilteringMode {
+        unsafe { PxScene_getStaticKinematicFilteringMode(self.as_ptr()).into() }
+    }
+}
+
+#[derive(Copy, Clone, Debug, BitFlags)]
+#[repr(u16)]
+pub enum HitFlag {
+    Position = 1 << 0,
+    Normal = 1 << 1,
+    UV = 1 << 3,
+    AssumeNoInitialOverlap = 1 << 4,
+    MeshMultiple = 1 << 5,
+    MeshAny = 1 << 6,
+    MeshBothSides = 1 << 7,
+    PreciseSweep = 1 << 8,
+    MTD = 1 << 9,
+    FaceIndex = 1 << 10,
+}
+
+impl HitFlag {
+    pub fn default() -> BitFlags<HitFlag> {
+        HitFlag::Position | HitFlag::Normal | HitFlag::FaceIndex
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+#[repr(u32)]
+pub enum PruningStructureType {
+    None = 0,
+    DynamicAABBTree = 1,
+    StaticAABBTree = 2,
+}
+
+impl Into<PxPruningStructureType::Enum> for PruningStructureType {
+    fn into(self) -> PxPruningStructureType::Enum {
+        match self {
+            PruningStructureType::None => PxPruningStructureType::eNONE,
+            PruningStructureType::DynamicAABBTree => PxPruningStructureType::eDYNAMIC_AABB_TREE,
+            PruningStructureType::StaticAABBTree => PxPruningStructureType::eSTATIC_AABB_TREE,
+        }
+    }
+}
+
+impl From<PxPruningStructureType::Enum> for PruningStructureType {
+    fn from(val: PxPruningStructureType::Enum) -> Self {
+        debug_assert!(val < PxPruningStructureType::eLAST);
+        match val {
+            PxPruningStructureType::eNONE => PruningStructureType::None,
+            PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAABBTree,
+            PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAABBTree,
+            _ => unimplemented!("Invalid enum variant."),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+#[repr(u32)]
+pub enum PairFilteringMode {
+    Keep = 0,
+    Suppress = 1,
+    Kill = 2,
+}
+
+impl Default for PairFilteringMode {
+    fn default() -> Self {
+        PairFilteringMode::Suppress
+    }
+}
+
+impl Into<PxPairFilteringMode::Enum> for PairFilteringMode {
+    fn into(self) -> PxPairFilteringMode::Enum {
+        match self {
+            PairFilteringMode::Keep => PxPairFilteringMode::eKEEP,
+            PairFilteringMode::Suppress => PxPairFilteringMode::eSUPPRESS,
+            PairFilteringMode::Kill => PxPairFilteringMode::eKILL,
+        }
+    }
+}
+
+impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
+    fn from(mode: PxPairFilteringMode::Enum) -> Self {
+        match mode {
+            PxPairFilteringMode::eKEEP => PairFilteringMode::Keep,
+            PxPairFilteringMode::eSUPPRESS => PairFilteringMode::Suppress,
+            PxPairFilteringMode::eKILL => PairFilteringMode::Kill,
+            // eDEFAULT has the same integer value as eSUPPRESS so it will get caught by that branch
+            //PxPairFilteringMode::eDEFAULT => PairFilteringMode::Suppress,
+            _ => unimplemented!("Invalid enum variant."),
         }
     }
 }
@@ -537,244 +965,135 @@ pub enum SimulationThreadType {
     Default,
 }
 
-pub struct SceneBuilder {
-    pub(crate) gravity: Vec3,
-    pub(crate) simulation_filter_shader: Option<SimulationFilterShader>,
-    pub(crate) simulation_threading: Option<SimulationThreadType>,
-    pub(crate) broad_phase_type: BroadPhaseType,
-    pub(crate) use_controller_manager: bool,
-    pub(crate) controller_manager_locking: bool,
-    pub(crate) call_default_filter_shader_first: bool,
-    pub(crate) use_ccd: bool,
-    pub(crate) enable_ccd_resweep: bool,
-    pub(crate) solver_type: SolverType,
-    pub(crate) enhanced_determinism: bool,
-    pub(crate) friction_every_iteration: bool,
-    pub(crate) stabilization: bool,
-    pub(crate) adaptive_force: bool,
-    pub(crate) ccd_max_passes: usize,
+#[derive(Copy, Clone, Debug, BitFlags)]
+#[repr(u32)]
+///  eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
+pub enum SceneFlag {
+    EnableActiveActors = 1,
+    EnableCcd = 2,
+    DisableCcdResweep = 4,
+    AdaptiveForce = 8,
+    EnablePcm = 64,
+    DisableContactReportBufferResize = 128,
+    DisableContactCache = 256,
+    RequireRwLock = 512,
+    EnableStabilization = 1024,
+    EnableAveragePoint = 2048,
+    ExcludeKinematicsFromActiveActors = 4096,
+    EnableGpuDynamics = 8192,
+    EnableEnhancedDeterminism = 16384,
+    EnableFrictionEveryIteration = 32768,
 }
 
-impl Default for SceneBuilder {
-    fn default() -> Self {
-        Self {
-            gravity: Vec3::new(0.0, -9.80665, 0.0), // standard gravity value
-            call_default_filter_shader_first: true,
-            simulation_filter_shader: None,
-            simulation_threading: None,
-            broad_phase_type: BroadPhaseType::SweepAndPrune,
-            use_controller_manager: false,
-            controller_manager_locking: false,
-            use_ccd: false,
-            enable_ccd_resweep: false,
-            solver_type: SolverType::PGS,
-            enhanced_determinism: false,
-            friction_every_iteration: false,
-            stabilization: false,
-            adaptive_force: false,
-            ccd_max_passes: 1,
-        }
-    }
+/// A new typoe wrapper for PxSceneDesc.  Parametrized by it's user data type,
+/// the ArticulationLink, RigidStatic, and RigidDynamic actor types, and the
+/// Collision, Trigger, ConstraintBreak, WakeSleep, and Advance Callbacks.
+#[allow(clippy::type_complexity)]
+pub struct PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    obj: physx_sys::PxSceneDesc,
+    phantom_user_data: PhantomData<(U, L, S, D, OC, OT, OCB, OWS, OA)>,
 }
 
-impl SceneBuilder {
-    /// Set the gravity for the scene.
-    ///
-    /// Default: [0.0, -9.80665, 0.0] (standard gravity)
-    pub fn set_gravity(&mut self, gravity: Vec3) -> &mut Self {
-        self.gravity = gravity;
-        self
-    }
-
-    /// Set a callback to be invoked on various simulation events. Note:
-    /// Currently only handles collision events
-    ///
-    /// Default: not set
-    pub fn set_simulation_filter_shader(
-        &mut self,
-        simulation_filter_shader: SimulationFilterShader,
-    ) -> &mut Self {
-        self.simulation_filter_shader = Some(simulation_filter_shader);
-        self
-    }
-
-    /// Enable the controller manager on the scene.
-    ///
-    /// Default: false, false
-    pub fn use_controller_manager(
-        &mut self,
-        use_controller_manager: bool,
-        locking_enabled: bool,
-    ) -> &mut Self {
-        self.use_controller_manager = use_controller_manager;
-        self.controller_manager_locking = locking_enabled;
-        self
-    }
-
-    /// Sets whether the filter should begin by calling the default filter shader
-    /// PxDefaultSimulationFilterShader that emulates the PhysX 2.8 rules.
-    ///
-    /// Default: true
-    pub fn set_call_default_filter_shader_first(
-        &mut self,
-        call_default_filter_shader_first: bool,
-    ) -> &mut Self {
-        self.call_default_filter_shader_first = call_default_filter_shader_first;
-        self
-    }
-
-    /// Set the number of threads to use for simulation
-    ///
-    /// Default: not set
-    pub fn set_simulation_threading(
-        &mut self,
-        simulation_threading: SimulationThreadType,
-    ) -> &mut Self {
-        self.simulation_threading = Some(simulation_threading);
-        self
-    }
-
-    /// Set collision detection type
-    ///
-    /// Default: Sweep and prune
-    pub fn set_broad_phase_type(&mut self, broad_phase_type: BroadPhaseType) -> &mut Self {
-        self.broad_phase_type = broad_phase_type;
-        self
-    }
-
-    /// Set if CCD (continuous collision detection) should be available for use in the scene.
-    /// Doesn't automatically enable it for all rigid bodies, they still need to be flagged.
-    ///
-    /// If you don't set enable_ccd_resweep to true, eDISABLE_CCD_RESWEEP is set, which improves performance
-    /// at the cost of accuracy right after bounces.
-    ///
-    /// Default: false, false
-    pub fn set_use_ccd(&mut self, use_ccd: bool, enable_ccd_resweep: bool) -> &mut Self {
-        self.use_ccd = use_ccd;
-        self.enable_ccd_resweep = enable_ccd_resweep;
-        self
-    }
-
-    /// Maximum number of CCD passes.
-    ///
-    /// Default: 1
-    pub fn set_ccd_max_passes(&mut self, ccd_max_passes: usize) -> &mut Self {
-        self.ccd_max_passes = ccd_max_passes;
-        self
-    }
-
-    /// Set solver type
-    ///
-    /// Default: PGS
-    pub fn set_solver_type(&mut self, solver_type: SolverType) -> &mut Self {
-        self.solver_type = solver_type;
-        self
-    }
-
-    /// Set to enable enhanced determinism flag
-    ///
-    /// Default: false
-    pub fn set_enhanced_determinism(&mut self, enhanced_determinism: bool) -> &mut Self {
-        self.enhanced_determinism = enhanced_determinism;
-        self
-    }
-
-    /// Set to evaluate friction every iteration instead of only in the final 3 position iterations
-    ///
-    /// Default: false
-    pub fn set_friction_every_iteration(&mut self, friction_every_iteration: bool) -> &mut Self {
-        self.friction_every_iteration = friction_every_iteration;
-        self
-    }
-
-    /// Set to enable an additional stabilization pass in the solver.
-    ///
-    /// Default: false
-    pub fn set_stabilization(&mut self, stabilization: bool) -> &mut Self {
-        self.stabilization = stabilization;
-        self
-    }
-
-    /// Set to enable adaptive force to accelerate convergence of the solver
-    ///
-    /// Default: false
-    pub fn set_adaptive_force(&mut self, adaptive_force: bool) -> &mut Self {
-        self.adaptive_force = adaptive_force;
-        self
-    }
-
-    pub(super) fn build_desc(&self, physics: &mut Physics) -> PxSceneDesc {
+impl<U, L, S, D, OC, OT, OCB, OWS, OA> PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    /// Create a new scene descriptor.
+    #[allow(clippy::type_complexity)]
+    pub fn new(
+        physics: &impl Physics,
+        user_data: U,
+        simulation_event_callback: Owner<PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>>,
+        simulation_filter_shader: FilterShaderDescriptor,
+        thread_count: u32,
+    ) -> Option<Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>> {
         unsafe {
-            let tolerances = physics.get_tolerances_scale();
-            let mut scene_desc = PxSceneDesc_new(tolerances);
-
-            let dispatcher = match self.simulation_threading.as_ref().expect("foo") {
-                SimulationThreadType::Default => {
-                    phys_PxDefaultCpuDispatcherCreate(1, null_mut()) as *mut _
+            let mut desc = PxSceneDesc_new(physics.get_tolerances_scale()?);
+            desc.gravity = PxVec3::new(0.0, -9.81, 0.0).into();
+            desc.cpuDispatcher =
+                phys_PxDefaultCpuDispatcherCreate(thread_count, null_mut()) as *mut _;
+            match simulation_filter_shader {
+                FilterShaderDescriptor::Default => {
+                    desc.filterShader = get_default_simulation_filter_shader();
                 }
-                SimulationThreadType::Dedicated(count) => {
-                    phys_PxDefaultCpuDispatcherCreate(*count, null_mut()) as *mut _
+                FilterShaderDescriptor::CallDefaultFirst(shader) => {
+                    physx_sys::enable_custom_filter_shader(&mut desc, shader, 1);
                 }
-                SimulationThreadType::Shared(dispatcher) => *dispatcher as *mut _,
+                FilterShaderDescriptor::Custom(shader) => {
+                    physx_sys::enable_custom_filter_shader(&mut desc, shader, 0);
+                }
             };
-
-            scene_desc.cpuDispatcher = dispatcher;
-            scene_desc.gravity = gl_to_px_v3(self.gravity);
-            scene_desc.solverType = self.solver_type.into();
-            scene_desc.broadPhaseType = self.broad_phase_type.into();
-
-            if self.use_ccd {
-                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_CCD;
-                if !self.enable_ccd_resweep {
-                    scene_desc.flags.mBits |= PxSceneFlag::eDISABLE_CCD_RESWEEP;
-                }
-                scene_desc.ccdMaxPasses = self.ccd_max_passes as u32;
-            }
-
-            if self.enhanced_determinism {
-                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
-            }
-
-            if self.friction_every_iteration {
-                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
-            }
-
-            if self.stabilization {
-                scene_desc.flags.mBits |= PxSceneFlag::eENABLE_STABILIZATION;
-            }
-
-            if self.adaptive_force {
-                scene_desc.flags.mBits |= PxSceneFlag::eADAPTIVE_FORCE;
-            }
-
-            if let Some(filter_shader) = self.simulation_filter_shader {
-                physx_sys::enable_custom_filter_shader(
-                    &mut scene_desc as *mut PxSceneDesc,
-                    filter_shader,
-                    if self.call_default_filter_shader_first {
-                        1
-                    } else {
-                        0
-                    },
-                );
-            } else {
-                scene_desc.filterShader = get_default_simulation_filter_shader();
-            }
-            scene_desc
+            desc.simulationEventCallback = simulation_event_callback.into_ptr();
+            let desc = Box::into_raw(Box::new(desc)) as *mut Self;
+            (&mut *desc).init_user_data(user_data);
+            Owner::from_raw(desc)
         }
     }
+}
 
-    /// Build a new Scene from the provided parameters
-    pub(super) fn build(&self, physics: &mut Physics) -> Scene {
-        unsafe {
-            let scene_desc = self.build_desc(physics);
-            let px_scene = PxPhysics_createScene_mut(physics.get_raw_mut(), &scene_desc);
-            let mut scene = Scene::new(px_scene);
+unsafe impl<U, L, S, D, OA, OT, OWS, OC, OCB> UserData
+    for PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    type UserData = U;
 
-            if self.use_controller_manager {
-                scene.add_controller_manager(self.controller_manager_locking);
-            }
-            scene
-        }
+    fn user_data_ptr(&self) -> &*mut c_void {
+        &self.obj.userData
     }
+
+    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+        &mut self.obj.userData
+    }
+}
+
+unsafe impl<U, L, S, D, OA, OT, OWS, OC, OCB> Class<physx_sys::PxSceneDesc>
+    for PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
+where
+    L: ArticulationLink,
+    S: RigidStatic,
+    D: RigidDynamic,
+    OC: CollisionCallback,
+    OT: TriggerCallback,
+    OCB: ConstraintBreakCallback,
+    OWS: WakeSleepCallback<L, S, D>,
+    OA: AdvanceCallback<L, D>,
+{
+    fn as_ptr(&self) -> *const physx_sys::PxSceneDesc {
+        &self.obj
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxSceneDesc {
+        &mut self.obj
+    }
+}
+
+pub enum FilterShaderDescriptor {
+    Default,
+    Custom(physx_sys::SimulationFilterShader),
+    CallDefaultFirst(physx_sys::SimulationFilterShader),
 }
