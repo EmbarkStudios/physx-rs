@@ -4,6 +4,15 @@
 
 ## [Unreleased]
 
+## [0.4.11] - 2020-12-03
+
+### Added
+
+- [PR#198](https://github.com/EmbarkStudios/physx-rs/pull/98) Major refactor of
+  the high-level `physx` crate exposed the following low-level calls:
+  - `pub fn get_simulation_event_info(callback: *mut PxSimulationEventCallback,) -> *mut SimulationEventCallbackInfo;`
+  - `pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;`
+
 ## [0.4.10] - 2020-10-20
 
 ### Added
@@ -77,7 +86,8 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.10...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.11...HEAD
+[0.4.11]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.10...physx-sys-v0.4.11
 [0.4.10]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.9...physx-sys-v0.4.10
 [0.4.9]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...physx-sys-v0.4.9
 [0.4.8]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.7...physx-sys-v0.4.8

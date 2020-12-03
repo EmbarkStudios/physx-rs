@@ -4,18 +4,24 @@
 
 ## [Unreleased]
 
-## [0.9.0] - 2020-11-25
+## [0.9.0] - 2020-12-03
 
 ### Refactored
 
-- [PR#98](https://github.com/EmbarkStudios/physx-rs/pull/98) Use Class<T> instead of Deref, track user data types
+- [PR#98](https://github.com/EmbarkStudios/physx-rs/pull/98) Use Class<T>
+  instead of Deref, track user data types This change is a significant refactor.
+  The API is now very close to the underlying PhysX API, but with Rust's type
+  and memory safety.  Method names mirror the C++ API, but `like_this` instead
+  of `likeThis`. Much of the additional behaviour that was built on top of the
+  underlying API has been removed.  The prelude exports the class-traits, but
+  intentionally does not export the new-type wrappers.  Instead of importing
+  them, create type aliases for them with the generic params filled in to cut
+  down on the amount of typing (see the example). The PR has a detailed summary
+  of the changes, with links to the relevant code.
 
-This change is a significant refactor.  The API is now very close to the underlying PhysX API, but with
-Rust's type and memory safety.  Method names mirror the C++ API, but `like_this` instead of `likeThis`.
-Much of the additional behaviour that was built on top of the underlying API has been removed.  The prelude exports the
-class-traits, but intentionally does not export the new-type wrappers.  Instead of importing them, create type
-aliases for them with the generic params filled in to cut down on the amount of typing (see the example).
-The PR has a detailed summary of the changes, with links to the relevant code.
+### Dependencies
+
+- [PR#110](https://github.com/EmbarkStudios/physx-rs/pull/110) Upgrade glam v0.10 -> v0.11
 
 ## [0.8.0] - 2020-11-10
 
@@ -83,7 +89,9 @@ The PR has a detailed summary of the changes, with links to the relevant code.
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.4...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...HEAD
+[0.9.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.8.0...physx-v0.9.0
+[0.8.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.4...physx-v0.8.0
 [0.7.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.3...physx-v0.7.4
 [0.7.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.2...physx-v0.7.3
 [0.7.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.1...physx-v0.7.2
