@@ -100,9 +100,9 @@ pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 /// Parametrized by the Foundation's Allocator and the Physics' Shape type.
 pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
     // Order matters here for Drop. Foundation must be dropped last.
-    pub physics: Owner<PxPhysics<Geom>>,
+    physics: Owner<PxPhysics<Geom>>,
     pub pvd: Option<VisualDebugger>,
-    pub foundation: Owner<PxFoundation<Allocator>>,
+    foundation: Owner<PxFoundation<Allocator>>,
     extensions_loaded: bool,
 }
 
@@ -120,8 +120,20 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
-    pub fn physics(&mut self) -> &mut PxPhysics<Geom> {
+    pub fn physics(&self) -> &PxPhysics<Geom> {
+        self.physics.as_ref()
+    }
+
+    pub fn foundation(&self) -> &PxFoundation<Allocator> {
+        self.foundation.as_ref()
+    }
+
+    pub fn physics_mut(&mut self) -> &mut PxPhysics<Geom> {
         self.physics.as_mut()
+    }
+
+    pub fn foundation_mut(&mut self) -> &mut PxFoundation<Allocator> {
+        self.foundation.as_mut()
     }
 }
 
@@ -576,7 +588,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         unsafe { PxPhysics_getTolerancesScale(self.as_ptr()).as_ref() }
     }
 
-    /// Get the physiucs insertion callback, used for real-time cooking of physics meshes.
+    /// Get the physics insertion callback, used for real-time cooking of physics meshes.
     fn get_physics_insertion_callback(&mut self) -> Option<&mut PxPhysicsInsertionCallback> {
         unsafe { PxPhysics_getPhysicsInsertionCallback_mut(self.as_mut_ptr()).as_mut() }
     }
