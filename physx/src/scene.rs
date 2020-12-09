@@ -36,7 +36,8 @@ use crate::{
     visual_debugger::PvdSceneClient,
 };
 
-use enumflags2::{self, *};
+use enumflags2::BitFlags;
+
 use std::{
     ffi::c_void,
     marker::PhantomData,
@@ -975,7 +976,7 @@ pub enum SimulationThreadType {
     Default,
 }
 
-#[derive(Copy, Clone, Debug, BitFlags)]
+#[derive(BitFlags, Copy, Clone, Debug)]
 #[repr(u32)]
 ///  eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
 pub enum SceneFlag {
@@ -1040,14 +1041,14 @@ where
         simulation_filter_shader: FilterShaderDescriptor,
         thread_count: u32,
         solver_type: SolverType,
-        flags: SceneFlag,
+        flags: BitFlags::<SceneFlag>,
     ) -> Option<Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>> {
         unsafe {
             let mut desc = PxSceneDesc_new(physics.get_tolerances_scale()?);
             desc.gravity = PxVec3::new(0.0, -9.81, 0.0).into();
             desc.cpuDispatcher =
                 phys_PxDefaultCpuDispatcherCreate(thread_count, null_mut()) as *mut _;
-            desc.flags.mBits = flags.into();
+            desc.flags.mBits = flags.bits();
             desc.solverType = match solver_type {
                 SolverType::PGS => PxSolverType::ePGS,
                 SolverType::TGS => PxSolverType::eTGS,
