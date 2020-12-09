@@ -98,11 +98,7 @@ fn main() {
 
     // Setup the scene object.  The PxScene type alias makes this much cleaner.
     // There are lots of unwrap calls due to potential null pointers.
-    let mut scene: Owner<PxScene> = physics
-        .create_scene(
-            scene_desc,
-        )
-        .unwrap();
+    let mut scene: Owner<PxScene> = physics.create_scene(scene_desc).unwrap();
 
     let mut material = physics.create_material(0.5, 0.5, 0.6, ()).unwrap();
 
