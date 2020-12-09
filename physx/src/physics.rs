@@ -101,7 +101,7 @@ pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
     // Order matters here for Drop. Foundation must be dropped last.
     physics: Owner<PxPhysics<Geom>>,
-    pub pvd: Option<VisualDebugger>,
+    pvd: Option<VisualDebugger>,
     foundation: Owner<PxFoundation<Allocator>>,
     extensions_loaded: bool,
 }
@@ -128,12 +128,20 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         self.foundation.as_ref()
     }
 
+    pub fn pvd(&self) -> &Option<VisualDebugger> {
+        &self.pvd
+    }
+
     pub fn physics_mut(&mut self) -> &mut PxPhysics<Geom> {
         self.physics.as_mut()
     }
 
     pub fn foundation_mut(&mut self) -> &mut PxFoundation<Allocator> {
         self.foundation.as_mut()
+    }
+
+    pub fn pvd_mut(&mut self) -> &mut Option<VisualDebugger> {
+        &mut self.pvd
     }
 }
 
