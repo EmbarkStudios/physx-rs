@@ -36,7 +36,7 @@ use crate::{
     visual_debugger::PvdSceneClient,
 };
 
-use enumflags2::BitFlags;
+use enumflags2::{self, *};
 use std::{
     ffi::c_void,
     marker::PhantomData,
@@ -68,7 +68,7 @@ use physx_sys::{
     PxPruningStructureType,
     PxSceneDesc_new,
     //PxHitFlags,
-    //PxSceneFlags,
+    PxSceneFlag,
     PxScene_addActor_mut,
     PxScene_addActors_mut,
     PxScene_addActors_mut_1,
@@ -124,6 +124,7 @@ use physx_sys::{
     PxScene_setBroadPhaseCallback_mut,
     PxScene_setCCDContactModifyCallback_mut,
     PxScene_setContactModifyCallback_mut,
+    PxScene_setGravity_mut,
     //PxScene_setFilterShaderData_mut,
     //PxScene_setSimulationEventCallback_mut,
     /*
@@ -168,7 +169,6 @@ use physx_sys::{
     PxScene_setDynamicTreeRebuildRateHint_mut,
     PxScene_setFlag_mut,
     PxScene_setFrictionType_mut,
-    PxScene_setGravity_mut,
     PxScene_setLimits_mut,
     PxScene_setNbContactDataBlocks_mut,
     PxScene_setSceneQueryUpdateMode_mut,
@@ -833,6 +833,16 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     fn get_static_kinematic_filtering_mode(&self) -> PairFilteringMode {
         unsafe { PxScene_getStaticKinematicFilteringMode(self.as_ptr()).into() }
     }
+
+    //////////////////////////////////////////////////////////////////////////
+    // Other simulation settings
+
+    /// Sets the gravity vector.
+    fn set_gravity(&mut self, x: f32, y: f32, z: f32) {
+        unsafe {
+            PxScene_setGravity_mut(self.as_mut_ptr(), &PxVec3::new(x, y, z).into());
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, BitFlags)]
@@ -985,6 +995,12 @@ pub enum SceneFlag {
     EnableFrictionEveryIteration = 32768,
 }
 
+impl Into<PxSceneFlag::Enum> for SceneFlag {
+    fn into(self) -> PxSceneFlag::Enum {
+        self as PxSceneFlag::Enum
+    }
+}
+
 /// A new typoe wrapper for PxSceneDesc.  Parametrized by it's user data type,
 /// the ArticulationLink, RigidStatic, and RigidDynamic actor types, and the
 /// Collision, Trigger, ConstraintBreak, WakeSleep, and Advance Callbacks.
@@ -1023,12 +1039,19 @@ where
         simulation_event_callback: Owner<PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>>,
         simulation_filter_shader: FilterShaderDescriptor,
         thread_count: u32,
+        solver_type: SolverType,
+        flags: SceneFlag,
     ) -> Option<Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>> {
         unsafe {
             let mut desc = PxSceneDesc_new(physics.get_tolerances_scale()?);
             desc.gravity = PxVec3::new(0.0, -9.81, 0.0).into();
             desc.cpuDispatcher =
                 phys_PxDefaultCpuDispatcherCreate(thread_count, null_mut()) as *mut _;
+            desc.flags.mBits = flags.into();
+            desc.solverType = match solver_type {
+                SolverType::PGS => PxSolverType::ePGS,
+                SolverType::TGS => PxSolverType::eTGS,
+            };
             match simulation_filter_shader {
                 FilterShaderDescriptor::Default => {
                     desc.filterShader = get_default_simulation_filter_shader();
