@@ -1041,7 +1041,7 @@ where
         simulation_filter_shader: FilterShaderDescriptor,
         thread_count: u32,
         solver_type: SolverType,
-        flags: BitFlags::<SceneFlag>,
+        flags: BitFlags<SceneFlag>,
     ) -> Option<Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>> {
         unsafe {
             let mut desc = PxSceneDesc_new(physics.get_tolerances_scale()?);
