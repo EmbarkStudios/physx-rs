@@ -29,10 +29,10 @@ use crate::{
     rigid_actor::RigidActor,
     rigid_dynamic::{PxRigidDynamic, RigidDynamic},
     rigid_static::{PxRigidStatic, RigidStatic},
-    scene::{PxScene, PxSceneDesc, Scene},
+    scene::PxScene,
     shape::{Shape, ShapeFlags},
     simulation_event_callback::*,
-    traits::{Class, PxFlags, UserData},
+    traits::{Class, Descriptor, PxFlags, SceneDescriptor, UserData},
     triangle_mesh::TriangleMesh,
     visual_debugger::VisualDebugger,
 };
@@ -64,7 +64,6 @@ use physx_sys::{
     PxPhysics_createPruningStructure_mut,
     PxPhysics_createRigidDynamic_mut,
     PxPhysics_createRigidStatic_mut,
-    PxPhysics_createScene_mut,
     PxPhysics_createShape_mut_1,
     PxPhysics_createTriangleMesh_mut,
     PxPhysics_getBVHStructures,
@@ -225,11 +224,15 @@ impl<Geom: Shape> Physics for PxPhysics<Geom> {
 pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     type Shape: Shape;
 
+    fn create<Desc: Descriptor<Self>>(&mut self, desc: Desc) -> Desc::Target {
+        desc.create(self)
+    }
+
     /// Create a new scene with from a descriptor.
     #[allow(clippy::type_complexity)]
     fn create_scene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>(
         &mut self,
-        scene_descriptor: Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>,
+        scene_descriptor: SceneDescriptor<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>,
     ) -> Option<Owner<PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>>>
     where
         L: ArticulationLink,
@@ -243,12 +246,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         OWS: WakeSleepCallback<L, S, D>,
         OA: AdvanceCallback<L, D>,
     {
-        unsafe {
-            Scene::from_raw(PxPhysics_createScene_mut(
-                self.as_mut_ptr(),
-                scene_descriptor.into_ptr(),
-            ))
-        }
+        scene_descriptor.create(self)
     }
 
     /// Create a new aggregate.  Must be added to a scene with the same actor user data types.

@@ -66,6 +66,19 @@ pub struct PxBounds3 {
     obj: physx_sys::PxBounds3,
 }
 
+impl PxBounds3 {
+    /// Creates largest bounds that avoid floating point exceptions.
+    pub fn max_bounds_extents() -> Self {
+        unsafe {
+            physx_sys::PxBounds3_new_1(
+                &physx_sys::PxVec3_new_2(-f32::MAX / 4.0),
+                &physx_sys::PxVec3_new_2(f32::MAX / 4.0),
+            )
+            .into()
+        }
+    }
+}
+
 crate::DeriveClassForNewType!(PxBounds3: PxBounds3);
 
 impl From<physx_sys::PxBounds3> for PxBounds3 {
@@ -77,5 +90,11 @@ impl From<physx_sys::PxBounds3> for PxBounds3 {
 impl Into<physx_sys::PxBounds3> for PxBounds3 {
     fn into(self) -> physx_sys::PxBounds3 {
         self.obj
+    }
+}
+
+impl Default for PxBounds3 {
+    fn default() -> Self {
+        Self::max_bounds_extents()
     }
 }

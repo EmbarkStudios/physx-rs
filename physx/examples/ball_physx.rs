@@ -2,7 +2,6 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created:  3 July 2019
 
-use enumflags2::BitFlags;
 use physx::prelude::*;
 
 /// This is a WIP example for how the rustified wrappers lets your reduced the
@@ -85,20 +84,15 @@ fn main() {
 
     let physics = physics_foundation.physics_mut();
 
-    let scene_desc = PxSceneDesc::new(
-        physics,
-        (),
-        PxSimulationEventCallback::new(None, None, None, None, Some(OnAdvance)).unwrap(),
-        FilterShaderDescriptor::Default,
-        1,
-        SolverType::PGS,
-        BitFlags::<SceneFlag>::empty(),
-    )
-    .unwrap();
-
     // Setup the scene object.  The PxScene type alias makes this much cleaner.
     // There are lots of unwrap calls due to potential null pointers.
-    let mut scene: Owner<PxScene> = physics.create_scene(scene_desc).unwrap();
+    let mut scene: Owner<PxScene> = physics
+        .create(SceneDescriptor {
+            gravity: PxVec3::new(0.0, -9.81, 0.0),
+            on_advance: Some(OnAdvance),
+            ..SceneDescriptor::new(())
+        })
+        .unwrap();
 
     let mut material = physics.create_material(0.5, 0.5, 0.6, ()).unwrap();
 
