@@ -116,7 +116,7 @@ impl<
             on_constraint_break: None,
             on_wake_sleep: None,
             on_advance: None,
-            gravity: PxVec3::new(0.0, -9.81, 0.0),
+            gravity: PxVec3::new(0.0, 0.0, 0.0),
             kine_kine_filtering_mode: PairFilteringMode::Suppress,
             static_kine_filtering_mode: PairFilteringMode::Suppress,
             broad_phase_type: BroadPhaseType::AutomaticBoxPruning,
