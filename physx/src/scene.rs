@@ -4,7 +4,6 @@
 
 #![warn(clippy::all)]
 #![allow(clippy::missing_safety_doc)]
-#![allow(deprecated)]
 
 /*!
 Wrapper for PhysX PxScene
@@ -23,7 +22,6 @@ use crate::{
     foundation::ScratchBuffer,
     math::PxVec3,
     owner::Owner,
-    physics::Physics,
     pruning_structure::PruningStructure,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
@@ -39,7 +37,6 @@ use crate::{
 use enumflags2::BitFlags;
 
 use std::{
-    ffi::c_void,
     marker::PhantomData,
     ptr::{drop_in_place, null, null_mut},
 };
@@ -47,9 +44,7 @@ use std::{
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
 use physx_sys::{
-    get_default_simulation_filter_shader,
     phys_PxCreateControllerManager,
-    phys_PxDefaultCpuDispatcherCreate,
     PxActorTypeFlags,
     PxBaseTask,
     PxBroadPhaseCallback,
@@ -65,11 +60,14 @@ use physx_sys::{
     */
     PxContactModifyCallback,
     PxCpuDispatcher,
+    PxFrictionType,
     PxPairFilteringMode,
     PxPruningStructureType,
-    PxSceneDesc_new,
     //PxHitFlags,
     PxSceneFlag,
+    PxSceneFlags,
+    PxSceneLimits,
+    PxSceneQueryUpdateMode,
     PxScene_addActor_mut,
     PxScene_addActors_mut,
     PxScene_addActors_mut_1,
@@ -867,6 +865,36 @@ impl HitFlag {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
+#[repr(u32)]
+pub enum SceneQueryUpdateMode {
+    BuildEnabledCommitEnabled = 0,
+    BuildEnabledCommitDisabled = 1,
+    BuildDisabledCommitDisabled = 2,
+}
+
+impl Into<PxSceneQueryUpdateMode::Enum> for SceneQueryUpdateMode {
+    fn into(self) -> PxSceneQueryUpdateMode::Enum {
+        match self {
+            SceneQueryUpdateMode::BuildEnabledCommitEnabled => {
+                PxSceneQueryUpdateMode::eBUILD_ENABLED_COMMIT_ENABLED
+            }
+            SceneQueryUpdateMode::BuildEnabledCommitDisabled => {
+                PxSceneQueryUpdateMode::eBUILD_ENABLED_COMMIT_DISABLED
+            }
+            SceneQueryUpdateMode::BuildDisabledCommitDisabled => {
+                PxSceneQueryUpdateMode::eBUILD_DISABLED_COMMIT_DISABLED
+            }
+        }
+    }
+}
+
+impl Default for SceneQueryUpdateMode {
+    fn default() -> Self {
+        SceneQueryUpdateMode::BuildEnabledCommitEnabled
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 #[repr(u32)]
 pub enum PruningStructureType {
@@ -894,6 +922,12 @@ impl From<PxPruningStructureType::Enum> for PruningStructureType {
             PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAABBTree,
             _ => unimplemented!("Invalid enum variant."),
         }
+    }
+}
+
+impl Default for PruningStructureType {
+    fn default() -> Self {
+        PruningStructureType::DynamicAABBTree
     }
 }
 
@@ -934,31 +968,88 @@ impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
     }
 }
 
-#[derive(Debug, Clone, Copy, BitFlags)]
-#[repr(u32)]
-pub enum BroadPhaseType {
-    SweepAndPrune = 1,
-    MultiBoxPruning = 2,
-    AutomaticBoxPruning = 4,
-    GPU = 8,
+#[derive(Default, Copy, Clone, Debug)]
+pub struct SceneLimits {
+    pub max_nb_actors: u32,
+    pub max_nb_bodies: u32,
+    pub max_nb_static_shapes: u32,
+    pub max_nb_dynamic_shapes: u32,
+    pub max_nb_aggregates: u32,
+    pub max_nb_constraints: u32,
+    pub max_nb_regions: u32,
+    pub max_nb_broad_phase_overlaps: u32,
 }
 
-impl Into<PxBroadPhaseType::Enum> for BroadPhaseType {
-    fn into(self) -> PxBroadPhaseType::Enum {
-        match self {
-            BroadPhaseType::SweepAndPrune => 0,
-            BroadPhaseType::MultiBoxPruning => 1,
-            BroadPhaseType::AutomaticBoxPruning => 2,
-            BroadPhaseType::GPU => 3,
+impl Into<PxSceneLimits> for SceneLimits {
+    fn into(self) -> PxSceneLimits {
+        PxSceneLimits {
+            maxNbActors: self.max_nb_actors,
+            maxNbBodies: self.max_nb_bodies,
+            maxNbStaticShapes: self.max_nb_static_shapes,
+            maxNbDynamicShapes: self.max_nb_dynamic_shapes,
+            maxNbAggregates: self.max_nb_aggregates,
+            maxNbConstraints: self.max_nb_constraints,
+            maxNbRegions: self.max_nb_regions,
+            maxNbBroadPhaseOverlaps: self.max_nb_broad_phase_overlaps,
         }
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 #[repr(u32)]
+pub enum FrictionType {
+    Patch = 0,
+    OneDirectional = 1,
+    TwoDirectional = 2,
+}
+
+impl Into<PxFrictionType::Enum> for FrictionType {
+    fn into(self) -> PxFrictionType::Enum {
+        match self {
+            FrictionType::Patch => PxFrictionType::ePATCH,
+            FrictionType::OneDirectional => PxFrictionType::eONE_DIRECTIONAL,
+            FrictionType::TwoDirectional => PxFrictionType::eTWO_DIRECTIONAL,
+        }
+    }
+}
+
+impl Default for FrictionType {
+    fn default() -> Self {
+        FrictionType::Patch
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]
+pub enum BroadPhaseType {
+    SweepAndPrune = 0,
+    MultiBoxPruning = 1,
+    AutomaticBoxPruning = 2,
+    GPU = 3,
+}
+
+impl Into<PxBroadPhaseType::Enum> for BroadPhaseType {
+    fn into(self) -> PxBroadPhaseType::Enum {
+        match self {
+            BroadPhaseType::SweepAndPrune => PxBroadPhaseType::eSAP,
+            BroadPhaseType::MultiBoxPruning => PxBroadPhaseType::eMBP,
+            BroadPhaseType::AutomaticBoxPruning => PxBroadPhaseType::eABP,
+            BroadPhaseType::GPU => PxBroadPhaseType::eGPU,
+        }
+    }
+}
+
+impl Default for BroadPhaseType {
+    fn default() -> Self {
+        BroadPhaseType::AutomaticBoxPruning
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]
 pub enum SolverType {
-    PGS = 1,
-    TGS = 2,
+    PGS = 0,
+    TGS = 1,
 }
 
 impl Into<PxSolverType::Enum> for SolverType {
@@ -967,6 +1058,12 @@ impl Into<PxSolverType::Enum> for SolverType {
             SolverType::PGS => PxSolverType::ePGS,
             SolverType::TGS => PxSolverType::eTGS,
         }
+    }
+}
+
+impl Default for SolverType {
+    fn default() -> Self {
+        SolverType::PGS
     }
 }
 
@@ -1002,117 +1099,15 @@ impl Into<PxSceneFlag::Enum> for SceneFlag {
     }
 }
 
-/// A new typoe wrapper for PxSceneDesc.  Parametrized by it's user data type,
-/// the ArticulationLink, RigidStatic, and RigidDynamic actor types, and the
-/// Collision, Trigger, ConstraintBreak, WakeSleep, and Advance Callbacks.
-#[allow(clippy::type_complexity)]
-pub struct PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
-where
-    L: ArticulationLink,
-    S: RigidStatic,
-    D: RigidDynamic,
-    OC: CollisionCallback,
-    OT: TriggerCallback,
-    OCB: ConstraintBreakCallback,
-    OWS: WakeSleepCallback<L, S, D>,
-    OA: AdvanceCallback<L, D>,
-{
-    obj: physx_sys::PxSceneDesc,
-    phantom_user_data: PhantomData<(U, L, S, D, OC, OT, OCB, OWS, OA)>,
-}
+impl PxFlags for BitFlags<SceneFlag> {
+    type Target = PxSceneFlags;
 
-impl<U, L, S, D, OC, OT, OCB, OWS, OA> PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
-where
-    L: ArticulationLink,
-    S: RigidStatic,
-    D: RigidDynamic,
-    OC: CollisionCallback,
-    OT: TriggerCallback,
-    OCB: ConstraintBreakCallback,
-    OWS: WakeSleepCallback<L, S, D>,
-    OA: AdvanceCallback<L, D>,
-{
-    /// Create a new scene descriptor.
-    #[allow(clippy::type_complexity)]
-    pub fn new(
-        physics: &impl Physics,
-        user_data: U,
-        simulation_event_callback: Owner<PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>>,
-        simulation_filter_shader: FilterShaderDescriptor,
-        thread_count: u32,
-        solver_type: SolverType,
-        flags: BitFlags<SceneFlag>,
-    ) -> Option<Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>> {
-        unsafe {
-            let mut desc = PxSceneDesc_new(physics.get_tolerances_scale()?);
-            desc.gravity = PxVec3::new(0.0, -9.81, 0.0).into();
-            desc.cpuDispatcher =
-                phys_PxDefaultCpuDispatcherCreate(thread_count, null_mut()) as *mut _;
-            desc.flags.mBits = flags.bits();
-            desc.solverType = match solver_type {
-                SolverType::PGS => PxSolverType::ePGS,
-                SolverType::TGS => PxSolverType::eTGS,
-            };
-            match simulation_filter_shader {
-                FilterShaderDescriptor::Default => {
-                    desc.filterShader = get_default_simulation_filter_shader();
-                }
-                FilterShaderDescriptor::CallDefaultFirst(shader) => {
-                    physx_sys::enable_custom_filter_shader(&mut desc, shader, 1);
-                }
-                FilterShaderDescriptor::Custom(shader) => {
-                    physx_sys::enable_custom_filter_shader(&mut desc, shader, 0);
-                }
-            };
-            desc.simulationEventCallback = simulation_event_callback.into_ptr();
-            let desc = Box::into_raw(Box::new(desc)) as *mut Self;
-            (&mut *desc).init_user_data(user_data);
-            Owner::from_raw(desc)
-        }
-    }
-}
-
-unsafe impl<U, L, S, D, OA, OT, OWS, OC, OCB> UserData
-    for PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
-where
-    L: ArticulationLink,
-    S: RigidStatic,
-    D: RigidDynamic,
-    OC: CollisionCallback,
-    OT: TriggerCallback,
-    OCB: ConstraintBreakCallback,
-    OWS: WakeSleepCallback<L, S, D>,
-    OA: AdvanceCallback<L, D>,
-{
-    type UserData = U;
-
-    fn user_data_ptr(&self) -> &*mut c_void {
-        &self.obj.userData
+    fn into_px(self) -> Self::Target {
+        PxSceneFlags { mBits: self.bits() }
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
-        &mut self.obj.userData
-    }
-}
-
-unsafe impl<U, L, S, D, OA, OT, OWS, OC, OCB> Class<physx_sys::PxSceneDesc>
-    for PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>
-where
-    L: ArticulationLink,
-    S: RigidStatic,
-    D: RigidDynamic,
-    OC: CollisionCallback,
-    OT: TriggerCallback,
-    OCB: ConstraintBreakCallback,
-    OWS: WakeSleepCallback<L, S, D>,
-    OA: AdvanceCallback<L, D>,
-{
-    fn as_ptr(&self) -> *const physx_sys::PxSceneDesc {
-        &self.obj
-    }
-
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxSceneDesc {
-        &mut self.obj
+    fn from_px(flags: Self::Target) -> Self {
+        BitFlags::from_bits_truncate(flags.mBits)
     }
 }
 
@@ -1120,4 +1115,10 @@ pub enum FilterShaderDescriptor {
     Default,
     Custom(physx_sys::SimulationFilterShader),
     CallDefaultFirst(physx_sys::SimulationFilterShader),
+}
+
+impl Default for FilterShaderDescriptor {
+    fn default() -> Self {
+        FilterShaderDescriptor::Default
+    }
 }

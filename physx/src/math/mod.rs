@@ -79,3 +79,15 @@ impl Into<physx_sys::PxBounds3> for PxBounds3 {
         self.obj
     }
 }
+
+impl Default for PxBounds3 {
+    fn default() -> Self {
+        unsafe {
+            physx_sys::PxBounds3_new_1(
+                &physx_sys::PxVec3_new_2(-f32::MAX / 4.0),
+                &physx_sys::PxVec3_new_2(f32::MAX / 4.0),
+            )
+            .into()
+        }
+    }
+}
