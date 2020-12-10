@@ -969,6 +969,7 @@ impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
 }
 
 #[derive(Default, Copy, Clone, Debug)]
+/// 0 means no limit.
 pub struct SceneLimits {
     pub max_nb_actors: u32,
     pub max_nb_bodies: u32,
