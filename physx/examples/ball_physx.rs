@@ -80,9 +80,7 @@ fn main() {
     // Holds a PxFoundation and a PxPhysics.
     // Also has an optional Pvd and transport, not enabled by default.
     // The default allocator is the one provided by PhysX.
-    let mut physics_foundation = PhysicsFoundation::<_, PxShape>::default();
-
-    let physics = physics_foundation.physics_mut();
+    let mut physics = PhysicsFoundation::<_, PxShape>::default();
 
     // Setup the scene object.  The PxScene type alias makes this much cleaner.
     // There are lots of unwrap calls due to potential null pointers.

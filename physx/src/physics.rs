@@ -169,6 +169,23 @@ impl<Allocator: AllocatorCallback, Geom: Shape> Drop for PhysicsFoundation<Alloc
     }
 }
 
+unsafe impl<T, Allocator: AllocatorCallback, Geom: Shape> Class<T> for PhysicsFoundation<Allocator, Geom>
+where
+    physx_sys::PxPhysics: Class<T>,
+{
+    fn as_ptr(&self) -> *const T {
+        self.physics.obj.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut T {
+        self.physics.obj.as_mut_ptr()
+    }
+}
+
+impl<Allocator: AllocatorCallback, Geom: Shape> Physics for PhysicsFoundation<Allocator, Geom> {
+    type Shape = Geom;
+}
+
 /// A new type wrapper for PxPhysics.  Parametrized by the type of the Shapes it can create.
 #[repr(transparent)]
 pub struct PxPhysics<Geom: Shape> {
