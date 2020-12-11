@@ -145,8 +145,8 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         self.foundation.as_ref()
     }
 
-    pub fn pvd(&self) -> &Option<VisualDebugger> {
-        &self.pvd
+    pub fn pvd(&self) -> Option<&VisualDebugger> {
+        self.pvd.as_ref()
     }
 
     pub fn physics_mut(&mut self) -> &mut PxPhysics<Geom> {
@@ -157,8 +157,8 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         self.foundation.as_mut()
     }
 
-    pub fn pvd_mut(&mut self) -> &mut Option<VisualDebugger> {
-        &mut self.pvd
+    pub fn pvd_mut(&mut self) -> Option<&mut VisualDebugger> {
+        self.pvd.as_mut()
     }
 }
 
