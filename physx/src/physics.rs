@@ -105,6 +105,24 @@ pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
     extensions_loaded: bool,
 }
 
+unsafe impl<T, Allocator: AllocatorCallback, Geom: Shape> Class<T>
+    for PhysicsFoundation<Allocator, Geom>
+where
+    physx_sys::PxPhysics: Class<T>,
+{
+    fn as_ptr(&self) -> *const T {
+        self.physics.obj.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut T {
+        self.physics.obj.as_mut_ptr()
+    }
+}
+
+impl<Allocator: AllocatorCallback, Geom: Shape> Physics for PhysicsFoundation<Allocator, Geom> {
+    type Shape = Geom;
+}
+
 impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geom> {
     pub fn new(allocator: Allocator) -> PhysicsFoundation<Allocator, Geom> {
         let mut foundation =
