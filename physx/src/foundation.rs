@@ -38,7 +38,7 @@ pub enum ErrorCode {
     PerfWarning = 128u32,
 }
 
-/// A new type wrapper for PxFoundation.  Parametrized by it's Allocator type.
+/// A new type wrapper for PxFoundation parameterized by its Allocator type.
 #[repr(transparent)]
 pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,

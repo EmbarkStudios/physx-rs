@@ -31,6 +31,7 @@ pub use crate::height_field::*;
 pub use crate::math::*;
 pub use crate::owner::Owner;
 pub use crate::physics::{Physics, PhysicsFoundation, PX_PHYSICS_VERSION};
+pub use crate::query::PxRaycastBuffer;
 pub use crate::rigid_actor::RigidActor;
 pub use crate::rigid_body::{ForceMode, RigidBody, RigidBodyFlag, RigidBodyFlags};
 pub use crate::rigid_dynamic::{RigidDynamic, RigidDynamicLockFlag, RigidDynamicLockFlags};

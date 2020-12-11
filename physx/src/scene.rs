@@ -20,9 +20,11 @@ use crate::{
     controller::Controller,
     controller_manager::{ControllerManager, PxControllerManager},
     foundation::ScratchBuffer,
-    math::PxVec3,
+    geometry::Geometry,
+    math::{PxTransform, PxVec3},
     owner::Owner,
     pruning_structure::PruningStructure,
+    query::{OverlapCallback, PxQueryFilterData, RaycastCallback, SweepCallback},
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
     rigid_static::RigidStatic,
@@ -50,20 +52,14 @@ use physx_sys::{
     PxBroadPhaseCallback,
     PxBroadPhaseType,
     PxCCDContactModifyCallback,
-    /*
-    PxOverlapCallback,
-    PxSweepCallback,
-    PxQueryFilterData,
-    PxQueryFilterData_new,
-    PxQueryFilterCallback,
-    PxQueryCache,
-    */
     PxContactModifyCallback,
     PxCpuDispatcher,
     PxFrictionType,
+    PxHitFlags,
     PxPairFilteringMode,
     PxPruningStructureType,
-    //PxHitFlags,
+    PxQueryCache,
+    PxQueryFilterCallback,
     PxSceneFlag,
     PxSceneFlags,
     PxSceneLimits,
@@ -88,9 +84,6 @@ use physx_sys::{
     PxScene_fetchQueries_mut,
     */
     PxScene_flushQueryUpdates_mut,
-    // PxScene_overlap,
-    // PxScene_raycast,
-    // PxScene_sweep,
     PxScene_getActiveActors_mut,
     PxScene_getActors,
     PxScene_getAggregates,
@@ -113,6 +106,8 @@ use physx_sys::{
     PxScene_getSimulationEventCallback,
     PxScene_getStaticKinematicFilteringMode,
     PxScene_getStaticStructure,
+    PxScene_overlap,
+    PxScene_raycast,
     PxScene_release_mut,
     PxScene_removeActor_mut,
     PxScene_removeActors_mut,
@@ -183,11 +178,13 @@ use physx_sys::{
     // PxScene_lockWrite_mut,
     // PxScene_unlockWrite_mut,
     PxScene_simulate_mut,
+    PxScene_sweep,
     //PxSimulationFilterCallback,
     PxSolverType,
 };
 
 pub type ActorTypeFlags = BitFlags<ActorTypeFlag>;
+pub type HitFlags = BitFlags<HitFlag>;
 
 impl PxFlags for ActorTypeFlags {
     type Target = PxActorTypeFlags;
@@ -629,11 +626,132 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         unsafe { PxScene_getDynamicStructure(self.as_ptr()).into() }
     }
 
-    /// Fluish any changes to the scene query represenation, forcing any buffered changes to be applied now,
+    /// Flush any changes to the scene query represenation, forcing any buffered changes to be applied now,
     /// rather than when the next scene query is executed.
     fn flush_query_updates(&mut self) {
         unsafe {
             PxScene_flushQueryUpdates_mut(self.as_mut_ptr());
+        }
+    }
+
+    /// Casts a ray into the scene, reporting any hit objects via the [`RaycastCallback`] trait passed into `hit_callback`.
+    /// For simple usage, passing in [`PxRaycastBuffer`] will suffice.
+    /// Users can also provide a custom implementation of [`RaycastCallback`] in cases where allocating a single buffer to store
+    /// hits is prohibitively expensive.
+    /// Returns true if the ray hit an actor.
+    /// See the [PhysX documentation on `raycast`][src] for more details.
+    ///
+    /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a7d7dcd877cee092f8b57c67d79982b50)
+    #[allow(clippy::too_many_arguments)]
+    fn raycast(
+        &self,
+        origin: &PxVec3,
+        unit_dir: &PxVec3,
+        distance: f32,
+        hit_callback: &mut impl RaycastCallback,
+        hit_flags: HitFlags,
+        filter_data: &PxQueryFilterData,
+        filter_callback: Option<&mut PxQueryFilterCallback>,
+        cache: Option<&PxQueryCache>,
+    ) -> bool {
+        let filter_callback = filter_callback
+            .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
+                v as *mut _
+            });
+        let cache = cache.map_or(std::ptr::null::<PxQueryCache>(), |v| v as *const _);
+
+        unsafe {
+            let hit_callback = hit_callback.into_px();
+
+            PxScene_raycast(
+                self.as_ptr(),
+                origin.as_ptr(),
+                unit_dir.as_ptr(),
+                distance,
+                hit_callback,
+                hit_flags.into_px(),
+                &filter_data.obj,
+                filter_callback,
+                cache,
+            )
+        }
+    }
+
+    /// Sweeps a shape across the scene, reporting any hit objects via the [`SweepCallback`] trait passed into `hit_callback`.
+    /// For simple usage, passing in [`PxSweepBuffer`] will suffice.
+    /// Users can also provide a custom implementation of [`SweepCallback`] in cases where allocating a single buffer to store
+    /// hits is prohibitively expensive.
+    /// Returns true if the sweep hit an actor.
+    /// See the [PhysX documentation on `sweep`][src] for more details.
+    ///
+    /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a9b07b2a98e64105a06e97ffaeba2a63d)
+    #[allow(clippy::too_many_arguments)]
+    fn sweep(
+        &self,
+        geometry: &impl Geometry,
+        pose: &PxTransform,
+        direction: &PxVec3,
+        distance: f32,
+        hit_callback: &mut impl SweepCallback,
+        hit_flags: HitFlags,
+        filter_data: &PxQueryFilterData,
+        filter_callback: Option<&mut PxQueryFilterCallback>,
+        cache: Option<&PxQueryCache>,
+        inflation: f32,
+    ) -> bool {
+        let filter_callback = filter_callback
+            .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
+                v as *mut _
+            });
+        let cache = cache.map_or(std::ptr::null::<PxQueryCache>(), |v| v as *const _);
+        unsafe {
+            let hit_callback = hit_callback.into_px();
+            PxScene_sweep(
+                self.as_ptr(),
+                geometry.as_ptr(),
+                pose.as_ptr(),
+                direction.as_ptr(),
+                distance,
+                hit_callback,
+                hit_flags.into_px(),
+                &filter_data.obj,
+                filter_callback,
+                cache,
+                inflation,
+            )
+        }
+    }
+
+    /// Reports any objects overlapping with the given shape via the [`SweepCallback`] trait passed into `hit_callback`.
+    /// For simple usage, passing in [`PxOverlapBuffer`] will suffice.
+    /// Users can also provide a custom implementation of [`OverlapCallback`] in cases where allocating a single buffer to store
+    /// hits is prohibitively expensive.
+    /// Returns true if the overlap hit an actor.
+    /// See the [PhysX documentation on `overlap`][src] for more details.
+    ///
+    /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a31d09c0e967f9806a1f0d5df78dfc996)
+    fn overlap(
+        &self,
+        geometry: &impl Geometry,
+        pose: &PxTransform,
+        hit_callback: &mut impl OverlapCallback,
+        filter_data: &PxQueryFilterData,
+        filter_callback: Option<&mut PxQueryFilterCallback>,
+    ) -> bool {
+        let filter_callback = filter_callback
+            .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
+                v as *mut _
+            });
+        unsafe {
+            let hit_callback = hit_callback.into_px();
+            PxScene_overlap(
+                self.as_ptr(),
+                geometry.as_ptr(),
+                pose.as_ptr(),
+                hit_callback,
+                &filter_data.obj,
+                filter_callback,
+            )
         }
     }
 
@@ -860,8 +978,20 @@ pub enum HitFlag {
 }
 
 impl HitFlag {
-    pub fn default() -> BitFlags<HitFlag> {
+    pub fn default_hit_flags() -> HitFlags {
         HitFlag::Position | HitFlag::Normal | HitFlag::FaceIndex
+    }
+}
+
+impl PxFlags for HitFlags {
+    type Target = PxHitFlags;
+
+    fn into_px(self) -> Self::Target {
+        PxHitFlags { mBits: self.bits() }
+    }
+
+    fn from_px(flags: Self::Target) -> Self {
+        unsafe { BitFlags::new(flags.mBits) }
     }
 }
 

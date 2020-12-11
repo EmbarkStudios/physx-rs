@@ -176,20 +176,57 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
     }
 };
 
+typedef PxAgain (*HitProcessTouchesCallback)(const void *buffer, PxU32 nbHits, void *userdata);
+typedef void (*HitFinalizeQueryCallback)(void *userdata);
+
+template <typename T>
+class HitCallbackTrampoline : public PxHitCallback<T>
+{
+  public:
+    HitCallbackTrampoline(
+        HitProcessTouchesCallback processTouchesCallback,
+        HitFinalizeQueryCallback finalizeQueryCallback,
+        void *userdata)
+        : PxHitCallback<T>(mTouches, sNumTouches),
+          mProcessTouchesCallback(processTouchesCallback),
+          mFinalizeQueryCallback(finalizeQueryCallback),
+          mUserData(userdata) {}
+
+    HitProcessTouchesCallback mProcessTouchesCallback;
+    HitFinalizeQueryCallback mFinalizeQueryCallback;
+    void *mUserData;
+
+    PxAgain processTouches(const T *buffer, PxU32 nbHits) override
+    {
+        return mProcessTouchesCallback(buffer, nbHits, mUserData);
+    }
+
+    void finalizeQuery() override
+    {
+        mFinalizeQueryCallback(mUserData);
+    }
+private:
+	// TODO Provide users a way to pass in the touches buffer.
+	// processTouches will not be called if the passed-in buffer is nullptr.
+	static const size_t sNumTouches = 16;
+	T mTouches[sNumTouches];
+};
+
 typedef void * (*AllocCallback)(uint64_t size, const char *typeName, const char *filename, int line, void *userdata);
 typedef void (*DeallocCallback)(void *ptr, void *userdata);
 
 class CustomAllocatorTrampoline : public PxAllocatorCallback {
 public:
     CustomAllocatorTrampoline(AllocCallback allocCb, DeallocCallback deallocCb, void *userdata)
-        : mAllocCallback(allocCb), mDeallocCallback(deallocCb), mUserData(userdata) {
-    }
+        : mAllocCallback(allocCb), mDeallocCallback(deallocCb), mUserData(userdata) {}
 
-	void *allocate(size_t size, const char* typeName, const char* filename, int line) {
+    void *allocate(size_t size, const char *typeName, const char *filename, int line)
+    {
         return mAllocCallback((uint64_t)size, typeName, filename, line, mUserData);
     }
 
-	virtual void deallocate(void* ptr) {
+    virtual void deallocate(void* ptr)
+    {
         mDeallocCallback(ptr, mUserData);
     }
 
@@ -236,8 +273,48 @@ extern "C"
         return new RaycastFilterCallback(actor_to_ignore);
     }
 
-    PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData) {
+    PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData)
+    {
         return new RaycastFilterTrampoline(callback, userData);
+    }
+
+    PxRaycastCallback *create_raycast_buffer()
+    {
+        return new PxRaycastBuffer;
+    }
+
+    PxSweepCallback *create_sweep_buffer()
+    {
+        return new PxSweepBuffer;
+    }
+
+    PxOverlapCallback *create_overlap_buffer()
+    {
+        return new PxOverlapBuffer;
+    }
+
+    PxRaycastCallback *create_raycast_callback(
+        HitProcessTouchesCallback process_touches_callback,
+        HitFinalizeQueryCallback finalize_query_callback,
+        void *userdata
+    ) {
+		return new HitCallbackTrampoline<PxRaycastHit>(process_touches_callback, finalize_query_callback, userdata);
+    }
+
+    PxSweepCallback *create_sweep_callback(
+        HitProcessTouchesCallback process_touches_callback,
+        HitFinalizeQueryCallback finalize_query_callback,
+        void *userdata
+    ) {
+		return new HitCallbackTrampoline<PxSweepHit>(process_touches_callback, finalize_query_callback, userdata);
+    }
+
+    PxOverlapCallback *create_overlap_callback(
+        HitProcessTouchesCallback process_touches_callback,
+        HitFinalizeQueryCallback finalize_query_callback,
+        void *userdata
+    ) {
+		return new HitCallbackTrampoline<PxOverlapHit>(process_touches_callback, finalize_query_callback, userdata);
     }
 
     PxAllocatorCallback *create_alloc_callback(
