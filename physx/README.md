@@ -14,7 +14,7 @@
 The overall goal is to maintain a close mapping to the underlying PhysX API
 while improving safety and reliability of the code. This means, for example,
 that we do not expose the `PxLoadExtensions()` function but rather attach this
-to the [`Physics`](source/physics.rs) builder.
+to the [`Physics`](src/physics.rs) builder.
 
 Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing an unsafe low-level binding.
 
@@ -23,17 +23,13 @@ Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) cont
 ## Basic usage
 
 ``` rust
-const PX_PHYSICS_VERSION: u32 = physx::version(4, 1, 1);
-let mut foundation = Foundation::new(PX_PHYSICS_VERSION);
+let mut physics = PhysicsFoundation::default();
 
-let mut physics = PhysicsBuilder::default()
-    .load_extensions(false) // Flip this flag to load extensions during setup
-    .build(&mut foundation);
-
-let mut scene = physics.create_scene(
-    SceneBuilder::default()
-        .set_gravity(glm::vec3(0.0, -9.81, 0.0))
-        .set_simulation_threading(SimulationThreadType::Dedicated(1)),
+let mut scene = physics.create(
+    SceneDescriptor {
+        gravity: PxVec3::new(0.0, 0.0, -9.81),
+        ..SceneDescriptor::new(MySceneUserData::default())
+    }
 );
 
 // Your physics simulation goes here
@@ -49,24 +45,14 @@ to work. The first, and most basic one is creating a C wrapper over the C++ API.
 Using C as an intermediary allows us to leverage a stable ABI through which C++
 and Rust can communicate. The `physx-sys` crate provides this interface.
 
-Since `PhysX` makes significant use of inheritance, there is no straightforward mapping to Rust code. To simulate the inheritance, we have a pointer-wrapper called [`PxType<T>`](src/px_type.rs). We implement the functions on each wrapped `PxType<PxRgidiActor>` and expose an alias `RigidActor`.
-
-The [deref pattern](https://github.com/rust-unofficial/patterns/blob/master/anti_patterns/deref.md) is used to simulate inheritance. For example `RigidBody::set_angular_damping`, can be called from the child `RigidDynamic` because `RigidDynamic` implements `Deref<Target = RigidBody>`.
+`PhysX` makes significant use of inheritance, which isn't directly translatable to Rust.  The class interfaces are directly translated into traits with full default implementations that are just calls to the unsafe FFI functions.  These traits are bounded by their super class trait, as well as a `Class<T>` trait, where `T` is the class data struct found in `physx_sys`.  The class interface methods all take pointers to self, and the `Class<T>` trait provides `as_ptr` and `as_mut_ptr` methods to retrieve `*const` and `*mut` pointers to `T`.  Types that have a `userData` class member also have a `UserData` trait bound.
 
 ```Rust
-// `set_angular_damping` is not defined in `RigidDynamic`, it is defined in `RidigBody`.
-// This works because `Deref` is used to emulate inheritance.
-let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
-sphere_actor.set_angular_damping(0.5);
-```
-
-```Rust
-// The verbose example to show what happens behind the scenes.
-let mut sphere_actor: RigidDynamic = unsafe { physics.create_dynamic(..) };
-{
-    // `RidigDynamic` implements `Deref/DerefMut` to a `RigidBody`.
-    let sphere_actor: &mut RigidBody = &mut *sphere_actor;
-    sphere_actor.set_angular_damping(0.5);
+trait RigidDynamic: RigidActor + Class<physx_sys::PxRigidDynamic> + UserData {
+    fn get_sleep_threshold(&self) -> f32 {
+        unsafe { PxRigidDynamic_getSleepThreshold(self.as_ptr()) }
+    }
+    // ...
 }
 ```
 
