@@ -87,13 +87,15 @@ impl PxCooking {
         }
     }
 
-    /// Cook a new convex mesh if the descriptor is validated.
+    /// Cook a new convex mesh using a mesh descriptor.
+    /// The data provided in the mesh descriptor should be validated by [`PxCooking::validate_convex_mesh`] before being
+    /// passed into this method.
     pub fn create_convex_mesh(
         &self,
         physics: &mut impl Physics,
         desc: &PxConvexMeshDesc,
     ) -> ConvexMeshCookingResult {
-        if !self.validate_convex_mesh(desc) {
+        if !desc.is_valid() {
             return ConvexMeshCookingResult::InvalidDescriptor;
         };
         if let Some(callback) = physics.get_physics_insertion_callback() {
@@ -127,13 +129,15 @@ impl PxCooking {
         }
     }
 
-    /// Cook a new triangle mesh if the descriptor is validated.
+    /// Cook a new triangle mesh using a mesh descriptor.
+    /// The data provided in the mesh descriptor should be validated by [`PxCooking::validate_triangle_mesh`] before being
+    /// passed into this method.
     pub fn create_triangle_mesh(
         &self,
         physics: &mut impl Physics,
         desc: &PxTriangleMeshDesc,
     ) -> TriangleMeshCookingResult {
-        if !self.validate_triangle_mesh(desc) {
+        if !desc.is_valid() {
             return TriangleMeshCookingResult::InvalidDescriptor;
         };
         if let Some(callback) = physics.get_physics_insertion_callback() {
