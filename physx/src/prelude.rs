@@ -36,11 +36,15 @@ pub use crate::rigid_body::{ForceMode, RigidBody, RigidBodyFlag, RigidBodyFlags}
 pub use crate::rigid_dynamic::{RigidDynamic, RigidDynamicLockFlag, RigidDynamicLockFlags};
 pub use crate::rigid_static::RigidStatic;
 pub use crate::scene::{
-    BroadPhaseType, FilterShaderDescriptor, PairFilteringMode, PruningStructureType, PxSceneDesc,
-    Scene, SceneFlag, SimulationThreadType, SolverType,
+    BroadPhaseType, FilterShaderDescriptor, PairFilteringMode, PruningStructureType, Scene,
+    SceneFlag, SimulationThreadType, SolverType,
 };
 pub use crate::shape::{CollisionLayer, Shape, ShapeFlag, ShapeFlags};
 pub use crate::simulation_event_callback::{
     AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
     TriggerCallback, WakeSleepCallback,
+};
+pub use crate::traits::descriptor::{
+    ConstraintDescriptor, MaterialDescriptor, PlaneDescriptor, RigidDynamicDescriptor,
+    RigidStaticDescriptor, SceneDescriptor, ShapeDescriptor,
 };

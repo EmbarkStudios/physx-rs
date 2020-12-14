@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+- [PR#113](https://github.com/EmbarkStudios/physx-rs/pull/98) Fix various issues
+  found using physx-rs in practice after the big PR#98 merge from 0.9.0.
+  You now create a scene using `Physics::create()` with a new scene descriptor
+  that can represent all the parameters of PxSceneDesc.
+
 ## [0.9.0] - 2020-12-03
 
 ### Refactored
