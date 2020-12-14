@@ -29,10 +29,10 @@ use crate::{
     rigid_actor::RigidActor,
     rigid_dynamic::{PxRigidDynamic, RigidDynamic},
     rigid_static::{PxRigidStatic, RigidStatic},
-    scene::{PxScene, PxSceneDesc, Scene},
+    scene::PxScene,
     shape::{Shape, ShapeFlags},
     simulation_event_callback::*,
-    traits::{Class, PxFlags, UserData},
+    traits::{Class, Descriptor, PxFlags, SceneDescriptor, UserData},
     triangle_mesh::TriangleMesh,
     visual_debugger::VisualDebugger,
 };
@@ -64,7 +64,6 @@ use physx_sys::{
     PxPhysics_createPruningStructure_mut,
     PxPhysics_createRigidDynamic_mut,
     PxPhysics_createRigidStatic_mut,
-    PxPhysics_createScene_mut,
     PxPhysics_createShape_mut_1,
     PxPhysics_createTriangleMesh_mut,
     PxPhysics_getBVHStructures,
@@ -100,10 +99,28 @@ pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 /// Parametrized by the Foundation's Allocator and the Physics' Shape type.
 pub struct PhysicsFoundation<Allocator: AllocatorCallback, Geom: Shape> {
     // Order matters here for Drop. Foundation must be dropped last.
-    pub physics: Owner<PxPhysics<Geom>>,
-    pub pvd: Option<VisualDebugger>,
-    pub foundation: Owner<PxFoundation<Allocator>>,
+    physics: Owner<PxPhysics<Geom>>,
+    pvd: Option<VisualDebugger>,
+    foundation: Owner<PxFoundation<Allocator>>,
     extensions_loaded: bool,
+}
+
+unsafe impl<T, Allocator: AllocatorCallback, Geom: Shape> Class<T>
+    for PhysicsFoundation<Allocator, Geom>
+where
+    physx_sys::PxPhysics: Class<T>,
+{
+    fn as_ptr(&self) -> *const T {
+        self.physics.obj.as_ptr()
+    }
+
+    fn as_mut_ptr(&mut self) -> *mut T {
+        self.physics.obj.as_mut_ptr()
+    }
+}
+
+impl<Allocator: AllocatorCallback, Geom: Shape> Physics for PhysicsFoundation<Allocator, Geom> {
+    type Shape = Geom;
 }
 
 impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geom> {
@@ -120,8 +137,28 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
-    pub fn physics(&mut self) -> &mut PxPhysics<Geom> {
+    pub fn physics(&self) -> &PxPhysics<Geom> {
+        self.physics.as_ref()
+    }
+
+    pub fn foundation(&self) -> &PxFoundation<Allocator> {
+        self.foundation.as_ref()
+    }
+
+    pub fn pvd(&self) -> Option<&VisualDebugger> {
+        self.pvd.as_ref()
+    }
+
+    pub fn physics_mut(&mut self) -> &mut PxPhysics<Geom> {
         self.physics.as_mut()
+    }
+
+    pub fn foundation_mut(&mut self) -> &mut PxFoundation<Allocator> {
+        self.foundation.as_mut()
+    }
+
+    pub fn pvd_mut(&mut self) -> Option<&mut VisualDebugger> {
+        self.pvd.as_mut()
     }
 }
 
@@ -205,11 +242,15 @@ impl<Geom: Shape> Physics for PxPhysics<Geom> {
 pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     type Shape: Shape;
 
+    fn create<Desc: Descriptor<Self>>(&mut self, desc: Desc) -> Desc::Target {
+        desc.create(self)
+    }
+
     /// Create a new scene with from a descriptor.
     #[allow(clippy::type_complexity)]
     fn create_scene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>(
         &mut self,
-        scene_descriptor: Owner<PxSceneDesc<U, L, S, D, OC, OT, OCB, OWS, OA>>,
+        scene_descriptor: SceneDescriptor<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>,
     ) -> Option<Owner<PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>>>
     where
         L: ArticulationLink,
@@ -223,12 +264,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         OWS: WakeSleepCallback<L, S, D>,
         OA: AdvanceCallback<L, D>,
     {
-        unsafe {
-            Scene::from_raw(PxPhysics_createScene_mut(
-                self.as_mut_ptr(),
-                scene_descriptor.into_ptr(),
-            ))
-        }
+        scene_descriptor.create(self)
     }
 
     /// Create a new aggregate.  Must be added to a scene with the same actor user data types.
@@ -576,7 +612,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         unsafe { PxPhysics_getTolerancesScale(self.as_ptr()).as_ref() }
     }
 
-    /// Get the physiucs insertion callback, used for real-time cooking of physics meshes.
+    /// Get the physics insertion callback, used for real-time cooking of physics meshes.
     fn get_physics_insertion_callback(&mut self) -> Option<&mut PxPhysicsInsertionCallback> {
         unsafe { PxPhysics_getPhysicsInsertionCallback_mut(self.as_mut_ptr()).as_mut() }
     }

@@ -80,23 +80,16 @@ fn main() {
     // Holds a PxFoundation and a PxPhysics.
     // Also has an optional Pvd and transport, not enabled by default.
     // The default allocator is the one provided by PhysX.
-    let mut physics_foundation = PhysicsFoundation::<_, PxShape>::default();
-
-    let physics = physics_foundation.physics();
+    let mut physics = PhysicsFoundation::<_, PxShape>::default();
 
     // Setup the scene object.  The PxScene type alias makes this much cleaner.
     // There are lots of unwrap calls due to potential null pointers.
     let mut scene: Owner<PxScene> = physics
-        .create_scene(
-            PxSceneDesc::new(
-                physics,
-                (),
-                PxSimulationEventCallback::new(None, None, None, None, Some(OnAdvance)).unwrap(),
-                FilterShaderDescriptor::Default,
-                1,
-            )
-            .unwrap(),
-        )
+        .create(SceneDescriptor {
+            gravity: PxVec3::new(0.0, -9.81, 0.0),
+            on_advance: Some(OnAdvance),
+            ..SceneDescriptor::new(())
+        })
         .unwrap();
 
     let mut material = physics.create_material(0.5, 0.5, 0.6, ()).unwrap();
