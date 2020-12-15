@@ -44,24 +44,6 @@ pub struct PxRaycastCallback {
 #[repr(transparent)]
 pub struct PxRaycastBuffer(PxRaycastCallback);
 
-unsafe impl Class<PxRaycastCallback> for PxRaycastBuffer {
-    fn as_ptr(&self) -> *const PxRaycastCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut PxRaycastCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
-
-unsafe impl Class<physx_sys::PxRaycastCallback> for PxRaycastBuffer {
-    fn as_ptr(&self) -> *const physx_sys::PxRaycastCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxRaycastCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
-
 unsafe impl RaycastCallback for PxRaycastBuffer {
     unsafe fn new() -> Self {
         Self(PxRaycastCallback {
@@ -127,24 +109,6 @@ pub struct PxSweepCallback {
 #[repr(transparent)]
 pub struct PxSweepBuffer(PxSweepCallback);
 
-unsafe impl Class<PxSweepCallback> for PxSweepBuffer {
-    fn as_ptr(&self) -> *const PxSweepCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut PxSweepCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
-
-unsafe impl Class<physx_sys::PxSweepCallback> for PxSweepBuffer {
-    fn as_ptr(&self) -> *const physx_sys::PxSweepCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxSweepCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
-
 unsafe impl SweepCallback for PxSweepBuffer {
     unsafe fn new() -> Self {
         Self(PxSweepCallback {
@@ -209,24 +173,6 @@ pub struct PxOverlapCallback {
 
 #[repr(transparent)]
 pub struct PxOverlapBuffer(PxOverlapCallback);
-
-unsafe impl Class<PxOverlapCallback> for PxOverlapBuffer {
-    fn as_ptr(&self) -> *const PxOverlapCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut PxOverlapCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
-
-unsafe impl Class<physx_sys::PxOverlapCallback> for PxOverlapBuffer {
-    fn as_ptr(&self) -> *const physx_sys::PxOverlapCallback {
-        self.0.obj.as_ptr() as *const _ as *const _
-    }
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxOverlapCallback {
-        self.0.obj.as_mut_ptr() as *mut _ as *mut _
-    }
-}
 
 unsafe impl OverlapCallback for PxOverlapBuffer {
     unsafe fn new() -> Self {
