@@ -1,6 +1,6 @@
-// Author: Tom Olsson <tom.olsson@embark-studios.com>
+// Author: Nick Caplinger <the.nick.caplinger@gmail.com>
 // Copyright © 2020, Embark Studios, all rights reserved.
-// Created: 9 December 2020
+// Created: 14 December 2020
 
 //! Scene queries are used to perform tests against the actors and geometry held in a scene.
 
