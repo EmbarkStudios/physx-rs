@@ -4,10 +4,6 @@
 
 //! Scene queries are used to perform tests against the actors and geometry held in a scene.
 
-#![warn(clippy::all)]
-#![allow(clippy::missing_safety_doc)]
-#![allow(deprecated)]
-
 use crate::{owner::Owner, traits::Class};
 use physx_sys::{
     create_overlap_buffer, create_overlap_callback, create_raycast_buffer, create_raycast_callback,
