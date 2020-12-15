@@ -700,10 +700,9 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         inflation: f32,
     ) -> bool {
         let filter_callback = filter_callback
-            .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
-                v as *mut _
-            });
-        let cache = cache.map_or(std::ptr::null::<PxQueryCache>(), |v| v as *const _);
+            .map(|v| v as *mut _)
+            .unwrap_or(std::ptr::null_mut());
+        let cache = cache.map(|v| v as *const _).unwrap_or(std::ptr::null());
         unsafe {
             let hit_callback = hit_callback.into_px();
             PxScene_sweep(
