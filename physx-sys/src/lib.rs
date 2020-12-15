@@ -241,16 +241,14 @@ pub struct FilterShaderCallbackInfo {
     pub constantBlockSize: u32,
 }
 
-pub type PxAgain = bool;
-
 pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
 
 pub type RaycastProcessTouchesCallback =
-    unsafe extern "C" fn(*const PxRaycastHit, u32, *const c_void) -> PxAgain;
+    unsafe extern "C" fn(*const PxRaycastHit, u32, *const c_void) -> bool;
 pub type SweepProcessTouchesCallback =
-    unsafe extern "C" fn(*const PxSweepHit, u32, *const c_void) -> PxAgain;
+    unsafe extern "C" fn(*const PxSweepHit, u32, *const c_void) -> bool;
 pub type OverlapProcessTouchesCallback =
-    unsafe extern "C" fn(*const PxOverlapHit, u32, *const c_void) -> PxAgain;
+    unsafe extern "C" fn(*const PxOverlapHit, u32, *const c_void) -> bool;
 
 pub type FinalizeQueryCallback = unsafe extern "C" fn(*const c_void);
 
