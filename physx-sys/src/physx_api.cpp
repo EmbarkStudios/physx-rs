@@ -176,27 +176,30 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
     }
 };
 
-typedef PxAgain (*HitProcessTouchesCallback)(const void *buffer, PxU32 nbHits, void *userdata);
+typedef PxAgain (*RaycastHitProcessTouchesCallback)(const PxRaycastHit *buffer, PxU32 nbHits, void *userdata);
+typedef PxAgain (*SweepHitProcessTouchesCallback)(const PxSweepHit *buffer, PxU32 nbHits, void *userdata);
+typedef PxAgain (*OverlapHitProcessTouchesCallback)(const PxOverlapHit *buffer, PxU32 nbHits, void *userdata);
 typedef void (*HitFinalizeQueryCallback)(void *userdata);
 
-template <typename T>
-class HitCallbackTrampoline : public PxHitCallback<T>
+class RaycastHitCallbackTrampoline : public PxRaycastCallback
 {
   public:
-    HitCallbackTrampoline(
-        HitProcessTouchesCallback processTouchesCallback,
+    RaycastHitCallbackTrampoline(
+        RaycastHitProcessTouchesCallback processTouchesCallback,
         HitFinalizeQueryCallback finalizeQueryCallback,
+        PxRaycastHit *touchesBuffer,
+        PxU32 numTouches,
         void *userdata)
-        : PxHitCallback<T>(mTouches, sNumTouches),
+        : PxRaycastCallback(touchesBuffer, numTouches),
           mProcessTouchesCallback(processTouchesCallback),
           mFinalizeQueryCallback(finalizeQueryCallback),
           mUserData(userdata) {}
 
-    HitProcessTouchesCallback mProcessTouchesCallback;
+    RaycastHitProcessTouchesCallback mProcessTouchesCallback;
     HitFinalizeQueryCallback mFinalizeQueryCallback;
     void *mUserData;
 
-    PxAgain processTouches(const T *buffer, PxU32 nbHits) override
+    PxAgain processTouches(const PxRaycastHit *buffer, PxU32 nbHits) override
     {
         return mProcessTouchesCallback(buffer, nbHits, mUserData);
     }
@@ -205,11 +208,64 @@ class HitCallbackTrampoline : public PxHitCallback<T>
     {
         mFinalizeQueryCallback(mUserData);
     }
-private:
-	// TODO Provide users a way to pass in the touches buffer.
-	// processTouches will not be called if the passed-in buffer is nullptr.
-	static const size_t sNumTouches = 16;
-	T mTouches[sNumTouches];
+};
+
+class SweepHitCallbackTrampoline : public PxSweepCallback
+{
+  public:
+    SweepHitCallbackTrampoline(
+        SweepHitProcessTouchesCallback processTouchesCallback,
+        HitFinalizeQueryCallback finalizeQueryCallback,
+        PxSweepHit *touchesBuffer,
+        PxU32 numTouches,
+        void *userdata)
+        : PxSweepCallback(touchesBuffer, numTouches),
+          mProcessTouchesCallback(processTouchesCallback),
+          mFinalizeQueryCallback(finalizeQueryCallback),
+          mUserData(userdata) {}
+
+    SweepHitProcessTouchesCallback mProcessTouchesCallback;
+    HitFinalizeQueryCallback mFinalizeQueryCallback;
+    void *mUserData;
+
+    PxAgain processTouches(const PxSweepHit *buffer, PxU32 nbHits) override
+    {
+        return mProcessTouchesCallback(buffer, nbHits, mUserData);
+    }
+
+    void finalizeQuery() override
+    {
+        mFinalizeQueryCallback(mUserData);
+    }
+};
+
+class OverlapHitCallbackTrampoline : public PxOverlapCallback
+{
+  public:
+    OverlapHitCallbackTrampoline(
+        OverlapHitProcessTouchesCallback processTouchesCallback,
+        HitFinalizeQueryCallback finalizeQueryCallback,
+        PxOverlapHit *touchesBuffer,
+        PxU32 numTouches,
+        void *userdata)
+        : PxOverlapCallback(touchesBuffer, numTouches),
+          mProcessTouchesCallback(processTouchesCallback),
+          mFinalizeQueryCallback(finalizeQueryCallback),
+          mUserData(userdata) {}
+
+    OverlapHitProcessTouchesCallback mProcessTouchesCallback;
+    HitFinalizeQueryCallback mFinalizeQueryCallback;
+    void *mUserData;
+
+    PxAgain processTouches(const PxOverlapHit *buffer, PxU32 nbHits) override
+    {
+        return mProcessTouchesCallback(buffer, nbHits, mUserData);
+    }
+
+    void finalizeQuery() override
+    {
+        mFinalizeQueryCallback(mUserData);
+    }
 };
 
 typedef void * (*AllocCallback)(uint64_t size, const char *typeName, const char *filename, int line, void *userdata);
@@ -294,27 +350,38 @@ extern "C"
     }
 
     PxRaycastCallback *create_raycast_callback(
-        HitProcessTouchesCallback process_touches_callback,
+        RaycastHitProcessTouchesCallback process_touches_callback,
         HitFinalizeQueryCallback finalize_query_callback,
+        PxRaycastHit *touchesBuffer,
+        PxU32 numTouches,
         void *userdata
     ) {
-		return new HitCallbackTrampoline<PxRaycastHit>(process_touches_callback, finalize_query_callback, userdata);
+        return new RaycastHitCallbackTrampoline(
+            process_touches_callback, finalize_query_callback, touchesBuffer, numTouches, userdata);
     }
 
     PxSweepCallback *create_sweep_callback(
-        HitProcessTouchesCallback process_touches_callback,
+        SweepHitProcessTouchesCallback process_touches_callback,
         HitFinalizeQueryCallback finalize_query_callback,
+        PxSweepHit *touchesBuffer,
+        PxU32 numTouches,
         void *userdata
     ) {
-		return new HitCallbackTrampoline<PxSweepHit>(process_touches_callback, finalize_query_callback, userdata);
+        return new SweepHitCallbackTrampoline(
+            process_touches_callback, finalize_query_callback, touchesBuffer, numTouches, userdata
+        );
     }
 
     PxOverlapCallback *create_overlap_callback(
-        HitProcessTouchesCallback process_touches_callback,
+        OverlapHitProcessTouchesCallback process_touches_callback,
         HitFinalizeQueryCallback finalize_query_callback,
+        PxOverlapHit *touchesBuffer,
+        PxU32 numTouches,
         void *userdata
     ) {
-		return new HitCallbackTrampoline<PxOverlapHit>(process_touches_callback, finalize_query_callback, userdata);
+        return new OverlapHitCallbackTrampoline(
+            process_touches_callback, finalize_query_callback, touchesBuffer, numTouches, userdata
+        );
     }
 
     PxAllocatorCallback *create_alloc_callback(

@@ -285,16 +285,22 @@ extern "C" {
     pub fn create_raycast_callback(
         process_touches_callback: RaycastProcessTouchesCallback,
         finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxRaycastHit,
+        num_touches: u32,
         userdata: *mut c_void,
     ) -> *mut PxRaycastCallback;
     pub fn create_sweep_callback(
         process_touches_callback: SweepProcessTouchesCallback,
         finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxSweepHit,
+        num_touches: u32,
         userdata: *mut c_void,
     ) -> *mut PxSweepCallback;
     pub fn create_overlap_callback(
         process_touches_callback: OverlapProcessTouchesCallback,
         finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxOverlapHit,
+        num_touches: u32,
         userdata: *mut c_void,
     ) -> *mut PxOverlapCallback;
 

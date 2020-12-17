@@ -96,6 +96,8 @@ pub unsafe trait RaycastCallback: Sized {
         create_raycast_callback(
             Self::process_touches,
             Self::finalize_query,
+            std::ptr::null_mut(),
+            0,
             Box::into_raw(Box::new(self)) as *mut c_void,
         )
     }
@@ -161,6 +163,8 @@ pub unsafe trait SweepCallback: Sized {
         create_sweep_callback(
             Self::process_touches,
             Self::finalize_query,
+            std::ptr::null_mut(),
+            0,
             Box::into_raw(Box::new(self)) as *mut c_void,
         )
     }
@@ -226,6 +230,8 @@ pub unsafe trait OverlapCallback: Sized {
         create_overlap_callback(
             Self::process_touches,
             Self::finalize_query,
+            std::ptr::null_mut(),
+            0,
             Box::into_raw(Box::new(self)) as *mut c_void,
         )
     }
