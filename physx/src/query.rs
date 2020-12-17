@@ -10,6 +10,7 @@ use physx_sys::{
     create_sweep_buffer, create_sweep_callback,
 };
 use std::ffi::c_void;
+use std::{slice, marker::PhantomData};
 
 #[repr(transparent)]
 pub struct PxQueryFilterData {
@@ -36,203 +37,90 @@ impl Into<physx_sys::PxQueryFilterData> for PxQueryFilterData {
     }
 }
 
-#[repr(transparent)]
-pub struct PxRaycastCallback {
-    pub obj: Owner<physx_sys::PxRaycastCallback>,
+// pub struct PxRaycastHit
+
+pub struct PxRaycastCallback<T: RaycastCallback> {
+    pub(crate) obj: Option<Owner<physx_sys::PxRaycastCallback>>,
+    phantom_user_data: PhantomData<T>,
 }
 
-#[repr(transparent)]
-pub struct PxRaycastBuffer(PxRaycastCallback);
+impl<T: RaycastCallback> PxRaycastCallback<T> {
 
-unsafe impl RaycastCallback for PxRaycastBuffer {
-    unsafe fn new() -> Self {
-        Self(PxRaycastCallback {
-            obj: Owner::from_raw(create_raycast_buffer()).unwrap(),
-        })
+    pub fn new(user_data: &mut T, touch_buffer: Option<&mut [physx_sys::PxRaycastHit]>) -> Self {
+        use std::convert::TryInto;
+
+        let (buffer_ptr, buffer_len) = touch_buffer
+            .map(|v| (v.as_mut_ptr(), v.len()))
+            .unwrap_or((std::ptr::null_mut(), 0));
+
+        let buffer_len = buffer_len.try_into().unwrap(); // FIXME replace unwrap
+
+        unsafe {
+            Self {
+                obj: Owner::from_raw(
+                    create_raycast_callback(
+                        Self::process_touches,
+                        Self::finalize_query,
+                        buffer_ptr,
+                        buffer_len,
+                        user_data as *mut _ as *mut c_void, // TODO we need to make sure this is dropped
+                    )
+                ),
+                phantom_user_data: PhantomData,
+            }
+        }
     }
 
-    unsafe fn get_raycast_hit(&mut self) -> Option<physx_sys::PxRaycastHit> {
-        Some(self.0.obj.block)
-    }
-
-    unsafe extern "C" fn process_touches(
-        _buffer: *const physx_sys::PxRaycastHit,
-        _num_hits: u32,
-        _user_data: *const c_void,
-    ) -> bool {
-        // Unused by this impl
-        false
-    }
-
-    unsafe extern "C" fn finalize_query(_user_data: *const c_void) {
-        // Unused by this impl
-    }
-
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxRaycastCallback {
-        self.0.obj.as_mut_ptr()
-    }
-}
-
-/// A trait for creating custom raycast callbacks for PhysX.
-pub unsafe trait RaycastCallback: Sized {
-    unsafe fn new() -> Self;
-    unsafe fn get_raycast_hit(&mut self) -> Option<physx_sys::PxRaycastHit>;
-
-    /// # Safety
-    /// Must not panic.
     unsafe extern "C" fn process_touches(
         buffer: *const physx_sys::PxRaycastHit,
         num_hits: u32,
-        user_data: *const c_void,
-    ) -> bool;
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn finalize_query(user_data: *const c_void);
-
-    /// # Safety
-    /// Do not override this method.
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxRaycastCallback {
-        create_raycast_callback(
-            Self::process_touches,
-            Self::finalize_query,
-            std::ptr::null_mut(),
-            0,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
-    }
-}
-
-#[repr(transparent)]
-pub struct PxSweepCallback {
-    pub obj: Owner<physx_sys::PxSweepCallback>,
-}
-
-#[repr(transparent)]
-pub struct PxSweepBuffer(PxSweepCallback);
-
-unsafe impl SweepCallback for PxSweepBuffer {
-    unsafe fn new() -> Self {
-        Self(PxSweepCallback {
-            obj: Owner::from_raw(create_sweep_buffer()).unwrap(),
-        })
-    }
-
-    unsafe fn get_sweep_hit(&mut self) -> Option<physx_sys::PxSweepHit> {
-        Some(self.0.obj.block)
-    }
-
-    unsafe extern "C" fn process_touches(
-        _buffer: *const physx_sys::PxSweepHit,
-        _num_hits: u32,
-        _user_data: *const c_void,
+        user_data: *mut c_void,
     ) -> bool {
-        // Unused by this impl
-        false
+        // TODO catch_unwind
+        (&mut *(user_data as *mut T)).process_touches(slice::from_raw_parts(buffer, num_hits as usize))
     }
 
-    unsafe extern "C" fn finalize_query(_user_data: *const c_void) {
-        // Unused by this impl
-    }
-
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxSweepCallback {
-        self.0.obj.as_mut_ptr()
-    }
-}
-
-/// A trait for creating custom sweep callbacks for PhysX.
-pub unsafe trait SweepCallback: Sized {
-    unsafe fn new() -> Self;
-    unsafe fn get_sweep_hit(&mut self) -> Option<physx_sys::PxSweepHit>;
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn process_touches(
-        buffer: *const physx_sys::PxSweepHit,
-        num_hits: u32,
-        user_data: *const c_void,
-    ) -> bool;
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn finalize_query(user_data: *const c_void);
-
-    /// # Safety
-    /// Do not override this method.
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxSweepCallback {
-        create_sweep_callback(
-            Self::process_touches,
-            Self::finalize_query,
-            std::ptr::null_mut(),
-            0,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    unsafe extern "C" fn finalize_query(
+        user_data: *mut c_void,
+    ) {
+        // TODO catch_unwind
+        (&mut *(user_data as *mut T)).finalize_query();
     }
 }
 
-#[repr(transparent)]
-pub struct PxOverlapCallback {
-    pub obj: Owner<physx_sys::PxOverlapCallback>,
+/// A safe wrapper around raycast PhysX callbacks
+pub trait RaycastCallback {
+    fn process_touches(&mut self, touches: &[physx_sys::PxRaycastHit]) -> bool;
+    fn finalize_query(&mut self);
 }
 
-#[repr(transparent)]
-pub struct PxOverlapBuffer(PxOverlapCallback);
+// /// A trait for creating custom raycast callbacks for PhysX.
+// pub unsafe trait RaycastCallback {
+//     unsafe fn get_raycast_hit(&mut self) -> Option<physx_sys::PxRaycastHit>;
+//     // TODO
+//     // unsafe fn get_raycast_touches(&mut self) -> Option<physx_sys::PxRaycastHit>;
 
-unsafe impl OverlapCallback for PxOverlapBuffer {
-    unsafe fn new() -> Self {
-        Self(PxOverlapCallback {
-            obj: Owner::from_raw(create_overlap_buffer()).unwrap(),
-        })
-    }
+//     /// # Safety
+//     /// Must not panic.
+//     unsafe extern "C" fn process_touches(
+//         buffer: *const physx_sys::PxRaycastHit,
+//         num_hits: u32,
+//         user_data: *const c_void,
+//     ) -> bool;
 
-    unsafe fn get_overlap_hit(&mut self) -> Option<physx_sys::PxOverlapHit> {
-        Some(self.0.obj.block)
-    }
+//     /// # Safety
+//     /// Must not panic.
+//     unsafe extern "C" fn finalize_query(user_data: *const c_void);
 
-    unsafe extern "C" fn process_touches(
-        _buffer: *const physx_sys::PxOverlapHit,
-        _num_hits: u32,
-        _user_data: *const c_void,
-    ) -> bool {
-        // Unused by this impl
-        false
-    }
-
-    unsafe extern "C" fn finalize_query(_user_data: *const c_void) {
-        // Unused by this impl
-    }
-
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxOverlapCallback {
-        self.0.obj.as_mut_ptr()
-    }
-}
-
-/// A trait for creating custom overlap callbacks for PhysX.
-pub unsafe trait OverlapCallback: Sized {
-    unsafe fn new() -> Self;
-    unsafe fn get_overlap_hit(&mut self) -> Option<physx_sys::PxOverlapHit>;
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn process_touches(
-        buffer: *const physx_sys::PxOverlapHit,
-        num_hits: u32,
-        user_data: *const c_void,
-    ) -> bool;
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn finalize_query(user_data: *const c_void);
-
-    /// # Safety
-    /// Do not override this method.
-    unsafe fn into_px(&mut self) -> *mut physx_sys::PxOverlapCallback {
-        create_overlap_callback(
-            Self::process_touches,
-            Self::finalize_query,
-            std::ptr::null_mut(),
-            0,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
-    }
-}
+//     /// # Safety
+//     /// Do not override this method.
+//     unsafe fn into_px(&mut self) -> *mut physx_sys::PxRaycastCallback {
+//         create_raycast_callback(
+//             Self::process_touches,
+//             Self::finalize_query,
+//             std::ptr::null_mut(),
+//             0,
+//             Box::into_raw(Box::new(self)) as *mut c_void,
+//         )
+//     }
+// }

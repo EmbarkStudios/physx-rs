@@ -5,10 +5,10 @@
 use glam::Vec3;
 use physx::prelude::*;
 use physx::query::{
-    OverlapCallback, PxOverlapBuffer, PxQueryFilterData, PxRaycastBuffer, PxSweepBuffer,
-    RaycastCallback, SweepCallback,
+    PxQueryFilterData, RaycastCallback, PxRaycastCallback
 };
 use physx::scene::HitFlag;
+use physx::traits::PxFlags;
 use std::ffi::c_void;
 
 /// This is an example demonstrating the usage of scene queries within the physx crate.
@@ -75,30 +75,23 @@ impl AdvanceCallback<PxArticulationLink, PxRigidDynamic> for OnAdvance {
     }
 }
 
-struct MyRaycastCallback;
+// A test raycast callback that stores positions of all touches
+#[derive(Default)]
+struct PositionCollectorRaycastCallback {
+    positions: Vec<PxVec3>,
+}
 
-unsafe impl RaycastCallback for MyRaycastCallback {
-    unsafe fn new() -> Self {
-        Self {}
-    }
+impl RaycastCallback for PositionCollectorRaycastCallback {
 
-    unsafe fn get_raycast_hit(&mut self) -> Option<physx_sys::PxRaycastHit> {
-        None
-    }
-
-    unsafe extern "C" fn process_touches(
-        _buffer: *const physx_sys::PxRaycastHit,
-        _num_hits: u32,
-        _user_data: *const c_void,
-    ) -> bool {
-        println!("custom process_touches logic happens here");
+    fn process_touches(&mut self, touches: &[physx_sys::PxRaycastHit]) -> bool {
+        for touch in touches {
+            self.positions.push(touch.position.into());
+        }
         false
     }
-
-    /// # Safety
-    /// Must not panic.
-    unsafe extern "C" fn finalize_query(_user_data: *const c_void) {
-        println!("custom finalize_query logic happens here");
+    
+    fn finalize_query(&mut self) {
+        println!("Collected a total of {} positions!", self.positions.len());
     }
 }
 
@@ -149,103 +142,75 @@ fn main() {
     let up_dir = Vec3::new(0.0, 1.0, 0.0);
     let down_dir = -up_dir;
     let distance = 5000.0;
-    unsafe {
-        // Raycasts
-        let mut hit = PxRaycastBuffer::new();
-        let hit_flags = HitFlag::default_hit_flags();
-        let filter_data = PxQueryFilterData::default();
 
-        let mut custom_hit = MyRaycastCallback::new();
+    // Raycasts
+//    let mut hit = PxRaycastBuffer::new();
+    let hit_flags = HitFlag::default_hit_flags();
+    let filter_data = PxQueryFilterData::default();
 
-        let did_ray_hit = scene.raycast(
-            &origin.into(),
-            &down_dir.into(),
-            distance,
-            &mut hit,
-            hit_flags,
-            &filter_data,
-            None,
-            None,
-        );
-        assert!(did_ray_hit); // hits dynamic sphere in scene
+    let default_touch_buffer = physx_sys::PxRaycastHit {
+        actor: std::ptr::null_mut(),
+        shape: std::ptr::null_mut(),
+        faceIndex: 0,
+        structgen_pad0: [0u8; 4],
+        flags: HitFlag::default_hit_flags().into_px(),
+        structgen_pad1: [0u8; 2],
+        position: PxVec3::default().into(),
+        normal: PxVec3::default().into(),
+        distance: 0.0,
+        u: 0.0,
+        v: 0.0,
+    };
+    let mut touch_buffer = [default_touch_buffer; 16];
+    let mut custom_hit = PositionCollectorRaycastCallback::default();
+    let mut custom_hit_obj = PxRaycastCallback::new(&mut custom_hit, Some(&mut touch_buffer));
 
-        // Let's see some info about the hit
-        let hit_info = hit.get_raycast_hit().unwrap();
-        dbg!(hit_info.distance);
-        // dbg!(PxVec3::from(hit_info.position));
-        // dbg!(PxVec3::from(hit_info.normal));
+    // let did_ray_hit = scene.raycast(
+    //     &origin.into(),
+    //     &down_dir.into(),
+    //     distance,
+    //     &mut hit,
+    //     hit_flags,
+    //     &filter_data,
+    //     None,
+    //     None,
+    // );
+    // assert!(did_ray_hit); // hits dynamic sphere in scene
 
-        let did_ray_hit = scene.raycast(
-            &origin.into(),
-            &down_dir.into(),
-            distance,
-            &mut custom_hit,
-            hit_flags,
-            &filter_data,
-            None,
-            None,
-        );
-        assert!(did_ray_hit); // hits dynamic sphere in scene
+    // // Let's see some info about the hit
+    // let hit_info = hit.get_raycast_hit().unwrap();
+    // dbg!(hit_info.distance);
+    // // dbg!(PxVec3::from(hit_info.position));
+    // // dbg!(PxVec3::from(hit_info.normal));
 
-        let did_ray_hit = scene.raycast(
-            &origin.into(),
-            &up_dir.into(),
-            distance,
-            &mut hit,
-            hit_flags,
-            &filter_data,
-            None,
-            None,
-        );
-        assert!(!did_ray_hit); // raycast upward does not hit anything
+    let did_ray_hit = scene.raycast(
+        &origin.into(),
+        &down_dir.into(),
+        distance,
+        &mut custom_hit_obj,
+        hit_flags,
+        &filter_data,
+        None,
+        None,
+    );
+    assert!(did_ray_hit); // hits dynamic sphere in scene
 
-        // Overlaps
-        let mut overlap_callback = PxOverlapBuffer::new();
-        let did_overlap = scene.overlap(
-            &sphere_geo,
-            &PxTransform::default(),
-            &mut overlap_callback,
-            &filter_data,
-            None,
-        );
-        assert!(did_overlap); // overlaps with ground plane
+    custom_hit.positions.clear();
+    let did_ray_hit = scene.raycast(
+        &origin.into(),
+        &up_dir.into(),
+        distance,
+        &mut custom_hit_obj,
+        hit_flags,
+        &filter_data,
+        None,
+        None,
+    );
+    assert!(!did_ray_hit); // raycast upward does not hit anything
 
-        let did_overlap = scene.overlap(
-            &sphere_geo,
-            &PxTransform::from_translation(&Vec3::new(0.0, 30.0, 0.0).into()),
-            &mut overlap_callback,
-            &filter_data,
-            None,
-        );
-        assert!(!did_overlap); // midair sphere overlaps with nothing
+    // Overlaps
+    // TODO
 
-        let mut sweep_callback = PxSweepBuffer::new();
-        let did_sweep_hit = scene.sweep(
-            &sphere_geo,
-            &PxTransform::from_translation(&Vec3::new(0.0, 30.0, 0.0).into()),
-            &down_dir.into(),
-            60.0,
-            &mut sweep_callback,
-            hit_flags,
-            &filter_data,
-            None,
-            None,
-            0.0,
-        );
-        assert!(did_sweep_hit); // sweeping through the plane should hit
-
-        let did_sweep_hit = scene.sweep(
-            &sphere_geo,
-            &PxTransform::from_translation(&Vec3::new(0.0, 30.0, 0.0).into()),
-            &up_dir.into(),
-            60.0,
-            &mut sweep_callback,
-            hit_flags,
-            &filter_data,
-            None,
-            None,
-            0.0,
-        );
-        assert!(!did_sweep_hit); // sweeping upward should not hit anything
-    }
+    // Sweeps
+    // TODO
 }
