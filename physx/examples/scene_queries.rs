@@ -86,6 +86,9 @@ impl RaycastCallback for PositionCollectorRaycastCallback {
         for touch in touches {
             self.positions.push(touch.position.into());
         }
+
+        // We should return true if we determine that the touched object should block further hits
+        // For our example callback, we'll just collected all the touched objects
         false
     }
 
@@ -194,6 +197,20 @@ fn main() {
     );
     assert!(did_ray_hit); // hits dynamic sphere in scene
 
+    for position in &custom_hit_callbacks.positions {
+        println!("position: {}, {}, {}", position.x(), position.y(), position.z());
+    }
+
+    if let Some(touches) = custom_hit.get_touching_hits() {
+        for touch in touches {
+            println!("touch position: {}, {}, {}", touch.position.x, touch.position.y, touch.position.z);
+        }
+    }
+
+    if let Some(blocker) = custom_hit.get_blocking_hit() {
+        println!("blocker position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
+    }
+
     custom_hit_callbacks.positions.clear();
     let did_ray_hit = scene.raycast(
         &origin.into(),
@@ -222,7 +239,7 @@ fn main() {
         );
 
         if let Some(blocker) = simple_hit_callback.get_blocking_hit() {
-            println!("position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
+            println!("blocker position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
         }
     }
 
