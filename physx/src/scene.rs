@@ -643,12 +643,12 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     ///
     /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a7d7dcd877cee092f8b57c67d79982b50)
     #[allow(clippy::too_many_arguments)]
-    fn raycast<T: RaycastCallback>(
+    fn raycast<'buffer, T: RaycastCallback>(
         &self,
         origin: &PxVec3,
         unit_dir: &PxVec3,
         distance: f32,
-        hit_callback: &mut PxRaycastCallback<T>,
+        hit_callback: &mut PxRaycastCallback<'buffer, T>,
         hit_flags: HitFlags,
         filter_data: &PxQueryFilterData,
         filter_callback: Option<&mut PxQueryFilterCallback>,

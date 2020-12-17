@@ -40,7 +40,7 @@ impl Into<physx_sys::PxQueryFilterData> for PxQueryFilterData {
 pub struct RaycastCallbackDefault;
 
 impl RaycastCallback for RaycastCallbackDefault {
-    fn process_touches(&mut self, touches: &[physx_sys::PxRaycastHit]) -> bool {
+    fn process_touches(&mut self, _touches: &[physx_sys::PxRaycastHit]) -> bool {
         unimplemented!()
     }
     fn finalize_query(&mut self) {
@@ -48,12 +48,13 @@ impl RaycastCallback for RaycastCallbackDefault {
     }
 }
 
-pub struct PxRaycastCallback<T: RaycastCallback> {
+pub struct PxRaycastCallback<'buffer, T: RaycastCallback> {
     pub(crate) obj: Option<Owner<physx_sys::PxRaycastCallback>>,
+    _touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>,
     phantom_user_callback: PhantomData<T>,
 }
 
-impl<T: RaycastCallback> Drop for PxRaycastCallback<T> {
+impl<'buffer, T: RaycastCallback> Drop for PxRaycastCallback<'buffer, T> {
     fn drop(&mut self) {
         if let Some(obj) = &mut self.obj {
             unsafe {
@@ -63,26 +64,29 @@ impl<T: RaycastCallback> Drop for PxRaycastCallback<T> {
     }
 }
 
-impl<T: RaycastCallback> PxRaycastCallback<T> {
+impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
 
-    // pub fn new(touch_buffer: Option<&mut [physx_sys::PxRaycastHit]>) -> Self {
     pub fn new() -> Self {
         unsafe {
             Self {
                 obj: Owner::from_raw(
                     create_raycast_buffer()
                 ),
+                _touch_buffer: None,
                 phantom_user_callback: PhantomData,
             }
         }
     }
 
-    pub fn with_user_callbacks(user_callback: &mut T, touch_buffer: Option<&mut [physx_sys::PxRaycastHit]>) -> Self {
+    pub fn with_user_callbacks(user_callback: &mut T, mut touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>) -> Self {
         use std::convert::TryInto;
 
-        let (buffer_ptr, buffer_len) = touch_buffer
-            .map(|v| (v.as_mut_ptr(), v.len()))
-            .unwrap_or((std::ptr::null_mut(), 0));
+        let (buffer_ptr, buffer_len) =
+            if let Some(touch_buffer) = &mut touch_buffer {
+                (touch_buffer.as_mut_ptr(), touch_buffer.len())
+            } else {
+                (std::ptr::null_mut(), 0)
+            };
 
         // FIXME replace unwrap
         let buffer_len = buffer_len.try_into().unwrap();
@@ -98,6 +102,7 @@ impl<T: RaycastCallback> PxRaycastCallback<T> {
                         user_callback as *mut _ as *mut c_void,
                     )
                 ),
+                _touch_buffer: touch_buffer,
                 phantom_user_callback: PhantomData,
             }
         }

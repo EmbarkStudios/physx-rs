@@ -163,7 +163,12 @@ fn main() {
         u: 0.0,
         v: 0.0,
     };
-    let mut touch_buffer = [default_touch_buffer; 16];
+
+    // NOTE touch_buffer is used as the backing storage for the callback.
+    //      It can be allocated however you see fit.
+    // let mut touch_buffer = [default_touch_buffer; 16];
+    let mut touch_buffer = vec![default_touch_buffer; 128];
+
     let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
     let mut custom_hit = PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
 
@@ -196,6 +201,10 @@ fn main() {
         None,
     );
     assert!(did_ray_hit); // hits dynamic sphere in scene
+
+    // NOTE touch_buffer is borrowed for the duration of the PxRaycastCallback's lifetime!
+    //      Uncommenting this line will cause a build error.
+    // touch_buffer.clear();
 
     for position in &custom_hit_callbacks.positions {
         println!("position: {}, {}, {}", position.x(), position.y(), position.z());
