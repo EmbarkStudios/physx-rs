@@ -50,7 +50,7 @@ impl RaycastCallback for RaycastCallbackDefault {
 
 pub struct PxRaycastCallback<'buffer, T: RaycastCallback> {
     pub(crate) obj: Option<Owner<physx_sys::PxRaycastCallback>>,
-    _touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>,
+    phantom_touch_buffer: PhantomData<Option<&'buffer mut [physx_sys::PxRaycastHit]>>,
     phantom_user_callback: PhantomData<T>,
 }
 
@@ -72,21 +72,18 @@ impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
                 obj: Owner::from_raw(
                     create_raycast_buffer()
                 ),
-                _touch_buffer: None,
+                phantom_touch_buffer: PhantomData,
                 phantom_user_callback: PhantomData,
             }
         }
     }
 
-    pub fn with_user_callbacks(user_callback: &mut T, mut touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>) -> Self {
+    pub fn with_user_callbacks(user_callback: &mut T, touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>) -> Self {
         use std::convert::TryInto;
 
-        let (buffer_ptr, buffer_len) =
-            if let Some(touch_buffer) = &mut touch_buffer {
-                (touch_buffer.as_mut_ptr(), touch_buffer.len())
-            } else {
-                (std::ptr::null_mut(), 0)
-            };
+        let (buffer_ptr, buffer_len) = touch_buffer
+            .map(|v| (v.as_mut_ptr(), v.len()))
+            .unwrap_or((std::ptr::null_mut(), 0));
 
         // FIXME replace unwrap
         let buffer_len = buffer_len.try_into().unwrap();
@@ -102,7 +99,7 @@ impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
                         user_callback as *mut _ as *mut c_void,
                     )
                 ),
-                _touch_buffer: touch_buffer,
+                phantom_touch_buffer: PhantomData,
                 phantom_user_callback: PhantomData,
             }
         }
