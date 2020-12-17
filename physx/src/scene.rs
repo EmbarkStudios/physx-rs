@@ -648,7 +648,6 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         origin: &PxVec3,
         unit_dir: &PxVec3,
         distance: f32,
-        // hit_callback: &mut impl RaycastCallback,
         hit_callback: &mut PxRaycastCallback<T>,
         hit_flags: HitFlags,
         filter_data: &PxQueryFilterData,
@@ -667,7 +666,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
                 origin.as_ptr(),
                 unit_dir.as_ptr(),
                 distance,
-                hit_callback.obj.as_mut().unwrap().as_mut_ptr(), // FIXME don't just unwrap
+                hit_callback.obj.as_mut().unwrap().as_mut_ptr(),
                 hit_flags.into_px(),
                 &filter_data.obj,
                 filter_callback,

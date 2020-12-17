@@ -5,11 +5,10 @@
 use glam::Vec3;
 use physx::prelude::*;
 use physx::query::{
-    PxQueryFilterData, RaycastCallback, PxRaycastCallback
+    PxQueryFilterData, RaycastCallback, PxRaycastCallback, RaycastCallbackDefault,
 };
 use physx::scene::HitFlag;
 use physx::traits::PxFlags;
-use std::ffi::c_void;
 
 /// This is an example demonstrating the usage of scene queries within the physx crate.
 /// This includes raycast, sweep, and overlap tests.
@@ -89,7 +88,7 @@ impl RaycastCallback for PositionCollectorRaycastCallback {
         }
         false
     }
-    
+
     fn finalize_query(&mut self) {
         println!("Collected a total of {} positions!", self.positions.len());
     }
@@ -162,8 +161,8 @@ fn main() {
         v: 0.0,
     };
     let mut touch_buffer = [default_touch_buffer; 16];
-    let mut custom_hit = PositionCollectorRaycastCallback::default();
-    let mut custom_hit_obj = PxRaycastCallback::new(&mut custom_hit, Some(&mut touch_buffer));
+    let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
+    let mut custom_hit = PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
 
     // let did_ray_hit = scene.raycast(
     //     &origin.into(),
@@ -187,7 +186,7 @@ fn main() {
         &origin.into(),
         &down_dir.into(),
         distance,
-        &mut custom_hit_obj,
+        &mut custom_hit,
         hit_flags,
         &filter_data,
         None,
@@ -195,18 +194,37 @@ fn main() {
     );
     assert!(did_ray_hit); // hits dynamic sphere in scene
 
-    custom_hit.positions.clear();
+    custom_hit_callbacks.positions.clear();
     let did_ray_hit = scene.raycast(
         &origin.into(),
         &up_dir.into(),
         distance,
-        &mut custom_hit_obj,
+        &mut custom_hit,
         hit_flags,
         &filter_data,
         None,
         None,
     );
     assert!(!did_ray_hit); // raycast upward does not hit anything
+
+    {
+        let mut simple_hit_callback = PxRaycastCallback::<RaycastCallbackDefault>::new();
+
+        let _did_ray_hit = scene.raycast(
+            &origin.into(),
+            &down_dir.into(),
+            distance,
+            &mut simple_hit_callback,
+            hit_flags,
+            &filter_data,
+            None,
+            None,
+        );
+
+        if let Some(blocker) = simple_hit_callback.get_blocking_hit() {
+            println!("position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
+        }
+    }
 
     // Overlaps
     // TODO

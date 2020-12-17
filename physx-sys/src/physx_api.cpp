@@ -360,6 +360,11 @@ extern "C"
             process_touches_callback, finalize_query_callback, touchesBuffer, numTouches, userdata);
     }
 
+    void delete_raycast_callback(PxRaycastCallback *callback)
+    {
+        delete callback;
+    }
+
     PxSweepCallback *create_sweep_callback(
         SweepHitProcessTouchesCallback process_touches_callback,
         HitFinalizeQueryCallback finalize_query_callback,
