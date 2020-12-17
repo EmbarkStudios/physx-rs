@@ -71,20 +71,24 @@ impl<T: RaycastCallback> PxRaycastCallback<T> {
         }
     }
 
+    /// Must not panic.
     unsafe extern "C" fn process_touches(
         buffer: *const physx_sys::PxRaycastHit,
         num_hits: u32,
         user_data: *mut c_void,
     ) -> bool {
-        // TODO catch_unwind
-        (&mut *(user_data as *mut T)).process_touches(slice::from_raw_parts(buffer, num_hits as usize))
+        std::panic::catch_unwind(|| {
+            (&mut *(user_data as *mut T)).process_touches(slice::from_raw_parts(buffer, num_hits as usize))
+        }).unwrap_or(true)
     }
 
+    /// Must not panic.
     unsafe extern "C" fn finalize_query(
         user_data: *mut c_void,
     ) {
-        // TODO catch_unwind
-        (&mut *(user_data as *mut T)).finalize_query();
+        let _explicitly_ignored = std::panic::catch_unwind(|| {
+            (&mut *(user_data as *mut T)).finalize_query();
+        });
     }
 }
 
