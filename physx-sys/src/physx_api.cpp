@@ -365,6 +365,16 @@ extern "C"
         delete callback;
     }
 
+    void delete_sweep_callback(PxSweepCallback *callback)
+    {
+        delete callback;
+    }
+
+    void delete_overlap_callback(PxOverlapCallback *callback)
+    {
+        delete callback;
+    }
+
     PxSweepCallback *create_sweep_callback(
         SweepHitProcessTouchesCallback process_touches_callback,
         HitFinalizeQueryCallback finalize_query_callback,

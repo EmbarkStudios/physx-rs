@@ -24,7 +24,10 @@ use crate::{
     math::{PxTransform, PxVec3},
     owner::Owner,
     pruning_structure::PruningStructure,
-    query::{PxQueryFilterData, PxRaycastCallback, RaycastCallback},
+    query::{
+        OverlapCallback, PxOverlapCallback, PxQueryFilterData, PxRaycastCallback, PxSweepCallback,
+        RaycastCallback, SweepCallback,
+    },
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
     rigid_static::RigidStatic,
@@ -655,10 +658,10 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         cache: Option<&PxQueryCache>,
     ) -> bool {
         let filter_callback = filter_callback
-            .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
-                v as *mut _
-            });
-        let cache = cache.map_or(std::ptr::null::<PxQueryCache>(), |v| v as *const _);
+            .map(|v| v as *mut _)
+            .unwrap_or(std::ptr::null_mut());
+
+        let cache = cache.map(|v| v as *const _).unwrap_or(std::ptr::null());
 
         unsafe {
             PxScene_raycast(
@@ -675,82 +678,82 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         }
     }
 
-    // /// Sweeps a shape across the scene, reporting any hit objects via the [`SweepCallback`] trait passed into `hit_callback`.
-    // /// For simple usage, passing in [`PxSweepBuffer`] will suffice.
-    // /// Users can also provide a custom implementation of [`SweepCallback`] in cases where allocating a single buffer to store
-    // /// hits is prohibitively expensive.
-    // /// Returns true if the sweep hit an actor.
-    // /// See the [PhysX documentation on `sweep`][src] for more details.
-    // ///
-    // /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a9b07b2a98e64105a06e97ffaeba2a63d)
-    // #[allow(clippy::too_many_arguments)]
-    // fn sweep(
-    //     &self,
-    //     geometry: &impl Geometry,
-    //     pose: &PxTransform,
-    //     direction: &PxVec3,
-    //     distance: f32,
-    //     hit_callback: &mut impl SweepCallback,
-    //     hit_flags: HitFlags,
-    //     filter_data: &PxQueryFilterData,
-    //     filter_callback: Option<&mut PxQueryFilterCallback>,
-    //     cache: Option<&PxQueryCache>,
-    //     inflation: f32,
-    // ) -> bool {
-    //     let filter_callback = filter_callback
-    //         .map(|v| v as *mut _)
-    //         .unwrap_or(std::ptr::null_mut());
-    //     let cache = cache.map(|v| v as *const _).unwrap_or(std::ptr::null());
-    //     unsafe {
-    //         let hit_callback = hit_callback.into_px();
-    //         PxScene_sweep(
-    //             self.as_ptr(),
-    //             geometry.as_ptr(),
-    //             pose.as_ptr(),
-    //             direction.as_ptr(),
-    //             distance,
-    //             hit_callback,
-    //             hit_flags.into_px(),
-    //             &filter_data.obj,
-    //             filter_callback,
-    //             cache,
-    //             inflation,
-    //         )
-    //     }
-    // }
+    /// Sweeps a shape across the scene, reporting any hit objects via the [`SweepCallback`] trait passed into `hit_callback`.
+    /// For simple usage, passing in [`PxSweepBuffer`] will suffice.
+    /// Users can also provide a custom implementation of [`SweepCallback`] in cases where allocating a single buffer to store
+    /// hits is prohibitively expensive.
+    /// Returns true if the sweep hit an actor.
+    /// See the [PhysX documentation on `sweep`][src] for more details.
+    ///
+    /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a9b07b2a98e64105a06e97ffaeba2a63d)
+    #[allow(clippy::too_many_arguments)]
+    fn sweep<'buffer, T: SweepCallback>(
+        &self,
+        geometry: &impl Geometry,
+        pose: &PxTransform,
+        direction: &PxVec3,
+        distance: f32,
+        hit_callback: &mut PxSweepCallback<'buffer, T>,
+        hit_flags: HitFlags,
+        filter_data: &PxQueryFilterData,
+        filter_callback: Option<&mut PxQueryFilterCallback>,
+        cache: Option<&PxQueryCache>,
+        inflation: f32,
+    ) -> bool {
+        let filter_callback = filter_callback
+            .map(|v| v as *mut _)
+            .unwrap_or(std::ptr::null_mut());
 
-    // /// Reports any objects overlapping with the given shape via the [`SweepCallback`] trait passed into `hit_callback`.
-    // /// For simple usage, passing in [`PxOverlapBuffer`] will suffice.
-    // /// Users can also provide a custom implementation of [`OverlapCallback`] in cases where allocating a single buffer to store
-    // /// hits is prohibitively expensive.
-    // /// Returns true if the overlap hit an actor.
-    // /// See the [PhysX documentation on `overlap`][src] for more details.
-    // ///
-    // /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a31d09c0e967f9806a1f0d5df78dfc996)
-    // fn overlap(
-    //     &self,
-    //     geometry: &impl Geometry,
-    //     pose: &PxTransform,
-    //     hit_callback: &mut impl OverlapCallback,
-    //     filter_data: &PxQueryFilterData,
-    //     filter_callback: Option<&mut PxQueryFilterCallback>,
-    // ) -> bool {
-    //     let filter_callback = filter_callback
-    //         .map_or(std::ptr::null_mut::<PxQueryFilterCallback>(), |v| {
-    //             v as *mut _
-    //         });
-    //     unsafe {
-    //         let hit_callback = hit_callback.into_px();
-    //         PxScene_overlap(
-    //             self.as_ptr(),
-    //             geometry.as_ptr(),
-    //             pose.as_ptr(),
-    //             hit_callback,
-    //             &filter_data.obj,
-    //             filter_callback,
-    //         )
-    //     }
-    // }
+        let cache = cache.map(|v| v as *const _).unwrap_or(std::ptr::null());
+
+        unsafe {
+            PxScene_sweep(
+                self.as_ptr(),
+                geometry.as_ptr(),
+                pose.as_ptr(),
+                direction.as_ptr(),
+                distance,
+                hit_callback.obj.as_mut().unwrap().as_mut_ptr(),
+                hit_flags.into_px(),
+                &filter_data.obj,
+                filter_callback,
+                cache,
+                inflation,
+            )
+        }
+    }
+
+    /// Reports any objects overlapping with the given shape via the [`SweepCallback`] trait passed into `hit_callback`.
+    /// For simple usage, passing in [`PxOverlapBuffer`] will suffice.
+    /// Users can also provide a custom implementation of [`OverlapCallback`] in cases where allocating a single buffer to store
+    /// hits is prohibitively expensive.
+    /// Returns true if the overlap hit an actor.
+    /// See the [PhysX documentation on `overlap`][src] for more details.
+    ///
+    /// [src]: (https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxapi/files/classPxScene.html#a31d09c0e967f9806a1f0d5df78dfc996)
+    fn overlap<'buffer, T: OverlapCallback>(
+        &self,
+        geometry: &impl Geometry,
+        pose: &PxTransform,
+        hit_callback: &mut PxOverlapCallback<'buffer, T>,
+        filter_data: &PxQueryFilterData,
+        filter_callback: Option<&mut PxQueryFilterCallback>,
+    ) -> bool {
+        let filter_callback = filter_callback
+            .map(|v| v as *mut _)
+            .unwrap_or(std::ptr::null_mut());
+
+        unsafe {
+            PxScene_overlap(
+                self.as_ptr(),
+                geometry.as_ptr(),
+                pose.as_ptr(),
+                hit_callback.obj.as_mut().unwrap().as_mut_ptr(),
+                &filter_data.obj,
+                filter_callback,
+            )
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////
     // Bulk Getters

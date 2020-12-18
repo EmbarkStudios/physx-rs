@@ -305,6 +305,8 @@ extern "C" {
     ) -> *mut PxOverlapCallback;
 
     pub fn delete_raycast_callback(callback: *mut PxRaycastCallback);
+    pub fn delete_sweep_callback(callback: *mut PxSweepCallback);
+    pub fn delete_overlap_callback(callback: *mut PxOverlapCallback);
 
     pub fn create_alloc_callback(
         alloc_callback: AllocCallback,
