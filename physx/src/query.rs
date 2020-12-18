@@ -7,10 +7,10 @@
 use crate::{owner::Owner, traits::Class};
 use physx_sys::{
     create_overlap_buffer, create_overlap_callback, create_raycast_buffer, create_raycast_callback,
-    create_sweep_buffer, create_sweep_callback, delete_raycast_callback
+    create_sweep_buffer, create_sweep_callback, delete_raycast_callback,
 };
 use std::ffi::c_void;
-use std::{slice, marker::PhantomData};
+use std::{marker::PhantomData, slice};
 
 #[repr(transparent)]
 pub struct PxQueryFilterData {
@@ -65,20 +65,20 @@ impl<'buffer, T: RaycastCallback> Drop for PxRaycastCallback<'buffer, T> {
 }
 
 impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
-
     pub fn new() -> Self {
         unsafe {
             Self {
-                obj: Owner::from_raw(
-                    create_raycast_buffer()
-                ),
+                obj: Owner::from_raw(create_raycast_buffer()),
                 phantom_touch_buffer: PhantomData,
                 phantom_user_callback: PhantomData,
             }
         }
     }
 
-    pub fn with_user_callbacks(user_callback: &mut T, touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>) -> Self {
+    pub fn with_user_callbacks(
+        user_callback: &mut T,
+        touch_buffer: Option<&'buffer mut [physx_sys::PxRaycastHit]>,
+    ) -> Self {
         use std::convert::TryInto;
 
         let (buffer_ptr, buffer_len) = touch_buffer
@@ -90,15 +90,13 @@ impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
 
         unsafe {
             Self {
-                obj: Owner::from_raw(
-                    create_raycast_callback(
-                        Self::process_touches,
-                        Self::finalize_query,
-                        buffer_ptr,
-                        buffer_len,
-                        user_callback as *mut _ as *mut c_void,
-                    )
-                ),
+                obj: Owner::from_raw(create_raycast_callback(
+                    Self::process_touches,
+                    Self::finalize_query,
+                    buffer_ptr,
+                    buffer_len,
+                    user_callback as *mut _ as *mut c_void,
+                )),
                 phantom_touch_buffer: PhantomData,
                 phantom_user_callback: PhantomData,
             }
@@ -121,7 +119,10 @@ impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
             let callback = obj.as_ref();
             if callback.touches != std::ptr::null_mut() && callback.nbTouches > 0 {
                 unsafe {
-                    return Some(std::slice::from_raw_parts(callback.touches, callback.nbTouches as usize));
+                    return Some(std::slice::from_raw_parts(
+                        callback.touches,
+                        callback.nbTouches as usize,
+                    ));
                 }
             }
         }
@@ -136,14 +137,14 @@ impl<'buffer, T: RaycastCallback> PxRaycastCallback<'buffer, T> {
         user_callback: *mut c_void,
     ) -> bool {
         std::panic::catch_unwind(|| {
-            (&mut *(user_callback as *mut T)).process_touches(slice::from_raw_parts(buffer, num_hits as usize))
-        }).unwrap_or(true)
+            (&mut *(user_callback as *mut T))
+                .process_touches(slice::from_raw_parts(buffer, num_hits as usize))
+        })
+        .unwrap_or(true)
     }
 
     /// Must not panic.
-    unsafe extern "C" fn finalize_query(
-        user_callback: *mut c_void,
-    ) {
+    unsafe extern "C" fn finalize_query(user_callback: *mut c_void) {
         let _explicitly_ignored = std::panic::catch_unwind(|| {
             (&mut *(user_callback as *mut T)).finalize_query();
         });

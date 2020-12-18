@@ -24,7 +24,7 @@ use crate::{
     math::{PxTransform, PxVec3},
     owner::Owner,
     pruning_structure::PruningStructure,
-    query::{PxQueryFilterData, RaycastCallback, PxRaycastCallback},
+    query::{PxQueryFilterData, PxRaycastCallback, RaycastCallback},
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
     rigid_static::RigidStatic,

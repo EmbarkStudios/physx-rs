@@ -4,9 +4,7 @@
 
 use glam::Vec3;
 use physx::prelude::*;
-use physx::query::{
-    PxQueryFilterData, RaycastCallback, PxRaycastCallback, RaycastCallbackDefault,
-};
+use physx::query::{PxQueryFilterData, PxRaycastCallback, RaycastCallback, RaycastCallbackDefault};
 use physx::scene::HitFlag;
 use physx::traits::PxFlags;
 
@@ -81,7 +79,6 @@ struct PositionCollectorRaycastCallback {
 }
 
 impl RaycastCallback for PositionCollectorRaycastCallback {
-
     fn process_touches(&mut self, touches: &[physx_sys::PxRaycastHit]) -> bool {
         for touch in touches {
             self.positions.push(touch.position.into());
@@ -146,7 +143,6 @@ fn main() {
     let distance = 5000.0;
 
     // Raycasts
-//    let mut hit = PxRaycastBuffer::new();
     let hit_flags = HitFlag::default_hit_flags();
     let filter_data = PxQueryFilterData::default();
 
@@ -170,7 +166,8 @@ fn main() {
     let mut touch_buffer = vec![default_touch_buffer; 128];
 
     let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
-    let mut custom_hit = PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
+    let mut custom_hit =
+        PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
 
     let did_ray_hit = scene.raycast(
         &origin.into(),
@@ -189,17 +186,28 @@ fn main() {
     // touch_buffer.clear();
 
     for position in &custom_hit_callbacks.positions {
-        println!("position: {}, {}, {}", position.x(), position.y(), position.z());
+        println!(
+            "position: {}, {}, {}",
+            position.x(),
+            position.y(),
+            position.z()
+        );
     }
 
     if let Some(touches) = custom_hit.get_touching_hits() {
         for touch in touches {
-            println!("touch position: {}, {}, {}", touch.position.x, touch.position.y, touch.position.z);
+            println!(
+                "touch position: {}, {}, {}",
+                touch.position.x, touch.position.y, touch.position.z
+            );
         }
     }
 
     if let Some(blocker) = custom_hit.get_blocking_hit() {
-        println!("blocker position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
+        println!(
+            "blocker position: {}, {}, {}",
+            blocker.position.x, blocker.position.y, blocker.position.z
+        );
     }
 
     custom_hit_callbacks.positions.clear();
@@ -230,7 +238,10 @@ fn main() {
         );
 
         if let Some(blocker) = simple_hit_callback.get_blocking_hit() {
-            println!("blocker position: {}, {}, {}", blocker.position.x, blocker.position.y, blocker.position.z);
+            println!(
+                "blocker position: {}, {}, {}",
+                blocker.position.x, blocker.position.y, blocker.position.z
+            );
         }
     }
 
