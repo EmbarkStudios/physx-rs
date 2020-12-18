@@ -172,24 +172,6 @@ fn main() {
     let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
     let mut custom_hit = PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
 
-    // let did_ray_hit = scene.raycast(
-    //     &origin.into(),
-    //     &down_dir.into(),
-    //     distance,
-    //     &mut hit,
-    //     hit_flags,
-    //     &filter_data,
-    //     None,
-    //     None,
-    // );
-    // assert!(did_ray_hit); // hits dynamic sphere in scene
-
-    // // Let's see some info about the hit
-    // let hit_info = hit.get_raycast_hit().unwrap();
-    // dbg!(hit_info.distance);
-    // // dbg!(PxVec3::from(hit_info.position));
-    // // dbg!(PxVec3::from(hit_info.normal));
-
     let did_ray_hit = scene.raycast(
         &origin.into(),
         &down_dir.into(),
