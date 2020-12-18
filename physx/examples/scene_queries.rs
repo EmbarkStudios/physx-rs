@@ -4,7 +4,10 @@
 
 use glam::Vec3;
 use physx::prelude::*;
-use physx::query::{PxQueryFilterData, PxRaycastCallback, RaycastCallback, RaycastCallbackDefault};
+use physx::query::{
+    OverlapCallback, PxOverlapCallback, PxQueryFilterData, PxRaycastCallback, PxSweepCallback,
+    RaycastCallback, RaycastCallbackDefault, SweepCallbackDefault,
+};
 use physx::scene::HitFlag;
 use physx::traits::PxFlags;
 
@@ -94,6 +97,28 @@ impl RaycastCallback for PositionCollectorRaycastCallback {
     }
 }
 
+// A test overlap callback that stores overlapping actors
+#[derive(Default)]
+struct ActorCollectorOverlapCallback {
+    actors: Vec<*mut physx_sys::PxRigidActor>,
+}
+
+impl OverlapCallback for ActorCollectorOverlapCallback {
+    fn process_touches(&mut self, touches: &[physx_sys::PxOverlapHit]) -> bool {
+        for touch in touches {
+            self.actors.push(touch.actor);
+        }
+
+        // We should return true if we determine that the touched object should block further hits
+        // For our example callback, we'll just collected all the touched objects
+        false
+    }
+
+    fn finalize_query(&mut self) {
+        println!("Collected a total of {} actors!", self.actors.len());
+    }
+}
+
 fn main() {
     // Holds a PxFoundation and a PxPhysics.
     // Also has an optional Pvd and transport, not enabled by default.
@@ -146,108 +171,156 @@ fn main() {
     let hit_flags = HitFlag::default_hit_flags();
     let filter_data = PxQueryFilterData::default();
 
-    let default_touch_buffer = physx_sys::PxRaycastHit {
-        actor: std::ptr::null_mut(),
-        shape: std::ptr::null_mut(),
-        faceIndex: 0,
-        structgen_pad0: [0u8; 4],
-        flags: HitFlag::default_hit_flags().into_px(),
-        structgen_pad1: [0u8; 2],
-        position: PxVec3::default().into(),
-        normal: PxVec3::default().into(),
-        distance: 0.0,
-        u: 0.0,
-        v: 0.0,
-    };
-
-    // NOTE touch_buffer is used as the backing storage for the callback.
-    //      It can be allocated however you see fit.
-    // let mut touch_buffer = [default_touch_buffer; 16];
-    let mut touch_buffer = vec![default_touch_buffer; 128];
-
-    let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
-    let mut custom_hit =
-        PxRaycastCallback::with_user_callbacks(&mut custom_hit_callbacks, Some(&mut touch_buffer));
-
-    let did_ray_hit = scene.raycast(
-        &origin.into(),
-        &down_dir.into(),
-        distance,
-        &mut custom_hit,
-        hit_flags,
-        &filter_data,
-        None,
-        None,
-    );
-    assert!(did_ray_hit); // hits dynamic sphere in scene
-
-    // NOTE touch_buffer is borrowed for the duration of the PxRaycastCallback's lifetime!
-    //      Uncommenting this line will cause a build error.
-    // touch_buffer.clear();
-
-    for position in &custom_hit_callbacks.positions {
-        println!(
-            "position: {}, {}, {}",
-            position.x(),
-            position.y(),
-            position.z()
-        );
-    }
-
-    if let Some(touches) = custom_hit.get_touching_hits() {
-        for touch in touches {
-            println!(
-                "touch position: {}, {}, {}",
-                touch.position.x, touch.position.y, touch.position.z
-            );
-        }
-    }
-
-    if let Some(blocker) = custom_hit.get_blocking_hit() {
-        println!(
-            "blocker position: {}, {}, {}",
-            blocker.position.x, blocker.position.y, blocker.position.z
-        );
-    }
-
-    custom_hit_callbacks.positions.clear();
-    let did_ray_hit = scene.raycast(
-        &origin.into(),
-        &up_dir.into(),
-        distance,
-        &mut custom_hit,
-        hit_flags,
-        &filter_data,
-        None,
-        None,
-    );
-    assert!(!did_ray_hit); // raycast upward does not hit anything
-
     {
-        let mut simple_hit_callback = PxRaycastCallback::<RaycastCallbackDefault>::new();
+        let default_touch_buffer = physx_sys::PxRaycastHit {
+            actor: std::ptr::null_mut(),
+            shape: std::ptr::null_mut(),
+            faceIndex: 0,
+            structgen_pad0: [0u8; 4],
+            flags: HitFlag::default_hit_flags().into_px(),
+            structgen_pad1: [0u8; 2],
+            position: PxVec3::default().into(),
+            normal: PxVec3::default().into(),
+            distance: 0.0,
+            u: 0.0,
+            v: 0.0,
+        };
 
-        let _did_ray_hit = scene.raycast(
+        // NOTE touch_buffer is used as the backing storage for the callback.
+        //      It can be allocated however you see fit.
+        // let mut touch_buffer = [default_touch_buffer; 16];
+        let mut touch_buffer = vec![default_touch_buffer; 128];
+
+        let mut custom_hit_callbacks = PositionCollectorRaycastCallback::default();
+        let mut custom_hit = PxRaycastCallback::with_user_callbacks(
+            &mut custom_hit_callbacks,
+            Some(touch_buffer.as_mut_slice()),
+        );
+
+        let did_ray_hit = scene.raycast(
             &origin.into(),
             &down_dir.into(),
             distance,
-            &mut simple_hit_callback,
+            &mut custom_hit,
             hit_flags,
             &filter_data,
             None,
             None,
         );
+        assert!(did_ray_hit); // hits dynamic sphere in scene
 
-        if let Some(blocker) = simple_hit_callback.get_blocking_hit() {
+        // NOTE touch_buffer is borrowed for the duration of the PxRaycastCallback's lifetime!
+        //      Uncommenting this line will cause a build error.
+        // touch_buffer.clear();
+
+        for position in &custom_hit_callbacks.positions {
+            println!(
+                "position: {}, {}, {}",
+                position.x(),
+                position.y(),
+                position.z()
+            );
+        }
+
+        if let Some(touches) = custom_hit.get_touching_hits() {
+            for touch in touches {
+                println!(
+                    "touch position: {}, {}, {}",
+                    touch.position.x, touch.position.y, touch.position.z
+                );
+            }
+        }
+
+        if let Some(blocker) = custom_hit.get_blocking_hit() {
             println!(
                 "blocker position: {}, {}, {}",
                 blocker.position.x, blocker.position.y, blocker.position.z
             );
         }
+
+        custom_hit_callbacks.positions.clear();
+        let did_ray_hit = scene.raycast(
+            &origin.into(),
+            &up_dir.into(),
+            distance,
+            &mut custom_hit,
+            hit_flags,
+            &filter_data,
+            None,
+            None,
+        );
+        assert!(!did_ray_hit); // raycast upward does not hit anything
+
+        // Test using a simple hit buffer
+        {
+            let mut simple_hit_callback = PxRaycastCallback::<RaycastCallbackDefault>::default();
+
+            let _did_ray_hit = scene.raycast(
+                &origin.into(),
+                &down_dir.into(),
+                distance,
+                &mut simple_hit_callback,
+                hit_flags,
+                &filter_data,
+                None,
+                None,
+            );
+
+            if let Some(blocker) = simple_hit_callback.get_blocking_hit() {
+                println!(
+                    "blocker position: {}, {}, {}",
+                    blocker.position.x, blocker.position.y, blocker.position.z
+                );
+            }
+        }
+    }
+
+    // Sweeps
+    {
+        let mut simple_hit_callback = PxSweepCallback::<SweepCallbackDefault>::default();
+
+        let did_hit = scene.sweep(
+            &sphere_geo,
+            &PxTransform::from_translation(&Vec3::new(0.0, 30.0, 0.0).into()),
+            &up_dir.into(),
+            60.0,
+            &mut simple_hit_callback,
+            hit_flags,
+            &filter_data,
+            None,
+            None,
+            0.0,
+        );
+
+        assert!(!did_hit);
     }
 
     // Overlaps
-    // TODO
+    {
+        let default_touch_buffer = physx_sys::PxOverlapHit {
+            actor: std::ptr::null_mut(),
+            shape: std::ptr::null_mut(),
+            faceIndex: 0,
+            structgen_pad0: [0u8; 4],
+            padTo16Bytes: 0,
+            structgen_pad1: [0u8; 4],
+        };
 
-    // Sweeps
-    // TODO
+        let mut touch_buffer = vec![default_touch_buffer; 16];
+
+        let mut actor_collector = ActorCollectorOverlapCallback::default();
+        let mut overlap_callback = PxOverlapCallback::with_user_callbacks(
+            &mut actor_collector,
+            Some(touch_buffer.as_mut_slice()),
+        );
+
+        let did_overlap = scene.overlap(
+            &sphere_geo,
+            &PxTransform::default(),
+            &mut overlap_callback,
+            &filter_data,
+            None,
+        );
+        assert!(did_overlap); // overlaps with ground plane
+    }
 }
