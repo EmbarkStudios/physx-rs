@@ -143,7 +143,7 @@ fn cmake_compile(target_env: Environment) {
         // Currently there's bugs when compiling with the latest clang.
         // See: https://github.com/NVIDIAGameWorks/PhysX/issues/321
         .cxxflag("-Wno-alloca")
-        .cflag("-Wanon-enum-enum-conversion")
+        .cxxflag("-Wno-anon-enum-enum-conversion")
         .build();
 
     let lib_dir = locate_output_lib_dir(physx, &target_env.mode);
