@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.11.0]
+
 - [PR#124](https://github.com/EmbarkStudios/physx-rs/pull/124) Upgrade glam
   v0.11 -> v0.12
 
