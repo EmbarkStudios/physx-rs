@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.11.0]
+
 - [PR#124](https://github.com/EmbarkStudios/physx-rs/pull/124) Upgrade glam
   v0.11 -> v0.12
 
@@ -101,7 +103,8 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...HEAD
+[0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...physx-v0.10.0
 [0.9.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.8.0...physx-v0.9.0
 [0.8.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.7.4...physx-v0.8.0
