@@ -155,7 +155,10 @@ fn main() {
         let mut include = PathBuf::from("src/generated");
 
         match target.as_str() {
-            "x86_64-apple-darwin" | "x86_64-pc-windows-msvc" | "aarch64-linux-android" => {
+            "x86_64-apple-darwin"
+            | "x86_64-pc-windows-msvc"
+            | "aarch64-linux-android"
+            | "aarch64-apple-darwin" => {
                 include.push(target);
             }
             nix if nix.starts_with("x86_64-unknown-linux") => {
