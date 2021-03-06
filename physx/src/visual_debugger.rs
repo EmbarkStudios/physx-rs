@@ -27,7 +27,7 @@ pub enum VisualDebuggerSceneFlag {
     TransmitConstraints = 4,
 }
 
-/// Combines the Pvd and it's current PvdTransport, if there is one.
+/// Combines the Pvd and it's current `PvdTransport`, if there is one.
 pub struct VisualDebugger {
     pvd: Owner<Pvd>,
     transport: Option<Owner<PvdTransport>>,
@@ -44,7 +44,7 @@ unsafe impl Class<physx_sys::PxPvd> for VisualDebugger {
 }
 
 impl VisualDebugger {
-    /// Create a new VisualDebugger instance, a utility class that
+    /// Create a new `VisualDebugger` instance, a utility class that
     /// combines the TCP setup and the Pvd into one object. The port
     /// default for the PVD program is port 5425, so it is suggested to use this
     /// unless you're explicitly changing the other one as well.
@@ -85,7 +85,7 @@ impl VisualDebugger {
         Some(visual_debugger)
     }
 
-    /// Connect the Pvd to the PvdTransport.
+    /// Connect the Pvd to the `PvdTransport`.
     pub fn connect(&mut self, flags: PxPvdInstrumentationFlags) -> bool {
         if let Some(transport) = self.transport.as_mut() {
             self.pvd.connect(transport.as_mut(), flags)
@@ -164,7 +164,7 @@ impl Drop for PvdTransport {
     }
 }
 
-/// A new type wrapper for PxPvd.
+/// A new type wrapper for `PxPvd`.
 #[repr(transparent)]
 pub struct Pvd {
     obj: physx_sys::PxPvd,
@@ -220,7 +220,7 @@ impl Drop for Pvd {
     }
 }
 
-/// A new type wrapper for PxPvdSceneClient.
+/// A new type wrapper for `PxPvdSceneClient`.
 pub struct PvdSceneClient {
     obj: physx_sys::PxPvdSceneClient,
 }

@@ -569,7 +569,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         completion_task: Option<&mut PxBaseTask>,
         scratch: Option<&mut ScratchBuffer>,
     ) {
-        let completion_task = completion_task.map(|t| t as *mut _).unwrap_or(null_mut());
+        let completion_task = completion_task.map_or(null_mut(), |t| t as *mut _);
 
         let (scratch_ptr, scratch_size) = if let Some(scratch) = scratch {
             scratch.as_ptr_and_size()
@@ -761,19 +761,19 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     // Callbacks
 
     /// # Safety
-    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
         PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
     }
 
     /// # Safety
-    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_contact_modify_callback(&self) -> &PxContactModifyCallback {
         &*PxScene_getContactModifyCallback(self.as_ptr())
     }
 
     /// # Safety
-    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_ccd_contact_modify_callback(
         &mut self,
         callback: &mut PxCCDContactModifyCallback,
@@ -782,19 +782,19 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     }
 
     /// # Safety
-    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_ccd_contact_callback(&self) -> &PxCCDContactModifyCallback {
         &*PxScene_getCCDContactModifyCallback(self.as_ptr())
     }
 
     /// # Safety
-    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_broad_phase_callback(&mut self, callback: &mut PxBroadPhaseCallback) {
         PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
     }
 
     /// # Safety
-    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of physx_sys.
+    /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_broad_phase_callback(&self) -> &PxBroadPhaseCallback {
         &*PxScene_getBroadPhaseCallback(self.as_ptr())
     }

@@ -25,6 +25,7 @@ impl<T> Owner<T> {
     }
 
     /// Consumes the Owner without calling Drop and returns the raw pointer it was wrapping.
+    #[allow(clippy::mem_forget)]
     pub fn into_ptr<S>(mut self) -> *mut S
     where
         T: Class<S>,
