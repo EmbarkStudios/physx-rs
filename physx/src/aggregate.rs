@@ -142,7 +142,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
             PxAggregate_addActor_mut(
                 self.as_mut_ptr(),
                 actor.as_mut_ptr(),
-                bvh.map(Class::as_ptr).unwrap_or(null()),
+                bvh.map_or(null(), Class::as_ptr),
             )
         }
     }
@@ -157,7 +157,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
             PxAggregate_addActor_mut(
                 self.as_mut_ptr(),
                 actor.as_mut_ptr(),
-                bvh.map(Class::as_ptr).unwrap_or(null()),
+                bvh.map_or(null(), Class::as_ptr),
             )
         }
     }
@@ -172,7 +172,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
             PxAggregate_addActor_mut(
                 self.as_mut_ptr(),
                 actor.as_mut_ptr(),
-                bvh.map(Class::as_ptr).unwrap_or(null()),
+                bvh.map_or(null(), Class::as_ptr),
             )
         }
     }

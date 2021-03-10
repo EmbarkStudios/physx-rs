@@ -226,9 +226,7 @@ pub trait ArticulationBase: Class<physx_sys::PxArticulationBase> + Base {
         unsafe {
             (PxArticulationBase_createLink_mut(
                 self.as_mut_ptr(),
-                parent
-                    .map(|parent| parent.as_mut_ptr())
-                    .unwrap_or(null_mut()),
+                parent.map_or(null_mut(), |parent| parent.as_mut_ptr()),
                 pose.as_ptr(),
             ) as *mut Self::ArticulationLink)
                 .as_mut()

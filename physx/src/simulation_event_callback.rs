@@ -84,21 +84,16 @@ where
         OA: AdvanceCallback<L, D>,
     {
         unsafe {
-            let (collision_callback, collision_user_data) = on_collide
-                .map(OC::into_cb_user_data)
-                .unwrap_or((None, null_mut()));
-            let (trigger_callback, trigger_user_data) = on_trigger
-                .map(OT::into_cb_user_data)
-                .unwrap_or((None, null_mut()));
-            let (constraint_break_callback, constraint_break_user_data) = on_constraint_break
-                .map(OCB::into_cb_user_data)
-                .unwrap_or((None, null_mut()));
-            let (wake_sleep_callback, wake_sleep_user_data) = on_wake_sleep
-                .map(OWS::into_cb_user_data)
-                .unwrap_or((None, null_mut()));
-            let (advance_callback, advance_user_data) = on_advance
-                .map(OA::into_cb_user_data)
-                .unwrap_or((None, null_mut()));
+            let (collision_callback, collision_user_data) =
+                on_collide.map_or((None, null_mut()), OC::into_cb_user_data);
+            let (trigger_callback, trigger_user_data) =
+                on_trigger.map_or((None, null_mut()), OT::into_cb_user_data);
+            let (constraint_break_callback, constraint_break_user_data) =
+                on_constraint_break.map_or((None, null_mut()), OCB::into_cb_user_data);
+            let (wake_sleep_callback, wake_sleep_user_data) =
+                on_wake_sleep.map_or((None, null_mut()), OWS::into_cb_user_data);
+            let (advance_callback, advance_user_data) =
+                on_advance.map_or((None, null_mut()), OA::into_cb_user_data);
 
             Owner::from_raw(
                 create_simulation_event_callbacks(&SimulationEventCallbackInfo {
@@ -239,8 +234,8 @@ trait ConstraintBreakCallbackRaw: ConstraintBreakCallback {
     }
 }
 
-/// A trait for onWake() and onSleep() callbacks. Parametrized by the ArticulationLink,
-/// RigidStatic, and RigidDynamic types of the scene it is  in.
+/// A trait for `onWake()` and `onSleep()` callbacks. Parametrized by the [`ArticulationLink`],
+/// [`RigidStatic`], and [`RigidDynamic`] types of the scene it is  in.
 pub trait WakeSleepCallback<L: ArticulationLink, S: RigidStatic, D: RigidDynamic>: Sized {
     fn on_wake_sleep(&mut self, actors: &[&ActorMap<L, S, D>], is_waking: bool);
 }
@@ -282,10 +277,10 @@ where
 }
 
 /// A trait for the Advance Callback.  onAdvance() is called during simulation, so it must
-/// be thread safe, and `self` is not mutable. Parametrized by the ArticulationLink
-/// and RigidDynamic types of the scene it is  in.
+/// be thread safe, and `self` is not mutable. Parametrized by the `ArticulationLink`
+/// and `RigidDynamic` types of the scene it is  in.
 pub trait AdvanceCallback<L: ArticulationLink, D: RigidDynamic>: Sized {
-    /// All actors with  PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW set will be passed into here
+    /// All actors with  `PxRigidBodyFlag::eENABLE_POSE_INTEGRATION_PREVIEW` set will be passed into here
     /// once the simulate call has updated their position.
     fn on_advance(&self, actors: &[&RigidBodyMap<L, D>], transforms: &[PxTransform]);
 }

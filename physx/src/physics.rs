@@ -717,9 +717,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
             unsafe {
                 phys_PxInitExtensions(
                     physics.as_mut_ptr(),
-                    pvd.as_mut()
-                        .map(|pv| pv.as_mut_ptr())
-                        .unwrap_or_else(null_mut),
+                    pvd.as_mut().map_or_else(null_mut, |pv| pv.as_mut_ptr()),
                 )
             }
         } else {
