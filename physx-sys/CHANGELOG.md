@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.4.12] - 2020-12-03
+
+### Added
+
+- [PR#123](https://github.com/EmbarkStudios/physx-rs/pull/123) Initial `aarch64-apple-darwin` support
+
 ## [0.4.11] - 2020-12-03
 
 ### Added
