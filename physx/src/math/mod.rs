@@ -14,6 +14,8 @@ mod quat;
 pub use quat::PxQuat;
 mod vec3;
 pub use vec3::PxVec3;
+#[cfg(feature = "glam")]
+mod glam;
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
@@ -30,18 +32,6 @@ impl From<(f64, f64, f64)> for PxExtendedVec3 {
                 x: vec.0,
                 y: vec.1,
                 z: vec.2,
-            },
-        }
-    }
-}
-
-impl From<glam::Vec3> for PxExtendedVec3 {
-    fn from(vec: glam::Vec3) -> Self {
-        Self {
-            obj: physx_sys::PxExtendedVec3 {
-                x: vec.x as f64,
-                y: vec.y as f64,
-                z: vec.z as f64,
             },
         }
     }

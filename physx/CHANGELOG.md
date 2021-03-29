@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+- [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) Glam is now an
+  optional dependency and has been updated. You can enable the `glam` feature
+  to continue to use `glam` with `physx-sys` types.
 - [Updated various struct names and trait implementations](https://github.com/EmbarkStudios/physx-rs/pull/130):
   - `BVHStructure` is now named `BvhStructure`.
   - `PxBVHStructureDesc` is now named `PxBvhStructureDesc`.
