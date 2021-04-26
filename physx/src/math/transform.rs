@@ -38,9 +38,9 @@ impl From<physx_sys::PxTransform> for PxTransform {
     }
 }
 
-impl Into<physx_sys::PxTransform> for PxTransform {
-    fn into(self) -> physx_sys::PxTransform {
-        self.obj
+impl From<PxTransform> for physx_sys::PxTransform {
+    fn from(value: PxTransform) -> Self {
+        value.obj
     }
 }
 
@@ -51,9 +51,9 @@ impl From<Mat4> for PxTransform {
     }
 }
 
-impl Into<Mat4> for PxTransform {
-    fn into(self) -> Mat4 {
-        Mat4::from_rotation_translation(self.rotation().into(), self.translation().into())
+impl From<PxTransform> for Mat4 {
+    fn from(value: PxTransform) -> Self {
+        Self::from_rotation_translation(value.rotation().into(), value.translation().into())
     }
 }
 

@@ -5,7 +5,7 @@ use crate::{
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     base::Base,
-    bvh_structure::BVHStructure,
+    bvh_structure::BvhStructure,
     owner::Owner,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
@@ -136,7 +136,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     fn add_articulation_link(
         &mut self,
         actor: &mut Self::ArticulationLink,
-        bvh: Option<&BVHStructure>,
+        bvh: Option<&BvhStructure>,
     ) -> bool {
         unsafe {
             PxAggregate_addActor_mut(
@@ -151,7 +151,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     fn add_rigid_static(
         &mut self,
         actor: &mut Self::RigidStatic,
-        bvh: Option<&BVHStructure>,
+        bvh: Option<&BvhStructure>,
     ) -> bool {
         unsafe {
             PxAggregate_addActor_mut(
@@ -166,7 +166,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     fn add_rigid_dynamic(
         &mut self,
         actor: &mut Self::RigidDynamic,
-        bvh: Option<&BVHStructure>,
+        bvh: Option<&BvhStructure>,
     ) -> bool {
         unsafe {
             PxAggregate_addActor_mut(

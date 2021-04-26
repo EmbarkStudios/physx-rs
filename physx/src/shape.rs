@@ -60,9 +60,9 @@ pub enum ShapeFlag {
     Visualization = 8u32,
 }
 
-impl Into<PxShapeFlag::Enum> for ShapeFlag {
-    fn into(self) -> PxShapeFlag::Enum {
-        match self {
+impl From<ShapeFlag> for PxShapeFlag::Enum {
+    fn from(value: ShapeFlag) -> Self {
+        match value {
             ShapeFlag::SimulationShape => 1u32,
             ShapeFlag::SceneQueryShape => 2u32,
             ShapeFlag::TriggerShape => 4u32,

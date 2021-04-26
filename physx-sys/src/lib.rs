@@ -176,7 +176,8 @@
     non_snake_case,
     clippy::doc_markdown, // TODO: fixup comments and docs (though annoyingly complains about "PhysX")
     clippy::unreadable_literal,
-    clippy::unused_unit
+    clippy::unused_unit,
+    clippy::upper_case_acronyms
 )]
 
 #[cfg(feature = "structgen")]

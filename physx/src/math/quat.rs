@@ -30,9 +30,9 @@ impl From<physx_sys::PxQuat> for PxQuat {
     }
 }
 
-impl Into<physx_sys::PxQuat> for PxQuat {
-    fn into(self) -> physx_sys::PxQuat {
-        self.obj
+impl From<PxQuat> for physx_sys::PxQuat {
+    fn from(value: PxQuat) -> Self {
+        value.obj
     }
 }
 
@@ -43,9 +43,9 @@ impl From<Quat> for PxQuat {
     }
 }
 
-impl Into<Quat> for PxQuat {
-    fn into(self) -> Quat {
-        let physx_sys::PxQuat { x, y, z, w } = self.obj;
+impl From<PxQuat> for Quat {
+    fn from(value: PxQuat) -> Self {
+        let physx_sys::PxQuat { x, y, z, w } = value.obj;
         Quat::from_xyzw(x, y, z, w)
     }
 }

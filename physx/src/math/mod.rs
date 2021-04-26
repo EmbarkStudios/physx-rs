@@ -53,9 +53,9 @@ impl From<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
     }
 }
 
-impl Into<physx_sys::PxExtendedVec3> for PxExtendedVec3 {
-    fn into(self) -> physx_sys::PxExtendedVec3 {
-        self.obj
+impl From<PxExtendedVec3> for physx_sys::PxExtendedVec3 {
+    fn from(value: PxExtendedVec3) -> Self {
+        value.obj
     }
 }
 
@@ -87,9 +87,9 @@ impl From<physx_sys::PxBounds3> for PxBounds3 {
     }
 }
 
-impl Into<physx_sys::PxBounds3> for PxBounds3 {
-    fn into(self) -> physx_sys::PxBounds3 {
-        self.obj
+impl From<PxBounds3> for physx_sys::PxBounds3 {
+    fn from(value: PxBounds3) -> Self {
+        value.obj
     }
 }
 

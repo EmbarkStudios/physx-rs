@@ -491,8 +491,8 @@ pub enum ArticulationFlag {
     DriveLimitsAreForces = 1 << 1,
 }
 
-impl Into<PxArticulationFlag::Enum> for ArticulationFlag {
-    fn into(self) -> PxArticulationFlag::Enum {
-        self as _
+impl From<ArticulationFlag> for PxArticulationFlag::Enum {
+    fn from(value: ArticulationFlag) -> Self {
+        value as _
     }
 }

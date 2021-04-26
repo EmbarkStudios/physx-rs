@@ -434,9 +434,9 @@ pub enum CapsuleClimbingMode {
     Constrained,
 }
 
-impl Into<physx_sys::PxCapsuleClimbingMode::Enum> for CapsuleClimbingMode {
-    fn into(self) -> physx_sys::PxCapsuleClimbingMode::Enum {
-        match self {
+impl From<CapsuleClimbingMode> for physx_sys::PxCapsuleClimbingMode::Enum {
+    fn from(value: CapsuleClimbingMode) -> Self {
+        match value {
             CapsuleClimbingMode::Easy => physx_sys::PxCapsuleClimbingMode::eEASY,
             CapsuleClimbingMode::Constrained => physx_sys::PxCapsuleClimbingMode::eCONSTRAINED,
         }

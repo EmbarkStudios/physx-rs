@@ -40,7 +40,7 @@ impl Drop for HeightField {
 #[derive(Debug, Copy, Clone)]
 #[repr(u32)]
 pub enum HeightFieldFormat {
-    S16TM = 1,
+    S16tm = 1,
 }
 
 #[derive(BitFlags, Debug, Copy, Clone)]

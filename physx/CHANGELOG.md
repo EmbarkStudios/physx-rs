@@ -4,6 +4,49 @@
 
 ## [Unreleased]
 
+- [Updated various struct names and trait implementations](https://github.com/EmbarkStudios/physx-rs/pull/130):
+  - `BVHStructure` is now named `BvhStructure`.
+  - `PxBVHStructureDesc` is now named `PxBvhStructureDesc`.
+  - `HeightFieldFormat::S16TM` is now named `S16tm`.
+  - `BroadPhaseType::GPU` is now named `Gpu`.
+  - `SolverType::{PGS, TGS}` are now named `Pgs`, and `Tgs`.
+  - `RigidBodyFlag::{EnableCCD, EnableCCDFriction, EnableSpeculativeCCD,
+     EnableCCDMaxContactImpulse}` are now named `EnableCcd`,
+     `EnableCcdFriction`, `EnableSpeculativeCcd`, `EnableCcdMaxContactImpulse`.
+  - `PruningStructureType::{DynamicAABBTree, StaticAABBTree}` are now named
+    `DynamicAabbTree`, `StaticAabbTree`.
+  - `Mat4` now implements `From<physx_sys::PxTransform>`.
+  - `Quat` now implements `From<physx_sys::PxQuat>`.
+  - `Vec3` now implements `From<physx_sys::PxVec3>`.
+  - `physx_sys::PxActorType::Enum` now implements `From<ActorType>`.
+  - `physx_sys::PxActorFlag::Enum` now implements `From<ActorFlag>`.
+  - `physx_sys::PxArticulationAxis::Enum` now implements `From<ArticulationAxis>`.
+  - `physx_sys::PxArticulationAxis::Enum` now implements `From<ArticulationMotion>`.
+  - `physx_sys::PxArticulationDriveType::Enum` now implements `From<ArticulationDriveType>`.
+  - `physx_sys::PxArticulationFlag::Enum` now implements `From<ArticulationFlag>`.
+  - `physx_sys::PxArticulationJointDriveType::Enum` now implements `From<ArticulationJointDriveType>`.
+  - `physx_sys::PxArticulationJointType::Enum` now implements `From<ArticulationJointType>`.
+  - `physx_sys::PxArticulationRootLinkData` now implements `From<ArticulationRootLinkData>`.
+  - `physx_sys::PxBaseFlag::Enum` now implements `From<BaseFlag>`.
+  - `physx_sys::PxBounds3` now implements `From<PxBounds3>`.
+  - `physx_sys::PxCapsuleClimbingMode::Enum` now implements `From<CapsuleClimbingMode>`.
+  - `physx_sys::PxExtendedVec3` now implements `From<PxExtendedVec3>`.
+  - `physx_sys::PxExtendedVec3` now implements `From<PxVec3>`.
+  - `physx_sys::PxForceMode::Enum` now implements `From<ForceMode>`.
+  - `physx_sys::PxFrictionType::Enum` now implements `From<FrictionType>`.
+  - `physx_sys::PxPairFilteringMode::Enum` now implements `From<PairFilteringMode>`.
+  - `physx_sys::PxPruningStructureType::Enum` now implements `From<PruningStructureType>`.
+  - `physx_sys::PxQuat` now implements `From<PxQuat>`.
+  - `physx_sys::PxRigidBodyFlag::Enum` now implements `From<RigidBodyFlag>`.
+  - `physx_sys::PxRigidDynamicLockFlag::Enum` now implements `From<RigidDynamicLockFlag>`.
+  - `physx_sys::PxSceneFlag::Enum` now implements `From<SceneFlag>`.
+  - `physx_sys::PxSceneLimits` now implements `From<SceneLimits>`.
+  - `physx_sys::PxSceneQueryUpdateMode::Enum` now implements `From<SceneQueryUpdateMode>`.
+  - `physx_sys::PxShapeFlag::Enum` now implements `From<ShapeFlag>`.
+  - `physx_sys::PxSolverType::Enum` now implements `From<SolverType>`.
+  - `physx_sys::PxTransform` now implements `From<PxTransform>`.
+  - `physx_sys::PxVec3` now implements `From<PxVec3>`.
+
 ## [0.11.0]
 
 - [PR#124](https://github.com/EmbarkStudios/physx-rs/pull/124) Upgrade glam

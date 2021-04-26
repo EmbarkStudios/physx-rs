@@ -251,9 +251,9 @@ pub enum ActorType {
     ArticulationLink = 2,
 }
 
-impl Into<PxActorType::Enum> for ActorType {
-    fn into(self) -> PxActorType::Enum {
-        self as u32
+impl From<ActorType> for PxActorType::Enum {
+    fn from(value: ActorType) -> Self {
+        value as u32
     }
 }
 
@@ -277,9 +277,9 @@ pub enum ActorFlag {
     DisableSimulation = 8,
 }
 
-impl Into<PxActorFlag::Enum> for ActorFlag {
-    fn into(self) -> PxActorFlag::Enum {
-        match self {
+impl From<ActorFlag> for PxActorFlag::Enum {
+    fn from(value: ActorFlag) -> Self {
+        match value {
             ActorFlag::Visualization => 1,
             ActorFlag::DisableGravity => 2,
             ActorFlag::SendSleepNotifies => 4,
