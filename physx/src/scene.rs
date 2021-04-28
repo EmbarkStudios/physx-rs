@@ -849,13 +849,13 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
 pub enum HitFlag {
     Position = 1 << 0,
     Normal = 1 << 1,
-    UV = 1 << 3,
+    Uv = 1 << 3,
     AssumeNoInitialOverlap = 1 << 4,
     MeshMultiple = 1 << 5,
     MeshAny = 1 << 6,
     MeshBothSides = 1 << 7,
     PreciseSweep = 1 << 8,
-    MTD = 1 << 9,
+    Mtd = 1 << 9,
     FaceIndex = 1 << 10,
 }
 
@@ -873,9 +873,9 @@ pub enum SceneQueryUpdateMode {
     BuildDisabledCommitDisabled = 2,
 }
 
-impl Into<PxSceneQueryUpdateMode::Enum> for SceneQueryUpdateMode {
-    fn into(self) -> PxSceneQueryUpdateMode::Enum {
-        match self {
+impl From<SceneQueryUpdateMode> for PxSceneQueryUpdateMode::Enum {
+    fn from(value: SceneQueryUpdateMode) -> Self {
+        match value {
             SceneQueryUpdateMode::BuildEnabledCommitEnabled => {
                 PxSceneQueryUpdateMode::eBUILD_ENABLED_COMMIT_ENABLED
             }
@@ -899,16 +899,16 @@ impl Default for SceneQueryUpdateMode {
 #[repr(u32)]
 pub enum PruningStructureType {
     None = 0,
-    DynamicAABBTree = 1,
-    StaticAABBTree = 2,
+    DynamicAabbTree = 1,
+    StaticAabbTree = 2,
 }
 
-impl Into<PxPruningStructureType::Enum> for PruningStructureType {
-    fn into(self) -> PxPruningStructureType::Enum {
-        match self {
+impl From<PruningStructureType> for PxPruningStructureType::Enum {
+    fn from(value: PruningStructureType) -> Self {
+        match value {
             PruningStructureType::None => PxPruningStructureType::eNONE,
-            PruningStructureType::DynamicAABBTree => PxPruningStructureType::eDYNAMIC_AABB_TREE,
-            PruningStructureType::StaticAABBTree => PxPruningStructureType::eSTATIC_AABB_TREE,
+            PruningStructureType::DynamicAabbTree => PxPruningStructureType::eDYNAMIC_AABB_TREE,
+            PruningStructureType::StaticAabbTree => PxPruningStructureType::eSTATIC_AABB_TREE,
         }
     }
 }
@@ -918,8 +918,8 @@ impl From<PxPruningStructureType::Enum> for PruningStructureType {
         debug_assert!(val < PxPruningStructureType::eLAST);
         match val {
             PxPruningStructureType::eNONE => PruningStructureType::None,
-            PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAABBTree,
-            PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAABBTree,
+            PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAabbTree,
+            PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAabbTree,
             _ => unimplemented!("Invalid enum variant."),
         }
     }
@@ -927,7 +927,7 @@ impl From<PxPruningStructureType::Enum> for PruningStructureType {
 
 impl Default for PruningStructureType {
     fn default() -> Self {
-        PruningStructureType::DynamicAABBTree
+        PruningStructureType::DynamicAabbTree
     }
 }
 
@@ -945,9 +945,9 @@ impl Default for PairFilteringMode {
     }
 }
 
-impl Into<PxPairFilteringMode::Enum> for PairFilteringMode {
-    fn into(self) -> PxPairFilteringMode::Enum {
-        match self {
+impl From<PairFilteringMode> for PxPairFilteringMode::Enum {
+    fn from(value: PairFilteringMode) -> Self {
+        match value {
             PairFilteringMode::Keep => PxPairFilteringMode::eKEEP,
             PairFilteringMode::Suppress => PxPairFilteringMode::eSUPPRESS,
             PairFilteringMode::Kill => PxPairFilteringMode::eKILL,
@@ -981,17 +981,17 @@ pub struct SceneLimits {
     pub max_nb_broad_phase_overlaps: u32,
 }
 
-impl Into<PxSceneLimits> for SceneLimits {
-    fn into(self) -> PxSceneLimits {
-        PxSceneLimits {
-            maxNbActors: self.max_nb_actors,
-            maxNbBodies: self.max_nb_bodies,
-            maxNbStaticShapes: self.max_nb_static_shapes,
-            maxNbDynamicShapes: self.max_nb_dynamic_shapes,
-            maxNbAggregates: self.max_nb_aggregates,
-            maxNbConstraints: self.max_nb_constraints,
-            maxNbRegions: self.max_nb_regions,
-            maxNbBroadPhaseOverlaps: self.max_nb_broad_phase_overlaps,
+impl From<SceneLimits> for PxSceneLimits {
+    fn from(value: SceneLimits) -> Self {
+        Self {
+            maxNbActors: value.max_nb_actors,
+            maxNbBodies: value.max_nb_bodies,
+            maxNbStaticShapes: value.max_nb_static_shapes,
+            maxNbDynamicShapes: value.max_nb_dynamic_shapes,
+            maxNbAggregates: value.max_nb_aggregates,
+            maxNbConstraints: value.max_nb_constraints,
+            maxNbRegions: value.max_nb_regions,
+            maxNbBroadPhaseOverlaps: value.max_nb_broad_phase_overlaps,
         }
     }
 }
@@ -1004,9 +1004,9 @@ pub enum FrictionType {
     TwoDirectional = 2,
 }
 
-impl Into<PxFrictionType::Enum> for FrictionType {
-    fn into(self) -> PxFrictionType::Enum {
-        match self {
+impl From<FrictionType> for PxFrictionType::Enum {
+    fn from(value: FrictionType) -> Self {
+        match value {
             FrictionType::Patch => PxFrictionType::ePATCH,
             FrictionType::OneDirectional => PxFrictionType::eONE_DIRECTIONAL,
             FrictionType::TwoDirectional => PxFrictionType::eTWO_DIRECTIONAL,
@@ -1026,16 +1026,16 @@ pub enum BroadPhaseType {
     SweepAndPrune = 0,
     MultiBoxPruning = 1,
     AutomaticBoxPruning = 2,
-    GPU = 3,
+    Gpu = 3,
 }
 
-impl Into<PxBroadPhaseType::Enum> for BroadPhaseType {
-    fn into(self) -> PxBroadPhaseType::Enum {
-        match self {
+impl From<BroadPhaseType> for PxBroadPhaseType::Enum {
+    fn from(value: BroadPhaseType) -> Self {
+        match value {
             BroadPhaseType::SweepAndPrune => PxBroadPhaseType::eSAP,
             BroadPhaseType::MultiBoxPruning => PxBroadPhaseType::eMBP,
             BroadPhaseType::AutomaticBoxPruning => PxBroadPhaseType::eABP,
-            BroadPhaseType::GPU => PxBroadPhaseType::eGPU,
+            BroadPhaseType::Gpu => PxBroadPhaseType::eGPU,
         }
     }
 }
@@ -1049,22 +1049,22 @@ impl Default for BroadPhaseType {
 #[derive(Debug, Clone, Copy)]
 #[repr(u32)]
 pub enum SolverType {
-    PGS = 0,
-    TGS = 1,
+    Pgs = 0,
+    Tgs = 1,
 }
 
-impl Into<PxSolverType::Enum> for SolverType {
-    fn into(self) -> PxSolverType::Enum {
-        match self {
-            SolverType::PGS => PxSolverType::ePGS,
-            SolverType::TGS => PxSolverType::eTGS,
+impl From<SolverType> for PxSolverType::Enum {
+    fn from(value: SolverType) -> Self {
+        match value {
+            SolverType::Pgs => PxSolverType::ePGS,
+            SolverType::Tgs => PxSolverType::eTGS,
         }
     }
 }
 
 impl Default for SolverType {
     fn default() -> Self {
-        SolverType::PGS
+        SolverType::Pgs
     }
 }
 
@@ -1094,9 +1094,9 @@ pub enum SceneFlag {
     EnableFrictionEveryIteration = 32768,
 }
 
-impl Into<PxSceneFlag::Enum> for SceneFlag {
-    fn into(self) -> PxSceneFlag::Enum {
-        self as PxSceneFlag::Enum
+impl From<SceneFlag> for PxSceneFlag::Enum {
+    fn from(value: SceneFlag) -> Self {
+        value as PxSceneFlag::Enum
     }
 }
 

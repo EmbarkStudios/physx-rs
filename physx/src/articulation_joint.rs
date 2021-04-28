@@ -56,9 +56,9 @@ pub enum ArticulationJointDriveType {
     Error,
 }
 
-impl Into<PxArticulationJointDriveType::Enum> for ArticulationJointDriveType {
-    fn into(self) -> PxArticulationJointDriveType::Enum {
-        match self {
+impl From<ArticulationJointDriveType> for PxArticulationJointDriveType::Enum {
+    fn from(value: ArticulationJointDriveType) -> Self {
+        match value {
             ArticulationJointDriveType::Target => PxArticulationJointDriveType::eTARGET,
             ArticulationJointDriveType::Error => PxArticulationJointDriveType::eERROR,
         }

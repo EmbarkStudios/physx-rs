@@ -31,9 +31,9 @@ pub enum BaseFlag {
     IsReleasable = 2,
 }
 
-impl Into<PxBaseFlag::Enum> for BaseFlag {
-    fn into(self) -> PxBaseFlag::Enum {
-        self as PxBaseFlag::Enum
+impl From<BaseFlag> for PxBaseFlag::Enum {
+    fn from(value: BaseFlag) -> Self {
+        value as PxBaseFlag::Enum
     }
 }
 

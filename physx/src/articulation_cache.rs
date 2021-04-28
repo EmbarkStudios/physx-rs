@@ -75,14 +75,14 @@ impl From<PxArticulationRootLinkData> for ArticulationRootLinkData {
     }
 }
 
-impl Into<PxArticulationRootLinkData> for ArticulationRootLinkData {
-    fn into(self) -> PxArticulationRootLinkData {
-        PxArticulationRootLinkData {
-            transform: self.transform.into(),
-            worldLinVel: self.world_lin_vel.into(),
-            worldAngVel: self.world_ang_vel.into(),
-            worldLinAccel: self.world_lin_accel.into(),
-            worldAngAccel: self.world_ang_accel.into(),
+impl From<ArticulationRootLinkData> for PxArticulationRootLinkData {
+    fn from(value: ArticulationRootLinkData) -> Self {
+        Self {
+            transform: value.transform.into(),
+            worldLinVel: value.world_lin_vel.into(),
+            worldAngVel: value.world_ang_vel.into(),
+            worldLinAccel: value.world_lin_accel.into(),
+            worldAngAccel: value.world_ang_accel.into(),
         }
     }
 }

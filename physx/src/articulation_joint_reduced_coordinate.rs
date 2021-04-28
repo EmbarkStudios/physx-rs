@@ -47,9 +47,9 @@ pub enum ArticulationJointDriveType {
     Error,
 }
 
-impl Into<PxArticulationJointDriveType::Enum> for ArticulationJointDriveType {
-    fn into(self) -> PxArticulationJointDriveType::Enum {
-        match self {
+impl From<ArticulationJointDriveType> for PxArticulationJointDriveType::Enum {
+    fn from(value: ArticulationJointDriveType) -> Self {
+        match value {
             ArticulationJointDriveType::Target => PxArticulationJointDriveType::eTARGET,
             ArticulationJointDriveType::Error => PxArticulationJointDriveType::eERROR,
         }
@@ -66,9 +66,9 @@ pub enum ArticulationMotion {
     Free,
 }
 
-impl Into<PxArticulationAxis::Enum> for ArticulationMotion {
-    fn into(self) -> PxArticulationMotion::Enum {
-        match self {
+impl From<ArticulationMotion> for PxArticulationAxis::Enum {
+    fn from(value: ArticulationMotion) -> Self {
+        match value {
             ArticulationMotion::Locked => PxArticulationMotion::eLOCKED,
             ArticulationMotion::Limited => PxArticulationMotion::eLIMITED,
             ArticulationMotion::Free => PxArticulationMotion::eFREE,
@@ -123,9 +123,9 @@ impl ArticulationAxis {
     }
 }
 
-impl Into<PxArticulationAxis::Enum> for ArticulationAxis {
-    fn into(self) -> PxArticulationAxis::Enum {
-        match self {
+impl From<ArticulationAxis> for PxArticulationAxis::Enum {
+    fn from(value: ArticulationAxis) -> Self {
+        match value {
             ArticulationAxis::Twist => PxArticulationAxis::eTWIST,
             ArticulationAxis::Swing1 => PxArticulationAxis::eSWING1,
             ArticulationAxis::Swing2 => PxArticulationAxis::eSWING2,
@@ -147,9 +147,9 @@ pub enum ArticulationJointType {
     Undefined,
 }
 
-impl Into<PxArticulationJointType::Enum> for ArticulationJointType {
-    fn into(self) -> PxArticulationJointType::Enum {
-        match self {
+impl From<ArticulationJointType> for PxArticulationJointType::Enum {
+    fn from(value: ArticulationJointType) -> Self {
+        match value {
             ArticulationJointType::Prismatic => PxArticulationJointType::ePRISMATIC,
             ArticulationJointType::Revolute => PxArticulationJointType::eREVOLUTE,
             ArticulationJointType::Spherical => PxArticulationJointType::eSPHERICAL,

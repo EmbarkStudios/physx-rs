@@ -60,24 +60,24 @@ impl PxFlags for RigidBodyFlags {
 pub enum RigidBodyFlag {
     Kinematic = 1,
     UseKinematicTargetForSceneQueries = 2,
-    EnableCCD = 4,
-    EnableCCDFriction = 8,
+    EnableCcd = 4,
+    EnableCcdFriction = 8,
     EnablePoseIntegrationPreview = 16,
-    EnableSpeculativeCCD = 32,
-    EnableCCDMaxContactImpulse = 64,
+    EnableSpeculativeCcd = 32,
+    EnableCcdMaxContactImpulse = 64,
     RetainAccelerations = 128,
 }
 
-impl Into<PxRigidBodyFlag::Enum> for RigidBodyFlag {
-    fn into(self) -> PxRigidBodyFlag::Enum {
-        match self {
+impl From<RigidBodyFlag> for PxRigidBodyFlag::Enum {
+    fn from(value: RigidBodyFlag) -> Self {
+        match value {
             RigidBodyFlag::Kinematic => 1,
             RigidBodyFlag::UseKinematicTargetForSceneQueries => 2,
-            RigidBodyFlag::EnableCCD => 4,
-            RigidBodyFlag::EnableCCDFriction => 8,
+            RigidBodyFlag::EnableCcd => 4,
+            RigidBodyFlag::EnableCcdFriction => 8,
             RigidBodyFlag::EnablePoseIntegrationPreview => 16,
-            RigidBodyFlag::EnableSpeculativeCCD => 32,
-            RigidBodyFlag::EnableCCDMaxContactImpulse => 64,
+            RigidBodyFlag::EnableSpeculativeCcd => 32,
+            RigidBodyFlag::EnableCcdMaxContactImpulse => 64,
             RigidBodyFlag::RetainAccelerations => 128,
         }
     }
@@ -88,11 +88,11 @@ impl From<PxRigidBodyFlag::Enum> for RigidBodyFlag {
         match other {
             1 => RigidBodyFlag::Kinematic,
             2 => RigidBodyFlag::UseKinematicTargetForSceneQueries,
-            4 => RigidBodyFlag::EnableCCD,
-            8 => RigidBodyFlag::EnableCCDFriction,
+            4 => RigidBodyFlag::EnableCcd,
+            8 => RigidBodyFlag::EnableCcdFriction,
             16 => RigidBodyFlag::EnablePoseIntegrationPreview,
-            32 => RigidBodyFlag::EnableSpeculativeCCD,
-            64 => RigidBodyFlag::EnableCCDMaxContactImpulse,
+            32 => RigidBodyFlag::EnableSpeculativeCcd,
+            64 => RigidBodyFlag::EnableCcdMaxContactImpulse,
             128 => RigidBodyFlag::RetainAccelerations,
             _ => panic!("invalid value in RigidBodyFlag"),
         }
@@ -108,9 +108,9 @@ pub enum ForceMode {
     Acceleration = 3,
 }
 
-impl Into<PxForceMode::Enum> for ForceMode {
-    fn into(self) -> PxForceMode::Enum {
-        match self {
+impl From<ForceMode> for PxForceMode::Enum {
+    fn from(value: ForceMode) -> Self {
+        match value {
             ForceMode::Force => 0,
             ForceMode::Impulse => 1,
             ForceMode::VelocityChange => 2,

@@ -29,9 +29,9 @@ impl From<physx_sys::PxVec3> for PxVec3 {
     }
 }
 
-impl Into<physx_sys::PxVec3> for PxVec3 {
-    fn into(self) -> physx_sys::PxVec3 {
-        self.obj
+impl From<PxVec3> for physx_sys::PxVec3 {
+    fn from(value: PxVec3) -> Self {
+        value.obj
     }
 }
 
@@ -47,12 +47,12 @@ impl From<physx_sys::PxExtendedVec3> for PxVec3 {
     }
 }
 
-impl Into<physx_sys::PxExtendedVec3> for PxVec3 {
-    fn into(self) -> physx_sys::PxExtendedVec3 {
-        physx_sys::PxExtendedVec3 {
-            x: self.obj.x as f64,
-            y: self.obj.y as f64,
-            z: self.obj.z as f64,
+impl From<PxVec3> for physx_sys::PxExtendedVec3 {
+    fn from(value: PxVec3) -> Self {
+        Self {
+            x: value.obj.x as f64,
+            y: value.obj.y as f64,
+            z: value.obj.z as f64,
         }
     }
 }
@@ -64,9 +64,9 @@ impl From<Vec3> for PxVec3 {
     }
 }
 
-impl Into<Vec3> for PxVec3 {
-    fn into(self) -> Vec3 {
-        let physx_sys::PxVec3 { x, y, z } = self.obj;
+impl From<PxVec3> for Vec3 {
+    fn from(value: PxVec3) -> Self {
+        let physx_sys::PxVec3 { x, y, z } = value.obj;
         Vec3::new(x, y, z)
     }
 }

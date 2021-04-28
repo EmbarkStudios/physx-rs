@@ -41,9 +41,9 @@ pub enum ArticulationDriveType {
     Force,
 }
 
-impl Into<PxArticulationDriveType::Enum> for ArticulationDriveType {
-    fn into(self) -> PxArticulationDriveType::Enum {
-        match self {
+impl From<ArticulationDriveType> for PxArticulationDriveType::Enum {
+    fn from(value: ArticulationDriveType) -> Self {
+        match value {
             ArticulationDriveType::Acceleration => PxArticulationDriveType::eACCELERATION,
             ArticulationDriveType::Force => PxArticulationDriveType::eFORCE,
         }

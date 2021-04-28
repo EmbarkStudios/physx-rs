@@ -11,13 +11,13 @@ use physx_sys::{
 };
 
 #[repr(transparent)]
-pub struct BVHStructure {
+pub struct BvhStructure {
     obj: physx_sys::PxBVHStructure,
 }
 
-crate::DeriveClassForNewType!(BVHStructure: PxBVHStructure, PxBase);
+crate::DeriveClassForNewType!(BvhStructure: PxBVHStructure, PxBase);
 
-impl BVHStructure {
+impl BvhStructure {
     /// # Safety
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
@@ -27,17 +27,17 @@ impl BVHStructure {
     }
 }
 
-unsafe impl Send for BVHStructure {}
-unsafe impl Sync for BVHStructure {}
+unsafe impl Send for BvhStructure {}
+unsafe impl Sync for BvhStructure {}
 
-impl Drop for BVHStructure {
+impl Drop for BvhStructure {
     fn drop(&mut self) {
         unsafe { PxBase_release_mut(self.as_mut_ptr()) }
     }
 }
 
-impl BVHStructure {
-    /// Get the bounds in the BVHStructure.
+impl BvhStructure {
+    /// Get the bounds in the BvhStructure.
     pub fn get_bounds(&self) -> &[PxBounds3] {
         unsafe {
             std::slice::from_raw_parts(
@@ -47,7 +47,7 @@ impl BVHStructure {
         }
     }
 
-    /// Get the number of bounds in the BVHStructure.
+    /// Get the number of bounds in the BvhStructure.
     pub fn get_nb_bounds(&self) -> u32 {
         unsafe { PxBVHStructure_getNbBounds(self.as_ptr()) }
     }

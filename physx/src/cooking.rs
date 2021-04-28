@@ -1,5 +1,5 @@
 use crate::{
-    bvh_structure::BVHStructure, convex_mesh::ConvexMesh, foundation::Foundation,
+    bvh_structure::BvhStructure, convex_mesh::ConvexMesh, foundation::Foundation,
     height_field::HeightField, owner::Owner, physics::Physics, traits::Class,
     triangle_mesh::TriangleMesh,
 };
@@ -76,10 +76,10 @@ impl PxCooking {
     pub fn create_bvh_structure(
         &self,
         physics: &mut impl Physics,
-        desc: &PxBVHStructureDesc,
-    ) -> Option<Owner<BVHStructure>> {
+        desc: &PxBvhStructureDesc,
+    ) -> Option<Owner<BvhStructure>> {
         unsafe {
-            BVHStructure::from_raw(PxCooking_createBVHStructure(
+            BvhStructure::from_raw(PxCooking_createBVHStructure(
                 self.as_ptr(),
                 desc.as_ptr(),
                 physics.get_physics_insertion_callback()?,
@@ -367,11 +367,11 @@ impl PxHeightFieldDesc {
     }
 }
 
-pub struct PxBVHStructureDesc {
+pub struct PxBvhStructureDesc {
     pub obj: physx_sys::PxBVHStructureDesc,
 }
 
-unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBVHStructureDesc {
+unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBvhStructureDesc {
     fn as_ptr(&self) -> *const physx_sys::PxBVHStructureDesc {
         &self.obj
     }
@@ -381,13 +381,13 @@ unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBVHStructureDesc {
     }
 }
 
-impl Default for PxBVHStructureDesc {
+impl Default for PxBvhStructureDesc {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PxBVHStructureDesc {
+impl PxBvhStructureDesc {
     /// Create a new BVH structure descriptor.
     pub fn new() -> Self {
         unsafe {

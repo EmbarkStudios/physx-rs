@@ -11,7 +11,7 @@ fn get_physx_target_os_name() -> String {
 }
 
 // Find the time of the most recent modification among all the files in a directory
-fn most_recent_modification_time_in_dir(path: &PathBuf) -> Option<std::time::SystemTime> {
+fn most_recent_modification_time_in_dir(path: &std::path::Path) -> Option<std::time::SystemTime> {
     use std::fs;
 
     fs::read_dir(&path).ok().and_then(|entries| {

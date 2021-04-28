@@ -66,9 +66,9 @@ pub enum RigidDynamicLockFlag {
     LockAngularZ = 1 << 5,
 }
 
-impl Into<PxRigidDynamicLockFlag::Enum> for RigidDynamicLockFlag {
-    fn into(self) -> PxRigidDynamicLockFlag::Enum {
-        match self {
+impl From<RigidDynamicLockFlag> for PxRigidDynamicLockFlag::Enum {
+    fn from(value: RigidDynamicLockFlag) -> Self {
+        match value {
             RigidDynamicLockFlag::LockLinearX => PxRigidDynamicLockFlag::eLOCK_LINEAR_X,
             RigidDynamicLockFlag::LockLinearY => PxRigidDynamicLockFlag::eLOCK_LINEAR_Y,
             RigidDynamicLockFlag::LockLinearZ => PxRigidDynamicLockFlag::eLOCK_LINEAR_Z,
