@@ -18,7 +18,7 @@ physx-sys = { version = "0.4.10", path = "../physx-sys" }
 
 enumflags2 = "0.6"
 log = "0.4"
-glam = "0.12"
+glam = { version = "0.13", optional = true }
 thiserror = "1.0.20"
 
 [features]

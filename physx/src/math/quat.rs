@@ -1,7 +1,5 @@
 use crate::{math::PxVec3, traits::Class};
 
-use glam::Quat;
-
 use physx_sys::{
     PxQuat_dot, PxQuat_getAngle, PxQuat_getAngle_1, PxQuat_getBasisVector0, PxQuat_getBasisVector1,
     PxQuat_getBasisVector2, PxQuat_getConjugate, PxQuat_getImaginaryPart, PxQuat_getNormalized,
@@ -13,7 +11,7 @@ use physx_sys::{
 #[derive(Copy, Clone)]
 #[repr(transparent)]
 pub struct PxQuat {
-    obj: physx_sys::PxQuat,
+    pub(super) obj: physx_sys::PxQuat,
 }
 
 crate::DeriveClassForNewType!(PxQuat: PxQuat);
@@ -33,20 +31,6 @@ impl From<physx_sys::PxQuat> for PxQuat {
 impl From<PxQuat> for physx_sys::PxQuat {
     fn from(value: PxQuat) -> Self {
         value.obj
-    }
-}
-
-impl From<Quat> for PxQuat {
-    fn from(quat: Quat) -> Self {
-        let (x, y, z, w) = quat.into();
-        Self::new(x, y, z, w)
-    }
-}
-
-impl From<PxQuat> for Quat {
-    fn from(value: PxQuat) -> Self {
-        let physx_sys::PxQuat { x, y, z, w } = value.obj;
-        Quat::from_xyzw(x, y, z, w)
     }
 }
 
