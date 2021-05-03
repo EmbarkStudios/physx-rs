@@ -4,6 +4,7 @@
 
 ## [Unreleased]
 
+## [0.4.13] - 2021-05-03
 ### Fixed
 
 - [PR#135](https://github.com/EmbarkStudios/physx-rs/pull/135] Update PhysX submodule with ARM64 buildfix for Xcode 14.5
