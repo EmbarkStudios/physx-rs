@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+## [0.4.13] - 2021-05-03
+### Fixed
+
+- [PR#135](https://github.com/EmbarkStudios/physx-rs/pull/135] Update PhysX submodule with ARM64 buildfix for Xcode 14.5
+
 ## [0.4.12] - 2020-12-03
 
 ### Added
@@ -92,7 +97,9 @@
 
 - Ability to not run the default filter shader before the callback.
 
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.11...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.13...HEAD
+[0.4.13]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.12...physx-sys-v0.4.13
+[0.4.12]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.11...physx-sys-v0.4.12
 [0.4.11]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.10...physx-sys-v0.4.11
 [0.4.10]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.9...physx-sys-v0.4.10
 [0.4.9]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.8...physx-sys-v0.4.9
