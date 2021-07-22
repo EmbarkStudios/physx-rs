@@ -6,7 +6,7 @@
 ## [Unreleased] - ReleaseDate
 
 ### Changed
-- [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) Glam is now an optional dependency and has been updated. You can enable the `glam` feature to continue to use `glam` with `physx-sys` types.
+- [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) made [`glam`](https://crates.io/crates/glam) an optional dependency and has been updated. You can enable the `glam` feature to continue to use `glam` with `physx-sys` types.
 - [Updated various struct names and trait implementations](https://github.com/EmbarkStudios/physx-rs/pull/130):
   - `BVHStructure` is now named `BvhStructure`.
   - `PxBVHStructureDesc` is now named `PxBvhStructureDesc`.
@@ -49,6 +49,7 @@
   - `physx_sys::PxSolverType::Enum` now implements `From<SolverType>`.
   - `physx_sys::PxTransform` now implements `From<PxTransform>`.
   - `physx_sys::PxVec3` now implements `From<PxVec3>`.
+- [PR#138](https://github.com/EmbarkStudios/physx-rs/pull/138) updated `enumflags2` to 0.7.
 
 ## [0.11.0]
 
