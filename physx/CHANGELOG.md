@@ -2,11 +2,11 @@
 
 <!-- markdownlint-disable MD024 -->
 
-## [Unreleased]
+<!-- next-header -->
+## [Unreleased] - ReleaseDate
 
-- [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) Glam is now an
-  optional dependency and has been updated. You can enable the `glam` feature
-  to continue to use `glam` with `physx-sys` types.
+### Changed
+- [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) made [`glam`](https://crates.io/crates/glam) an optional dependency and has been updated. You can enable the `glam` feature to continue to use `glam` with `physx-sys` types.
 - [Updated various struct names and trait implementations](https://github.com/EmbarkStudios/physx-rs/pull/130):
   - `BVHStructure` is now named `BvhStructure`.
   - `PxBVHStructureDesc` is now named `PxBvhStructureDesc`.
@@ -49,6 +49,7 @@
   - `physx_sys::PxSolverType::Enum` now implements `From<SolverType>`.
   - `physx_sys::PxTransform` now implements `From<PxTransform>`.
   - `physx_sys::PxVec3` now implements `From<PxVec3>`.
+- [PR#138](https://github.com/EmbarkStudios/physx-rs/pull/138) updated `enumflags2` to 0.7.
 
 ## [0.11.0]
 
@@ -57,27 +58,14 @@
 
 ## [0.10.0]
 
-- [PR#113](https://github.com/EmbarkStudios/physx-rs/pull/98) Fix various issues
-  found using physx-rs in practice after the big PR#98 merge from 0.9.0.
-  You now create a scene using `Physics::create()` with a new scene descriptor
-  that can represent all the parameters of PxSceneDesc.
-- [PR#120](https://github.com/EmbarkStudios/physx-rs/pull/120) Make convex and
-  triangle mesh validation optional.
+- [PR#113](https://github.com/EmbarkStudios/physx-rs/pull/98) Fix various issues found using physx-rs in practice after the big PR#98 merge from 0.9.0. You now create a scene using `Physics::create()` with a new scene descriptor that can represent all the parameters of PxSceneDesc.
+- [PR#120](https://github.com/EmbarkStudios/physx-rs/pull/120) Make convex and triangle mesh validation optional.
 
 ## [0.9.0] - 2020-12-03
 
 ### Refactored
 
-- [PR#98](https://github.com/EmbarkStudios/physx-rs/pull/98) Use Class<T>
-  instead of Deref, track user data types This change is a significant refactor.
-  The API is now very close to the underlying PhysX API, but with Rust's type
-  and memory safety.  Method names mirror the C++ API, but `like_this` instead
-  of `likeThis`. Much of the additional behaviour that was built on top of the
-  underlying API has been removed.  The prelude exports the class-traits, but
-  intentionally does not export the new-type wrappers.  Instead of importing
-  them, create type aliases for them with the generic params filled in to cut
-  down on the amount of typing (see the example). The PR has a detailed summary
-  of the changes, with links to the relevant code.
+- [PR#98](https://github.com/EmbarkStudios/physx-rs/pull/98) Use Class<T> instead of Deref, track user data types This change is a significant refactor. The API is now very close to the underlying PhysX API, but with Rust's type and memory safety. Method names mirror the C++ API, but `like_this` instead of `likeThis`. Much of the additional behaviour that was built on top of the underlying API has been removed.  The prelude exports the class-traits, but intentionally does not export the new-type wrappers.  Instead of importing them, create type aliases for them with the generic params filled in to cut down on the amount of typing (see the example). The PR has a detailed summary of the changes, with links to the relevant code.
 
 ### Dependencies
 
@@ -149,6 +137,7 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
+<!-- next-url -->
 [Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...HEAD
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...physx-v0.10.0

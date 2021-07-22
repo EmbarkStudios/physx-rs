@@ -93,30 +93,14 @@ debug = false
 
 ## How to release (maintainers only)
 
-physx-rs consists of two crates, physx and physx-sys. If you only merged changes to one of them,
-only that one needs a new release.
+1. Install [cargo-release](https://github.com/sunng87/cargo-release#install)
 
-1. Look at `physx/CHANGELOG.md` and `physx-sys/CHANGELOG.md` to determine whether both or only one
+2. Look at `physx/CHANGELOG.md` and `physx-sys/CHANGELOG.md` to determine whether both or only one
 of the crate needs updating, and what [semantic version](https://semver.org/) bump we need
 
 2. Review the list of changes in the changelogs and compare with the git commit diffs to the previous release and make sure we've captured and described all changes well and that they are semantically correct
 
-3. Create a branch: `git checkout -b release-physx-0.x.y`
-
-4. Update relevant changelogs (also update the diff links at the bottom of them!), and the version number in the Cargo.toml files for the crate(s) that you are updating.
-
-5. Make a PR from your branch, get it reviewed and merged. If in doubt about what the PR
-should look like, just look at previous release PRs
-
-6. Run `cargo publish` in the physx and physx-sys directories as appropriate.
-
-7. Once published without errors, tag the merge with `physx-v0.x.y` and/or `physx-sys-v0.z.w` tags as appropriate:
-
-    ```bash
-    git tag physx-v0.x.y -m ""
-    git tag physx-sys-v0.x.y -m ""
-    git push --tags
-    ```
+3. Run `cargo release --manifest-path <physx|physx-sys>/Cargo.toml <major|minor|patch>` to automatically update the CHANGELOG, publish, tag, and push the release. If you are publishing both `physx` and `physx-sys`, you can just add the `--skip-push` flag to avoid pushing each crate individually and then do `git push --follow-tags` to push both at the same time.
 
 ## Contributing
 

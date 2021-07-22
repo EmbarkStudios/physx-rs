@@ -2,12 +2,16 @@
 
 <!-- markdownlint-disable MD024 -->
 
-## [Unreleased]
+<!-- next-header -->
+## [Unreleased] - ReleaseDate
+### Fixed
+
+- [PR#138](https://github.com/EmbarkStudios/physx-rs/pull/138) silenced the `dtor-name`, `suggest-overrides`, and `suggest-override-destructor` warnings in the cmake build to silence warnings causing [build failures in clang-11+](https://github.com/NVIDIAGameWorks/PhysX/issues/417).
 
 ## [0.4.13] - 2021-05-03
 ### Fixed
 
-- [PR#135](https://github.com/EmbarkStudios/physx-rs/pull/135] Update PhysX submodule with ARM64 buildfix for Xcode 14.5
+- [PR#135](https://github.com/EmbarkStudios/physx-rs/pull/135) Update PhysX submodule with ARM64 buildfix for Xcode 14.5
 
 ## [0.4.12] - 2020-12-03
 
@@ -97,6 +101,7 @@
 
 - Ability to not run the default filter shader before the callback.
 
+<!-- next-url -->
 [Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.13...HEAD
 [0.4.13]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.12...physx-sys-v0.4.13
 [0.4.12]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.11...physx-sys-v0.4.12
