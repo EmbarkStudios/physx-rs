@@ -146,6 +146,7 @@ impl PxQuat {
     }
 
     /// returns the angle in radians and a normalized axis vector
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_angle_axis(&self) -> (f32, PxVec3) {
         let mut angle = 0.0;
         let mut axis = PxVec3::default();

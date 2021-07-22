@@ -5,7 +5,7 @@ use crate::{
 
 use std::marker::PhantomData;
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
     PxCombineMode,
@@ -29,7 +29,8 @@ use physx_sys::{
     //PxMaterial_getConcreteTypeName,
 };
 
-#[derive(Copy, Clone, BitFlags, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u16)]
 pub enum MaterialFlag {
     DisableFriction = 1 << 0,
@@ -231,7 +232,7 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     fn get_flags(&self) -> MaterialFlags {
         unsafe {
             let PxMaterialFlags { mBits } = PxMaterial_getFlags(self.as_ptr());
-            BitFlags::new(mBits)
+            BitFlags::from_bits_unchecked(mBits)
         }
     }
 

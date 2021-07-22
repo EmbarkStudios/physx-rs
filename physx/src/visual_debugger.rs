@@ -10,7 +10,7 @@
 
 use super::{foundation::Foundation, owner::Owner, traits::Class};
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
     phys_PxCreatePvd, phys_PxDefaultPvdSocketTransportCreate, PxPvdInstrumentationFlag,
@@ -19,7 +19,8 @@ use physx_sys::{
     PxPvd_isConnected_mut, PxPvd_release_mut,
 };
 
-#[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
+#[bitflags]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 pub enum VisualDebuggerSceneFlag {
     TransmitContacts = 1,

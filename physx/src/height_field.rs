@@ -8,7 +8,7 @@
 
 */
 use crate::{owner::Owner, traits::Class};
-use enumflags2::BitFlags;
+use enumflags2::bitflags;
 use physx_sys::PxHeightField_release_mut;
 
 pub const HEIGHT_SCALE: f32 = 1.0;
@@ -43,7 +43,8 @@ pub enum HeightFieldFormat {
     S16tm = 1,
 }
 
-#[derive(BitFlags, Debug, Copy, Clone)]
+#[bitflags]
+#[derive(Debug, Copy, Clone)]
 #[repr(u16)]
 pub enum HeightFieldFlag {
     NoboundaryEdges = 1,

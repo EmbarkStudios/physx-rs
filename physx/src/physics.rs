@@ -725,9 +725,9 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         };
 
         Some(PhysicsFoundation {
-            foundation,
             physics,
             pvd,
+            foundation,
             extensions_loaded,
         })
     }

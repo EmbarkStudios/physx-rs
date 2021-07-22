@@ -9,7 +9,7 @@ Wrapper for PxFoundation class
 */
 
 use crate::{owner::Owner, traits::Class};
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 use physx_sys::{
     create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
     get_default_error_callback, phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
@@ -25,7 +25,8 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 
-#[derive(BitFlags, Copy, Clone, Debug, PartialEq)]
+#[bitflags]
+#[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum ErrorCode {
     DebugInfo = 1u32,
