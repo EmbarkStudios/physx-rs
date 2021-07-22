@@ -3,7 +3,7 @@ Wrapper for PxBase.
  */
 
 use crate::traits::Class;
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 pub(crate) use physx_sys::PxBase;
 
@@ -24,7 +24,8 @@ use physx_sys::{
  * Section ENUMERATIONS                                                        *
  ******************************************************************************/
 
-#[derive(Copy, Clone, BitFlags, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u16)]
 pub enum BaseFlag {
     OwnsMemory = 1,
@@ -137,7 +138,7 @@ pub trait Base: Class<PxBase> + Sized {
     /// Read the BaseFlags of this object
     fn get_base_flags(&self) -> BitFlags<BaseFlag> {
         let flags = unsafe { PxBase_getBaseFlags(self.as_ptr() as *const _) };
-        unsafe { BitFlags::new(flags.mBits) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
     }
 
     ////////////////////////////////////////////////////////////////////////////////

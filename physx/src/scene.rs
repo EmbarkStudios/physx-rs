@@ -34,7 +34,7 @@ use crate::{
     visual_debugger::PvdSceneClient,
 };
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use std::{
     marker::PhantomData,
@@ -197,11 +197,12 @@ impl PxFlags for ActorTypeFlags {
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::new(flags.mBits) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
     }
 }
 
-#[derive(BitFlags, Copy, Clone, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u16)]
 pub enum ActorTypeFlag {
     RigidStatic = 1,
@@ -844,7 +845,8 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     }
 }
 
-#[derive(Copy, Clone, Debug, BitFlags)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u16)]
 pub enum HitFlag {
     Position = 1 << 0,
@@ -1074,7 +1076,8 @@ pub enum SimulationThreadType {
     Default,
 }
 
-#[derive(BitFlags, Copy, Clone, Debug)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u32)]
 ///  eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
 pub enum SceneFlag {

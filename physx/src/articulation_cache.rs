@@ -14,7 +14,7 @@ use crate::{
     traits::Class,
 };
 
-use enumflags2::BitFlags;
+use enumflags2::bitflags;
 use std::ptr::NonNull;
 
 use physx_sys::{PxArticulationCache, PxArticulationRootLinkData};
@@ -23,7 +23,8 @@ use physx_sys::{PxArticulationCache, PxArticulationRootLinkData};
 // Section ENUMS
 ////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, Clone, Copy, BitFlags)]
+#[bitflags]
+#[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum ArticulationCacheFlag {
     Velocity = 1,

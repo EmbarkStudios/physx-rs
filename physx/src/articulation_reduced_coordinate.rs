@@ -22,7 +22,7 @@ use super::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
     PxArticulationCacheFlags,
@@ -480,11 +480,12 @@ impl PxFlags for ArticulationFlags {
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::new(flags.mBits) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
     }
 }
 
-#[derive(Copy, Clone, Debug, BitFlags)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 pub enum ArticulationFlag {
     FixBase = 1 << 0,

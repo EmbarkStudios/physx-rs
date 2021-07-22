@@ -144,6 +144,9 @@ fn cmake_compile(target_env: Environment) {
         // See: https://github.com/NVIDIAGameWorks/PhysX/issues/321
         .cxxflag("-Wno-alloca")
         .cxxflag("-Wno-anon-enum-enum-conversion")
+        .cxxflag("-Wno-dtor-name")
+        .cxxflag("-Wno-suggest-override")
+        .cxxflag("-Wno-suggest-destructor-override")
         .build();
 
     let lib_dir = locate_output_lib_dir(physx, &target_env.mode);

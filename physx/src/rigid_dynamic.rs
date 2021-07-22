@@ -19,7 +19,7 @@ use crate::{
     traits::{Class, PxFlags, UserData},
 };
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
@@ -51,11 +51,12 @@ impl PxFlags for RigidDynamicLockFlags {
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::new(flags.mBits as u8) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits as u8) }
     }
 }
 
-#[derive(Copy, Clone, Debug, BitFlags)]
+#[bitflags]
+#[derive(Copy, Clone, Debug)]
 #[repr(u8)]
 pub enum RigidDynamicLockFlag {
     LockLinearX = 1 << 0,

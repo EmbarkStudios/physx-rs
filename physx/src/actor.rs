@@ -17,7 +17,7 @@ use crate::{
     rigid_static::RigidStatic,
     traits::{Class, PxFlags},
 };
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use std::marker::PhantomData;
 
@@ -268,7 +268,8 @@ impl From<PxActorType::Enum> for ActorType {
     }
 }
 
-#[derive(Debug, Copy, Clone, BitFlags)]
+#[bitflags]
+#[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 pub enum ActorFlag {
     Visualization = 1,

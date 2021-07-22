@@ -18,7 +18,7 @@ use crate::{
     traits::{Class, PxFlags},
 };
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
     PxForceMode, PxRigidBody, PxRigidBodyFlag, PxRigidBodyFlags, PxRigidBody_addForce_mut,
@@ -52,10 +52,12 @@ impl PxFlags for RigidBodyFlags {
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::new(flags.mBits) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
     }
 }
-#[derive(Debug, Copy, Clone, BitFlags)]
+
+#[bitflags]
+#[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 pub enum RigidBodyFlag {
     Kinematic = 1,

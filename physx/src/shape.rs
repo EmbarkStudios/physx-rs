@@ -14,7 +14,7 @@ use crate::{
     traits::{Class, PxFlags, UserData},
 };
 
-use enumflags2::BitFlags;
+use enumflags2::{bitflags, BitFlags};
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
@@ -26,7 +26,8 @@ use physx_sys::{
 };
 
 /// Layers used for collision/querying of shapes
-#[derive(Debug, Copy, Clone, BitFlags)]
+#[bitflags]
+#[derive(Debug, Copy, Clone)]
 #[repr(u32)]
 pub enum CollisionLayer {
     Ghost = 1,
@@ -47,11 +48,12 @@ impl PxFlags for ShapeFlags {
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::new(flags.mBits as u32) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits as u32) }
     }
 }
 /// Layers used for collision/querying of shapes
-#[derive(Debug, Copy, Clone, BitFlags)]
+#[bitflags]
+#[derive(Debug, Copy, Clone)]
 #[repr(u32)]
 pub enum ShapeFlag {
     SimulationShape = 1u32,
