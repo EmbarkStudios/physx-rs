@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.12.0] - 2021-07-22
 
 ### Changed
 - [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) made [`glam`](https://crates.io/crates/glam) an optional dependency and has been updated. You can enable the `glam` feature to continue to use `glam` with `physx-sys` types.
@@ -138,7 +139,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...HEAD
+[0.12.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...physx-v0.12.0
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...physx-v0.10.0
 [0.9.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.8.0...physx-v0.9.0
