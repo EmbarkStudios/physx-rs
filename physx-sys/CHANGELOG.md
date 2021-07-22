@@ -3,6 +3,9 @@
 <!-- markdownlint-disable MD024 -->
 
 ## [Unreleased]
+### Fixed
+
+- [PR#138](https://github.com/EmbarkStudios/physx-rs/pull/138) silenced the `dtor-name`, `suggest-overrides`, and `suggest-override-destructor` warnings in the cmake build to silence warnings causing [build failures in clang-11+](https://github.com/NVIDIAGameWorks/PhysX/issues/417).
 
 ## [0.4.13] - 2021-05-03
 ### Fixed
