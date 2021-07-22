@@ -2,7 +2,8 @@
 
 <!-- markdownlint-disable MD024 -->
 
-## [Unreleased]
+<!-- next-header -->
+## [Unreleased] - ReleaseDate
 
 ### Changed
 - [PR#129](https://github.com/EmbarkStudios/physx-rs/pull/129) Glam is now an optional dependency and has been updated. You can enable the `glam` feature to continue to use `glam` with `physx-sys` types.
@@ -135,6 +136,7 @@
 - Ability to not run the default filter shader before the callback.
 - Fix for triangle mesh data when using glam with SSE enabled
 
+<!-- next-url -->
 [Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...HEAD
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...physx-v0.10.0
