@@ -922,7 +922,7 @@ impl From<PxPruningStructureType::Enum> for PruningStructureType {
             PxPruningStructureType::eNONE => PruningStructureType::None,
             PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAabbTree,
             PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAabbTree,
-            _ => unimplemented!("Invalid enum variant."),
+            _ => unreachable!("Invalid enum variant."),
         }
     }
 }
@@ -965,7 +965,7 @@ impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
             PxPairFilteringMode::eKILL => PairFilteringMode::Kill,
             // eDEFAULT has the same integer value as eSUPPRESS so it will get caught by that branch
             //PxPairFilteringMode::eDEFAULT => PairFilteringMode::Suppress,
-            _ => unimplemented!("Invalid enum variant."),
+            _ => unreachable!("Invalid enum variant."),
         }
     }
 }
