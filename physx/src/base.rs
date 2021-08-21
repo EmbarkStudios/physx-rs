@@ -67,7 +67,6 @@ pub enum ConcreteType {
 impl From<u16> for ConcreteType {
     fn from(val: u16) -> Self {
         match val {
-            0 => ConcreteType::Undefined,
             1 => ConcreteType::Heightfield,
             2 => ConcreteType::ConvexMesh,
             3 => ConcreteType::TriangleMeshBvh33,

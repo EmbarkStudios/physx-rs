@@ -60,7 +60,7 @@ impl From<PxCombineMode::Enum> for CombineMode {
             PxCombineMode::eMIN => CombineMode::Min,
             PxCombineMode::eMULTIPLY => CombineMode::Multiply,
             PxCombineMode::eMAX => CombineMode::Max,
-            _ => unimplemented!("Invalid enum variant: {:?}.", mode),
+            _ => unreachable!("Invalid enum variant: {:?}.", mode),
         }
     }
 }

@@ -89,7 +89,7 @@ impl From<PxRigidDynamicLockFlag::Enum> for RigidDynamicLockFlag {
             PxRigidDynamicLockFlag::eLOCK_ANGULAR_X => RigidDynamicLockFlag::LockAngularX,
             PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y => RigidDynamicLockFlag::LockAngularY,
             PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z => RigidDynamicLockFlag::LockAngularZ,
-            _ => unimplemented!("Invalid enum variant."),
+            _ => unreachable!("Invalid enum variant."),
         }
     }
 }
