@@ -4,12 +4,23 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+### Changed
+
+- [PR#140](https://github.com/EmbarkStudios/physx-rs/pull/140) updated to Embark lint v0.4, though we allow several clippy lints at the moment due to how endemic a few of them are.
+
+### Fixed
+
+- [PR#140](https://github.com/EmbarkStudios/physx-rs/pull/140) updated the C++ code to fix several `unused-but-set-variable` errors when compiling with clang-13.
+
 ## [0.4.14] - 2021-07-22
+
 ### Fixed
 
 - [PR#138](https://github.com/EmbarkStudios/physx-rs/pull/138) silenced the `dtor-name`, `suggest-overrides`, and `suggest-override-destructor` warnings in the cmake build to silence warnings causing [build failures in clang-11+](https://github.com/NVIDIAGameWorks/PhysX/issues/417).
 
 ## [0.4.13] - 2021-05-03
+
 ### Fixed
 
 - [PR#135](https://github.com/EmbarkStudios/physx-rs/pull/135) Update PhysX submodule with ARM64 buildfix for Xcode 14.5
