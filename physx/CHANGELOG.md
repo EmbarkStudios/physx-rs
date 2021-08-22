@@ -4,6 +4,11 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+### Changed
+
+- [PR#140](https://github.com/EmbarkStudios/physx-rs/pull/140) updated to Embark lints v0.4, though we allow several clippy lints at the moment due to how endemic a few of them are.
+
 ## [0.12.0] - 2021-07-22
 
 ### Changed
