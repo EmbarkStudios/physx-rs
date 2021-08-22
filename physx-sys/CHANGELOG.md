@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.4.15] - 2021-08-22
 
 ### Changed
 
@@ -114,7 +115,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.14...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...HEAD
+[0.4.15]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.14...physx-sys-v0.4.15
 [0.4.14]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.13...physx-sys-v0.4.14
 [0.4.13]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.12...physx-sys-v0.4.13
 [0.4.12]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.11...physx-sys-v0.4.12
