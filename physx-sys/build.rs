@@ -139,7 +139,7 @@ fn main() {
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
-        let mut structgen = if target.starts_with("aarch64-") {
+        let mut structgen = if target == "aarch64-linux-android" {
             let mut structgen = std::process::Command::new("qemu-aarch64");
             structgen.arg(&structgen_path);
             structgen
@@ -163,6 +163,9 @@ fn main() {
             }
             nix if nix.starts_with("x86_64-unknown-linux") => {
                 include.push("x86_64-unknown-linux");
+            }
+            nix if nix.starts_with("aarch64-unknown-linux") => {
+                include.push("aarch64-unknown-linux");
             }
             _ => panic!("unknown TARGET triple '{}'", target),
         }
