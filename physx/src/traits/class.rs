@@ -20,8 +20,10 @@ use physx_sys::{
     PxHeightField,
     PxJoint,
     PxMaterial,
+    PxOverlapCallback,
     PxPrismaticJoint,
     PxPruningStructure,
+    PxRaycastCallback,
     PxRevoluteJoint,
     PxRigidActor,
     PxRigidBody,
@@ -29,6 +31,7 @@ use physx_sys::{
     PxRigidStatic,
     PxShape,
     PxSphericalJoint,
+    PxSweepCallback,
     PxTriangleMesh,
     PxVehicleDrive,
     PxVehicleDrive4W,
@@ -195,6 +198,10 @@ DeriveClass!(PxVec3);
 DeriveClass!(PxExtendedVec3);
 DeriveClass!(PxMeshScale);
 DeriveClass!(PxBounds3);
+
+DeriveClass!(PxRaycastCallback);
+DeriveClass!(PxSweepCallback);
+DeriveClass!(PxOverlapCallback);
 
 DeriveClass!(PxArticulationCache);
 

@@ -325,6 +325,15 @@ pub struct FilterShaderCallbackInfo {
 
 pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
 
+pub type RaycastProcessTouchesCallback =
+    unsafe extern "C" fn(*const PxRaycastHit, u32, *mut c_void) -> bool;
+pub type SweepProcessTouchesCallback =
+    unsafe extern "C" fn(*const PxSweepHit, u32, *mut c_void) -> bool;
+pub type OverlapProcessTouchesCallback =
+    unsafe extern "C" fn(*const PxOverlapHit, u32, *mut c_void) -> bool;
+
+pub type FinalizeQueryCallback = unsafe extern "C" fn(*mut c_void);
+
 pub type AllocCallback =
     unsafe extern "C" fn(u64, *const c_void, *const c_void, u32, *const c_void) -> *mut c_void;
 
@@ -350,6 +359,36 @@ extern "C" {
         callback: RaycastHitCallback,
         userdata: *mut c_void,
     ) -> *mut PxQueryFilterCallback;
+
+    pub fn create_raycast_buffer() -> *mut PxRaycastCallback;
+    pub fn create_sweep_buffer() -> *mut PxSweepCallback;
+    pub fn create_overlap_buffer() -> *mut PxOverlapCallback;
+
+    pub fn create_raycast_callback(
+        process_touches_callback: RaycastProcessTouchesCallback,
+        finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxRaycastHit,
+        num_touches: u32,
+        userdata: *mut c_void,
+    ) -> *mut PxRaycastCallback;
+    pub fn create_sweep_callback(
+        process_touches_callback: SweepProcessTouchesCallback,
+        finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxSweepHit,
+        num_touches: u32,
+        userdata: *mut c_void,
+    ) -> *mut PxSweepCallback;
+    pub fn create_overlap_callback(
+        process_touches_callback: OverlapProcessTouchesCallback,
+        finalize_query_callback: FinalizeQueryCallback,
+        touches_buffer: *mut PxOverlapHit,
+        num_touches: u32,
+        userdata: *mut c_void,
+    ) -> *mut PxOverlapCallback;
+
+    pub fn delete_raycast_callback(callback: *mut PxRaycastCallback);
+    pub fn delete_sweep_callback(callback: *mut PxSweepCallback);
+    pub fn delete_overlap_callback(callback: *mut PxOverlapCallback);
 
     pub fn create_alloc_callback(
         alloc_callback: AllocCallback,

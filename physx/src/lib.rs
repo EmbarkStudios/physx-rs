@@ -202,6 +202,7 @@ pub mod material;
 pub mod owner;
 pub mod physics;
 pub mod pruning_structure;
+pub mod query;
 pub mod rigid_actor;
 pub mod rigid_body;
 pub mod rigid_dynamic;
