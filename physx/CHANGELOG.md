@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.12.1] - 2021-08-22
 
 ### Changed
 
@@ -144,7 +145,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...HEAD
+[0.12.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...physx-v0.12.1
 [0.12.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...physx-v0.12.0
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.9.0...physx-v0.10.0
