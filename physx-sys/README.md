@@ -1,4 +1,8 @@
+<div align="center">
+
 # 🎳 physx-sys
+
+**Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://github.com/NVIDIAGameWorks/PhysX) C++ API.**
 
 ![Build Status](https://github.com/EmbarkStudios/physx-rs/workflows/CI/badge.svg)
 [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys)
@@ -7,7 +11,7 @@
 [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](http://embark.games)
 [![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
 
-Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://github.com/NVIDIAGameWorks/PhysX) C++ API.
+</div>
 
 Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) containing a work-in-progress safe wrapper.
 
@@ -15,11 +19,11 @@ Please also see the [repository](https://github.com/EmbarkStudios/physx-rs) cont
 
 [Tomasz Stachowiak](https://github.com/h3r2tic) did a presentation at the Stockholm Rust Meetup on October 2019 about this project that goes through the technical details of how C++ to Rust bindings of `physx-sys` works:
 
-[![](http://img.youtube.com/vi/RxtXGeDHu0w/0.jpg)](http://www.youtube.com/watch?v=RxtXGeDHu0w "An unholy fusion of Rust and C++ in physx-rs (Stockholm Rust Meetup, October 2019)")
+[![An unholy fusion of Rust and C++ in physx-rs (Stockholm Rust Meetup, October 2019)](http://img.youtube.com/vi/RxtXGeDHu0w/0.jpg)](http://www.youtube.com/watch?v=RxtXGeDHu0w)
 
 ## Basic usage
 
-```Rust
+```rust
 unsafe {
     let foundation = physx_create_foundation();
     let physics = physx_create_physics(foundation);
@@ -48,7 +52,7 @@ unsafe {
 
 A simple example to showcase how to use physx-sys. It can be run with `cargo run --examples ball`.
 
-```
+```txt
  o
 
   o
@@ -90,12 +94,12 @@ Steps *2..4* are performed completely automatically from within `build.rs`, whil
 
 Licensed under either of
 
-* Apache License, Version 2.0, ([LICENSE-APACHE](../LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](../LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
 
 at your option.
 
-Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has it's [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
+Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
 
 ### Contribution
 
