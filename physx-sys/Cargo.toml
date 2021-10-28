@@ -2,8 +2,11 @@
 name = "physx-sys"
 description = "Unsafe bindings for NVIDIA PhysX C++ SDK"
 version = "0.4.15"
-authors = ["Embark <opensource@embark-studios.com>", "Tomasz Stachowiak <h3@h3.gd>"]
-license = "MIT OR Apache-2.0"
+authors = [
+    "Embark <opensource@embark-studios.com>",
+    "Tomasz Stachowiak <h3@h3.gd>",
+]
+license = "(MIT OR Apache-2.0) AND BSD-3-Clause"
 repository = "https://github.com/EmbarkStudios/physx-rs"
 edition = "2018"
 build = "build.rs"
