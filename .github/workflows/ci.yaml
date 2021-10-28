@@ -186,5 +186,4 @@ jobs:
           CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
           CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
           AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
-        uses: actions-rs/cargo@v1
         run: cargo build --target aarch64-linux-android --release
