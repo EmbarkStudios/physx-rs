@@ -62,7 +62,7 @@ jobs:
       - name: ball no features
         run: cargo run --example ball
       - name: ball just cmake
-        run: cargo run --manifest-path physx/Cargo.toml --exmaple ball_physx --features use-cmake
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
       - name: ball just structgen
         run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen
 
@@ -92,7 +92,7 @@ jobs:
       - name: ball no features
         run: cargo run --example ball --release
       - name: ball just cmake
-        run: cargo run --manifest-path physx/Cargo.toml --exmaple ball_physx --features use-cmake --release
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake --release
       - name: ball just structgen
         run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
 
