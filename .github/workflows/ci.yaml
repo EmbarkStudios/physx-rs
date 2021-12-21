@@ -1,13 +1,22 @@
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+
 name: CI
 env:
   ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk-bundle
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -15,163 +24,113 @@ jobs:
 
       # make sure all code has been formatted with rustfmt
       - run: rustup component add rustfmt
-      - run: git submodule update --init
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check --color always
+      - run: cargo fmt -- --check --color always
 
       # run clippy to verify we have no warnings
       - run: rustup component add clippy
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --all-features -- -D warnings
+      - run: cargo clippy --all-features --all-targets -- -D warnings
 
   cargo-deny:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: EmbarkStudios/cargo-deny-action@v1
 
   test_debug:
     name: Test (Debug)
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-20.04, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.7.app
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
-      - name: cargo fetch
-        uses: actions-rs/cargo@v1
-        with:
-          command: fetch
+      - run: cargo fetch
       - name: test - no features
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
       - name: test - cmake + structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features
+        run: cargo test --all-features
       - name: ball cmake + structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example ball --all-features
+        run: cargo run --example ball --all-features
       - name: ball no features
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example ball
+        run: cargo run --example ball
       - name: ball just cmake
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
       - name: ball just structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --manifest-path physx/Cargo.toml --example ball_physx --features structgen
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen
 
   test_release:
     name: Test (Release)
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-20.04, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.7.app
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
-      - name: cargo fetch
-        uses: actions-rs/cargo@v1
-        with:
-          command: fetch
+      - run: cargo fetch
       - name: test - no features
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --release
+        run: cargo test --release
       - name: test - cmake + structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --all-features --release
+        run: cargo test --all-features --release
       - name: ball cmake + structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example ball --all-features --release
+        run: cargo run --example ball --all-features --release
       - name: ball no features
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --example ball --release
+        run: cargo run --example ball --release
       - name: ball just cmake
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake --release
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake --release
       - name: ball just structgen
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
+        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
 
   package:
     name: Package
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macOS-latest]
+        os: [ubuntu-20.04, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.7.app
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
-      - uses: actions-rs/cargo@v1
-        with:
-          command: package
-          args: --manifest-path ./physx-sys/Cargo.toml
+      - run: cargo package --manifest-path ./physx-sys/Cargo.toml
 
   structgen:
     name: Structgen
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019, macOS-latest]
+        os: [ubuntu-20.04, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_11.7.app
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path ./physx-sys/Cargo.toml --features structgen
+      - run: cargo build --manifest-path ./physx-sys/Cargo.toml --features structgen
       - name: Upload
         shell: bash
         run: |
@@ -189,84 +148,42 @@ jobs:
 
   build_android_debug:
     name: Build (Debug) (aarch64-linux-android)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
       - run: rustup target add aarch64-linux-android
-      - name: cargo fetch
-        uses: actions-rs/cargo@v1
-        with:
-          command: fetch
+      - run: cargo fetch
       - name: build - no features
         env:
           LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
           CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
           CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
           AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target aarch64-linux-android
+        run: cargo build --target aarch64-linux-android
 
   build_android_release:
     name: Build (Release) (aarch64-linux-android)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      - run: git submodule update --init
       - run: rustup target add aarch64-linux-android
-      - name: cargo fetch
-        uses: actions-rs/cargo@v1
-        with:
-          command: fetch
+      - run: cargo fetch
       - name: build - no features
         env:
           LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
           CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
           CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
           AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --target aarch64-linux-android --release
-#  android_structgen:
-#    name: Structgen (aarch64-linux-android)
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v1
-#      - uses: actions-rs/toolchain@v1
-#        with:
-#          toolchain: stable
-#          override: true
-#      - run: git submodule update --init
-#      - run: rustup target add aarch64-linux-android
-#      - run: sudo apt-get install libclang-9-dev
-#      - name: build & run pxbind
-#        env:
-#          LD_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
-#          CC_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang
-#          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
-#          AR_aarch64_linux_android: ${{env.ANDROID_NDK_ROOT }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ar
-#        run: export CC=/usr/bin/clang && export CXX=/usr/bin/clang++ && cd physx-sys/pxbind && ./build.sh && echo build succeeded && ./run_android.sh
-#      - name: Upload
-#        shell: bash
-#        run: |
-#          # Copy the structgen output to a deterministic location
-#          rs=$(find physx-sys/src/ -name physx_generated.rs)
-#          hpp=$(find physx-sys/src/ -name physx_generated.hpp)
-#          mkdir ./structgen
-#          cp $rs ./structgen/structgen.rs
-#          cp $hpp ./structgen/structgen_out.hpp
-#      - uses: actions/upload-artifact@v1
-#        with:
-#          name: structgen-aarch64-linux-android
-#          path: structgen
+        run: cargo build --target aarch64-linux-android --release
