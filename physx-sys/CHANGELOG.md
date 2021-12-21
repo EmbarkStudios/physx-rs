@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.4.16] - 2021-12-21
 ### Fixed
 
 - [PR#142](https://github.com/EmbarkStudios/physx-rs/pull/141) added the license texts to the crate, and added a note in the README about how to clarify the licenses in cargo deny until crates.io supports parentheses in license expressions.
@@ -120,7 +121,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...HEAD
+[0.4.16]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...physx-sys-v0.4.16
 [0.4.15]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.14...physx-sys-v0.4.15
 [0.4.14]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.13...physx-sys-v0.4.14
 [0.4.13]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.12...physx-sys-v0.4.13
