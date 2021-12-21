@@ -4,6 +4,10 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Fixed
+
+- [PR#142](https://github.com/EmbarkStudios/physx-rs/pull/141) added the license texts to the crate, and added a note in the README about how to clarify the licenses in cargo deny until crates.io supports parentheses in license expressions.
+
 ## [0.4.15] - 2021-08-22
 
 ### Changed

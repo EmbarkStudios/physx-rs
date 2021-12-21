@@ -101,6 +101,15 @@ at your option.
 
 Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
 
+If you use [`cargo deny`](https://github.com/EmbarkStudios/cargo-deny), you can use this clarification in your configuration, at least until [crates.io supports parentheses](https://github.com/rust-lang/crates.io/issues/2595).
+
+```ini
+[[licenses.clarify]]
+name = "physx-sys"
+expression = "(MIT OR Apache-2.0) AND BSD-3-Clause"
+license-files = [{ path = "LICENSE", hash = 0xe326546e }]
+```
+
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally

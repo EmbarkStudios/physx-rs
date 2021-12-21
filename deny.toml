@@ -27,3 +27,8 @@ allow-osi-fsf-free = "neither"
 # We want really high confidence when inferring licenses from text
 confidence-threshold = 0.92
 allow = ["Apache-2.0", "BSD-3-Clause", "MIT"]
+
+[[licenses.clarify]]
+name = "physx-sys"
+expression = "(MIT OR Apache-2.0) AND BSD-3-Clause"
+license-files = [{ path = "LICENSE", hash = 0xe326546e }]
