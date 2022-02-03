@@ -16,6 +16,8 @@ mod vec3;
 pub use vec3::PxVec3;
 #[cfg(feature = "glam")]
 mod glam;
+#[cfg(feature = "glam")]
+pub use glam::*;
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
