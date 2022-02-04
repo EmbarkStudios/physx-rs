@@ -15,9 +15,7 @@ pub use quat::PxQuat;
 mod vec3;
 pub use vec3::PxVec3;
 #[cfg(feature = "glam")]
-pub mod glam;
-#[cfg(feature = "glam")]
-pub use self::glam::*;
+mod glam;
 
 #[derive(Copy, Clone)]
 #[repr(transparent)]
