@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- [PR#146](https://github.com/EmbarkStudios/physx-rs/pull/146) updated the optional glam dependency to 0.20.
+
 ## [0.12.1] - 2021-08-22
 
 ### Changed
