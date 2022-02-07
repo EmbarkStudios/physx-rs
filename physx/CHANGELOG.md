@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.12.2] - 2022-02-07
 
 - [PR#146](https://github.com/EmbarkStudios/physx-rs/pull/146) updated the optional glam dependency to 0.20.
 
@@ -148,7 +149,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...HEAD
+[0.12.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...physx-v0.12.2
 [0.12.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...physx-v0.12.1
 [0.12.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...physx-v0.12.0
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.10.0...physx-v0.11.0
