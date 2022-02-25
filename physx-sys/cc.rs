@@ -237,14 +237,18 @@ fn add_common(ctx: &mut Context) {
     if ccenv.target_os == "android" {
         builder.define("ANDROID", None);
         let ndk_path = PathBuf::from(
-            env::var("ANDROID_NDK_ROOT").expect("environment variable \"ANDROID_NDK_ROOT\" has not been set"),
+            env::var("ANDROID_NDK_ROOT")
+                .expect("environment variable \"ANDROID_NDK_ROOT\" has not been set"),
         );
         let host_str = ccenv.host.as_str();
         let ndk_toolchain = match host_str {
             "x86_64-pc-windows-msvc" => "windows-x86_64",
             "x86_64-unknown-linux-gnu" => "linux-x86_64",
             "x86_64-apple-darwin" => "darwin-x86_64",
-            _ => panic!("Host triple {} is unsupported for cross-compilation to Android", host_str),
+            _ => panic!(
+                "Host triple {} is unsupported for cross-compilation to Android",
+                host_str
+            ),
         };
         let sysroot_path = ndk_path
             .join("toolchains/llvm/prebuilt")

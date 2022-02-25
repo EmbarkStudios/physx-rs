@@ -46,7 +46,7 @@ fn main() {
     let compiler = {
         env::var(&format!("CXX_{}", target))
             .or_else(|_| {
-                let target_under = target.replace("-", "_");
+                let target_under = target.replace('-', "_");
                 env::var(&format!("CXX_{}", target_under))
             })
             .or_else(|_| env::var("TARGET_CXX"))
