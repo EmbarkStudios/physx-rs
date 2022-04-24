@@ -6,7 +6,6 @@
 Wrapper interface for PxPhysics
  */
 
-#![allow(clippy::not_unsafe_ptr_arg_deref)]
 #![allow(clippy::missing_safety_doc)]
 
 use crate::{
