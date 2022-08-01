@@ -28,6 +28,8 @@ allow-osi-fsf-free = "neither"
 confidence-threshold = 0.92
 allow = ["Apache-2.0", "BSD-3-Clause", "MIT"]
 
+exceptions = [{ allow = ["Unicode-DFS-2016"], name = "unicode-ident" }]
+
 [[licenses.clarify]]
 name = "physx-sys"
 expression = "(MIT OR Apache-2.0) AND BSD-3-Clause"
