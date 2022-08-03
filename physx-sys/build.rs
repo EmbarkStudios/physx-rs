@@ -139,7 +139,9 @@ fn main() {
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
-        let mut structgen = if target.starts_with("aarch64-") {
+        // A bit hacky and might not work in all scenarios but qemu-aarch64 is not always
+        // available or even needed.
+        let mut structgen = if target != host && target.starts_with("aarch64-") {
             let mut structgen = std::process::Command::new("qemu-aarch64");
             structgen.arg(&structgen_path);
             structgen
