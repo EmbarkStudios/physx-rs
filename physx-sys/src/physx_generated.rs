@@ -45,17 +45,23 @@ pub const eVELOCITY: Enum = 1u64 as u32;
 pub const eACCELERATION: Enum = 2u64 as u32;
 pub const ePOSITION: Enum = 4u64 as u32;
 pub const eFORCE: Enum = 8u64 as u32;
-pub const eROOT: Enum = 16u64 as u32;
-pub const eALL: Enum = 23u64 as u32;
+pub const eLINKVELOCITY: Enum = 16u64 as u32;
+pub const eLINKACCELERATION: Enum = 32u64 as u32;
+pub const eROOT: Enum = 64u64 as u32;
+pub const eALL: Enum = 119u64 as u32;
 }
 pub mod PxArticulationDriveType{
 pub type Enum = u32;
 pub const eFORCE: Enum = 0u64 as u32;
 pub const eACCELERATION: Enum = 1u64 as u32;
+pub const eTARGET: Enum = 2u64 as u32;
+pub const eVELOCITY: Enum = 3u64 as u32;
+pub const eNONE: Enum = 4u64 as u32;
 }
 pub mod PxArticulationFlag{
 pub type Enum = u32;
 pub const eFIX_BASE: Enum = 1u64 as u32;
+pub const eDRIVE_LIMITS_ARE_FORCES: Enum = 2u64 as u32;
 }
 pub mod PxArticulationJointDriveType{
 pub type Enum = u32;
@@ -866,6 +872,10 @@ pub const eNORM_TIRE_LAT_FORCE: Enum = 9u64 as u32;
 pub const eNORM_TIRE_ALIGNING_MOMENT: Enum = 10u64 as u32;
 pub const eMAX_NB_WHEEL_CHANNELS: Enum = 11u64 as u32;
 }
+pub mod PxVehicleWheelsSimFlag{
+pub type Enum = u32;
+pub const eLIMIT_SUSPENSION_EXPANSION_VELOCITY: Enum = 1u64 as u32;
+}
 pub mod PxVisualizationParameter{
 pub type Enum = u32;
 pub const eSCALE: Enum = 0u64 as u32;
@@ -1222,7 +1232,7 @@ pub struct PxPvd{
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRigidDynamicLockFlags{
-    pub mBits: u16,
+    pub mBits: u8,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1377,7 +1387,7 @@ pub struct PxTypedStridedData_physx_PxMaterialTableIndex_{
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub union Anonymous216{
+pub union Anonymous217{
     pub mBVH33Desc: PxBVH33MidphaseDesc,
     pub mBVH34Desc: PxBVH34MidphaseDesc,
 }
@@ -1477,6 +1487,11 @@ pub struct PxFixedSizeLookupTable_eMAX_NB_ENGINE_TORQUE_CURVE_ENTRIES_{
 #[repr(C)]
 pub struct PxVehicleWheels4SimData{
     pxbind_dummy: u8
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVehicleWheelsSimFlags{
+    pub mBits: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -2164,6 +2179,8 @@ pub fn PxArticulationReducedCoordinate_getNbLoopJoints(self_: *const PxArticulat
 pub fn PxArticulationReducedCoordinate_getLoopJoints(self_: *const PxArticulationReducedCoordinate, userBuffer: *mut *mut PxJoint, bufferSize: u32, startIndex: u32, ) -> u32;
 pub fn PxArticulationReducedCoordinate_getCoefficientMatrixSize(self_: *const PxArticulationReducedCoordinate, ) -> u32;
 pub fn PxArticulationReducedCoordinate_teleportRootLink_mut(self_: *mut PxArticulationReducedCoordinate, pose: *const PxTransform, autowake: bool, ) -> ();
+pub fn PxArticulationReducedCoordinate_getLinkVelocity_mut(self_: *mut PxArticulationReducedCoordinate, linkId: u32, ) -> PxSpatialVelocity;
+pub fn PxArticulationReducedCoordinate_getLinkAcceleration_mut(self_: *mut PxArticulationReducedCoordinate, linkId: u32, ) -> PxSpatialVelocity;
 pub fn PxArticulationJointBase_getParentArticulationLink(self_: *const PxArticulationJointBase, ) -> *mut PxArticulationLink;
 pub fn PxArticulationJointBase_setParentPose_mut(self_: *mut PxArticulationJointBase, pose: *const PxTransform, ) -> ();
 pub fn PxArticulationJointBase_getParentPose(self_: *const PxArticulationJointBase, ) -> PxTransform;
@@ -3220,6 +3237,8 @@ pub fn PxVehicleWheelsSimData_enableWheel_mut(self_: *mut PxVehicleWheelsSimData
 pub fn PxVehicleWheelsSimData_getIsWheelDisabled(self_: *const PxVehicleWheelsSimData, wheel: u32, ) -> bool;
 pub fn PxVehicleWheelsSimData_setSubStepCount_mut(self_: *mut PxVehicleWheelsSimData, thresholdLongitudinalSpeed: f32, lowForwardSpeedSubStepCount: u32, highForwardSpeedSubStepCount: u32, ) -> ();
 pub fn PxVehicleWheelsSimData_setMinLongSlipDenominator_mut(self_: *mut PxVehicleWheelsSimData, minLongSlipDenominator: f32, ) -> ();
+pub fn PxVehicleWheelsSimData_setFlags_mut(self_: *mut PxVehicleWheelsSimData, flags: PxVehicleWheelsSimFlags, ) -> ();
+pub fn PxVehicleWheelsSimData_getFlags(self_: *const PxVehicleWheelsSimData, ) -> PxVehicleWheelsSimFlags;
 pub fn PxVehicleWheelsSimData_new_alloc(anonymous_arg0: PxEMPTY, ) -> *mut PxVehicleWheelsSimData;
 pub fn PxVehicleWheelsSimData_getBinaryMetaData_mut(stream: *mut PxOutputStream, ) -> ();
 pub fn PxVehicleWheelsSimData_getNbWheels4(self_: *const PxVehicleWheelsSimData, ) -> u32;

@@ -573,6 +573,15 @@ pub struct PxSpatialForce {
 #[test] fn check_size_PxSpatialForce() { assert_eq!(std::mem::size_of::<PxSpatialForce>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
+pub struct PxSpatialVelocity {
+    pub linear: PxVec3,
+    pub pad0: f32,
+    pub angular: PxVec3,
+    pub pad1: f32,
+}
+#[test] fn check_size_PxSpatialVelocity() { assert_eq!(std::mem::size_of::<PxSpatialVelocity>(), 32); }
+#[derive(Clone, Copy)]
+#[repr(C)]
 pub struct PxArticulationRootLinkData {
     pub transform: PxTransform,
     pub worldLinVel: PxVec3,
@@ -591,14 +600,15 @@ pub struct PxArticulationCache {
     pub jointAcceleration: *mut f32,
     pub jointPosition: *mut f32,
     pub jointForce: *mut f32,
-    pub structgen_pad0: [u8; 16],
+    pub linkVelocity: *mut PxSpatialVelocity,
+    pub linkAcceleration: *mut PxSpatialVelocity,
     pub rootLinkData: *mut PxArticulationRootLinkData,
     pub coefficientMatrix: *mut f32,
     pub lambda: *mut f32,
     pub scratchMemory: *mut std::ffi::c_void,
     pub scratchAllocator: *mut std::ffi::c_void,
     pub version: u32,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 4],
 }
 #[test] fn check_size_PxArticulationCache() { assert_eq!(std::mem::size_of::<PxArticulationCache>(), 120); }
 #[derive(Clone, Copy)]

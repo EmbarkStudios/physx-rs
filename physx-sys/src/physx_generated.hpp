@@ -84,6 +84,7 @@ static_assert(sizeof(physx::PxConstraintAllocator) == sizeof(physx_PxConstraintA
 static_assert(sizeof(physx::PxTGSSolverBodyVel) == sizeof(physx_PxTGSSolverBodyVel_Pod), "POD wrapper for physx::PxTGSSolverBodyVel has incorrect size.");
 static_assert(sizeof(physx::PxTGSSolverBodyData) == sizeof(physx_PxTGSSolverBodyData_Pod), "POD wrapper for physx::PxTGSSolverBodyData has incorrect size.");
 static_assert(sizeof(physx::PxSpatialForce) == sizeof(physx_PxSpatialForce_Pod), "POD wrapper for physx::PxSpatialForce has incorrect size.");
+static_assert(sizeof(physx::PxSpatialVelocity) == sizeof(physx_PxSpatialVelocity_Pod), "POD wrapper for physx::PxSpatialVelocity has incorrect size.");
 static_assert(sizeof(physx::PxArticulationRootLinkData) == sizeof(physx_PxArticulationRootLinkData_Pod), "POD wrapper for physx::PxArticulationRootLinkData has incorrect size.");
 static_assert(sizeof(physx::PxArticulationCache) == sizeof(physx_PxArticulationCache_Pod), "POD wrapper for physx::PxArticulationCache has incorrect size.");
 static_assert(sizeof(physx::PxArticulationReducedCoordinate) == sizeof(physx_PxArticulationReducedCoordinate_Pod), "POD wrapper for physx::PxArticulationReducedCoordinate has incorrect size.");
@@ -4670,6 +4671,22 @@ void PxArticulationReducedCoordinate_teleportRootLink_mut(physx_PxArticulationRe
 physx::PxArticulationReducedCoordinate* self_ = reinterpret_cast<physx::PxArticulationReducedCoordinate*>(self__pod);
 physx::PxTransform const& pose = reinterpret_cast<physx::PxTransform const&>(*pose_pod);
 self_->teleportRootLink(pose, autowake);
+}
+
+physx_PxSpatialVelocity_Pod PxArticulationReducedCoordinate_getLinkVelocity_mut(physx_PxArticulationReducedCoordinate_Pod* self__pod, uint32_t linkId) {
+physx::PxArticulationReducedCoordinate* self_ = reinterpret_cast<physx::PxArticulationReducedCoordinate*>(self__pod);
+physx::PxSpatialVelocity returnValue = self_->getLinkVelocity(linkId);
+physx_PxSpatialVelocity_Pod returnValue_pod;
+memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
+return returnValue_pod;
+}
+
+physx_PxSpatialVelocity_Pod PxArticulationReducedCoordinate_getLinkAcceleration_mut(physx_PxArticulationReducedCoordinate_Pod* self__pod, uint32_t linkId) {
+physx::PxArticulationReducedCoordinate* self_ = reinterpret_cast<physx::PxArticulationReducedCoordinate*>(self__pod);
+physx::PxSpatialVelocity returnValue = self_->getLinkAcceleration(linkId);
+physx_PxSpatialVelocity_Pod returnValue_pod;
+memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
+return returnValue_pod;
 }
 
 physx_PxArticulationLink_Pod* PxArticulationJointBase_getParentArticulationLink(physx_PxArticulationJointBase_Pod const* self__pod) {
@@ -11709,6 +11726,21 @@ self_->setSubStepCount(thresholdLongitudinalSpeed, lowForwardSpeedSubStepCount, 
 void PxVehicleWheelsSimData_setMinLongSlipDenominator_mut(physx_PxVehicleWheelsSimData_Pod* self__pod, float minLongSlipDenominator) {
 physx::PxVehicleWheelsSimData* self_ = reinterpret_cast<physx::PxVehicleWheelsSimData*>(self__pod);
 self_->setMinLongSlipDenominator(minLongSlipDenominator);
+}
+
+void PxVehicleWheelsSimData_setFlags_mut(physx_PxVehicleWheelsSimData_Pod* self__pod, physx_PxVehicleWheelsSimFlags_Pod flags_pod) {
+physx::PxVehicleWheelsSimData* self_ = reinterpret_cast<physx::PxVehicleWheelsSimData*>(self__pod);
+physx::PxVehicleWheelsSimFlags flags;
+memcpy(&flags, &flags_pod, sizeof(flags));
+self_->setFlags(flags);
+}
+
+physx_PxVehicleWheelsSimFlags_Pod PxVehicleWheelsSimData_getFlags(physx_PxVehicleWheelsSimData_Pod const* self__pod) {
+physx::PxVehicleWheelsSimData const* self_ = reinterpret_cast<physx::PxVehicleWheelsSimData const*>(self__pod);
+physx::PxVehicleWheelsSimFlags returnValue = self_->getFlags();
+physx_PxVehicleWheelsSimFlags_Pod returnValue_pod;
+memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
+return returnValue_pod;
 }
 
 physx_PxVehicleWheelsSimData_Pod* PxVehicleWheelsSimData_new_alloc(unsigned int anonymous_arg0_pod) {

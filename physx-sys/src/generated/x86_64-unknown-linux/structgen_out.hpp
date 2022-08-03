@@ -493,6 +493,12 @@ struct physx_PxSpatialForce_Pod {
     physx_PxVec3_Pod torque;
     float pad1;
 };
+struct physx_PxSpatialVelocity_Pod {
+    physx_PxVec3_Pod linear;
+    float pad0;
+    physx_PxVec3_Pod angular;
+    float pad1;
+};
 struct physx_PxArticulationRootLinkData_Pod {
     physx_PxTransform_Pod transform;
     physx_PxVec3_Pod worldLinVel;
@@ -508,14 +514,15 @@ struct physx_PxArticulationCache_Pod {
     float* jointAcceleration;
     float* jointPosition;
     float* jointForce;
-    char structgen_pad0[16];
+    physx_PxSpatialVelocity_Pod* linkVelocity;
+    physx_PxSpatialVelocity_Pod* linkAcceleration;
     physx_PxArticulationRootLinkData_Pod* rootLinkData;
     float* coefficientMatrix;
     float* lambda;
     void* scratchMemory;
     void* scratchAllocator;
     uint32_t version;
-    char structgen_pad1[4];
+    char structgen_pad0[4];
 };
 struct physx_PxArticulationReducedCoordinate_Pod {
     char structgen_pad0[8];
@@ -836,7 +843,7 @@ struct physx_PxPvd_Pod {
     void* vtable_;
 };
 struct physx_PxRigidDynamicLockFlags_Pod {
-    uint16_t mBits;
+    unsigned char mBits;
 };
 struct physx_PxSimulationStatistics_Pod {
     uint32_t nbActiveConstraints;
@@ -1241,7 +1248,7 @@ struct physx_PxBVH33MidphaseDesc_Pod {
 struct physx_PxBVH34MidphaseDesc_Pod {
     uint32_t numPrimsPerLeaf;
 };
-struct Anonymous216_Pod {
+struct Anonymous217_Pod {
     physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;
     physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;
 };
@@ -1589,6 +1596,9 @@ struct physx_PxVehicleTireData_Pod {
 struct physx_PxVehicleWheels4SimData_Pod;
 struct physx_PxVehicleWheelsSimData_Pod {
     char structgen_pad0[96];
+};
+struct physx_PxVehicleWheelsSimFlags_Pod {
+    uint32_t mBits;
 };
 struct physx_PxVehicleWheels4DynData_Pod;
 struct physx_PxVehicleTireForceCalculator_Pod;

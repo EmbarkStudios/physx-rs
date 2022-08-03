@@ -45,13 +45,11 @@ impl PxFlags for RigidDynamicLockFlags {
     type Target = PxRigidDynamicLockFlags;
 
     fn into_px(self) -> Self::Target {
-        PxRigidDynamicLockFlags {
-            mBits: self.bits() as u16,
-        }
+        PxRigidDynamicLockFlags { mBits: self.bits() }
     }
 
     fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::from_bits_unchecked(flags.mBits as u8) }
+        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
     }
 }
 

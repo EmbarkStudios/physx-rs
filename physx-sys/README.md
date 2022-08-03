@@ -90,6 +90,8 @@ The build process comprises a few steps:
 
 Steps *2..4* are performed completely automatically from within `build.rs`, while step *1* is only necessary when upgrading the PhysX SDK or modifying the generator. As such, building and running `pxbind` is a manual task, and is currently only supported on \*nix systems.
 
+Since `pxbind` relies on unstable clang internals only specific clang/llvm versions are supported to build it. Currently supported versions are `llvm-14` and `libclang-14-dev`. You may find it working with other versions but it's not guarenteed.
+
 ## License
 
 Licensed under either of
