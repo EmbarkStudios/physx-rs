@@ -70,6 +70,50 @@ jobs:
       - name: ball just structgen
         run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen
 
+  # Doesn't seem possible to integrate this in the other matrix jobs
+  build_debug_aarch64_linux:
+    name: Build (Debug) (aarch64-unknown-linux-gnu)
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        feature:
+          - --features structgen
+          - --features use-cmake 
+          # Default features
+          - --
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true 
+          command: build 
+          args: --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
+
+  build_release_aarch64_linux:
+    name: Build (Release) (aarch64-unknown-linux-gnu)
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-linux-gnu
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          use-cross: true 
+          command: build 
+          args: --release --target aarch64-unknown-linux-gnu
+
   test_release:
     name: Test (Release)
     strategy:
