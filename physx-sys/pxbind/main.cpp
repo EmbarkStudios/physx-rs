@@ -36,10 +36,10 @@ using namespace clang::ast_matchers;
 using namespace llvm;
 
 static cl::OptionCategory PxBindCategory("PxBind options");
-static std::shared_ptr<opt::OptTable> Options(createDriverOptTable());
+const opt::OptTable& Options(getDriverOptTable());
 static cl::opt<std::string> OutputFilename(
     "o",
-    cl::desc(Options->getOptionHelpText((options::OPT_o))));
+    cl::desc(Options.getOptionHelpText((options::OPT_o))));
 
 // https://stackoverflow.com/questions/5288396/c-ostream-out-manipulation/5289170#5289170
 template<typename Range, typename Value = typename Range::value_type>
@@ -614,11 +614,10 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::ULong:
         case BuiltinType::ULongLong:
             return "uint64_t";
-
+        default:
+            printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
+            abort();
     }
-
-    printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
-    abort();
 }
 
 string remapBuiltinTypeToRust(BuiltinType::Kind k) {
@@ -656,10 +655,10 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::ULong:
         case BuiltinType::ULongLong:
             return "usize";
+        default:
+            printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
+            abort();
     }
-
-    printf("Unhanded builtin rust type. BuiltinType::Kind = %u\n", unsigned(k));
-    abort();
 }
 
 class ClassMatchHandler : public MatchFinder::MatchCallback {
@@ -904,7 +903,7 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
 
             bool isAnonymous = false;
 
-            if (remappedTypeName.find("(anonymous") != string::npos) {
+            if (remappedTypeName.find("(anonymous") != string::npos || remappedTypeName.find("(unnamed)") != string::npos) {
                 isAnonymous = true;
                 remappedTypeName =
                     fmt::format("Anonymous{}", gc->podTypeRemap.size());
@@ -961,13 +960,11 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
         string qualifiedName,
         const CXXRecordDecl& decl,
         const PrintingPolicy& policy) {
-        string prefix = "";
         if (qualifiedName.rfind("const ") == 0) {
             qualifiedName = qualifiedName.substr(6);
-            // prefix = "const ";
         }
 
-        return prefix + remapRecordTypeNoConst(qualifiedName, decl, policy);
+        return remapRecordTypeNoConst(qualifiedName, decl, policy);
     }
 
     CppType convertTypeInner(const QualType& qt, const PrintingPolicy& policy) {
@@ -1089,10 +1086,12 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
         }
     }
 
-    virtual void run(const MatchFinder::MatchResult& Result) {
+    void run(const MatchFinder::MatchResult& Result) override {
         this->astContext = Result.Context;
         PrintingPolicy policy(Result.Context->getPrintingPolicy());
         policy.adjustForCPlusPlus();
+        // We rely on (unnamed) being printed for anonymous tag names
+        policy.AnonymousTagLocations = false;
 
         if (const CXXMethodDecl* cmd =
                 Result.Nodes.getNodeAs<CXXMethodDecl>("publicMethodDecl")) {
@@ -1338,7 +1337,7 @@ class MyFrontendAction : public ASTFrontendAction {
     std::unique_ptr<ASTConsumer> CreateASTConsumer(
         CompilerInstance& CI,
         StringRef file) override {
-        return llvm::make_unique<MyASTConsumer>(gc);
+        return std::make_unique<MyASTConsumer>(gc);
     }
 
   private:
@@ -1347,7 +1346,12 @@ class MyFrontendAction : public ASTFrontendAction {
 
 int main(int argc, const char** argv) {
     // parse the command-line args passed to your code
-    CommonOptionsParser op(argc, argv, PxBindCategory);
+    static llvm::Expected<CommonOptionsParser> op_res = CommonOptionsParser::create(argc, argv, PxBindCategory);
+    if(auto test = op_res.takeError()) {
+        std::cerr << "Failed to create common options parser" << std::endl;
+        return 1;
+    }
+    CommonOptionsParser &op = *op_res;
     // create a new Clang Tool instance (a LibTooling environment)
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
 
