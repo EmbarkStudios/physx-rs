@@ -45,9 +45,7 @@ impl PxFlags for RigidDynamicLockFlags {
     type Target = PxRigidDynamicLockFlags;
 
     fn into_px(self) -> Self::Target {
-        PxRigidDynamicLockFlags {
-            mBits: self.bits(),
-        }
+        PxRigidDynamicLockFlags { mBits: self.bits() }
     }
 
     fn from_px(flags: Self::Target) -> Self {
