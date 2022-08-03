@@ -29,7 +29,7 @@ set_property(TARGET pxbind PROPERTY CXX_STANDARD 17)
 
 # Find the libraries that correspond to the LLVM components
 # that we wish to use
-llvm_map_components_to_libnames(llvm_libs x86asmparser bitreader support mc option profiledata frontendopenmp libdriver)
+llvm_map_components_to_libnames(llvm_libs x86asmparser bitreader support mc option profiledata frontendopenmp)
 message(STATUS "LLVM_LIBS: ${llvm_libs}")
 
 target_link_libraries(pxbind
