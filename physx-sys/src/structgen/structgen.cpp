@@ -308,7 +308,7 @@ physx_PxConvexMesh_Pod::dumpLayout(structGen);
 struct physx_PxHullPolygon_Pod: public physx::PxHullPolygon {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxHullPolygon_Pod", "PxHullPolygon");
-        structGen.addField("float mPlane[4]", "mPlane", "[f32; 4]",sizeof(physx::PxReal [4]), unsafe_offsetof(physx_PxHullPolygon_Pod, mPlane));
+        structGen.addField("float mPlane[4]", "mPlane", "[f32; 4]",sizeof(physx::PxReal[4]), unsafe_offsetof(physx_PxHullPolygon_Pod, mPlane));
         structGen.addField("uint16_t mNbVerts", "mNbVerts", "u16",sizeof(physx::PxU16), unsafe_offsetof(physx_PxHullPolygon_Pod, mNbVerts));
         structGen.addField("uint16_t mIndexBase", "mIndexBase", "u16",sizeof(physx::PxU16), unsafe_offsetof(physx_PxHullPolygon_Pod, mIndexBase));
         structGen.endStruct(sizeof(physx::PxHullPolygon));
@@ -540,7 +540,7 @@ physx_PxHeightFieldDesc_Pod::dumpLayout(structGen);
 struct physx_PxTriangle_Pod: public physx::PxTriangle {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxTriangle_Pod", "PxTriangle");
-        structGen.addField("physx_PxVec3_Pod verts[3]", "verts", "[PxVec3; 3]",sizeof(physx::PxVec3 [3]), unsafe_offsetof(physx_PxTriangle_Pod, verts));
+        structGen.addField("physx_PxVec3_Pod verts[3]", "verts", "[PxVec3; 3]",sizeof(physx::PxVec3[3]), unsafe_offsetof(physx_PxTriangle_Pod, verts));
         structGen.endStruct(sizeof(physx::PxTriangle));
     }
 };
@@ -747,6 +747,18 @@ struct physx_PxSpatialForce_Pod: public physx::PxSpatialForce {
 };
 physx_PxSpatialForce_Pod::dumpLayout(structGen);
 
+struct physx_PxSpatialVelocity_Pod: public physx::PxSpatialVelocity {
+    static void dumpLayout(PodStructGen& structGen) {
+        structGen.beginStruct("physx_PxSpatialVelocity_Pod", "PxSpatialVelocity");
+        structGen.addField("physx_PxVec3_Pod linear", "linear", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxSpatialVelocity_Pod, linear));
+        structGen.addField("float pad0", "pad0", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxSpatialVelocity_Pod, pad0));
+        structGen.addField("physx_PxVec3_Pod angular", "angular", "PxVec3",sizeof(physx::PxVec3), unsafe_offsetof(physx_PxSpatialVelocity_Pod, angular));
+        structGen.addField("float pad1", "pad1", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxSpatialVelocity_Pod, pad1));
+        structGen.endStruct(sizeof(physx::PxSpatialVelocity));
+    }
+};
+physx_PxSpatialVelocity_Pod::dumpLayout(structGen);
+
 struct physx_PxArticulationRootLinkData_Pod: public physx::PxArticulationRootLinkData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxArticulationRootLinkData_Pod", "PxArticulationRootLinkData");
@@ -770,6 +782,8 @@ struct physx_PxArticulationCache_Pod: public physx::PxArticulationCache {
         structGen.addField("float* jointAcceleration", "jointAcceleration", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointAcceleration));
         structGen.addField("float* jointPosition", "jointPosition", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointPosition));
         structGen.addField("float* jointForce", "jointForce", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, jointForce));
+        structGen.addField("physx_PxSpatialVelocity_Pod* linkVelocity", "linkVelocity", "*mut PxSpatialVelocity",sizeof(physx::PxSpatialVelocity *), unsafe_offsetof(physx_PxArticulationCache_Pod, linkVelocity));
+        structGen.addField("physx_PxSpatialVelocity_Pod* linkAcceleration", "linkAcceleration", "*mut PxSpatialVelocity",sizeof(physx::PxSpatialVelocity *), unsafe_offsetof(physx_PxArticulationCache_Pod, linkAcceleration));
         structGen.addField("physx_PxArticulationRootLinkData_Pod* rootLinkData", "rootLinkData", "*mut PxArticulationRootLinkData",sizeof(physx::PxArticulationRootLinkData *), unsafe_offsetof(physx_PxArticulationCache_Pod, rootLinkData));
         structGen.addField("float* coefficientMatrix", "coefficientMatrix", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, coefficientMatrix));
         structGen.addField("float* lambda", "lambda", "*mut f32",sizeof(physx::PxReal *), unsafe_offsetof(physx_PxArticulationCache_Pod, lambda));
@@ -1048,7 +1062,7 @@ struct physx_PxContactModifyPair_Pod: public physx::PxContactModifyPair {
         structGen.beginStruct("physx_PxContactModifyPair_Pod", "PxContactModifyPair");
         structGen.addField("physx_PxRigidActor_Pod* actor[2]", "actor", "[*const PxRigidActor; 2]",sizeof(const physx::PxRigidActor *[2]), unsafe_offsetof(physx_PxContactModifyPair_Pod, actor));
         structGen.addField("physx_PxShape_Pod* shape[2]", "shape", "[*const PxShape; 2]",sizeof(const physx::PxShape *[2]), unsafe_offsetof(physx_PxContactModifyPair_Pod, shape));
-        structGen.addField("physx_PxTransform_Pod transform[2]", "transform", "[PxTransform; 2]",sizeof(physx::PxTransform [2]), unsafe_offsetof(physx_PxContactModifyPair_Pod, transform));
+        structGen.addField("physx_PxTransform_Pod transform[2]", "transform", "[PxTransform; 2]",sizeof(physx::PxTransform[2]), unsafe_offsetof(physx_PxContactModifyPair_Pod, transform));
         structGen.addField("physx_PxContactSet_Pod contacts", "contacts", "PxContactSet",sizeof(physx::PxContactSet), unsafe_offsetof(physx_PxContactModifyPair_Pod, contacts));
         structGen.endStruct(sizeof(physx::PxContactModifyPair));
     }
@@ -1179,7 +1193,7 @@ physx_PxPruningStructure_Pod::dumpLayout(structGen);
 
 structGen.passThroughC("struct physx_PxDeletionEventFlags_Pod {\n    unsigned char mBits;\n};\n");
 structGen.passThroughC("struct physx_PxPvd_Pod {\n    void* vtable_;\n};\n");
-structGen.passThroughC("struct physx_PxRigidDynamicLockFlags_Pod {\n    uint16_t mBits;\n};\n");
+structGen.passThroughC("struct physx_PxRigidDynamicLockFlags_Pod {\n    unsigned char mBits;\n};\n");
 struct physx_PxSimulationStatistics_Pod: public physx::PxSimulationStatistics {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxSimulationStatistics_Pod", "PxSimulationStatistics");
@@ -1189,7 +1203,7 @@ struct physx_PxSimulationStatistics_Pod: public physx::PxSimulationStatistics {
         structGen.addField("uint32_t nbStaticBodies", "nbStaticBodies", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbStaticBodies));
         structGen.addField("uint32_t nbDynamicBodies", "nbDynamicBodies", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDynamicBodies));
         structGen.addField("uint32_t nbKinematicBodies", "nbKinematicBodies", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbKinematicBodies));
-        structGen.addField("uint32_t nbShapes[7]", "nbShapes", "[u32; 7]",sizeof(physx::PxU32 [7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbShapes));
+        structGen.addField("uint32_t nbShapes[7]", "nbShapes", "[u32; 7]",sizeof(physx::PxU32[7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbShapes));
         structGen.addField("uint32_t nbAggregates", "nbAggregates", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbAggregates));
         structGen.addField("uint32_t nbArticulations", "nbArticulations", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbArticulations));
         structGen.addField("uint32_t nbAxisSolverConstraints", "nbAxisSolverConstraints", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbAxisSolverConstraints));
@@ -1206,10 +1220,10 @@ struct physx_PxSimulationStatistics_Pod: public physx::PxSimulationStatistics {
         structGen.addField("uint32_t nbPartitions", "nbPartitions", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbPartitions));
         structGen.addField("uint32_t nbBroadPhaseAdds", "nbBroadPhaseAdds", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbBroadPhaseAdds));
         structGen.addField("uint32_t nbBroadPhaseRemoves", "nbBroadPhaseRemoves", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbBroadPhaseRemoves));
-        structGen.addField("uint32_t nbDiscreteContactPairs[7][7]", "nbDiscreteContactPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32 [7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDiscreteContactPairs));
-        structGen.addField("uint32_t nbCCDPairs[7][7]", "nbCCDPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32 [7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbCCDPairs));
-        structGen.addField("uint32_t nbModifiedContactPairs[7][7]", "nbModifiedContactPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32 [7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbModifiedContactPairs));
-        structGen.addField("uint32_t nbTriggerPairs[7][7]", "nbTriggerPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32 [7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbTriggerPairs));
+        structGen.addField("uint32_t nbDiscreteContactPairs[7][7]", "nbDiscreteContactPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32[7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDiscreteContactPairs));
+        structGen.addField("uint32_t nbCCDPairs[7][7]", "nbCCDPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32[7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbCCDPairs));
+        structGen.addField("uint32_t nbModifiedContactPairs[7][7]", "nbModifiedContactPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32[7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbModifiedContactPairs));
+        structGen.addField("uint32_t nbTriggerPairs[7][7]", "nbTriggerPairs", "[[u32; 7]; 7]",sizeof(physx::PxU32[7][7]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbTriggerPairs));
         structGen.endStruct(sizeof(physx::PxSimulationStatistics));
     }
 };
@@ -1248,7 +1262,7 @@ struct physx_PxContactPair_Pod: public physx::PxContactPair {
         structGen.addField("uint16_t contactStreamSize", "contactStreamSize", "u16",sizeof(physx::PxU16), unsafe_offsetof(physx_PxContactPair_Pod, contactStreamSize));
         structGen.addField("physx_PxContactPairFlags_Pod flags", "flags", "PxContactPairFlags",sizeof(physx::PxContactPairFlags), unsafe_offsetof(physx_PxContactPair_Pod, flags));
         structGen.addField("physx_PxPairFlags_Pod events", "events", "PxPairFlags",sizeof(physx::PxPairFlags), unsafe_offsetof(physx_PxContactPair_Pod, events));
-        structGen.addField("uint32_t internalData[2]", "internalData", "[u32; 2]",sizeof(physx::PxU32 [2]), unsafe_offsetof(physx_PxContactPair_Pod, internalData));
+        structGen.addField("uint32_t internalData[2]", "internalData", "[u32; 2]",sizeof(physx::PxU32[2]), unsafe_offsetof(physx_PxContactPair_Pod, internalData));
         structGen.endStruct(sizeof(physx::PxContactPair));
     }
 };
@@ -1334,8 +1348,8 @@ struct physx_PxContactPairVelocity_Pod: public physx::PxContactPairVelocity {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxContactPairVelocity_Pod", "PxContactPairVelocity");
         structGen.addField("unsigned char type", "_type", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxContactPairVelocity_Pod, type));
-        structGen.addField("physx_PxVec3_Pod linearVelocity[2]", "linearVelocity", "[PxVec3; 2]",sizeof(physx::PxVec3 [2]), unsafe_offsetof(physx_PxContactPairVelocity_Pod, linearVelocity));
-        structGen.addField("physx_PxVec3_Pod angularVelocity[2]", "angularVelocity", "[PxVec3; 2]",sizeof(physx::PxVec3 [2]), unsafe_offsetof(physx_PxContactPairVelocity_Pod, angularVelocity));
+        structGen.addField("physx_PxVec3_Pod linearVelocity[2]", "linearVelocity", "[PxVec3; 2]",sizeof(physx::PxVec3[2]), unsafe_offsetof(physx_PxContactPairVelocity_Pod, linearVelocity));
+        structGen.addField("physx_PxVec3_Pod angularVelocity[2]", "angularVelocity", "[PxVec3; 2]",sizeof(physx::PxVec3[2]), unsafe_offsetof(physx_PxContactPairVelocity_Pod, angularVelocity));
         structGen.endStruct(sizeof(physx::PxContactPairVelocity));
     }
 };
@@ -1345,7 +1359,7 @@ struct physx_PxContactPairPose_Pod: public physx::PxContactPairPose {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxContactPairPose_Pod", "PxContactPairPose");
         structGen.addField("unsigned char type", "_type", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxContactPairPose_Pod, type));
-        structGen.addField("physx_PxTransform_Pod globalPose[2]", "globalPose", "[PxTransform; 2]",sizeof(physx::PxTransform [2]), unsafe_offsetof(physx_PxContactPairPose_Pod, globalPose));
+        structGen.addField("physx_PxTransform_Pod globalPose[2]", "globalPose", "[PxTransform; 2]",sizeof(physx::PxTransform[2]), unsafe_offsetof(physx_PxContactPairPose_Pod, globalPose));
         structGen.endStruct(sizeof(physx::PxContactPairPose));
     }
 };
@@ -1688,7 +1702,7 @@ struct physx_PxBVH34MidphaseDesc_Pod: public physx::PxBVH34MidphaseDesc {
 };
 physx_PxBVH34MidphaseDesc_Pod::dumpLayout(structGen);
 
-structGen.passThroughC("struct Anonymous216_Pod {\n    physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;\n    physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;\n};\n");
+structGen.passThroughC("struct Anonymous217_Pod {\n    physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;\n    physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;\n};\n");
 struct physx_PxMidphaseDesc_Pod: public physx::PxMidphaseDesc {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxMidphaseDesc_Pod", "PxMidphaseDesc");
@@ -2099,7 +2113,7 @@ physx_PxVehicleEngineData_Pod::dumpLayout(structGen);
 struct physx_PxVehicleGearsData_Pod: public physx::PxVehicleGearsData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehicleGearsData_Pod", "PxVehicleGearsData");
-        structGen.addField("float mRatios[32]", "mRatios", "[f32; 32]",sizeof(physx::PxReal [32]), unsafe_offsetof(physx_PxVehicleGearsData_Pod, mRatios));
+        structGen.addField("float mRatios[32]", "mRatios", "[f32; 32]",sizeof(physx::PxReal[32]), unsafe_offsetof(physx_PxVehicleGearsData_Pod, mRatios));
         structGen.addField("float mFinalRatio", "mFinalRatio", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleGearsData_Pod, mFinalRatio));
         structGen.addField("uint32_t mNbRatios", "mNbRatios", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxVehicleGearsData_Pod, mNbRatios));
         structGen.addField("float mSwitchTime", "mSwitchTime", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleGearsData_Pod, mSwitchTime));
@@ -2111,8 +2125,8 @@ physx_PxVehicleGearsData_Pod::dumpLayout(structGen);
 struct physx_PxVehicleAutoBoxData_Pod: public physx::PxVehicleAutoBoxData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehicleAutoBoxData_Pod", "PxVehicleAutoBoxData");
-        structGen.addField("float mUpRatios[32]", "mUpRatios", "[f32; 32]",sizeof(physx::PxReal [32]), unsafe_offsetof(physx_PxVehicleAutoBoxData_Pod, mUpRatios));
-        structGen.addField("float mDownRatios[32]", "mDownRatios", "[f32; 32]",sizeof(physx::PxReal [32]), unsafe_offsetof(physx_PxVehicleAutoBoxData_Pod, mDownRatios));
+        structGen.addField("float mUpRatios[32]", "mUpRatios", "[f32; 32]",sizeof(physx::PxReal[32]), unsafe_offsetof(physx_PxVehicleAutoBoxData_Pod, mUpRatios));
+        structGen.addField("float mDownRatios[32]", "mDownRatios", "[f32; 32]",sizeof(physx::PxReal[32]), unsafe_offsetof(physx_PxVehicleAutoBoxData_Pod, mDownRatios));
         structGen.endStruct(sizeof(physx::PxVehicleAutoBoxData));
     }
 };
@@ -2227,7 +2241,7 @@ struct physx_PxVehicleTireData_Pod: public physx::PxVehicleTireData {
         structGen.addField("float mLatStiffY", "mLatStiffY", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleTireData_Pod, mLatStiffY));
         structGen.addField("float mLongitudinalStiffnessPerUnitGravity", "mLongitudinalStiffnessPerUnitGravity", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleTireData_Pod, mLongitudinalStiffnessPerUnitGravity));
         structGen.addField("float mCamberStiffnessPerUnitGravity", "mCamberStiffnessPerUnitGravity", "f32",sizeof(physx::PxReal), unsafe_offsetof(physx_PxVehicleTireData_Pod, mCamberStiffnessPerUnitGravity));
-        structGen.addField("float mFrictionVsSlipGraph[3][2]", "mFrictionVsSlipGraph", "[[f32; 2]; 3]",sizeof(physx::PxReal [3][2]), unsafe_offsetof(physx_PxVehicleTireData_Pod, mFrictionVsSlipGraph));
+        structGen.addField("float mFrictionVsSlipGraph[3][2]", "mFrictionVsSlipGraph", "[[f32; 2]; 3]",sizeof(physx::PxReal[3][2]), unsafe_offsetof(physx_PxVehicleTireData_Pod, mFrictionVsSlipGraph));
         structGen.addField("uint32_t mType", "mType", "u32",sizeof(physx::PxU32), unsafe_offsetof(physx_PxVehicleTireData_Pod, mType));
         structGen.endStruct(sizeof(physx::PxVehicleTireData));
     }
@@ -2243,6 +2257,7 @@ struct physx_PxVehicleWheelsSimData_Pod: public physx::PxVehicleWheelsSimData {
 };
 physx_PxVehicleWheelsSimData_Pod::dumpLayout(structGen);
 
+structGen.passThroughC("struct physx_PxVehicleWheelsSimFlags_Pod {\n    uint32_t mBits;\n};\n");
 structGen.passThroughC("struct physx_PxVehicleWheels4DynData_Pod;\n");
 structGen.passThroughC("struct physx_PxVehicleTireForceCalculator_Pod;\n");
 struct physx_PxVehicleWheelsDynData_Pod: public physx::PxVehicleWheelsDynData {
@@ -2262,7 +2277,7 @@ struct physx_PxVehicleWheels_Pod: public physx::PxVehicleWheels {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleWheels_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleWheels_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleWheels_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleWheels_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleWheels_Pod, mPad0));
         structGen.endStruct(sizeof(physx::PxVehicleWheels));
     }
 };
@@ -2283,7 +2298,7 @@ physx_PxVehicleDriveSimData_Pod::dumpLayout(structGen);
 struct physx_PxVehicleDriveDynData_Pod: public physx::PxVehicleDriveDynData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehicleDriveDynData_Pod", "PxVehicleDriveDynData");
-        structGen.addField("float mControlAnalogVals[16]", "mControlAnalogVals", "[f32; 16]",sizeof(physx::PxReal [16]), unsafe_offsetof(physx_PxVehicleDriveDynData_Pod, mControlAnalogVals));
+        structGen.addField("float mControlAnalogVals[16]", "mControlAnalogVals", "[f32; 16]",sizeof(physx::PxReal[16]), unsafe_offsetof(physx_PxVehicleDriveDynData_Pod, mControlAnalogVals));
         structGen.addField("bool mUseAutoGears", "mUseAutoGears", "bool",sizeof(bool), unsafe_offsetof(physx_PxVehicleDriveDynData_Pod, mUseAutoGears));
         structGen.addField("bool mGearUpPressed", "mGearUpPressed", "bool",sizeof(bool), unsafe_offsetof(physx_PxVehicleDriveDynData_Pod, mGearUpPressed));
         structGen.addField("bool mGearDownPressed", "mGearDownPressed", "bool",sizeof(bool), unsafe_offsetof(physx_PxVehicleDriveDynData_Pod, mGearDownPressed));
@@ -2306,7 +2321,7 @@ struct physx_PxVehicleDrive_Pod: public physx::PxVehicleDrive {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleDrive_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleDrive_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleDrive_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleDrive_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleDrive_Pod, mPad0));
         structGen.addField("physx_PxVehicleDriveDynData_Pod mDriveDynData", "mDriveDynData", "PxVehicleDriveDynData",sizeof(physx::PxVehicleDriveDynData), unsafe_offsetof(physx_PxVehicleDrive_Pod, mDriveDynData));
         structGen.endStruct(sizeof(physx::PxVehicleDrive));
     }
@@ -2334,7 +2349,7 @@ struct physx_PxVehicleDrive4W_Pod: public physx::PxVehicleDrive4W {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mPad0));
         structGen.addField("physx_PxVehicleDriveDynData_Pod mDriveDynData", "mDriveDynData", "PxVehicleDriveDynData",sizeof(physx::PxVehicleDriveDynData), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mDriveDynData));
         structGen.addField("physx_PxVehicleDriveSimData4W_Pod mDriveSimData", "mDriveSimData", "PxVehicleDriveSimData4W",sizeof(physx::PxVehicleDriveSimData4W), unsafe_offsetof(physx_PxVehicleDrive4W_Pod, mDriveSimData));
         structGen.endStruct(sizeof(physx::PxVehicleDrive4W));
@@ -2351,7 +2366,7 @@ struct physx_PxVehicleDriveTank_Pod: public physx::PxVehicleDriveTank {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mPad0));
         structGen.addField("physx_PxVehicleDriveDynData_Pod mDriveDynData", "mDriveDynData", "PxVehicleDriveDynData",sizeof(physx::PxVehicleDriveDynData), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mDriveDynData));
         structGen.addField("physx_PxVehicleDriveSimData_Pod mDriveSimData", "mDriveSimData", "PxVehicleDriveSimData",sizeof(physx::PxVehicleDriveSimData), unsafe_offsetof(physx_PxVehicleDriveTank_Pod, mDriveSimData));
         structGen.endStruct(sizeof(physx::PxVehicleDriveTank));
@@ -2468,7 +2483,7 @@ struct physx_PxVehicleDriveNW_Pod: public physx::PxVehicleDriveNW {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mPad0));
         structGen.addField("physx_PxVehicleDriveDynData_Pod mDriveDynData", "mDriveDynData", "PxVehicleDriveDynData",sizeof(physx::PxVehicleDriveDynData), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mDriveDynData));
         structGen.addField("physx_PxVehicleDriveSimDataNW_Pod mDriveSimData", "mDriveSimData", "PxVehicleDriveSimDataNW",sizeof(physx::PxVehicleDriveSimDataNW), unsafe_offsetof(physx_PxVehicleDriveNW_Pod, mDriveSimData));
         structGen.endStruct(sizeof(physx::PxVehicleDriveNW));
@@ -2487,8 +2502,8 @@ physx_PxVehicleDrive4WRawInputData_Pod::dumpLayout(structGen);
 struct physx_PxVehicleKeySmoothingData_Pod: public physx::PxVehicleKeySmoothingData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehicleKeySmoothingData_Pod", "PxVehicleKeySmoothingData");
-        structGen.addField("float mRiseRates[16]", "mRiseRates", "[f32; 16]",sizeof(physx::PxReal [16]), unsafe_offsetof(physx_PxVehicleKeySmoothingData_Pod, mRiseRates));
-        structGen.addField("float mFallRates[16]", "mFallRates", "[f32; 16]",sizeof(physx::PxReal [16]), unsafe_offsetof(physx_PxVehicleKeySmoothingData_Pod, mFallRates));
+        structGen.addField("float mRiseRates[16]", "mRiseRates", "[f32; 16]",sizeof(physx::PxReal[16]), unsafe_offsetof(physx_PxVehicleKeySmoothingData_Pod, mRiseRates));
+        structGen.addField("float mFallRates[16]", "mFallRates", "[f32; 16]",sizeof(physx::PxReal[16]), unsafe_offsetof(physx_PxVehicleKeySmoothingData_Pod, mFallRates));
         structGen.endStruct(sizeof(physx::PxVehicleKeySmoothingData));
     }
 };
@@ -2498,8 +2513,8 @@ structGen.passThroughC("struct PxFixedSizeLookupTable_8__Pod {\n    float mDataP
 struct physx_PxVehiclePadSmoothingData_Pod: public physx::PxVehiclePadSmoothingData {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehiclePadSmoothingData_Pod", "PxVehiclePadSmoothingData");
-        structGen.addField("float mRiseRates[16]", "mRiseRates", "[f32; 16]",sizeof(physx::PxReal [16]), unsafe_offsetof(physx_PxVehiclePadSmoothingData_Pod, mRiseRates));
-        structGen.addField("float mFallRates[16]", "mFallRates", "[f32; 16]",sizeof(physx::PxReal [16]), unsafe_offsetof(physx_PxVehiclePadSmoothingData_Pod, mFallRates));
+        structGen.addField("float mRiseRates[16]", "mRiseRates", "[f32; 16]",sizeof(physx::PxReal[16]), unsafe_offsetof(physx_PxVehiclePadSmoothingData_Pod, mRiseRates));
+        structGen.addField("float mFallRates[16]", "mFallRates", "[f32; 16]",sizeof(physx::PxReal[16]), unsafe_offsetof(physx_PxVehiclePadSmoothingData_Pod, mFallRates));
         structGen.endStruct(sizeof(physx::PxVehiclePadSmoothingData));
     }
 };
@@ -2524,8 +2539,8 @@ physx_PxVehicleDriveTankRawInputData_Pod::dumpLayout(structGen);
 struct physx_PxVehicleCopyDynamicsMap_Pod: public physx::PxVehicleCopyDynamicsMap {
     static void dumpLayout(PodStructGen& structGen) {
         structGen.beginStruct("physx_PxVehicleCopyDynamicsMap_Pod", "PxVehicleCopyDynamicsMap");
-        structGen.addField("unsigned char sourceWheelIds[20]", "sourceWheelIds", "[u8; 20]",sizeof(physx::PxU8 [20]), unsafe_offsetof(physx_PxVehicleCopyDynamicsMap_Pod, sourceWheelIds));
-        structGen.addField("unsigned char targetWheelIds[20]", "targetWheelIds", "[u8; 20]",sizeof(physx::PxU8 [20]), unsafe_offsetof(physx_PxVehicleCopyDynamicsMap_Pod, targetWheelIds));
+        structGen.addField("unsigned char sourceWheelIds[20]", "sourceWheelIds", "[u8; 20]",sizeof(physx::PxU8[20]), unsafe_offsetof(physx_PxVehicleCopyDynamicsMap_Pod, sourceWheelIds));
+        structGen.addField("unsigned char targetWheelIds[20]", "targetWheelIds", "[u8; 20]",sizeof(physx::PxU8[20]), unsafe_offsetof(physx_PxVehicleCopyDynamicsMap_Pod, targetWheelIds));
         structGen.endStruct(sizeof(physx::PxVehicleCopyDynamicsMap));
     }
 };
@@ -2562,7 +2577,7 @@ struct physx_PxVehicleNoDrive_Pod: public physx::PxVehicleNoDrive {
         structGen.addField("physx_PxVehicleWheelsDynData_Pod mWheelsDynData", "mWheelsDynData", "PxVehicleWheelsDynData",sizeof(physx::PxVehicleWheelsDynData), unsafe_offsetof(physx_PxVehicleNoDrive_Pod, mWheelsDynData));
         structGen.addField("physx_PxRigidDynamic_Pod* mActor", "mActor", "*mut PxRigidDynamic",sizeof(physx::PxRigidDynamic *), unsafe_offsetof(physx_PxVehicleNoDrive_Pod, mActor));
         structGen.addField("unsigned char mType", "mType", "u8",sizeof(physx::PxU8), unsafe_offsetof(physx_PxVehicleNoDrive_Pod, mType));
-        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8 [14]), unsafe_offsetof(physx_PxVehicleNoDrive_Pod, mPad0));
+        structGen.addField("unsigned char mPad0[14]", "mPad0", "[u8; 14]",sizeof(physx::PxU8[14]), unsafe_offsetof(physx_PxVehicleNoDrive_Pod, mPad0));
         structGen.endStruct(sizeof(physx::PxVehicleNoDrive));
     }
 };
