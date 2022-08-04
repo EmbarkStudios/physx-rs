@@ -79,6 +79,7 @@ jobs:
         feature:
           - --features structgen
           - --features use-cmake 
+          - --all-features
           # Default features
           - --
     steps:
@@ -99,6 +100,14 @@ jobs:
   build_release_aarch64_linux:
     name: Build (Release) (aarch64-unknown-linux-gnu)
     runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        feature:
+          - --features structgen
+          - --features use-cmake 
+          - --all-features
+          # Default features
+          - --
     steps:
       - uses: actions/checkout@v2
         with:
@@ -112,7 +121,7 @@ jobs:
         with:
           use-cross: true 
           command: build 
-          args: --release --target aarch64-unknown-linux-gnu
+          args: --release --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
 
   test_release:
     name: Test (Release)
