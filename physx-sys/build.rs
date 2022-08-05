@@ -189,5 +189,4 @@ fn main() {
 
     // TODO: use the cloned git revision number instead
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
-
 }
