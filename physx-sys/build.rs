@@ -19,10 +19,7 @@ struct Context {
     includes: Vec<PathBuf>,
 }
 
-#[cfg(not(feature = "use-cmake"))]
 include!("cc.rs");
-#[cfg(feature = "use-cmake")]
-include!("cmake.rs");
 
 fn main() {
     // Use the optimization level to determine the build profile to pass, we
@@ -74,10 +71,6 @@ fn main() {
             static_crt,
         };
 
-        #[cfg(feature = "use-cmake")]
-        cmake_compile(environment);
-
-        #[cfg(not(feature = "use-cmake"))]
         cc_compile(environment);
     }
 
@@ -197,12 +190,4 @@ fn main() {
     // TODO: use the cloned git revision number instead
     println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
 
-    // Remove PxConfig.h since we're only allowed to modify OUT_DIR.
-    if cfg!(feature = "use-cmake") {
-        let _ = std::fs::remove_file(
-            env::current_dir()
-                .unwrap()
-                .join("PhysX/physx/include/PxConfig.h"),
-        );
-    }
 }
