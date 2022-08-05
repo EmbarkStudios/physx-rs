@@ -121,7 +121,7 @@ pub struct PxDebugText {
     pub size: f32,
     pub color: u32,
     pub structgen_pad0: [u8; 4],
-    pub string: *const u8,
+    pub string: *const i8,
 }
 #[test] fn check_size_PxDebugText() { assert_eq!(std::mem::size_of::<PxDebugText>(), 32); }
 #[derive(Clone, Copy)]
@@ -1630,7 +1630,7 @@ pub struct PxSceneQueryCache {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRepXObject {
-    pub typeName: *const u8,
+    pub typeName: *const i8,
     pub serializable: *const std::ffi::c_void,
     pub id: usize,
 }
@@ -2042,7 +2042,7 @@ pub struct PxVehicleGraphChannelDesc {
     pub mColorLow: PxVec3,
     pub mColorHigh: PxVec3,
     pub structgen_pad0: [u8; 4],
-    pub mTitle: *mut u8,
+    pub mTitle: *mut i8,
 }
 #[test] fn check_size_PxVehicleGraphChannelDesc() { assert_eq!(std::mem::size_of::<PxVehicleGraphChannelDesc>(), 48); }
 #[derive(Clone, Copy)]
@@ -2071,7 +2071,7 @@ pub struct PxVehicleNoDrive {
 #[repr(C)]
 pub struct PxProfileScoped {
     pub mCallback: *mut PxProfilerCallback,
-    pub mEventName: *const u8,
+    pub mEventName: *const i8,
     pub mProfilerData: *mut std::ffi::c_void,
     pub mContextId: usize,
     pub mDetached: bool,
