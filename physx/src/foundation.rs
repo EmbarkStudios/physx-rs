@@ -16,6 +16,7 @@ use physx_sys::{
     PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
+    create_error_callback, get_error_callback_user_data,
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
@@ -75,10 +76,12 @@ unsafe impl<Allocator: AllocatorCallback + Sync> Sync for PxFoundation<Allocator
 
 impl<Allocator: AllocatorCallback> Foundation for PxFoundation<Allocator> {
     type Allocator = Allocator;
+    //type Error = ErrorCallback;
 }
 
 pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     type Allocator: AllocatorCallback;
+    //type Error: ErrorCallback;
 
     /// Tries to create a PxFoundation of the given version with the default allocator and error callbacks.
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
@@ -88,6 +91,18 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
                 crate::physics::PX_PHYSICS_VERSION,
                 allocator.into_px(),
                 get_default_error_callback() as *mut PxErrorCallback,
+            ) as *mut Self)
+        }
+    }
+
+    /// Tries to create a PxFoundation with the provided allocator and error callbacks.
+    /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: impl ErrorCallback) -> Option<Owner<Self>> {
+        unsafe {
+            Owner::from_raw(phys_PxCreateFoundation(
+                crate::physics::PX_PHYSICS_VERSION,
+                allocator.into_px(),
+                error_callback.into_px(),
             ) as *mut Self)
         }
     }
@@ -279,5 +294,28 @@ unsafe impl AllocatorCallback for DefaultAllocator {
 
     unsafe extern "C" fn deallocate(_ptr: *const c_void, _user_data: *const c_void) {
         unreachable!()
+    }
+}
+
+
+/// A trait for creating error callbacks for PhysX.
+#[allow(clippy::missing_safety_doc)]
+pub unsafe trait ErrorCallback: Sized {
+    unsafe extern "C" fn report_error(
+        code: u32,
+        message: *const c_void,
+        file: *const c_void,
+        line: u32,
+        user_data: *const c_void,
+    ) -> *mut c_void;
+
+    /// # Safety
+    ///
+    /// Do not override this method.
+    unsafe fn into_px(self) -> *mut PxErrorCallback {
+        create_error_callback(
+            Self::report_error,
+            Box::into_raw(Box::new(self)) as *mut c_void,
+        )
     }
 }

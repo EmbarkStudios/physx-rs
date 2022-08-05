@@ -18,7 +18,7 @@ use crate::{
     bvh_structure::BvhStructure,
     constraint::Constraint,
     convex_mesh::ConvexMesh,
-    foundation::{AllocatorCallback, DefaultAllocator, Foundation, PxFoundation},
+    foundation::{AllocatorCallback, DefaultAllocator, Foundation, PxFoundation, ErrorCallback},
     geometry::Geometry,
     height_field::HeightField,
     material::Material,
@@ -135,6 +135,19 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
             extensions_loaded: false,
         }
     }
+
+    pub fn with_allocator_error_callback<Error: ErrorCallback>(allocator: Allocator, error_callback: Error) -> PhysicsFoundation<Allocator, Geom> {
+        let mut foundation =
+            PxFoundation::with_allocator_error_callback(allocator, error_callback).expect("Create Foundation returned a null pointer");
+        let physics =
+            PxPhysics::new(foundation.as_mut()).expect("Create PxPhysics returned a null pointer.");
+        Self {
+            foundation,
+            physics,
+            pvd: None,
+            extensions_loaded: false,
+        }
+    }    
 
     pub fn physics(&self) -> &PxPhysics<Geom> {
         self.physics.as_ref()
@@ -623,6 +636,7 @@ pub struct PhysicsFoundationBuilder<Allocator: AllocatorCallback> {
     pvd_port: i32,
     load_extensions: bool,
     allocator: Allocator,
+    error_callback: Option<Box<dyn ErrorCallback>>,
 }
 
 impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
@@ -636,6 +650,7 @@ impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
             pvd_port: 5425,
             load_extensions: false,
             allocator: DefaultAllocator,
+            error_callback: None,
         }
     }
 }
@@ -651,6 +666,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
             pvd_port: 5425,
             load_extensions: false,
             allocator,
+            error_callback: None,
         }
     }
 
@@ -690,6 +706,12 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         self.load_extensions = load;
         self
     }
+
+    /// Set error callback
+    pub fn with_error_callback(&mut self, load: bool) -> &mut Self {
+        self.load_extensions = load;
+        self
+    }    
 
     /// Build the PhysicsFoundation.
     pub fn build<Geom: Shape>(self) -> Option<PhysicsFoundation<Allocator, Geom>> {

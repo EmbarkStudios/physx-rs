@@ -346,6 +346,9 @@ pub type AllocCallback =
 
 pub type DeallocCallback = unsafe extern "C" fn(*const c_void, *const c_void);
 
+pub type ErrorCallback =
+    unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void) -> *mut c_void;
+
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
     pub fn physx_create_foundation_with_alloc(
@@ -374,6 +377,13 @@ extern "C" {
     ) -> *mut PxAllocatorCallback;
 
     pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;
+
+    pub fn create_error_callback(
+        error_callback: ErrorCallback,
+        userdata: *mut c_void,
+    ) -> *mut PxErrorCallback;    
+
+    pub fn get_error_callback_user_data(error_callback: *mut PxErrorCallback) -> *mut c_void;
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 

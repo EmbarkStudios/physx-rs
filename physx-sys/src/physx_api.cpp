@@ -200,6 +200,24 @@ public:
     void *mUserData;
 };
 
+typedef void (*ErrorCallback)(PxErrorCode::Enum code, const char *message, const char *file, int line, void *userdata);
+
+class ErrorTrampoline : public PxErrorCallback {
+public:
+    ErrorTrampoline(ErrorCallback errorCb, void *userdata)
+        : mErrorCallback(errorCb), mUserData(userdata) {
+    }
+
+	void reportError(PxErrorCode::Enum code, const char *message, const char *file, int line) {
+        return mErrorCallback(code, message, file, line, mUserData);
+    }
+
+private:
+    ErrorCallback mErrorCallback;
+public:
+    void *mUserData;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -250,6 +268,18 @@ extern "C"
 
     void *get_alloc_callback_user_data(PxAllocatorCallback *allocator) {
         CustomAllocatorTrampoline *trampoline = static_cast<CustomAllocatorTrampoline *>(allocator);
+        return trampoline->mUserData;
+    }
+
+    PxErrorCallback *create_error_callback(
+        ErrorCallback error_callback,
+        void *userdata
+    ) {
+        return new ErrorTrampoline(error_callback, userdata);
+    }
+
+    void *get_error_callback_user_data(PxErrorCallback *error_callback) {
+        ErrorTrampoline *trampoline = static_cast<ErrorTrampoline *>(error_callback);
         return trampoline->mUserData;
     }
 
