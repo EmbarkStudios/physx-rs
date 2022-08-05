@@ -6,6 +6,7 @@
 ## [Unreleased] - ReleaseDate
 
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
+- [PR#154](https://github.com/EmbarkStudios/physx-rs/pull/154) Add support for `aarch64-unknown-linux-gnu`
 
 ## [0.12.2] - 2022-02-07
 

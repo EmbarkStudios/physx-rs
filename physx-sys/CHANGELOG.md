@@ -6,6 +6,16 @@
 ## [Unreleased] - ReleaseDate
 
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
+- [PR#154](https://github.com/EmbarkStudios/physx-rs/pull/154) Add support for `aarch64-unknown-linux-gnu`
+- [PR#158](https://github.com/EmbarkStudios/physx-rs/pull/158) Update pre generated `aarch64-linux-android` files
+    - `PxRepXObject` typename field changed from `*const u8` to `*const i8`
+    - `PxDebugText` typename field changed from `*const u8` to `*const i8`
+    - `PxProfileScoped` typename field changed from `*const u8` to `*const i8`
+    - `PxVehicleGraphChannelDesc` typename field changed from `*mut u8` to `*mut i8`
+- [PR#156](https://github.com/EmbarkStudios/physx-rs/pull/156) Update pre generated `aarch64-apple-darwin` files
+    - Adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
+- [PR#153](https://github.com/EmbarkStudios/physx-rs/pull/153) Update clang/llvm lib used by `pxbind` and update `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`, `x86_64-unknown-linux` pre generated files.
+    - Mostly an internal change but adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
 
 ## [0.4.16] - 2021-12-21
 ### Fixed
