@@ -26,6 +26,3 @@ thiserror = "1.0"
 # is used to autogenerate Rust code from the physx headers. Normal use of the
 # physx crate would never need to use this feature.
 structgen = ["physx-sys/structgen"]
-# Uses physx's normal cmake process to build. By default cmake is not required
-# and is built directly with cc instead
-use-cmake = ["physx-sys/use-cmake"]

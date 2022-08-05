@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
+
 ## [0.12.2] - 2022-02-07
 
 - [PR#146](https://github.com/EmbarkStudios/physx-rs/pull/146) updated the optional glam dependency to 0.20.

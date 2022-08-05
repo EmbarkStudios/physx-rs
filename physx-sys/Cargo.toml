@@ -42,8 +42,6 @@ doctest = false
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }
-cmake = { version = "0.1.44", optional = true }
 
 [features]
 structgen = []
-use-cmake = ["cmake"]
