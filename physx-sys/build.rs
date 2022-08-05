@@ -540,6 +540,12 @@ fn main() {
     let include_path = if env::var("CARGO_FEATURE_STRUCTGEN").is_ok() {
         let mut structgen_path = output_dir_path.join("structgen");
 
+        // A bit hacky and might not work in all scenarios but qemu-aarch64 is not always
+        // available or even needed. If you are cross compiling to android then you need
+        // to remember to set CXX and CC to the respective toolchain compilers found in
+        // the ANDROID_NDK_ROOT as well.
+        let is_cross_compiling_aarch64 = target != host && target.starts_with("aarch64-");
+
         let structgen_compiler = physx_cc.get_compiler();
         let mut cmd = structgen_compiler.to_command();
         if structgen_compiler.is_like_msvc() {
@@ -552,6 +558,11 @@ fn main() {
             s.push(".obj");
             cmd.arg(s);
         } else {
+            if is_cross_compiling_aarch64 {
+                // statically linking is just much easier to deal
+                // with when using qemu-aarch64
+                cmd.arg("-static");
+            }
             cmd.arg("-o").arg(&structgen_path);
         }
 
@@ -567,9 +578,7 @@ fn main() {
         std::fs::metadata(&structgen_path)
             .expect("failed to compile structgen even though compiler reported no failures");
 
-        // A bit hacky and might not work in all scenarios but qemu-aarch64 is not always
-        // available or even needed.
-        let mut structgen = if target != host && target.starts_with("aarch64-") {
+        let mut structgen = if is_cross_compiling_aarch64 {
             let mut structgen = std::process::Command::new("qemu-aarch64");
             structgen.arg(&structgen_path);
             structgen
@@ -578,7 +587,7 @@ fn main() {
         };
 
         structgen.current_dir(&output_dir_path);
-        structgen.status().expect("structgen failed to execute");
+        structgen.status().expect("structgen failed to execute, if you are cross compiling to aarch64 you need to have qemu-aarch64 installed");
 
         output_dir_path
     } else {
