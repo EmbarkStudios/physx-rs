@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
+
 ## [0.4.16] - 2021-12-21
 ### Fixed
 
