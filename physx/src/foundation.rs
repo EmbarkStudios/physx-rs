@@ -45,6 +45,7 @@ pub enum ErrorCode {
 pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,
     phantom_interface: PhantomData<Allocator>,
+    custom_error_callback: Option<NotNull<PxErrorCallback>>,
 }
 
 impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
@@ -54,6 +55,7 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
                 Box::from_raw(allocator);
             };
             PxFoundation_release_mut(self.as_mut_ptr())
+            custom_error_callback.map(|c| destroy_error_callback(c));
         }
     }
 }
@@ -98,6 +100,7 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     /// Tries to create a PxFoundation with the provided allocator and error callbacks.
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
     fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: impl ErrorCallback) -> Option<Owner<Self>> {
+        todo!("handle custom_error_callback");
         unsafe {
             Owner::from_raw(phys_PxCreateFoundation(
                 crate::physics::PX_PHYSICS_VERSION,

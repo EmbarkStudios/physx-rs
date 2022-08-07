@@ -381,7 +381,11 @@ extern "C" {
     pub fn create_error_callback(
         error_callback: ErrorCallback,
         userdata: *mut c_void,
-    ) -> *mut PxErrorCallback;    
+    ) -> *mut PxErrorCallback;
+
+    pub fn destroy_error_callback(
+        error_callback: *mut PxErrorCallback,
+    );
 
     pub fn get_error_callback_user_data(error_callback: *mut PxErrorCallback) -> *mut c_void;
 

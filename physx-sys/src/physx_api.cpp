@@ -200,22 +200,22 @@ public:
     void *mUserData;
 };
 
-typedef void (*ErrorCallback)(PxErrorCode::Enum code, const char *message, const char *file, int line, void *userdata);
+using ErrorCallback = void (*)(PxErrorCode::Enum code, const char* message, const char* file, int line, void* userdata);
 
 class ErrorTrampoline : public PxErrorCallback {
 public:
-    ErrorTrampoline(ErrorCallback errorCb, void *userdata)
+    ErrorTrampoline(ErrorCallback errorCb, void* userdata)
         : mErrorCallback(errorCb), mUserData(userdata) {
     }
 
-	void reportError(PxErrorCode::Enum code, const char *message, const char *file, int line) {
-        return mErrorCallback(code, message, file, line, mUserData);
+    void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line) {
+        mErrorCallback(code, message, file, line, mUserData);
     }
 
 private:
     ErrorCallback mErrorCallback;
 public:
-    void *mUserData;
+    void* mUserData;
 };
 
 extern "C"
@@ -273,9 +273,15 @@ extern "C"
 
     PxErrorCallback *create_error_callback(
         ErrorCallback error_callback,
-        void *userdata
+        void* userdata
     ) {
         return new ErrorTrampoline(error_callback, userdata);
+    }
+
+    void destroy_error_callback(
+        PxErrorCallback *error_callback
+    ) {
+        delete error_callback;
     }
 
     void *get_error_callback_user_data(PxErrorCallback *error_callback) {
