@@ -16,13 +16,14 @@ use physx_sys::{
     PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
-    create_error_callback, get_error_callback_user_data,
+    create_error_callback, destroy_error_callback, get_error_callback_user_data,
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
     ffi::c_void,
     marker::PhantomData,
     mem::{align_of, size_of},
+    ptr::NonNull,
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 
@@ -45,7 +46,7 @@ pub enum ErrorCode {
 pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,
     phantom_interface: PhantomData<Allocator>,
-    custom_error_callback: Option<NotNull<PxErrorCallback>>,
+    custom_error_callback: Option<NonNull<PxErrorCallback>>,
 }
 
 impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
@@ -54,8 +55,8 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             if let Some(allocator) = self.get_allocator_callback() {
                 Box::from_raw(allocator);
             };
-            PxFoundation_release_mut(self.as_mut_ptr())
-            custom_error_callback.map(|c| destroy_error_callback(c));
+            PxFoundation_release_mut(self.as_mut_ptr());
+            self.custom_error_callback.map(|c| destroy_error_callback(c));
         }
     }
 }
