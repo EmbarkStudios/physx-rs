@@ -708,14 +708,19 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     }
 
     /// Set error callback
-    pub fn with_error_callback(&mut self, load: bool) -> &mut Self {
-        self.load_extensions = load;
+    pub fn with_error_callback(&mut self, error_callback: Option<Box<dyn ErrorCallback>>) -> &mut Self {
+        self.error_callback = error_callback;
         self
     }    
 
     /// Build the PhysicsFoundation.
     pub fn build<Geom: Shape>(self) -> Option<PhysicsFoundation<Allocator, Geom>> {
-        let mut foundation = PxFoundation::new(self.allocator)?;
+        //let mut foundation = PxFoundation::new(self.allocator)?;
+        let mut foundation = if let Some(callback) = self.error_callback {
+            PxFoundation::with_allocator_error_callback(self.allocator, callback)?
+        } else {
+            PxFoundation::new(self.allocator)?
+        };
         let (mut pvd, mut physics) = unsafe {
             if self.enable_pvd {
                 let mut pvd = VisualDebugger::new(foundation.as_mut(), self.pvd_port)?;

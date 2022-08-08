@@ -40,6 +40,8 @@ pub enum ErrorCode {
     PerfWarning = 128u32,
 }
 
+pub type ErrorCodeFlags = BitFlags<ErrorCode>;
+
 /// A new type wrapper for PxFoundation.  Parametrized by it's Allocator type.
 #[repr(transparent)]
 pub struct PxFoundation<Allocator: AllocatorCallback> {
