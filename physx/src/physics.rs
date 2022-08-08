@@ -136,7 +136,7 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
-    pub fn with_allocator_error_callback<Error: ErrorCallback>(allocator: Allocator, error_callback: Error) -> PhysicsFoundation<Allocator, Geom> {
+    pub fn with_allocator_error_callback(allocator: Allocator, error_callback: Box<dyn ErrorCallback>) -> PhysicsFoundation<Allocator, Geom> {
         let mut foundation =
             PxFoundation::with_allocator_error_callback(allocator, error_callback).expect("Create Foundation returned a null pointer");
         let physics =

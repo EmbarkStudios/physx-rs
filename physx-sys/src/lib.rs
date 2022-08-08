@@ -347,7 +347,7 @@ pub type AllocCallback =
 pub type DeallocCallback = unsafe extern "C" fn(*const c_void, *const c_void);
 
 pub type ErrorCallback =
-    unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void) -> *mut c_void;
+    unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void);
 
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;

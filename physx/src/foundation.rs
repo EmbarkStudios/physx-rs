@@ -20,10 +20,9 @@ use physx_sys::{
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
-    ffi::c_void,
+    ffi::{c_void, CStr},
     marker::PhantomData,
     mem::{align_of, size_of},
-    ptr::NonNull,
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 
@@ -46,7 +45,6 @@ pub enum ErrorCode {
 pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,
     phantom_interface: PhantomData<Allocator>,
-    custom_error_callback: Option<NonNull<PxErrorCallback>>,
 }
 
 impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
@@ -55,8 +53,8 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             if let Some(allocator) = self.get_allocator_callback() {
                 Box::from_raw(allocator);
             };
+            // TODO(nises): deallocate the error handler
             PxFoundation_release_mut(self.as_mut_ptr());
-            self.custom_error_callback.map(|c| destroy_error_callback(c));
         }
     }
 }
@@ -100,13 +98,12 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
 
     /// Tries to create a PxFoundation with the provided allocator and error callbacks.
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
-    fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: impl ErrorCallback) -> Option<Owner<Self>> {
-        todo!("handle custom_error_callback");
+    fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: Box<dyn ErrorCallback>) -> Option<Owner<Self>> {
         unsafe {
             Owner::from_raw(phys_PxCreateFoundation(
                 crate::physics::PX_PHYSICS_VERSION,
                 allocator.into_px(),
-                error_callback.into_px(),
+                error_callback_to_px(error_callback),
             ) as *mut Self)
         }
     }
@@ -302,24 +299,60 @@ unsafe impl AllocatorCallback for DefaultAllocator {
 }
 
 
-/// A trait for creating error callbacks for PhysX.
-#[allow(clippy::missing_safety_doc)]
-pub unsafe trait ErrorCallback: Sized {
-    unsafe extern "C" fn report_error(
-        code: u32,
-        message: *const c_void,
-        file: *const c_void,
-        line: u32,
-        user_data: *const c_void,
-    ) -> *mut c_void;
+// /// A trait for creating error callbacks for PhysX.
+// #[allow(clippy::missing_safety_doc)]
+// pub unsafe trait ErrorCallback: Sized {
+//     unsafe extern "C" fn report_error(
+//         code: u32,
+//         message: *const c_void,
+//         file: *const c_void,
+//         line: u32,
+//         user_data: *const c_void,
+//     ) -> *mut c_void;
 
-    /// # Safety
-    ///
-    /// Do not override this method.
-    unsafe fn into_px(self) -> *mut PxErrorCallback {
-        create_error_callback(
-            Self::report_error,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
-    }
+//     /// # Safety
+//     ///
+//     /// Do not override this method.
+//     unsafe fn into_px(self) -> *mut PxErrorCallback {
+//         create_error_callback(
+//             Self::report_error,
+//             Box::into_raw(Box::new(self)) as *mut c_void,
+//         )
+//     }
+// }
+
+unsafe extern "C" fn report_error_helper(
+    code: u32,
+    message: *const c_void,
+    file: *const c_void,
+    line: u32,
+    user_data: *const c_void,
+) {
+    let code = BitFlags::from_bits(code).unwrap_or_else(|_| {
+        debug_assert!(false, "bad error code {}", code);
+        Default::default()
+    });
+    let message = CStr::from_ptr(message as *const i8).to_str().unwrap_or("non-utf8 chars in message");
+    let file = CStr::from_ptr(file as *const i8).to_str().unwrap_or("non-utf8 chars in file");
+    let ec = &*(user_data as *const &dyn ErrorCallback);
+    ec.report_error(code, message, file, line);
+}
+
+unsafe fn error_callback_to_px(cb: Box<dyn ErrorCallback>) -> *mut PxErrorCallback {
+    // TODO(nises): deallocate this
+    create_error_callback(
+        report_error_helper,
+        // TODO(nises): deallocate this
+        Box::into_raw(cb) as *mut c_void,
+    )
+}
+
+pub trait ErrorCallback {
+    fn report_error(
+        &self,
+        code: BitFlags<ErrorCode>,
+        message: &str,
+        file: &str,
+        line: u32
+    );
 }
