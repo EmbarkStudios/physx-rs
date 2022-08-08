@@ -206,6 +206,7 @@ class ErrorTrampoline : public PxErrorCallback {
 public:
     ErrorTrampoline(ErrorCallback errorCb, void* userdata)
         : mErrorCallback(errorCb), mUserData(userdata) {
+            //reportError(PxErrorCode::eINVALID_PARAMETER, "physics callback test", __FILE__, __LINE__);
     }
 
     void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line) {

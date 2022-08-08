@@ -345,7 +345,7 @@ unsafe fn error_callback_to_px(cb: Box<dyn ErrorCallback>) -> *mut PxErrorCallba
     create_error_callback(
         report_error_helper,
         // TODO(nises): deallocate this
-        Box::into_raw(cb) as *mut c_void,
+        Box::into_raw(Box::new(cb)) as *mut c_void,
     )
 }
 
