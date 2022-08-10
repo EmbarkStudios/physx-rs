@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.13.0] - 2022-08-10
 
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
 - [PR#154](https://github.com/EmbarkStudios/physx-rs/pull/154) Add support for `aarch64-unknown-linux-gnu`
@@ -153,7 +154,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...HEAD
+[0.13.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...physx-v0.13.0
 [0.12.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...physx-v0.12.2
 [0.12.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...physx-v0.12.1
 [0.12.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.11.0...physx-v0.12.0
