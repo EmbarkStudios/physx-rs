@@ -38,7 +38,7 @@ impl From<BaseFlag> for PxBaseFlag::Enum {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConcreteType {
     Undefined = 0,
     Heightfield = 1,

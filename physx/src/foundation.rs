@@ -26,7 +26,7 @@ use std::{
 };
 
 #[bitflags]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum ErrorCode {
     DebugInfo = 1u32,
