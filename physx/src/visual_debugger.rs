@@ -20,7 +20,7 @@ use physx_sys::{
 };
 
 #[bitflags]
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[repr(u8)]
 pub enum VisualDebuggerSceneFlag {
     TransmitContacts = 1,
@@ -53,16 +53,28 @@ impl VisualDebugger {
     /// This function internally calls `new_with_timeout` with a default timeout
     /// of 10 ms.
     pub fn new(foundation: &mut impl Foundation, port: i32) -> Option<Self> {
-        VisualDebugger::new_with_timeout(foundation, port, 10)
+        VisualDebugger::new_with_timeout(foundation, "localhost", port, 10)
+    }
+
+    /// Create a new `VisualDebugger` instance, a utility class that
+    /// combines the TCP setup and the Pvd into one object. The port
+    /// default for the PVD program is port 5425, so it is suggested to use this
+    /// unless you're explicitly changing the other one as well.
+    ///
+    /// This function internally calls `new_with_timeout` with a default timeout
+    /// of 10 ms.
+    pub fn new_remote(foundation: &mut impl Foundation, host: &str, port: i32) -> Option<Self> {
+        VisualDebugger::new_with_timeout(foundation, host, port, 10)
     }
 
     /// See description of `new`
     pub fn new_with_timeout(
         foundation: &mut impl Foundation,
+        host: &str,
         port: i32,
         timeout: u32,
     ) -> Option<Self> {
-        use std::ffi::CStr;
+        use std::ffi::CString;
 
         let flags = PxPvdInstrumentationFlags {
             mBits: PxPvdInstrumentationFlag::eDEBUG as u8,
@@ -70,7 +82,7 @@ impl VisualDebugger {
 
         let pvd = unsafe { Pvd::from_raw(phys_PxCreatePvd(foundation.as_mut_ptr()))? };
         let transport = unsafe {
-            let oshost = CStr::from_bytes_with_nul_unchecked(b"localhost\0");
+            let oshost = CString::new(host).ok()?;
             PvdTransport::from_raw(phys_PxDefaultPvdSocketTransportCreate(
                 oshost.as_ptr() as _,
                 port,

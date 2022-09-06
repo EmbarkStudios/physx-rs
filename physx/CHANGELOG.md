@@ -4,6 +4,10 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: https://github.com/NVIDIAGameWorks/PhysX/issues/306
+- Allow overriding PVD host with `PhysicsFoundationBuilder::set_pvd_host`
+
 ## [0.13.0] - 2022-08-10
 
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
