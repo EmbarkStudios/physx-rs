@@ -621,6 +621,7 @@ pub struct PhysicsFoundationBuilder<Allocator: AllocatorCallback> {
     tolerances: PxTolerancesScale,
     enable_pvd: bool,
     pvd_port: i32,
+    pvd_remote: Option<String>,
     load_extensions: bool,
     allocator: Allocator,
 }
@@ -634,6 +635,7 @@ impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
             tolerances,
             enable_pvd: false,
             pvd_port: 5425,
+            pvd_remote: None,
             load_extensions: false,
             allocator: DefaultAllocator,
         }
@@ -649,6 +651,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
             tolerances,
             enable_pvd: false,
             pvd_port: 5425,
+            pvd_remote: None,
             load_extensions: false,
             allocator,
         }
@@ -662,6 +665,12 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     /// Set the port number for the visual debuggers transport.  Default is 5425.
     pub fn set_pvd_port(&mut self, pvd_port: i32) -> &mut Self {
         self.pvd_port = pvd_port;
+        self
+    }
+
+    /// Set the port number for the visual debuggers transport.  Default is 5425.
+    pub fn set_pvd_host(&mut self, pvd_host: impl Into<String>) -> &mut Self {
+        self.pvd_remote = Some(pvd_host.into());
         self
     }
 
@@ -696,8 +705,15 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         let mut foundation = PxFoundation::new(self.allocator)?;
         let (mut pvd, mut physics) = unsafe {
             if self.enable_pvd {
-                let mut pvd = VisualDebugger::new(foundation.as_mut(), self.pvd_port)?;
+                if !self.load_extensions {
+                    log::warn!("enabling PVD without extensions can lead to PVD crashing. Considering called `PhysicsFoundationBuilder::with_extensions(true).")
+                }
 
+                let mut pvd = if let Some(remote) = self.pvd_remote {
+                    VisualDebugger::new_remote(foundation.as_mut(), &remote, self.pvd_port)?
+                } else {
+                    VisualDebugger::new(foundation.as_mut(), self.pvd_port)?
+                };
                 let physics = PxPhysics::from_raw(phys_PxCreatePhysics(
                     PX_PHYSICS_VERSION,
                     foundation.as_mut_ptr(),
