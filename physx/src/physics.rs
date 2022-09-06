@@ -706,7 +706,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         let (mut pvd, mut physics) = unsafe {
             if self.enable_pvd {
                 if !self.load_extensions {
-                    log::warn!("enabling PVD without extensions can lead to PVD crashing. Considering called `PhysicsFoundationBuilder::with_extensions(true).")
+                    log::warn!("Enabling PVD without extensions can lead to PVD crashing. Considering called `PhysicsFoundationBuilder::with_extensions(true). See https://github.com/NVIDIAGameWorks/PhysX/issues/306 for more info.");
                 }
 
                 let mut pvd = if let Some(remote) = self.pvd_remote {

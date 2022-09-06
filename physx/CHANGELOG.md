@@ -5,7 +5,7 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
-- Warn when enabling PVD without extensions enabled to help diagnose PVD crashes
+- Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: https://github.com/NVIDIAGameWorks/PhysX/issues/306
 - Allow overriding PVD host with `PhysicsFoundationBuilder::set_pvd_host`
 
 ## [0.13.0] - 2022-08-10
