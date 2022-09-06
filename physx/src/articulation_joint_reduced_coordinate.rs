@@ -138,7 +138,7 @@ impl From<ArticulationAxis> for PxArticulationAxis::Enum {
 
 /******************************************************************************/
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArticulationJointType {
     Prismatic,
     Revolute,
