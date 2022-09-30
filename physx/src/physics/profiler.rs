@@ -1,14 +1,5 @@
-// Author: Tom Solberg <tom.solberg@embark-studios.com>
-// Copyright © 2022, Tom Solberg, all rights reserved.
-// Created: 30 September 2022
-
-/*!
-
-*/
-
-use std::ffi::c_void;
-
 use physx_sys::{create_profiler_callback, PxProfilerCallback};
+use std::ffi::c_void;
 
 /// A trait for creating profiler callbacks for PhysX.
 ///
