@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- add new `create_profiler_callback` which uses the trampoline pattern to send profiling events to Rust.
+
 ## [0.5.0] - 2022-08-10
 
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
