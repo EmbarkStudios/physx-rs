@@ -200,6 +200,31 @@ public:
     void *mUserData;
 };
 
+typedef void * (*ZoneStartCallback)(const char *typeName, bool detached, uint64_t context  , void *userdata);
+typedef void  (*ZoneEndCallback)(void* profilerData, const char *typeName, bool detached, uint64_t context , void *userdata);
+
+class CustomProfilerTrampoline : public PxProfilerCallback {
+public:
+    CustomProfilerTrampoline(ZoneStartCallback startCb, ZoneEndCallback endCb, void *userdata)
+        : mStartCallback(startCb), mEndCallback(endCb), mUserData(userdata) {
+    }
+
+	virtual void* zoneStart(const char* eventName, bool detached, uint64_t contextId)
+	{
+		return mStartCallback(eventName, detached, contextId, mUserData);
+	}
+	virtual void zoneEnd(void* profilerData, const char* eventName, bool detached, uint64_t contextId)
+	{
+		return mEndCallback(profilerData, eventName, detached, contextId, mUserData);
+	}
+
+private:
+    ZoneStartCallback mStartCallback;
+    ZoneEndCallback mEndCallback;
+public:
+    void *mUserData;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -251,6 +276,14 @@ extern "C"
     void *get_alloc_callback_user_data(PxAllocatorCallback *allocator) {
         CustomAllocatorTrampoline *trampoline = static_cast<CustomAllocatorTrampoline *>(allocator);
         return trampoline->mUserData;
+    }
+
+	PxProfilerCallback *create_profiler_callback(
+        ZoneStartCallback zone_start_callback,
+        ZoneEndCallback zone_end_callback,
+        void *userdata
+    ) {
+        return new CustomProfilerTrampoline(zone_start_callback, zone_end_callback, userdata);
     }
 
     void *get_default_simulation_filter_shader()

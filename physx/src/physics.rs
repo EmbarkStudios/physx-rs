@@ -8,6 +8,8 @@ Wrapper interface for PxPhysics
 
 #![allow(clippy::missing_safety_doc)]
 
+mod profiler;
+
 use crate::{
     aggregate::{Aggregate, PxAggregate},
     articulation::{Articulation, PxArticulation},
@@ -44,6 +46,7 @@ use physx_sys::{
     // TODO implement the extensions interface, move these there isntead of here?
     //phys_PxCreateBasePhysics,  used with extentions
     phys_PxInitExtensions,
+    phys_PxSetProfilerCallback,
     physx_create_physics,
     //FilterShaderCallbackInfo,
     PxConstraintConnector,
@@ -92,6 +95,8 @@ use physx_sys::{
     PxTolerancesScale_new,
 };
 
+pub use self::profiler::ProfilerCallback;
+
 pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 
 /// A PxPhysics, PxFoundation and optional PxPvd combined into one struct for ease of use.
@@ -133,6 +138,12 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
             physics,
             pvd: None,
             extensions_loaded: false,
+        }
+    }
+
+    pub fn set_profiler<P: ProfilerCallback>(&mut self, profiler: P) {
+        unsafe {
+            phys_PxSetProfilerCallback(profiler.into_px());
         }
     }
 
