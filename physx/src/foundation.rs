@@ -8,8 +8,6 @@
 Wrapper for PxFoundation class
 */
 
-mod profiler;
-
 use crate::{owner::Owner, traits::Class};
 use enumflags2::{bitflags, BitFlags};
 use physx_sys::{
@@ -26,8 +24,6 @@ use std::{
     mem::{align_of, size_of},
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
-
-pub use self::profiler::ProfilerCallback;
 
 #[bitflags]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]

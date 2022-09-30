@@ -1,21 +1,6 @@
-// Author: Tom Olsson <tom.olsson@embark-studios.com>
-// Copyright © 2019, Embark Studios, all rights reserved.
-// Created:  3 July 2019
-
+use physx::{physics::ProfilerCallback, prelude::*};
 use std::ffi::CStr;
 
-use physx::{physics::ProfilerCallback, prelude::*};
-
-/// This is a WIP example for how the rustified wrappers lets your reduced the
-/// amount of unsafe in your code, and make it clearer where we cannot abstract
-/// away the underlying dangers.
-///
-/// The overall goal is to maintain a close mapping to the underlying PhysX API
-/// while improving safety and reliability of the code.
-
-/// Many of the main types in PhysX have a userData *mut c_void field.
-/// Representing this safely in Rust requires generics everywhere,
-/// and pre-defining all the generic parameters makes things more usable.
 type PxMaterial = physx::material::PxMaterial<()>;
 type PxShape = physx::shape::PxShape<(), PxMaterial>;
 type PxArticulationLink = physx::articulation_link::PxArticulationLink<(), PxShape>;
@@ -84,9 +69,9 @@ struct PrintProfilerCallback {
 
 unsafe impl ProfilerCallback for PrintProfilerCallback {
     unsafe extern "C" fn zone_start(
-        name: *const i8,
-        detached: bool,
-        context_id: u64,
+        _name: *const i8,
+        _detached: bool,
+        _context_id: u64,
         user_data: *const std::ffi::c_void,
     ) -> *mut std::ffi::c_void {
         let this = &*(user_data as *const Self);
@@ -98,8 +83,8 @@ unsafe impl ProfilerCallback for PrintProfilerCallback {
     unsafe extern "C" fn zone_end(
         context: *const std::ffi::c_void,
         name: *const i8,
-        detached: bool,
-        context_id: u64,
+        _detached: bool,
+        _context_id: u64,
         user_data: *const std::ffi::c_void,
     ) {
         let name: &'static str = std::mem::transmute(CStr::from_ptr(name).to_str().unwrap());
@@ -155,38 +140,16 @@ fn main() {
     sphere_actor.set_rigid_body_flag(RigidBodyFlag::EnablePoseIntegrationPreview, true);
     scene.add_dynamic_actor(sphere_actor);
 
-    // Updating
-    let heights_over_time = (0..100)
-        .map(|_| {
-            // Calls both simulate and fetch_results.  More complex simulation update
-            // controls are not fully supported.
-            scene
-                .step(
-                    0.1,
-                    None::<&mut physx_sys::PxBaseTask>,
-                    Some(unsafe { &mut ScratchBuffer::new(4) }),
-                    true,
-                )
-                .expect("error occured during simulation");
-            // For simplicity, just read out the only dynamic actor in the scene.
-            // getActiveActors is also supported, it returns a Vec<&mut ActorMap> which has
-            // a map method that takes a function for each actor type, and `as_<T>` methods
-            // that return an Option<&mut T>.
-            let actors = scene.get_dynamic_actors();
-            actors[0].get_global_position().y() as i32 - 10
-        })
-        .collect::<Vec<_>>();
-
-    // Draw to stdout
-    let max_h = 18;
-    (0..max_h)
-        .map(|h| {
-            let h = max_h - 1 - h;
-            heights_over_time
-                .iter()
-                .enumerate()
-                .map(|(_t, p)| if h == *p { 'o' } else { ' ' })
-                .collect::<String>()
-        })
-        .for_each(|line| println!("{}", line));
+    for _ in 0..100 {
+        // Calls both simulate and fetch_results.  More complex simulation update
+        // controls are not fully supported.
+        scene
+            .step(
+                0.1,
+                None::<&mut physx_sys::PxBaseTask>,
+                Some(unsafe { &mut ScratchBuffer::new(4) }),
+                true,
+            )
+            .expect("error occured during simulation");
+    }
 }
