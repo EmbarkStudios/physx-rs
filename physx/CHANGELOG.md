@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- Fixed a bug where the Pvd host string would get deallocated and fail to connect.
+
 ## [0.14.0] - 2022-10-03
 
 - Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: https://github.com/NVIDIAGameWorks/PhysX/issues/306
