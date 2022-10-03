@@ -24,7 +24,7 @@ use physx_sys::{
     PxTriangleMeshGeometry_isValid, PxTriangleMeshGeometry_new, PxTriangleMeshGeometry_new_1,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum MeshGeometryFlag {
     DoubleSided = 1u8,
@@ -53,7 +53,7 @@ impl From<MeshGeometryFlag> for PxMeshGeometryFlag::Enum {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ConvexMeshGeometryFlag {
     TightBounds = 1u8,
@@ -82,7 +82,7 @@ impl From<ConvexMeshGeometryFlag> for PxConvexMeshGeometryFlag::Enum {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum GeometryType {
     Sphere = 0,

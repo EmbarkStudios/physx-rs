@@ -346,6 +346,11 @@ pub type AllocCallback =
 
 pub type DeallocCallback = unsafe extern "C" fn(*const c_void, *const c_void);
 
+pub type ZoneStartCallback =
+    unsafe extern "C" fn(*const i8, bool, u64, *const c_void) -> *mut c_void;
+
+pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
+
 pub type ErrorCallback =
     unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void);
 
@@ -375,6 +380,12 @@ extern "C" {
         dealloc_callback: DeallocCallback,
         userdata: *mut c_void,
     ) -> *mut PxAllocatorCallback;
+
+    pub fn create_profiler_callback(
+        zone_start_callback: ZoneStartCallback,
+        zone_end_callback: ZoneEndCallback,
+        userdata: *mut c_void,
+    ) -> *mut PxProfilerCallback;
 
     pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;
 

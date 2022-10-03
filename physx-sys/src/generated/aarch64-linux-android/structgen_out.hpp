@@ -95,7 +95,7 @@ struct physx_PxDebugText_Pod {
     float size;
     uint32_t color;
     char structgen_pad0[4];
-    unsigned char* string;
+    char* string;
 };
 struct physx_PxRenderBuffer_Pod {
     void* vtable_;
@@ -1478,7 +1478,7 @@ struct physx_PxSceneQueryFlags_Pod {
     uint16_t mBits;
 };
 struct physx_PxRepXObject_Pod {
-    unsigned char* typeName;
+    char* typeName;
     void* serializable;
     uint64_t id;
 };
@@ -1790,7 +1790,7 @@ struct physx_PxVehicleGraphChannelDesc_Pod {
     physx_PxVec3_Pod mColorLow;
     physx_PxVec3_Pod mColorHigh;
     char structgen_pad0[4];
-    unsigned char* mTitle;
+    char* mTitle;
 };
 struct physx_PxVehicleGraphDesc_Pod {
     char structgen_pad0[32];
@@ -1810,7 +1810,7 @@ struct physx_PxVehicleNoDrive_Pod {
 };
 struct physx_PxProfileScoped_Pod {
     physx_PxProfilerCallback_Pod* mCallback;
-    unsigned char* mEventName;
+    char* mEventName;
     void* mProfilerData;
     uint64_t mContextId;
     bool mDetached;

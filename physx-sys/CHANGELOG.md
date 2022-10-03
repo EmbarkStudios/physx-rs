@@ -4,6 +4,25 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.6.0] - 2022-10-03
+
+- add new `create_profiler_callback` which uses the trampoline pattern to send profiling events to Rust.
+- add new feature `profile` which will enable profiling in PhysX
+
+## [0.5.0] - 2022-08-10
+
+- [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
+- [PR#154](https://github.com/EmbarkStudios/physx-rs/pull/154) Add support for `aarch64-unknown-linux-gnu`
+- [PR#158](https://github.com/EmbarkStudios/physx-rs/pull/158) Update pre generated `aarch64-linux-android` files
+    - `PxRepXObject` typename field changed from `*const u8` to `*const i8`
+    - `PxDebugText` typename field changed from `*const u8` to `*const i8`
+    - `PxProfileScoped` typename field changed from `*const u8` to `*const i8`
+    - `PxVehicleGraphChannelDesc` typename field changed from `*mut u8` to `*mut i8`
+- [PR#156](https://github.com/EmbarkStudios/physx-rs/pull/156) Update pre generated `aarch64-apple-darwin` files
+    - Adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
+- [PR#153](https://github.com/EmbarkStudios/physx-rs/pull/153) Update clang/llvm lib used by `pxbind` and update `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`, `x86_64-unknown-linux` pre generated files.
+    - Mostly an internal change but adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
+
 ## [0.4.16] - 2021-12-21
 ### Fixed
 
@@ -121,7 +140,9 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...HEAD
+[0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.5.0...physx-sys-v0.6.0
+[0.5.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...physx-sys-v0.5.0
 [0.4.16]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...physx-sys-v0.4.16
 [0.4.15]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.14...physx-sys-v0.4.15
 [0.4.14]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.13...physx-sys-v0.4.14

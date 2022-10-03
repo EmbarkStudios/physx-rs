@@ -8,6 +8,8 @@ Wrapper interface for PxPhysics
 
 #![allow(clippy::missing_safety_doc)]
 
+mod profiler;
+
 use crate::{
     aggregate::{Aggregate, PxAggregate},
     articulation::{Articulation, PxArticulation},
@@ -44,6 +46,7 @@ use physx_sys::{
     // TODO implement the extensions interface, move these there isntead of here?
     //phys_PxCreateBasePhysics,  used with extentions
     phys_PxInitExtensions,
+    phys_PxSetProfilerCallback,
     physx_create_physics,
     //FilterShaderCallbackInfo,
     PxConstraintConnector,
@@ -92,6 +95,8 @@ use physx_sys::{
     PxTolerancesScale_new,
 };
 
+pub use self::profiler::ProfilerCallback;
+
 pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
 
 /// A PxPhysics, PxFoundation and optional PxPvd combined into one struct for ease of use.
@@ -133,6 +138,12 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
             physics,
             pvd: None,
             extensions_loaded: false,
+        }
+    }
+
+    pub fn set_profiler<P: ProfilerCallback>(&mut self, profiler: P) {
+        unsafe {
+            phys_PxSetProfilerCallback(profiler.into_px());
         }
     }
 
@@ -634,6 +645,7 @@ pub struct PhysicsFoundationBuilder<Allocator: AllocatorCallback> {
     tolerances: PxTolerancesScale,
     enable_pvd: bool,
     pvd_port: i32,
+    pvd_remote: Option<String>,
     load_extensions: bool,
     allocator: Allocator,
     error_callback: Option<Box<dyn ErrorCallback>>,
@@ -648,6 +660,7 @@ impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
             tolerances,
             enable_pvd: false,
             pvd_port: 5425,
+            pvd_remote: None,
             load_extensions: false,
             allocator: DefaultAllocator,
             error_callback: None,
@@ -664,6 +677,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
             tolerances,
             enable_pvd: false,
             pvd_port: 5425,
+            pvd_remote: None,
             load_extensions: false,
             allocator,
             error_callback: None,
@@ -678,6 +692,12 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     /// Set the port number for the visual debuggers transport.  Default is 5425.
     pub fn set_pvd_port(&mut self, pvd_port: i32) -> &mut Self {
         self.pvd_port = pvd_port;
+        self
+    }
+
+    /// Set the port number for the visual debuggers transport.  Default is 5425.
+    pub fn set_pvd_host(&mut self, pvd_host: impl Into<String>) -> &mut Self {
+        self.pvd_remote = Some(pvd_host.into());
         self
     }
 
@@ -723,8 +743,15 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         };
         let (mut pvd, mut physics) = unsafe {
             if self.enable_pvd {
-                let mut pvd = VisualDebugger::new(foundation.as_mut(), self.pvd_port)?;
+                if !self.load_extensions {
+                    log::warn!("Enabling PVD without extensions can lead to PVD crashing. Considering called `PhysicsFoundationBuilder::with_extensions(true). See https://github.com/NVIDIAGameWorks/PhysX/issues/306 for more info.");
+                }
 
+                let mut pvd = if let Some(remote) = self.pvd_remote {
+                    VisualDebugger::new_remote(foundation.as_mut(), &remote, self.pvd_port)?
+                } else {
+                    VisualDebugger::new(foundation.as_mut(), self.pvd_port)?
+                };
                 let physics = PxPhysics::from_raw(phys_PxCreatePhysics(
                     PX_PHYSICS_VERSION,
                     foundation.as_mut_ptr(),

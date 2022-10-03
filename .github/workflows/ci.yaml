@@ -57,14 +57,12 @@ jobs:
       - run: cargo fetch
       - name: test - no features
         run: cargo test
-      - name: test - cmake + structgen
+      - name: test - all features
         run: cargo test --all-features
-      - name: ball cmake + structgen
+      - name: ball all features 
         run: cargo run --example ball --all-features
       - name: ball no features
         run: cargo run --example ball
-      - name: ball just cmake
-        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake
       - name: ball just structgen
         run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen
 
@@ -76,7 +74,6 @@ jobs:
       matrix:
         feature:
           - --features structgen
-          - --features use-cmake 
           - --all-features
           # Default features
           - --
@@ -102,7 +99,6 @@ jobs:
       matrix:
         feature:
           - --features structgen
-          - --features use-cmake 
           - --all-features
           # Default features
           - --
@@ -140,14 +136,12 @@ jobs:
       - run: cargo fetch
       - name: test - no features
         run: cargo test --release
-      - name: test - cmake + structgen
+      - name: test - all features 
         run: cargo test --all-features --release
-      - name: ball cmake + structgen
+      - name: ball all features 
         run: cargo run --example ball --all-features --release
       - name: ball no features
         run: cargo run --example ball --release
-      - name: ball just cmake
-        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features use-cmake --release
       - name: ball just structgen
         run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
 
