@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.14.0] - 2022-10-03
 
 - Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: https://github.com/NVIDIAGameWorks/PhysX/issues/306
 - Allow overriding PVD host with `PhysicsFoundationBuilder::set_pvd_host`
@@ -160,7 +161,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...HEAD
+[0.14.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...physx-v0.14.0
 [0.13.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...physx-v0.13.0
 [0.12.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...physx-v0.12.2
 [0.12.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.0...physx-v0.12.1
