@@ -6,6 +6,7 @@
 ## [Unreleased] - ReleaseDate
 
 - add new `create_profiler_callback` which uses the trampoline pattern to send profiling events to Rust.
+- add new feature `profile` which will enable profiling in PhysX
 
 ## [0.5.0] - 2022-08-10
 
