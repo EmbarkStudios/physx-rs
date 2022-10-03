@@ -379,8 +379,8 @@ extern "C" {
     ) -> *mut PxAllocatorCallback;
 
     pub fn create_profiler_callback(
-        alloc_callback: ZoneStartCallback,
-        dealloc_callback: ZoneEndCallback,
+        zone_start_callback: ZoneStartCallback,
+        zone_end_callback: ZoneEndCallback,
         userdata: *mut c_void,
     ) -> *mut PxProfilerCallback;
 
