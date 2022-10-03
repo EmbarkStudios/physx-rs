@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.6.0] - 2022-10-03
 
 - add new `create_profiler_callback` which uses the trampoline pattern to send profiling events to Rust.
 - add new feature `profile` which will enable profiling in PhysX
@@ -139,7 +140,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.5.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...HEAD
+[0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.5.0...physx-sys-v0.6.0
 [0.5.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...physx-sys-v0.5.0
 [0.4.16]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...physx-sys-v0.4.16
 [0.4.15]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.14...physx-sys-v0.4.15
