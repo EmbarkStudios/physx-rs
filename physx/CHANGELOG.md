@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.14.1] - 2022-10-03
 
 - Fixed a bug where the Pvd host string would get deallocated and fail to connect.
 
@@ -164,7 +165,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.1...HEAD
+[0.14.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...physx-v0.14.1
 [0.14.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...physx-v0.14.0
 [0.13.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...physx-v0.13.0
 [0.12.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.1...physx-v0.12.2
