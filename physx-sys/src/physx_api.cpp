@@ -209,11 +209,12 @@ public:
         : mStartCallback(startCb), mEndCallback(endCb), mUserData(userdata) {
     }
 
-	virtual void* zoneStart(const char* eventName, bool detached, uint64_t contextId)
+	virtual void* zoneStart(const char* eventName, bool detached, uint64_t contextId) override
 	{
 		return mStartCallback(eventName, detached, contextId, mUserData);
 	}
-	virtual void zoneEnd(void* profilerData, const char* eventName, bool detached, uint64_t contextId)
+
+	virtual void zoneEnd(void* profilerData, const char* eventName, bool detached, uint64_t contextId) override
 	{
 		return mEndCallback(profilerData, eventName, detached, contextId, mUserData);
 	}

@@ -316,6 +316,10 @@ fn add_common(ctx: &mut Context) {
 
     builder.define("PX_SUPPORT_PVD", "1");
 
+    if cfg!(feature = "profile") {
+        builder.define("PX_PROFILE", "1");
+    }
+
     // If we're on linux, we already require clang++ for structgen, for reasons,
     // so just force clang++ for the normal compile as well...except in the case
     // where a user has expliclity set CXX....
@@ -443,6 +447,7 @@ fn cc_compile(target_env: Environment) {
     scenequery(&mut ctx);
     simulationcontroller(&mut ctx);
 
+
     ctx.includes.push(ctx.root.join("source/pvd/include"));
 
     // Strip out duplicate include paths, C++ already has it hard enough as it is
@@ -522,6 +527,10 @@ fn main() {
         .include("PhysX/physx/include")
         .include("PhysX/pxshared/include")
         .include("PhysX/physx/source/foundation/include");
+
+    if cfg!(feature = "profile") {
+        physx_cc.define("PX_PROFILE", Some("1"));
+    }
 
     if compiler.is_none() && host.contains("-linux-") {
         physx_cc.compiler("clang++");
