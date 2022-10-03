@@ -50,7 +50,7 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
     fn drop(&mut self) {
         unsafe {
             if let Some(allocator) = self.get_allocator_callback() {
-                Box::from_raw(allocator);
+                drop(Box::from_raw(allocator));
             };
             PxFoundation_release_mut(self.as_mut_ptr())
         }

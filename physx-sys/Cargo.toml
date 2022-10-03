@@ -45,3 +45,4 @@ cc = { version = "1.0", features = ["parallel"] }
 
 [features]
 structgen = []
+profile = []

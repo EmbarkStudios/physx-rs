@@ -131,19 +131,19 @@ where
             let info = &mut *get_simulation_event_info(self.as_mut_ptr());
             {
                 if !info.collision_user_data.is_null() {
-                    Box::from_raw(info.collision_user_data as *mut OC);
+                    drop(Box::from_raw(info.collision_user_data as *mut OC));
                 };
                 if !info.trigger_user_data.is_null() {
-                    Box::from_raw(info.trigger_user_data as *mut OT);
+                    drop(Box::from_raw(info.trigger_user_data as *mut OT));
                 };
                 if !info.constraint_break_user_data.is_null() {
-                    Box::from_raw(info.constraint_break_user_data as *mut OCB);
+                    drop(Box::from_raw(info.constraint_break_user_data as *mut OCB));
                 };
                 if !info.wake_sleep_user_data.is_null() {
-                    Box::from_raw(info.wake_sleep_user_data as *mut OWS);
+                    drop(Box::from_raw(info.wake_sleep_user_data as *mut OWS));
                 };
                 if !info.advance_user_data.is_null() {
-                    Box::from_raw(info.advance_user_data as *mut OA);
+                    drop(Box::from_raw(info.advance_user_data as *mut OA));
                 };
             }
             destroy_simulation_event_callbacks(self.as_mut_ptr());
