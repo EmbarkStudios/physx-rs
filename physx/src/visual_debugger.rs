@@ -32,6 +32,8 @@ pub enum VisualDebuggerSceneFlag {
 pub struct VisualDebugger {
     pvd: Owner<Pvd>,
     transport: Option<Owner<PvdTransport>>,
+    // Need to keep this field alive as the PvdTransport doesn't take ownership of the string.
+    _host: std::ffi::CString,
 }
 
 unsafe impl Class<physx_sys::PxPvd> for VisualDebugger {
@@ -79,10 +81,9 @@ impl VisualDebugger {
         let flags = PxPvdInstrumentationFlags {
             mBits: PxPvdInstrumentationFlag::eDEBUG as u8,
         };
-
+        let oshost = CString::new(host).ok()?;
         let pvd = unsafe { Pvd::from_raw(phys_PxCreatePvd(foundation.as_mut_ptr()))? };
         let transport = unsafe {
-            let oshost = CString::new(host).ok()?;
             PvdTransport::from_raw(phys_PxDefaultPvdSocketTransportCreate(
                 oshost.as_ptr() as _,
                 port,
@@ -90,7 +91,11 @@ impl VisualDebugger {
             ))
         };
 
-        let mut visual_debugger = Self { pvd, transport };
+        let mut visual_debugger = Self {
+            pvd,
+            transport,
+            _host: oshost,
+        };
 
         if !visual_debugger.connect(flags) {
             return None;
