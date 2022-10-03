@@ -447,7 +447,6 @@ fn cc_compile(target_env: Environment) {
     scenequery(&mut ctx);
     simulationcontroller(&mut ctx);
 
-
     ctx.includes.push(ctx.root.join("source/pvd/include"));
 
     // Strip out duplicate include paths, C++ already has it hard enough as it is
