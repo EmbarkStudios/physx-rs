@@ -20,7 +20,7 @@ use physx_sys::{
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
-    ffi::{c_void, CStr},
+    ffi::{c_void, CStr, c_char},
     marker::PhantomData,
     mem::{align_of, size_of},
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
@@ -324,8 +324,8 @@ unsafe extern "C" fn report_error_helper(
         debug_assert!(false, "bad error code {}", code);
         Default::default()
     });
-    let message = String::from_utf8_lossy(CStr::from_ptr(message.cast::<i8>()).to_bytes());
-    let file = String::from_utf8_lossy(CStr::from_ptr(file.cast::<i8>()).to_bytes());
+    let message = String::from_utf8_lossy(CStr::from_ptr(message.cast::<c_char>()).to_bytes());
+    let file = String::from_utf8_lossy(CStr::from_ptr(file.cast::<c_char>()).to_bytes());
     let ec = &*user_data.cast::<Box<dyn ErrorCallback>>();
     ec.report_error(code, &message, &file, line);
 }
