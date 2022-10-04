@@ -325,14 +325,11 @@ unsafe extern "C" fn report_error_helper(
         debug_assert!(false, "bad error code {}", code);
         Default::default()
     });
-    let message = unsafe { CStr::from_ptr(message.cast::<i8>()) }
-        .to_str()
-        .unwrap_or("non-utf8 chars in message");
-    let file = unsafe { CStr::from_ptr(file.cast::<i8>()) }
-        .to_str()
-        .unwrap_or("non-utf8 chars in file");
+    let message =
+        String::from_utf8_lossy(unsafe { CStr::from_ptr(message.cast::<i8>()) }.to_bytes());
+    let file = String::from_utf8_lossy(unsafe { CStr::from_ptr(file.cast::<i8>()) }.to_bytes());
     let ec = unsafe { &*user_data.cast::<Box<dyn ErrorCallback>>() };
-    ec.report_error(code, message, file, line);
+    ec.report_error(code, &message, &file, line);
 }
 
 unsafe extern "C" fn error_userdata_drop_helper(user_data: *mut c_void) {
