@@ -324,28 +324,24 @@ unsafe extern "C" fn report_error_helper(
         debug_assert!(false, "bad error code {}", code);
         Default::default()
     });
-    let message =
-        String::from_utf8_lossy(unsafe { CStr::from_ptr(message.cast::<i8>()) }.to_bytes());
-    let file = String::from_utf8_lossy(unsafe { CStr::from_ptr(file.cast::<i8>()) }.to_bytes());
-    let ec = unsafe { &*user_data.cast::<Box<dyn ErrorCallback>>() };
+    let message = String::from_utf8_lossy(CStr::from_ptr(message.cast::<i8>()).to_bytes());
+    let file = String::from_utf8_lossy(CStr::from_ptr(file.cast::<i8>()).to_bytes());
+    let ec = &*user_data.cast::<Box<dyn ErrorCallback>>();
     ec.report_error(code, &message, &file, line);
 }
 
 unsafe extern "C" fn error_userdata_drop_helper(user_data: *mut c_void) {
-    let b: Box<Box<dyn ErrorCallback>> =
-        unsafe { Box::from_raw(user_data.cast::<Box<dyn ErrorCallback>>()) };
+    let b: Box<Box<dyn ErrorCallback>> = Box::from_raw(user_data.cast::<Box<dyn ErrorCallback>>());
     drop(b);
 }
 
 unsafe fn error_callback_to_px(cb: Box<dyn ErrorCallback>) -> *mut PxErrorCallback {
-    unsafe {
-        create_error_callback(
-            report_error_helper,
-            // need the extra box to get a normal non-fat pointer
-            Box::into_raw(Box::new(cb)).cast::<c_void>(),
-            error_userdata_drop_helper,
-        )
-    }
+    create_error_callback(
+        report_error_helper,
+        // need the extra box to get a normal non-fat pointer
+        Box::into_raw(Box::new(cb)).cast::<c_void>(),
+        error_userdata_drop_helper,
+    )
 }
 
 pub trait ErrorCallback {
