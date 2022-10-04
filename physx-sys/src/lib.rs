@@ -354,8 +354,7 @@ pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, 
 pub type ErrorCallback =
     unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void);
 
-pub type ErrorUserdataDeleteCallback =
-    unsafe extern "C" fn(*mut c_void);
+pub type ErrorUserdataDeleteCallback = unsafe extern "C" fn(*mut c_void);
 
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
@@ -399,9 +398,7 @@ extern "C" {
         userdata_deleter: ErrorUserdataDeleteCallback,
     ) -> *mut PxErrorCallback;
 
-    pub fn destroy_error_callback(
-        error_callback: *mut PxErrorCallback,
-    );
+    pub fn destroy_error_callback(error_callback: *mut PxErrorCallback);
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 

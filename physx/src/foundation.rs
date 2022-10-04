@@ -11,12 +11,12 @@ Wrapper for PxFoundation class
 use crate::{owner::Owner, traits::Class};
 use enumflags2::{bitflags, BitFlags};
 use physx_sys::{
-    create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
-    get_default_error_callback, phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
+    create_alloc_callback, create_default_error_callback, create_error_callback,
+    destroy_error_callback, get_alloc_callback_user_data, get_default_allocator,
+    phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
     PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
-    create_error_callback, destroy_error_callback, create_default_error_callback,
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
@@ -55,7 +55,10 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             if let Some(allocator) = self.get_allocator_callback() {
                 drop(Box::from_raw(allocator));
             };
-            let error_callback: *mut PxErrorCallback = self.get_error_callback().map(|x| x as *mut PxErrorCallback).unwrap_or(std::ptr::null_mut());
+            let error_callback: *mut PxErrorCallback = self
+                .get_error_callback()
+                .map(|x| x as *mut PxErrorCallback)
+                .unwrap_or(std::ptr::null_mut());
             PxFoundation_release_mut(self.as_mut_ptr());
             if !error_callback.is_null() {
                 destroy_error_callback(error_callback);
@@ -91,24 +94,33 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
     fn new(allocator: Self::Allocator) -> Option<Owner<Self>> {
         unsafe {
-            Owner::from_raw(phys_PxCreateFoundation(
-                crate::physics::PX_PHYSICS_VERSION,
-                allocator.into_px(),
-                // needs to be create_default_error_callback rather than get_default_error_callback so we can delete it the same way as a custom callback
-                create_default_error_callback().cast::<PxErrorCallback>(),
-            ).cast::<Self>())
+            Owner::from_raw(
+                phys_PxCreateFoundation(
+                    crate::physics::PX_PHYSICS_VERSION,
+                    allocator.into_px(),
+                    // needs to be create_default_error_callback rather than get_default_error_callback so we can delete it the same way as a custom callback
+                    create_default_error_callback().cast::<PxErrorCallback>(),
+                )
+                .cast::<Self>(),
+            )
         }
     }
 
     /// Tries to create a PxFoundation with the provided allocator and error callbacks.
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
-    fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: Box<dyn ErrorCallback>) -> Option<Owner<Self>> {
+    fn with_allocator_error_callback(
+        allocator: Self::Allocator,
+        error_callback: Box<dyn ErrorCallback>,
+    ) -> Option<Owner<Self>> {
         unsafe {
-            Owner::from_raw(phys_PxCreateFoundation(
-                crate::physics::PX_PHYSICS_VERSION,
-                allocator.into_px(),
-                error_callback_to_px(error_callback),
-            ).cast::<Self>())
+            Owner::from_raw(
+                phys_PxCreateFoundation(
+                    crate::physics::PX_PHYSICS_VERSION,
+                    allocator.into_px(),
+                    error_callback_to_px(error_callback),
+                )
+                .cast::<Self>(),
+            )
         }
     }
 
@@ -313,16 +325,19 @@ unsafe extern "C" fn report_error_helper(
         debug_assert!(false, "bad error code {}", code);
         Default::default()
     });
-    let message = unsafe { CStr::from_ptr(message.cast::<i8>()) }.to_str().unwrap_or("non-utf8 chars in message");
-    let file = unsafe { CStr::from_ptr(file.cast::<i8>()) }.to_str().unwrap_or("non-utf8 chars in file");
+    let message = unsafe { CStr::from_ptr(message.cast::<i8>()) }
+        .to_str()
+        .unwrap_or("non-utf8 chars in message");
+    let file = unsafe { CStr::from_ptr(file.cast::<i8>()) }
+        .to_str()
+        .unwrap_or("non-utf8 chars in file");
     let ec = unsafe { &*user_data.cast::<Box<dyn ErrorCallback>>() };
     ec.report_error(code, message, file, line);
 }
 
-unsafe extern "C" fn error_userdata_drop_helper(
-    user_data: *mut c_void,
-) {
-    let b: Box<Box<dyn ErrorCallback>> = unsafe { Box::from_raw(user_data.cast::<Box<dyn ErrorCallback>>()) };
+unsafe extern "C" fn error_userdata_drop_helper(user_data: *mut c_void) {
+    let b: Box<Box<dyn ErrorCallback>> =
+        unsafe { Box::from_raw(user_data.cast::<Box<dyn ErrorCallback>>()) };
     drop(b);
 }
 
@@ -338,11 +353,5 @@ unsafe fn error_callback_to_px(cb: Box<dyn ErrorCallback>) -> *mut PxErrorCallba
 }
 
 pub trait ErrorCallback {
-    fn report_error(
-        &self,
-        code: BitFlags<ErrorCode>,
-        message: &str,
-        file: &str,
-        line: u32
-    );
+    fn report_error(&self, code: BitFlags<ErrorCode>, message: &str, file: &str, line: u32);
 }

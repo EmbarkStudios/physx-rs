@@ -20,7 +20,7 @@ use crate::{
     bvh_structure::BvhStructure,
     constraint::Constraint,
     convex_mesh::ConvexMesh,
-    foundation::{AllocatorCallback, DefaultAllocator, Foundation, PxFoundation, ErrorCallback},
+    foundation::{AllocatorCallback, DefaultAllocator, ErrorCallback, Foundation, PxFoundation},
     geometry::Geometry,
     height_field::HeightField,
     material::Material,
@@ -147,9 +147,12 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
-    pub fn with_allocator_error_callback(allocator: Allocator, error_callback: Box<dyn ErrorCallback>) -> PhysicsFoundation<Allocator, Geom> {
-        let mut foundation =
-            PxFoundation::with_allocator_error_callback(allocator, error_callback).expect("Create Foundation returned a null pointer");
+    pub fn with_allocator_error_callback(
+        allocator: Allocator,
+        error_callback: Box<dyn ErrorCallback>,
+    ) -> PhysicsFoundation<Allocator, Geom> {
+        let mut foundation = PxFoundation::with_allocator_error_callback(allocator, error_callback)
+            .expect("Create Foundation returned a null pointer");
         let physics =
             PxPhysics::new(foundation.as_mut()).expect("Create PxPhysics returned a null pointer.");
         Self {
@@ -158,7 +161,7 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
             pvd: None,
             extensions_loaded: false,
         }
-    }    
+    }
 
     pub fn physics(&self) -> &PxPhysics<Geom> {
         self.physics.as_ref()
@@ -728,10 +731,13 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     }
 
     /// Set error callback
-    pub fn with_error_callback(&mut self, error_callback: Option<Box<dyn ErrorCallback>>) -> &mut Self {
+    pub fn with_error_callback(
+        &mut self,
+        error_callback: Option<Box<dyn ErrorCallback>>,
+    ) -> &mut Self {
         self.error_callback = error_callback;
         self
-    }    
+    }
 
     /// Build the PhysicsFoundation.
     pub fn build<Geom: Shape>(self) -> Option<PhysicsFoundation<Allocator, Geom>> {
