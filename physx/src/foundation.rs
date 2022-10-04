@@ -16,10 +16,11 @@ use physx_sys::{
     PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
+    create_error_callback, destroy_error_callback, create_default_error_callback,
 };
 use std::{
     alloc::{alloc, dealloc, Layout},
-    ffi::c_void,
+    ffi::{c_void, CStr},
     marker::PhantomData,
     mem::{align_of, size_of},
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
@@ -39,6 +40,8 @@ pub enum ErrorCode {
     PerfWarning = 128u32,
 }
 
+pub type ErrorCodeFlags = BitFlags<ErrorCode>;
+
 /// A new type wrapper for PxFoundation.  Parametrized by it's Allocator type.
 #[repr(transparent)]
 pub struct PxFoundation<Allocator: AllocatorCallback> {
@@ -52,7 +55,11 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             if let Some(allocator) = self.get_allocator_callback() {
                 drop(Box::from_raw(allocator));
             };
-            PxFoundation_release_mut(self.as_mut_ptr())
+            let error_callback: *mut PxErrorCallback = self.get_error_callback().map(|x| x as *mut PxErrorCallback).unwrap_or(std::ptr::null_mut());
+            PxFoundation_release_mut(self.as_mut_ptr());
+            if !error_callback.is_null() {
+                destroy_error_callback(error_callback);
+            }
         }
     }
 }
@@ -87,8 +94,21 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
             Owner::from_raw(phys_PxCreateFoundation(
                 crate::physics::PX_PHYSICS_VERSION,
                 allocator.into_px(),
-                get_default_error_callback() as *mut PxErrorCallback,
-            ) as *mut Self)
+                // needs to be create_default_error_callback rather than get_default_error_callback so we can delete it the same way as a custom callback
+                create_default_error_callback().cast::<PxErrorCallback>(),
+            ).cast::<Self>())
+        }
+    }
+
+    /// Tries to create a PxFoundation with the provided allocator and error callbacks.
+    /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    fn with_allocator_error_callback(allocator: Self::Allocator, error_callback: Box<dyn ErrorCallback>) -> Option<Owner<Self>> {
+        unsafe {
+            Owner::from_raw(phys_PxCreateFoundation(
+                crate::physics::PX_PHYSICS_VERSION,
+                allocator.into_px(),
+                error_callback_to_px(error_callback),
+            ).cast::<Self>())
         }
     }
 
@@ -280,4 +300,49 @@ unsafe impl AllocatorCallback for DefaultAllocator {
     unsafe extern "C" fn deallocate(_ptr: *const c_void, _user_data: *const c_void) {
         unreachable!()
     }
+}
+
+unsafe extern "C" fn report_error_helper(
+    code: u32,
+    message: *const c_void,
+    file: *const c_void,
+    line: u32,
+    user_data: *const c_void,
+) {
+    let code = BitFlags::from_bits(code).unwrap_or_else(|_| {
+        debug_assert!(false, "bad error code {}", code);
+        Default::default()
+    });
+    let message = unsafe { CStr::from_ptr(message.cast::<i8>()) }.to_str().unwrap_or("non-utf8 chars in message");
+    let file = unsafe { CStr::from_ptr(file.cast::<i8>()) }.to_str().unwrap_or("non-utf8 chars in file");
+    let ec = unsafe { &*user_data.cast::<Box<dyn ErrorCallback>>() };
+    ec.report_error(code, message, file, line);
+}
+
+unsafe extern "C" fn error_userdata_drop_helper(
+    user_data: *mut c_void,
+) {
+    let b: Box<Box<dyn ErrorCallback>> = unsafe { Box::from_raw(user_data.cast::<Box<dyn ErrorCallback>>()) };
+    drop(b);
+}
+
+unsafe fn error_callback_to_px(cb: Box<dyn ErrorCallback>) -> *mut PxErrorCallback {
+    unsafe {
+        create_error_callback(
+            report_error_helper,
+            // need the extra box to get a normal non-fat pointer
+            Box::into_raw(Box::new(cb)).cast::<c_void>(),
+            error_userdata_drop_helper,
+        )
+    }
+}
+
+pub trait ErrorCallback {
+    fn report_error(
+        &self,
+        code: BitFlags<ErrorCode>,
+        message: &str,
+        file: &str,
+        line: u32
+    );
 }

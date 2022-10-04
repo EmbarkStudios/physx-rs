@@ -226,6 +226,34 @@ public:
     void *mUserData;
 };
 
+using ErrorCallback = void (*)(PxErrorCode::Enum code, const char* message, const char* file, int line, void* userdata);
+using ErrorUserdataDeleteCallback = void (*)(void* userdata);
+
+class ErrorTrampoline : public PxErrorCallback {
+public:
+    ErrorTrampoline(ErrorCallback errorCb, void* userdata, ErrorUserdataDeleteCallback userdataDeleter)
+        : mErrorCallback(errorCb), mUserdata(userdata), mUserdataDeleteCallback(userdataDeleter) {
+    }
+
+    ~ErrorTrampoline() override {
+        if(mUserdataDeleteCallback) {
+            mUserdataDeleteCallback(mUserdata);
+        }
+    }
+
+    ErrorTrampoline(ErrorTrampoline const&) =delete;
+    ErrorTrampoline& operator=(ErrorTrampoline const&) =delete;
+
+    void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line) override {
+        mErrorCallback(code, message, file, line, mUserdata);
+    }
+
+private:
+    ErrorCallback mErrorCallback = nullptr;
+    ErrorUserdataDeleteCallback mUserdataDeleteCallback = nullptr;
+    void* mUserdata = nullptr;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -245,11 +273,18 @@ extern "C"
         return &gAllocator;
     }
 
+    // TODO (nises): should this be removed?
     // fixme[tolsson]: this might be iffy on Windows with DLLs if we have multiple packages
     // linking against the raw interface
     PxErrorCallback* get_default_error_callback()
     {
         return &gErrorCallback;
+    }
+
+    // like get_default_error_callback but allocates a new callback object
+    PxErrorCallback* create_default_error_callback()
+    {
+        return new PxDefaultErrorCallback{};
     }
 
     PxPhysics *physx_create_physics(PxFoundation *foundation)
@@ -285,6 +320,20 @@ extern "C"
         void *userdata
     ) {
         return new CustomProfilerTrampoline(zone_start_callback, zone_end_callback, userdata);
+    }
+
+    PxErrorCallback *create_error_callback(
+        ErrorCallback error_callback,
+        void* userdata,
+        ErrorUserdataDeleteCallback userdata_deleter
+    ) {
+        return new ErrorTrampoline(error_callback, userdata, userdata_deleter);
+    }
+
+    void destroy_error_callback(
+        PxErrorCallback *error_callback
+    ) {
+        delete error_callback;
     }
 
     void *get_default_simulation_filter_shader()

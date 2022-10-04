@@ -351,6 +351,12 @@ pub type ZoneStartCallback =
 
 pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
 
+pub type ErrorCallback =
+    unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void);
+
+pub type ErrorUserdataDeleteCallback =
+    unsafe extern "C" fn(*mut c_void);
+
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
     pub fn physx_create_foundation_with_alloc(
@@ -360,6 +366,7 @@ extern "C" {
 
     pub fn get_default_allocator() -> *mut PxDefaultAllocator;
     pub fn get_default_error_callback() -> *mut PxDefaultErrorCallback;
+    pub fn create_default_error_callback() -> *mut PxDefaultErrorCallback;
 
     /// Destroy the returned callback object using PxQueryFilterCallback_delete.
     pub fn create_raycast_filter_callback(
@@ -385,6 +392,16 @@ extern "C" {
     ) -> *mut PxProfilerCallback;
 
     pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;
+
+    pub fn create_error_callback(
+        error_callback: ErrorCallback,
+        userdata: *mut c_void,
+        userdata_deleter: ErrorUserdataDeleteCallback,
+    ) -> *mut PxErrorCallback;
+
+    pub fn destroy_error_callback(
+        error_callback: *mut PxErrorCallback,
+    );
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 
