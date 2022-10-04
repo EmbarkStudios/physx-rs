@@ -57,8 +57,7 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             };
             let error_callback: *mut PxErrorCallback = self
                 .get_error_callback()
-                .map(|x| x as *mut PxErrorCallback)
-                .unwrap_or(std::ptr::null_mut());
+                .map_or(std::ptr::null_mut(), |x| x as *mut PxErrorCallback);
             PxFoundation_release_mut(self.as_mut_ptr());
             if !error_callback.is_null() {
                 destroy_error_callback(error_callback);
