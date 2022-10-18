@@ -8,6 +8,7 @@ Wrapper interface for PxPhysics
 
 #![allow(clippy::missing_safety_doc)]
 
+mod error_callback;
 mod profiler;
 
 use crate::{
@@ -96,6 +97,7 @@ use physx_sys::{
     PxTolerancesScale_new,
 };
 
+use self::error_callback::ErrorCallback;
 pub use self::profiler::ProfilerCallback;
 
 pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
@@ -736,11 +738,11 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     /// Set error callback
     /// # Safety
     /// `error_callback` must live as long as the object created by `build`
-    pub unsafe fn with_error_callback(
+    pub unsafe fn with_error_callback<EC: ErrorCallback>(
         &mut self,
-        error_callback: *mut PxErrorCallback,
+        error_callback: EC,
     ) -> &mut Self {
-        self.error_callback = Some(error_callback);
+        self.error_callback = Some(error_callback.into_px());
         self
     }
 

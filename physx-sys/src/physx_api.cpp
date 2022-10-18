@@ -226,7 +226,7 @@ public:
     void *mUserData;
 };
 
-using ErrorCallback = void (*)(PxErrorCode::Enum code, const char* message, const char* file, int line, void* userdata);
+using ErrorCallback = void (*)(int code, const char* message, const char* file, int line, void* userdata);
 
 class ErrorTrampoline : public PxErrorCallback {
 public:
