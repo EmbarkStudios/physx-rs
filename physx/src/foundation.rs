@@ -95,22 +95,21 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     }
 
     /// Tries to create a PxFoundation with the provided allocator and error callbacks.
-    /// `error_callback` must live as long as the returned `Foundation`
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    /// # Safety
+    /// `error_callback` must live as long as the returned `Foundation`
     unsafe fn with_allocator_error_callback(
         allocator: Self::Allocator,
         error_callback: *mut PxErrorCallback,
     ) -> Option<Owner<Self>> {
-        unsafe {
-            Owner::from_raw(
-                phys_PxCreateFoundation(
-                    crate::physics::PX_PHYSICS_VERSION,
-                    allocator.into_px(),
-                    error_callback,
-                )
-                .cast::<Self>(),
+        Owner::from_raw(
+            phys_PxCreateFoundation(
+                crate::physics::PX_PHYSICS_VERSION,
+                allocator.into_px(),
+                error_callback,
             )
-        }
+            .cast::<Self>(),
+        )
     }
 
     /// Get the error callback.

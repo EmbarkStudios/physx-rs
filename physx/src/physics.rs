@@ -148,6 +148,7 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
+    /// # Safety
     /// `error_callback` must live as long as the returned value
     pub unsafe fn with_allocator_error_callback(
         allocator: Allocator,
@@ -733,6 +734,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     }
 
     /// Set error callback
+    /// # Safety
     /// `error_callback` must live as long as the object created by `build`
     pub unsafe fn with_error_callback(
         &mut self,
