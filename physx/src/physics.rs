@@ -20,7 +20,7 @@ use crate::{
     bvh_structure::BvhStructure,
     constraint::Constraint,
     convex_mesh::ConvexMesh,
-    foundation::{AllocatorCallback, DefaultAllocator, ErrorCallback, Foundation, PxFoundation},
+    foundation::{AllocatorCallback, DefaultAllocator, Foundation, PxFoundation},
     geometry::Geometry,
     height_field::HeightField,
     material::Material,
@@ -51,6 +51,7 @@ use physx_sys::{
     //FilterShaderCallbackInfo,
     PxConstraintConnector,
     PxConstraintShaderTable,
+    PxErrorCallback,
     //PxFilterFlag,
     PxInputStream,
     //PxPairFlag,
@@ -147,9 +148,9 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
-    pub fn with_allocator_error_callback(
+    pub unsafe fn with_allocator_error_callback(
         allocator: Allocator,
-        error_callback: Box<dyn ErrorCallback>,
+        error_callback: *mut PxErrorCallback,
     ) -> PhysicsFoundation<Allocator, Geom> {
         let mut foundation = PxFoundation::with_allocator_error_callback(allocator, error_callback)
             .expect("Create Foundation returned a null pointer");
@@ -651,7 +652,7 @@ pub struct PhysicsFoundationBuilder<Allocator: AllocatorCallback> {
     pvd_remote: Option<String>,
     load_extensions: bool,
     allocator: Allocator,
-    error_callback: Option<Box<dyn ErrorCallback>>,
+    error_callback: Option<*mut PxErrorCallback>,
 }
 
 impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
@@ -731,18 +732,18 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     }
 
     /// Set error callback
-    pub fn with_error_callback(
+    pub unsafe fn with_error_callback(
         &mut self,
-        error_callback: Option<Box<dyn ErrorCallback>>,
+        error_callback: *mut PxErrorCallback,
     ) -> &mut Self {
-        self.error_callback = error_callback;
+        self.error_callback = Some(error_callback);
         self
     }
 
     /// Build the PhysicsFoundation.
     pub fn build<Geom: Shape>(self) -> Option<PhysicsFoundation<Allocator, Geom>> {
         let mut foundation = if let Some(callback) = self.error_callback {
-            PxFoundation::with_allocator_error_callback(self.allocator, callback)?
+            unsafe { PxFoundation::with_allocator_error_callback(self.allocator, callback)? }
         } else {
             PxFoundation::new(self.allocator)?
         };
