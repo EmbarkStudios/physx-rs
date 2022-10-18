@@ -352,7 +352,7 @@ pub type ZoneStartCallback =
 pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
 
 pub type ErrorCallback =
-    unsafe extern "C" fn(u32, *const c_void, *const c_void, u32, *const c_void);
+    unsafe extern "C" fn(PxErrorCode::Enum, *const c_void, *const c_void, u32, *const c_void);
 
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
