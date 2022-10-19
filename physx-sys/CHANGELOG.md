@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.7.0] - 2022-10-19
 
 - add new `create_error_callback` which uses the trampoline pattern to send Physx logging to Rust
 
@@ -143,7 +144,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.7.0...HEAD
+[0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...physx-sys-v0.7.0
 [0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.5.0...physx-sys-v0.6.0
 [0.5.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...physx-sys-v0.5.0
 [0.4.16]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.15...physx-sys-v0.4.16
