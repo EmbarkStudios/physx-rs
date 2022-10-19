@@ -735,9 +735,6 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
         self
     }
 
-    /// Set error callback
-    /// # Safety
-    /// `error_callback` must live as long as the object created by `build`
     pub fn with_error_callback<EC: ErrorCallback>(&mut self, error_callback: EC) -> &mut Self {
         self.error_callback = unsafe { Some(error_callback.into_px()) };
         self
