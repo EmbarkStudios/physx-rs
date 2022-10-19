@@ -311,12 +311,6 @@ extern "C"
         return new ErrorTrampoline(error_callback, userdata);
     }
 
-    void destroy_error_callback(
-        PxErrorCallback *error_callback
-    ) {
-        delete error_callback;
-    }
-
     void *get_default_simulation_filter_shader()
     {
         return (void *)PxDefaultSimulationFilterShader;

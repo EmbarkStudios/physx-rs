@@ -4,6 +4,11 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- Add new `PhysicsFoundationBuilder::with_error_callback` API with corresponding trait. This allows plugging in
+  a Rust-side logging framework to consume PhysX errors.
+
+
 ## [0.14.1] - 2022-10-03
 
 - Fixed a bug where the Pvd host string would get deallocated and fail to connect.

@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+- add new `create_error_callback` which uses the trampoline pattern to send Physx logging to Rust
+
 ## [0.6.0] - 2022-10-03
 
 - add new `create_profiler_callback` which uses the trampoline pattern to send profiling events to Rust.

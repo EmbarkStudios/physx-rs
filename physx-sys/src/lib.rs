@@ -394,8 +394,6 @@ extern "C" {
         userdata: *mut c_void,
     ) -> *mut PxErrorCallback;
 
-    pub fn destroy_error_callback(error_callback: *mut PxErrorCallback);
-
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 
     /// Create a C++ proxy callback which will forward contact events to `Callback`.
