@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.15.0] - 2022-10-19
 
 - Add new `PhysicsFoundationBuilder::with_error_callback` API with corresponding trait. This allows plugging in
   a Rust-side logging framework to consume PhysX errors.
@@ -170,7 +171,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.15.0...HEAD
+[0.15.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.1...physx-v0.15.0
 [0.14.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...physx-v0.14.1
 [0.14.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...physx-v0.14.0
 [0.13.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.12.2...physx-v0.13.0
