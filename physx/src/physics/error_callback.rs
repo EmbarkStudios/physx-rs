@@ -20,10 +20,10 @@ pub trait ErrorCallback: Sized {
         ) {
             let this = &*this.cast::<L>();
             let msg = CStr::from_ptr(message.cast());
-            let msg = msg.to_str().unwrap(); // SAFETY: We're dealing with basic char* here, so should always convert cleanly to str.
+            let msg = msg.to_string_lossy();
 
             let file = CStr::from_ptr(file.cast());
-            let file = file.to_str().unwrap(); // SAFETY: We're dealing with basic char* here, so should always convert cleanly to str.
+            let file = file.to_string_lossy();
 
             let code = if code == -1 {
                 BitFlags::ALL
@@ -31,7 +31,7 @@ pub trait ErrorCallback: Sized {
                 BitFlags::from_bits(code as u32).unwrap_or(ErrorCode::InvalidParameter.into())
             };
 
-            this.report_error(code, msg, file, line);
+            this.report_error(code, &msg, &file, line);
         }
 
         create_error_callback(
