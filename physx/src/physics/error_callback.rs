@@ -29,7 +29,7 @@ pub trait ErrorCallback: Sized {
                 BitFlags::ALL
             } else {
                 BitFlags::from_bits(code as u32)
-                    .unwrap_or_else(|| ErrorCode::InvalidParameter.into())
+                    .unwrap_or_else(|_| ErrorCode::InvalidParameter.into())
             };
 
             this.report_error(code, &msg, &file, line);
