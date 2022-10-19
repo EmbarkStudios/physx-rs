@@ -351,6 +351,9 @@ pub type ZoneStartCallback =
 
 pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
 
+pub type ErrorCallback =
+    unsafe extern "C" fn(PxErrorCode::Enum, *const i8, *const i8, u32, *const c_void);
+
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
     pub fn physx_create_foundation_with_alloc(
@@ -385,6 +388,11 @@ extern "C" {
     ) -> *mut PxProfilerCallback;
 
     pub fn get_alloc_callback_user_data(alloc_callback: *mut PxAllocatorCallback) -> *mut c_void;
+
+    pub fn create_error_callback(
+        error_callback: ErrorCallback,
+        userdata: *mut c_void,
+    ) -> *mut PxErrorCallback;
 
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 

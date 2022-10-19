@@ -52,7 +52,7 @@ impl<Allocator: AllocatorCallback> Drop for PxFoundation<Allocator> {
             if let Some(allocator) = self.get_allocator_callback() {
                 drop(Box::from_raw(allocator));
             };
-            PxFoundation_release_mut(self.as_mut_ptr())
+            PxFoundation_release_mut(self.as_mut_ptr());
         }
     }
 }
@@ -84,12 +84,29 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
     fn new(allocator: Self::Allocator) -> Option<Owner<Self>> {
         unsafe {
-            Owner::from_raw(phys_PxCreateFoundation(
+            Self::with_allocator_error_callback(
+                allocator,
+                get_default_error_callback() as *mut PxErrorCallback,
+            )
+        }
+    }
+
+    /// Tries to create a PxFoundation with the provided allocator and error callbacks.
+    /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    /// # Safety
+    /// `error_callback` must live as long as the returned `Foundation`
+    unsafe fn with_allocator_error_callback(
+        allocator: Self::Allocator,
+        error_callback: *mut PxErrorCallback,
+    ) -> Option<Owner<Self>> {
+        Owner::from_raw(
+            phys_PxCreateFoundation(
                 crate::physics::PX_PHYSICS_VERSION,
                 allocator.into_px(),
-                get_default_error_callback() as *mut PxErrorCallback,
-            ) as *mut Self)
-        }
+                error_callback,
+            )
+            .cast::<Self>(),
+        )
     }
 
     /// Get the error callback.

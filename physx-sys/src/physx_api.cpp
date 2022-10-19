@@ -226,6 +226,23 @@ public:
     void *mUserData;
 };
 
+using ErrorCallback = void (*)(int code, const char* message, const char* file, int line, void* userdata);
+
+class ErrorTrampoline : public PxErrorCallback {
+public:
+    ErrorTrampoline(ErrorCallback errorCb, void* userdata)
+        : mErrorCallback(errorCb), mUserdata(userdata)
+	{}
+
+    void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line) override {
+        mErrorCallback(code, message, file, line, mUserdata);
+    }
+
+private:
+    ErrorCallback mErrorCallback = nullptr;
+    void* mUserdata = nullptr;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -285,6 +302,13 @@ extern "C"
         void *userdata
     ) {
         return new CustomProfilerTrampoline(zone_start_callback, zone_end_callback, userdata);
+    }
+
+    PxErrorCallback *create_error_callback(
+        ErrorCallback error_callback,
+        void* userdata
+    ) {
+        return new ErrorTrampoline(error_callback, userdata);
     }
 
     void *get_default_simulation_filter_shader()
