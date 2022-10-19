@@ -28,7 +28,8 @@ pub trait ErrorCallback: Sized {
             let code = if code == -1 {
                 BitFlags::ALL
             } else {
-                BitFlags::from_bits(code as u32).unwrap_or(ErrorCode::InvalidParameter.into())
+                BitFlags::from_bits(code as u32)
+                    .unwrap_or_else(|| ErrorCode::InvalidParameter.into())
             };
 
             this.report_error(code, &msg, &file, line);
