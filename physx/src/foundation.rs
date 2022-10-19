@@ -84,11 +84,10 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
     fn new(allocator: Self::Allocator) -> Option<Owner<Self>> {
         unsafe {
-            Owner::from_raw(phys_PxCreateFoundation(
-                crate::physics::PX_PHYSICS_VERSION,
-                allocator.into_px(),
+            Self::with_allocator_error_callback(
+                allocator,
                 get_default_error_callback() as *mut PxErrorCallback,
-            ) as *mut Self)
+            )
         }
     }
 
