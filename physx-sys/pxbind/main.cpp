@@ -531,7 +531,7 @@ struct PodRecord {
         }
 
         string res;
-        res += "#[derive(Clone, Copy)]\n";
+        res += "#[derive(Clone, Copy, Debug)]\n";
         res += "#[repr(C)]\n";
         res += "pub " + recordType + " " + rustTypeName;
 

@@ -17,7 +17,7 @@ struct PodStructGen {
     void beginStruct(const char* cname, const char* rname) {
         fprintf(cfile, "struct %s {\n", cname);
 
-        fprintf(rfile, "#[derive(Clone, Copy)]\n");
+        fprintf(rfile, "#[derive(Clone, Copy, Debug)]\n");
         fprintf(rfile, "#[repr(C)]\n");
         fprintf(rfile, "pub struct %s {\n", rname);
 
