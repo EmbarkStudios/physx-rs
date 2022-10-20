@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.8.0] - 2022-10-20
 - add new `create_assert_handler` function which uses the trampoline pattern to send asserts to Rust
 
 ## [0.7.0] - 2022-10-19
@@ -146,7 +147,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.7.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.0...HEAD
+[0.8.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.7.0...physx-sys-v0.8.0
 [0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...physx-sys-v0.7.0
 [0.6.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.5.0...physx-sys-v0.6.0
 [0.5.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.4.16...physx-sys-v0.5.0
