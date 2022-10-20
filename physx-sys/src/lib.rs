@@ -354,6 +354,8 @@ pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, 
 pub type ErrorCallback =
     unsafe extern "C" fn(PxErrorCode::Enum, *const i8, *const i8, u32, *const c_void);
 
+pub type AssertHandler = unsafe extern "C" fn(*const i8, *const i8, u32, *mut bool, *const c_void);
+
 extern "C" {
     pub fn physx_create_foundation() -> *mut PxFoundation;
     pub fn physx_create_foundation_with_alloc(
@@ -394,6 +396,11 @@ extern "C" {
         userdata: *mut c_void,
     ) -> *mut PxErrorCallback;
 
+    pub fn create_assert_handler(
+        error_callback: AssertHandler,
+        userdata: *mut c_void,
+    ) -> *mut PxAssertHandler;
+
     pub fn get_default_simulation_filter_shader() -> *mut c_void;
 
     /// Create a C++ proxy callback which will forward contact events to `Callback`.
@@ -426,4 +433,14 @@ extern "C" {
         shader: SimulationFilterShader,
         call_default_filter_shader_first: u32,
     );
+
+    #[doc(hidden)]
+    /// Should only be used in testing etc! This isn't generated as we don't generate op functions.
+    pub fn PxAssertHandler_opCall_mut(
+        self_: *mut PxAssertHandler,
+        expr: *const i8,
+        file: *const i8,
+        line: i32,
+        ignore: *mut bool,
+    ) -> ();
 }

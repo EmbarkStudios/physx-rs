@@ -8,6 +8,7 @@ Wrapper interface for PxPhysics
 
 #![allow(clippy::missing_safety_doc)]
 
+mod assert_handler;
 mod error_callback;
 mod profiler;
 
@@ -47,6 +48,7 @@ use physx_sys::{
     // TODO implement the extensions interface, move these there isntead of here?
     //phys_PxCreateBasePhysics,  used with extentions
     phys_PxInitExtensions,
+    phys_PxSetAssertHandler,
     phys_PxSetProfilerCallback,
     physx_create_physics,
     //FilterShaderCallbackInfo,
@@ -97,6 +99,7 @@ use physx_sys::{
     PxTolerancesScale_new,
 };
 
+pub use self::assert_handler::AssertHandler;
 pub use self::error_callback::ErrorCallback;
 pub use self::profiler::ProfilerCallback;
 
@@ -144,10 +147,16 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         }
     }
 
+    /// Set the profiler callback to a struct that implements the `ProfilerCallback` trait.
     pub fn set_profiler<P: ProfilerCallback>(&mut self, profiler: P) {
         unsafe {
             phys_PxSetProfilerCallback(profiler.into_px());
         }
+    }
+
+    /// Set the global PhysX assert handler to a struct that implements the `AssertHandler` trait.
+    pub fn set_assert_handler<AH: AssertHandler>(&mut self, handler: AH) {
+        unsafe { phys_PxSetAssertHandler(handler.into_px()) }
     }
 
     /// # Safety

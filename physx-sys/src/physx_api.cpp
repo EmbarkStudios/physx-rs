@@ -243,6 +243,23 @@ private:
     void* mUserdata = nullptr;
 };
 
+using AssertHandler = void (*)(const char* expr, const char* file, int line, bool* should_ignore, void* userdata);
+
+class AssertTrampoline : public PxAssertHandler {
+public:
+    AssertTrampoline(AssertHandler onAssert, void* userdata)
+        : mAssertHandler(onAssert), mUserdata(userdata)
+	{}
+
+	virtual void operator()(const char* exp, const char* file, int line, bool& ignore) override final {
+        mAssertHandler(exp, file, line, &ignore, mUserdata);
+    }
+
+private:
+    AssertHandler mAssertHandler = nullptr;
+    void* mUserdata = nullptr;
+};
+
 extern "C"
 {
     PxFoundation *physx_create_foundation()
@@ -311,6 +328,14 @@ extern "C"
         return new ErrorTrampoline(error_callback, userdata);
     }
 
+
+    PxAssertHandler *create_assert_handler(
+        AssertHandler on_assert,
+        void* userdata
+    ) {
+        return new AssertTrampoline(on_assert, userdata);
+    }
+
     void *get_default_simulation_filter_shader()
     {
         return (void *)PxDefaultSimulationFilterShader;
@@ -346,4 +371,10 @@ extern "C"
         desc->filterShaderData     = (void *)&filterShaderData;
         desc->filterShaderDataSize = sizeof(FilterCallbackData);
     }
+
+	// Not generated, used only for testing and examples!
+    void PxAssertHandler_opCall_mut(physx_PxErrorCallback_Pod* self__pod, char const* expr, char const* file, int32_t line, bool* ignore ) {
+		physx::PxAssertHandler* self_ = reinterpret_cast<physx::PxAssertHandler*>(self__pod);
+		(*self_)(expr, file, line, *ignore);
+	};
 }
