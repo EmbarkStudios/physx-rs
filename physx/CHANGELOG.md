@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.16.0] - 2022-10-20
 - Add new `PhysicsFoundation::set_assert_handler` API with corresponding trait. This allows plugging in
   a Rust-side handler for assertions.
 
@@ -174,7 +175,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.15.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.0...HEAD
+[0.16.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.15.0...physx-v0.16.0
 [0.15.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.1...physx-v0.15.0
 [0.14.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...physx-v0.14.1
 [0.14.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.13.0...physx-v0.14.0
