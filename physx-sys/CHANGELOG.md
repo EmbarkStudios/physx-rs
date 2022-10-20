@@ -4,6 +4,8 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+- add new `create_assert_handler` function which uses the trampoline pattern to send asserts to Rust
+
 ## [0.7.0] - 2022-10-19
 
 - add new `create_error_callback` which uses the trampoline pattern to send Physx logging to Rust

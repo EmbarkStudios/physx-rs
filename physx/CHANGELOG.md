@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+- Add new `PhysicsFoundation::set_assert_handler` API with corresponding trait. This allows plugging in
+  a Rust-side handler for assertions.
+
 ## [0.15.0] - 2022-10-19
 
 - Add new `PhysicsFoundationBuilder::with_error_callback` API with corresponding trait. This allows plugging in
