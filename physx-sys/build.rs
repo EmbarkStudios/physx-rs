@@ -339,7 +339,6 @@ fn add_common(ctx: &mut Context) {
             "-ferror-limit=0",
             "-Wall",
             "-Wextra",
-            "-Werror",
             "-Wstrict-aliasing=2",
             "-Wno-everything",
         ]
@@ -348,7 +347,6 @@ fn add_common(ctx: &mut Context) {
             "-std=c++14",
             "-Wall",
             "-Wextra",
-            "-Werror",
             "-Wstrict-aliasing=2",
             "-w",
         ]
@@ -378,7 +376,7 @@ fn add_common(ctx: &mut Context) {
 
         flags.push("/std:c++14");
 
-        flags.extend(["/WX", "/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
+        flags.extend(["/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
 
         // Disable some warnings
         flags.extend(
