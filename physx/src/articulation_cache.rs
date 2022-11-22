@@ -269,7 +269,7 @@ impl ArticulationCache {
 
     pub fn set_root_link_data(&mut self, data: ArticulationRootLinkData) {
         unsafe {
-            *(*self.px_articulation_cache.as_mut()).rootLinkData = data.into();
+            *(self.px_articulation_cache.as_mut().rootLinkData) = data.into();
         }
     }
 }
