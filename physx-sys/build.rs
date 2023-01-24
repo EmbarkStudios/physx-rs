@@ -42,13 +42,28 @@ impl Context {
         self
     }
 
-    fn add_component(&mut self, name: &str, sources: &[&str]) -> &mut Self {
-        let src_dir = format!("source/{}/src", name);
+    fn add_component(&mut self, name: &str, rel: Option<&str>, sources: &[&str]) -> &mut Self {
+        let mut src_dir = format!("source/{name}");
+        if let Some(rel) = rel {
+            src_dir.push('/');
+            src_dir.push_str(rel);
+        }
         self.add_sources(&src_dir, sources);
+
+        let mut comproot = self.root.join("include");
+        comproot.push(name);
+
+        if comproot.exists() {
+            self.includes.push(comproot);
+        }
 
         let mut comproot = self.root.join("source");
         comproot.push(name);
-        self.includes.push(comproot.join("include"));
+        comproot.push("include");
+
+        if comproot.exists() {
+            self.includes.push(comproot);
+        }
 
         self
     }
@@ -58,7 +73,7 @@ macro_rules! component {
     ($name:ident) => {
         fn $name(ctx: &mut Context) {
             let sources = include!(concat!("sources/", stringify!($name)));
-            ctx.add_component(stringify!($name), &sources);
+            ctx.add_component(stringify!($name), Some("src"), &sources);
         }
     };
 }
@@ -77,7 +92,7 @@ component! {task}
 // specific compilands, so just calculate them here
 fn foundation(ctx: &mut Context) {
     let sources = include!("sources/foundation");
-    ctx.add_component("foundation", &sources);
+    ctx.add_component("foundation", None, &sources);
 
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("TARGET_FAMILY not specified");
     let sources = match target_family.as_str() {
@@ -86,7 +101,7 @@ fn foundation(ctx: &mut Context) {
         other => panic!("unknown TARGET_FAMILY '{}'", other),
     };
 
-    ctx.add_sources(&format!("source/foundation/src/{}", target_family), sources);
+    ctx.add_sources(&format!("source/foundation/{target_family}"), sources);
 }
 
 fn lowlevel(ctx: &mut Context) {
@@ -120,7 +135,7 @@ fn lowlevel(ctx: &mut Context) {
 
 fn vehicle(ctx: &mut Context) {
     let sources = include!("sources/vehicle");
-    ctx.add_component("physxvehicle", &sources);
+    ctx.add_component("physxvehicle", Some("src"), &sources);
 
     let sources = include!("sources/vehicle_metadata");
     ctx.add_sources("source/physxvehicle/src/physxmetadata/src", &sources);
@@ -130,7 +145,7 @@ fn vehicle(ctx: &mut Context) {
 
 fn extensions(ctx: &mut Context) {
     let sources = include!("sources/extensions");
-    ctx.add_component("physxextensions", &sources);
+    ctx.add_component("physxextensions", Some("src"), &sources);
 
     // metadata
     ctx.add_sources(
@@ -176,6 +191,10 @@ fn geomutils(ctx: &mut Context) {
     let sources = include!("sources/geomutils_convex");
     ctx.add_sources("source/geomutils/src/convex", &sources);
 
+    // cooking
+    let sources = include!("sources/geomutils_cooking");
+    ctx.add_sources("source/geomutils/src/cooking", &sources);
+
     // distance
     let sources = include!("sources/geomutils_distance");
     ctx.add_sources("source/geomutils/src/distance", &sources);
@@ -210,17 +229,6 @@ fn cooking(ctx: &mut Context) {
     let sources = include!("sources/cooking");
     ctx.add_sources("source/physxcooking/src", &sources);
     ctx.add_includes("source/include", &["cooking"]);
-
-    // mesh
-    let sources = include!("sources/cooking_mesh");
-    ctx.add_sources("source/physxcooking/src/mesh", &sources);
-
-    // convex
-    let sources = include!("sources/cooking_convex");
-    ctx.add_sources("source/physxcooking/src/convex", &sources);
-
-    // physx gates various cooking functionality with this define
-    ctx.builder.define("PX_COOKING", None);
 }
 
 fn physx(ctx: &mut Context) {
@@ -236,10 +244,6 @@ fn physx(ctx: &mut Context) {
         ctx.root
             .join("source/immediatemode/src/NpImmediateMode.cpp"),
     );
-
-    // buffering
-    let sources = include!("sources/buffering");
-    ctx.add_sources("source/physx/src/buffering", &sources);
 
     // there's always a "core"
     let sources = include!("sources/core");
@@ -335,7 +339,7 @@ fn add_common(ctx: &mut Context) {
 
     let flags = if builder.get_compiler().is_like_clang() {
         vec![
-            "-std=c++14",
+            "-std=c++11",
             "-ferror-limit=0",
             "-Wall",
             "-Wextra",
@@ -344,7 +348,7 @@ fn add_common(ctx: &mut Context) {
         ]
     } else if builder.get_compiler().is_like_gnu() {
         vec![
-            "-std=c++14",
+            "-std=c++11",
             "-Wall",
             "-Wextra",
             "-Wstrict-aliasing=2",
@@ -374,7 +378,7 @@ fn add_common(ctx: &mut Context) {
             flags.push("/O2");
         }
 
-        flags.push("/std:c++14");
+        flags.push("/std:c++11");
 
         flags.extend(["/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
 
@@ -414,7 +418,7 @@ fn add_common(ctx: &mut Context) {
 }
 
 fn cc_compile(target_env: Environment) {
-    let root = env::current_dir().unwrap().join("PhysX/physx");
+    let root = env::current_dir().unwrap().join("physx/physx");
 
     let ccenv = target_env;
 
@@ -521,9 +525,9 @@ fn main() {
         .extra_warnings(false)
         .define("NDEBUG", None)
         .define("PX_PHYSX_STATIC_LIB", None)
-        .include("PhysX/physx/include")
-        .include("PhysX/pxshared/include")
-        .include("PhysX/physx/source/foundation/include");
+        .include("physx/physx/include")
+        .include("physx/pxshared/include")
+        .include("physx/physx/source/foundation/include");
 
     if cfg!(feature = "profile") {
         physx_cc.define("PX_PROFILE", Some("1"));
@@ -534,9 +538,9 @@ fn main() {
     }
 
     physx_cc.flag(if physx_cc.get_compiler().is_like_msvc() {
-        "/std:c++14"
+        "/std:c++11"
     } else {
-        "-std=c++14"
+        "-std=c++11"
     });
 
     use std::ffi::OsString;

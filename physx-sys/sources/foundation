@@ -1,9 +1,8 @@
 [
-    "PsAllocator",
-    "PsAssert",
-    "PsFoundation",
-    "PsMathUtils",
-    "PsString",
-    "PsTempAllocator",
-    "PsUtilities",
+    "FdAllocator",
+    "FdAssert",
+    "FdFoundation",
+    "FdMathUtils",
+    "FdString",
+    "FdTempAllocator",
 ]

@@ -1,5 +1,4 @@
-[submodule "physx-sys/PhysX"]
-	path = physx-sys/PhysX
-	url = https://github.com/EmbarkStudios/PhysX.git
-	ignore = untracked
-	branch = 4.1
+[submodule "physx-sys/physx"]
+	path = physx-sys/physx
+	url = https://github.com/EmbarkStudios/PhysX-5
+	branch = main

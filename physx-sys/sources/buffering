@@ -1,9 +1,0 @@
-[
-    "ScbActor",
-    "ScbAggregate",
-    "ScbBase",
-    "ScbMetaData",
-    "ScbScene",
-    "ScbScenePvdClient",
-    "ScbShape",
-]

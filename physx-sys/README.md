@@ -90,7 +90,7 @@ The build process comprises a few steps:
 
 Steps *2..4* are performed completely automatically from within `build.rs`, while step *1* is only necessary when upgrading the PhysX SDK or modifying the generator. As such, building and running `pxbind` is a manual task, and is currently only supported on \*nix systems.
 
-Since `pxbind` relies on unstable clang internals only specific clang/llvm versions are supported to build it. Currently supported versions are `llvm-14` and `libclang-14-dev`. You may find it working with other versions but it's not guarenteed.
+Since `pxbind` relies on unstable clang internals only specific clang/llvm versions are supported to build it. Currently supported versions are `llvm-14` and `libclang-14-dev`. You may find it working with other versions but it's not guaranteed.
 
 ## License
 
@@ -102,15 +102,6 @@ Licensed under either of
 at your option.
 
 Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
-
-If you use [`cargo deny`](https://github.com/EmbarkStudios/cargo-deny), you can use this clarification in your configuration, at least until [crates.io supports parentheses](https://github.com/rust-lang/crates.io/issues/2595).
-
-```ini
-[[licenses.clarify]]
-name = "physx-sys"
-expression = "(MIT OR Apache-2.0) AND BSD-3-Clause"
-license-files = [{ path = "LICENSE", hash = 0xe326546e }]
-```
 
 ### Contribution
 

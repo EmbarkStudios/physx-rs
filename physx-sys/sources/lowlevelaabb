@@ -6,6 +6,4 @@
     "BpBroadPhaseSap",
     "BpBroadPhaseSapAux",
     "BpBroadPhaseShared",
-    "BpMBPTasks",
-    "BpSAPTasks",
 ]
