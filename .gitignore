@@ -2,3 +2,4 @@
 Cargo.lock
 .vscode/settings.json
 physx-sys/pxbind/build
+physx-sys/physx
