@@ -1,0 +1,8 @@
+[package]
+name = "pxbind2"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+autocxx = "0.23"
+cxx = "1.0"
