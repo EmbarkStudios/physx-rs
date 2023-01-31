@@ -5,7 +5,7 @@ version = "0.16.1"
 authors = ["Embark <opensource@embark-studios.com>"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/EmbarkStudios/physx-rs"
-edition = "2018"
+edition = "2021"
 readme = "README.md"
 keywords = ["physics"]
 categories = ["api-bindings", "simulation", "game-engines"]
@@ -18,7 +18,7 @@ physx-sys = { version = "0.8.1", path = "../physx-sys" }
 
 enumflags2 = "0.7"
 log = "0.4"
-glam = { version = "0.20", optional = true }
+glam = "0.22"
 thiserror = "1.0"
 
 [features]

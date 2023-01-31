@@ -8,7 +8,7 @@ authors = [
 ]
 license = "(MIT OR Apache-2.0) AND BSD-3-Clause"
 repository = "https://github.com/EmbarkStudios/physx-rs"
-edition = "2018"
+edition = "2021"
 build = "build.rs"
 readme = "README.md"
 keywords = ["physics"]
@@ -37,6 +37,7 @@ exclude = [
 doctest = false
 
 [dependencies]
+glam = "0.22"
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }
