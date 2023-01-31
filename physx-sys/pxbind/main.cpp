@@ -26,7 +26,7 @@
 #include "fmt/fmt/format.h"
 
 // Only types within this directory will be included
-const char* const REQUIRED_PATH_COMPONENT = "PhysX";
+const char* const REQUIRED_PATH_COMPONENT = "physx";
 
 using namespace std;
 using namespace clang;
@@ -36,10 +36,10 @@ using namespace clang::ast_matchers;
 using namespace llvm;
 
 static cl::OptionCategory PxBindCategory("PxBind options");
-const opt::OptTable& Options(getDriverOptTable());
-static cl::opt<std::string> OutputFilename(
-    "o",
-    cl::desc(Options.getOptionHelpText((options::OPT_o))));
+// const opt::OptTable& Options(getDriverOptTable());
+// static cl::opt<std::string> OutputFilename(
+//     "o",
+//     cl::desc(Options.getOptionHelpText((options::OPT_o))));
 
 // https://stackoverflow.com/questions/5288396/c-ostream-out-manipulation/5289170#5289170
 template<typename Range, typename Value = typename Range::value_type>
@@ -579,7 +579,8 @@ struct GeneratorContext {
     map<string, ConvEnum> enums;
 };
 
-string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
+string remapBuiltinTypeToCpp(const BuiltinType* bit, const PrintingPolicy& pp) {
+    auto k = bit->getKind();
     switch (k) {
         case BuiltinType::Void:
             return "void";
@@ -615,12 +616,13 @@ string remapBuiltinTypeToCpp(BuiltinType::Kind k) {
         case BuiltinType::ULongLong:
             return "uint64_t";
         default:
-            printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
+            printf("Unhanded builtin cpp type %s. BuiltinType::Kind = %u\n", bit->getNameAsCString(pp), unsigned(k));
             abort();
     }
 }
 
-string remapBuiltinTypeToRust(BuiltinType::Kind k) {
+string remapBuiltinTypeToRust(const BuiltinType* bit, const PrintingPolicy& pp) {
+    auto k = bit->getKind();
     switch (k) {
         case BuiltinType::Void:
             return "()";
@@ -656,25 +658,48 @@ string remapBuiltinTypeToRust(BuiltinType::Kind k) {
         case BuiltinType::ULongLong:
             return "usize";
         default:
-            printf("Unhanded builtin cpp type. BuiltinType::Kind = %u\n", unsigned(k));
+            printf("Unhanded builtin cpp type %s. BuiltinType::Kind = %u\n", bit->getNameAsCString(pp), unsigned(k));
+            bit->dump();
             abort();
     }
+}
+
+void unknown_type(const char* specific, const QualType& qt, const PrintingPolicy& policy) {
+    printf(
+            "%s:\n    qualified: %s\n    type "
+            "class:%s\n",
+            specific,
+            qt.getAsString(policy).c_str(),
+            qt->getTypeClassName());
+    qt->dump();
+    abort();
 }
 
 class ClassMatchHandler : public MatchFinder::MatchCallback {
     ASTContext* astContext;
     shared_ptr<GeneratorContext> gc;
+    std::map<string, const char*> simd;
 
   public:
     ClassMatchHandler(shared_ptr<GeneratorContext> gc)
-      : gc(gc) {}
+      : gc(gc)
+      , simd{
+            {"physx::aos::Vec4V", "glam::Vec4"},
+            {"physx::aos::Vec3V", "glam::Vec3A"},
+            {"physx::aos::VecI32V", "glam::IVec4"},
+            {"physx::aos::QuatV", "glam::Quat"},
+        } {
+    }
 
     string remapSingleField(
         const QualType& qt,
         const string& fieldName,
         const PrintingPolicy& policy) {
         if (auto builtin = qt->getAs<BuiltinType>()) {
-            const string desugared = remapBuiltinTypeToCpp(builtin->getKind());
+            if (unsigned(builtin->getKind()) == 227) {
+                unknown_type("fuck me", qt, policy);
+            }
+            const string desugared = remapBuiltinTypeToCpp(builtin, policy);
             return desugared + "{0} " + fieldName + "{1}";
         } else if (qt->isFunctionPointerType()) {
             return "void*{0} " + fieldName + "{1}";
@@ -710,22 +735,22 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
             string child = remapSingleField(
                 constArray->getElementType(), fieldName, policy);
             return fmt::format(child, "{0}", "{1}[" + sizeStr + "]");
-        } else {
-            /*os << "    ";
-            field->print(os, policy);
-            os << ";\n";*/
-            printf(
-                "Unsupported field type:\n    qualified: %s\n    type "
-                "class:%s\n",
-                qt.getAsString(policy).c_str(),
-                qt->getTypeClassName());
-            abort();
+        } else if (auto td = qt->getAs<TypedefType>()) {
+            const string cppType = qt.getAsString(policy);
+            if (auto rustType = this->simd.find(cppType); rustType != this->simd.end()) {
+                return cppType + "{0} " + fieldName + "{1}";
+            }
         }
+
+        unknown_type("Unsupported field type", qt, policy);
     }
 
     string remapRustType(const QualType& qt, const PrintingPolicy& policy) {
         if (auto builtin = qt->getAs<BuiltinType>()) {
-            return remapBuiltinTypeToRust(builtin->getKind());
+            if (unsigned(builtin->getKind()) == 227) {
+                unknown_type("fuck me", qt, policy);
+            }
+            return remapBuiltinTypeToRust(builtin, policy);
         } else if (qt->isFunctionPointerType()) {
             return "*mut std::ffi::c_void";
         } else if (qt->isReferenceType()) {
@@ -766,17 +791,14 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
             string child = remapRustType(constArray->getElementType(), policy);
             return fmt::format(
                 "[{}; {}]", child, constArray->getSize().getLimitedValue());
-        } else {
-            /*os << "    ";
-            field->print(os, policy);
-            os << ";\n";*/
-            printf(
-                "Unsupported (rust) field type:\n    qualified: %s\n    type "
-                "class:%s\n",
-                qt.getAsString(policy).c_str(),
-                qt->getTypeClassName());
-            abort();
+        } else if (auto td = qt->getAs<TypedefType>()) {
+            const string cppType = qt.getAsString(policy);
+            if (auto rustType = this->simd.find(cppType); rustType != this->simd.end()) {
+                return rustType->second;
+            }
         }
+
+        unknown_type("Unsupported (rust) field type", qt, policy);
     }
 
     string remapEnumToRust(const EnumDecl& decl, const PrintingPolicy& policy) {
@@ -829,8 +851,13 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
         ConvEnum ce;
         ce.name = enumName;
         ce.scope = scope;
+
+        if (unsigned(decl.getIntegerType()->getAs<BuiltinType>()->getKind()) == 227) {
+            decl.dump();
+                
+            }
         ce.intType = remapBuiltinTypeToRust(
-            decl.getIntegerType()->getAs<BuiltinType>()->getKind());
+            decl.getIntegerType()->getAs<BuiltinType>(), policy);
 
         for (auto e = decl.enumerator_begin(); e != decl.enumerator_end();
              ++e) {
@@ -882,16 +909,28 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
         string qualifiedName,
         const CXXRecordDecl& decl,
         const PrintingPolicy& policy) {
+        qualifiedName = stripPrefix(qualifiedName, "const ");
+
+        if (qualifiedName == "__va_list_tag") {
+            const auto foundType = gc->remappedCToRust.find(qualifiedName);
+            if (foundType == gc->remappedCToRust.end()) {
+                gc->remappedCToRust[qualifiedName] = "__va_list_tag";
+            }
+
+            return qualifiedName;
+        }
+
         const string sourceFile = this->astContext->getSourceManager()
                                       .getFilename(decl.getLocation())
                                       .str();
 
         // Ony include types defined in PhysX
-        if (sourceFile.find(REQUIRED_PATH_COMPONENT) == string::npos) {
+        if (
+            (!sourceFile.empty() && sourceFile.find(REQUIRED_PATH_COMPONENT) == string::npos) ||
+            (!qualifiedName.starts_with("physx::") && !qualifiedName.starts_with("Px"))
+        ) {
             return "void";
         }
-
-        qualifiedName = stripPrefix(qualifiedName, "const ");
 
         const auto foundType = gc->podTypeRemap.find(qualifiedName);
         if (foundType == gc->podTypeRemap.end()) {
@@ -939,16 +978,6 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
                 rec.fixEmptyStruct();
             }
 
-            /*if (!isAnonymous && decl.getDefinition() &&
-                !decl.getTemplateInstantiationPattern()) {
-                os << fmt::format(
-                    "static_assert(sizeof({0}) == sizeof({1}), \"POD "
-                    "wrapper for {0} has incorrect size.\");\n",
-                    qualifiedName,
-                    remappedTypeName);
-            }*/
-
-            // globalOs << os.str();
             gc->recs.emplace_back(rec);
             return remappedTypeName;
         } else {
@@ -975,8 +1004,10 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
             const string rustType = gc->remappedCToRust[cType];
             if (rustType.empty()) {
                 printf(
-                    "Could not map type %s to Rust. Available types:\n",
-                    stripPrefix(cType, "const ").c_str());
+                    "Could not map type '%s(%s)' to Rust. Available types:\n",
+                    stripPrefix(cType, "const ").c_str(),
+                    cppType.c_str()
+                );
                 for (auto& kv : gc->remappedCToRust) {
                     printf(
                         "%s -> %s; cpp: %s\n",
@@ -986,8 +1017,6 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
                 }
                 abort();
             }
-
-            // printf("%s -> %s\n", cppType.c_str(), cType.c_str());
 
             const string c2cppCode =
                 "{cppType} {cppName};\n"
@@ -1034,16 +1063,19 @@ class ClassMatchHandler : public MatchFinder::MatchCallback {
             return convertTypeInner(inner, policy)
                 .ref(mutabilityFromConstness(inner.isConstQualified()));
         } else if (auto builtin = qt->getAs<BuiltinType>()) {
-            string desugared = remapBuiltinTypeToCpp(builtin->getKind());
-            string rustType = remapBuiltinTypeToRust(builtin->getKind());
+            if (unsigned(builtin->getKind()) == 227) {
+                unknown_type("fuck me", qt, policy);
+            }
+            string desugared = remapBuiltinTypeToCpp(builtin, policy);
+            string rustType = remapBuiltinTypeToRust(builtin, policy);
             return CppType(desugared, desugared, rustType);
-        } else {
-            printf(
-                "Unsupported type:\n    qualified: %s\n    type class:%s\n",
-                cppType.c_str(),
-                qt->getTypeClassName());
-            abort();
+        } else if (auto td = qt->getAs<TypedefType>()) {
+            if (auto rustType = this->simd.find(cppType); rustType != this->simd.end()) {
+                return CppType(cppType, cppType, rustType->second);
+            }
         }
+
+        unknown_type("Unsupported type", qt, policy);
     }
 
     CppType convertType(QualType qt, const PrintingPolicy& policy) {
@@ -1351,6 +1383,7 @@ int main(int argc, const char** argv) {
         std::cerr << "Failed to create common options parser" << std::endl;
         return 1;
     }
+
     CommonOptionsParser &op = *op_res;
     // create a new Clang Tool instance (a LibTooling environment)
     ClangTool Tool(op.getCompilations(), op.getSourcePathList());
