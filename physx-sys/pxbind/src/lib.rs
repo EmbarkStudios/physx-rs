@@ -1,6 +1,6 @@
+pub mod consumer;
 mod dump;
-pub mod gen;
 
 pub use dump::{get_ast, get_parsed_ast};
 
-pub type Node = clang_ast::Node<gen::Item>;
+pub type Node = clang_ast::Node<consumer::Item>;

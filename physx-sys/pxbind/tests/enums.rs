@@ -1,7 +1,7 @@
 fn gen_enums(which: &str) -> anyhow::Result<String> {
     let ast = pxbind::get_parsed_ast(format!("tests/data/enum/{which}"))?;
 
-    let mut consumer = pxbind::gen::AstConsumer::default();
+    let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;
 
     let mut buffer = Vec::new();
