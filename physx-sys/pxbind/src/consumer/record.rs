@@ -9,20 +9,6 @@ macro_rules! writes {
     }
 }
 
-enum Builtin {
-    Bool,
-    Float,
-    Double,
-    Char,
-    UChar,
-    Short,
-    UShort,
-    Int,
-    UInt,
-    Long,
-    ULong,
-}
-
 enum TypeBinding<'ast> {
     SelfPod { typename: &'ast str, is_const: bool },
     Builtin(Builtin),
@@ -383,8 +369,9 @@ impl<'ast> FuncBinding<'ast> {
         writes!(acc, "{indent}pub fn {}(", self.name);
 
         for param in &self.params {
-            writes!(acc, "{}: {}, ", param.c_name);
+            writes!(acc, "{}: ", param.c_name);
             param.kind.write_rust_type(&mut acc);
+            writes!(acc, ", ");
         }
 
         if let Some(ret) = &self.ret {
@@ -436,7 +423,7 @@ impl Method {
 #[derive(Deserialize, Debug)]
 pub struct Constructor {
     #[serde(flatten)]
-    inner: Method,
+    pub(super) inner: Method,
 }
 
 impl Constructor {
@@ -496,6 +483,7 @@ struct Base {
 enum Tag {
     Struct,
     Class,
+    Union,
 }
 
 #[derive(Deserialize, Debug)]
@@ -540,6 +528,23 @@ impl Record {
 
 pub(super) struct RecBinding<'ast> {
     name: &'ast str,
+    has_vtable: bool,
+    fields: Vec<FieldBinding<'ast>>,
+}
+
+recField.name = fieldName;
+            recField.decl = fmt::format(
+                remapSingleField(field->getType(), fieldName, policy), "", "");
+            recField.cppType = field->getType().getAsString(policy);
+            recField.rustType = remapRustType(field->getType(), policy);
+            recField.isReference = field->getType()->isReferenceType();
+            recField.accessible =
+                field->getAccess() != AccessSpecifier::AS_private && !anonymous;
+
+struct FieldBinding<'ast> {
+    name: &'ast str,
+    is_public: bool,
+    is_reference: bool,
 }
 
 impl<'ast> super::AstConsumer<'ast> {
@@ -610,7 +615,9 @@ impl<'ast> super::AstConsumer<'ast> {
 
         self.classes.insert(&rec.name, (node, rec));
 
-        let mut is_public = matches!(rec.tag_used, Tag::Struct);
+        let mut is_public = !matches!(rec.tag_used, Tag::Class);
+
+        let mut fields = Vec::new();
 
         // Keep a record of each method that we are binding, to account for
         // overloading, particularly constructors, we need to append a counter
@@ -619,8 +626,13 @@ impl<'ast> super::AstConsumer<'ast> {
 
         for inn in &node.inner {
             // Ignore any method that isn't public, it's not part of the API we care about
-            if inn.kind.is_method() && !is_public {
-                continue;
+            if let Some(method) = inn.kind.as_method() {
+                if !is_public {
+                    continue;
+                } else if self.is_ignored(inn) {
+                    println!("skipping deprecated method {}::{}", rec.name, method.name);
+                    continue;
+                }
             }
 
             let comment = Self::get_comment(inn);
@@ -716,6 +728,15 @@ impl<'ast> super::AstConsumer<'ast> {
                         method,
                         true,
                     )
+                }
+                Item::FieldDecl { name, kind } => {
+                    fields.push((
+                        name,
+                        self.get_type_binding(kind).with_context(|| {
+                            format!("failed to get type binding for {}::{name}", rec.name)
+                        })?,
+                    ));
+                    continue;
                 }
                 _ => continue,
             };

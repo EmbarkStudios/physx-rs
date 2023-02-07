@@ -1,7 +1,9 @@
 mod record;
+use anyhow::Context as _;
 use record::RecBinding;
 pub use record::{Access, Constructor, Method, Record};
 mod enums;
+use clang_ast::Id;
 use enums::{EnumBinding, EnumRepr};
 
 use crate::Node;
@@ -28,7 +30,7 @@ impl fmt::Display for Indent {
 pub struct Type {
     desugured_qual_type: Option<String>,
     qual_type: String,
-    type_alias_decl_id: Option<u64>,
+    type_alias_decl_id: Option<Id>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -48,6 +50,14 @@ pub struct Param {
     name: String,
     #[serde(rename = "type")]
     kind: Type,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Typedef {
+    name: String,
+    #[serde(rename = "type")]
+    kind: Type,
+    id: Id,
 }
 
 #[derive(Deserialize, Debug)]
@@ -91,6 +101,9 @@ pub enum Item {
         #[serde(rename = "type")]
         kind: Type,
     },
+    TypedefDecl(Typedef),
+    /// The deprecated declspec has been defined on the item (PX_DEPRECATED)
+    DeprecatedAttr,
     /// We don't care about other items
     Other {
         kind: clang_ast::Kind,
@@ -100,11 +113,15 @@ pub enum Item {
 
 impl Item {
     #[inline]
-    fn is_method(&self) -> bool {
-        matches!(
-            self,
-            Self::CXXMethodDecl(_) | Self::CXXConstructorDecl(_) | Self::CXXDestructorDecl(_)
-        )
+    fn as_method(&self) -> Option<&Method> {
+        let meth = match self {
+            Self::CXXMethodDecl(meth) => meth,
+            Self::CXXConstructorDecl(ctor) => &ctor.inner,
+            Self::CXXDestructorDecl(dtor) => dtor,
+            _ => return None,
+        };
+
+        Some(meth)
     }
 }
 
@@ -207,7 +224,8 @@ pub struct AstConsumer<'ast> {
     recs: Vec<RecBinding<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
     /// for `release` methods, or whether something is a record at all
-    classes: std::collections::HashMap<&'ast str, (&'ast Node, &'ast Record)>,
+    classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
+    back_refs: HashMap<Id, &'ast Node>,
 }
 
 impl<'ast> AstConsumer<'ast> {
@@ -216,6 +234,11 @@ impl<'ast> AstConsumer<'ast> {
     }
 
     fn traverse(&mut self, node: &'ast Node) -> anyhow::Result<()> {
+        if self.is_ignored(node) {
+            println!("skipping node");
+            return Ok(());
+        }
+
         for inn in &node.inner {
             match &inn.kind {
                 Item::EnumDecl(decl) => {
@@ -232,12 +255,33 @@ impl<'ast> AstConsumer<'ast> {
                         self.recs.push(record);
                     }
                 }
+                Item::TypedefDecl(td) => {
+                    self.consume_typedef(inn, td)?;
+                }
                 _ => {
                     self.traverse(inn)?;
                 }
             }
         }
 
+        Ok(())
+    }
+
+    #[inline]
+    fn is_ignored(&self, node: &'ast Node) -> bool {
+        // Check to see if the node has the deprecated attribute, if so we can
+        // ignore emitting it. This can get rid of entire types, so we need to
+        // account for that when traversing the graph to emit types and functions
+        node.inner
+            .iter()
+            .any(|inn| matches!(inn.kind, Item::DeprecatedAttr))
+
+        // TODO: Maybe ignore some more types here
+        //false
+    }
+
+    fn consume_typedef(&mut self, node: &'ast Node, td: &Typedef) -> anyhow::Result<()> {
+        self.back_refs.insert(td.id, node);
         Ok(())
     }
 
@@ -322,4 +366,135 @@ impl<'ast> AstConsumer<'ast> {
             additional,
         })
     }
+
+    fn parse_type(&self, kind: &AstType<'_>) -> anyhow::Result<QualType> {
+        // Builtin types are the most common, we already handle the common typydefs as well
+        if let Some(bi) = self.parse_builtin(kind) {
+            return Ok(QualType::Builtin(bi));
+        }
+
+        // First check if the type has an alias, most likely a typedef
+        if let AstType::Qualified(kind) = kind {
+            if let Some(alias_id) = kind.type_alias_decl_id {
+                let node = self
+                    .back_refs
+                    .get(&alias_id)
+                    .context("failed to located type alias")?;
+            }
+        }
+
+        let type_str = kind.as_ref();
+
+        if let Some(ptr) = type_str.strip_suffix('*') {
+        } else if let Some(refer) = type_str.strip_suffix('&') {
+        } else if let Some(array) = type_str.strip_suffix(']') {
+            let ind = array
+                .find('[')
+                .context("uhm...we thought this was an array...")?;
+
+            let ele_type = AstType::Simple(&array[..ind]);
+            let ele_type = self
+                .parse_type(&ele_type)
+                .context("failed to parse element type")?;
+
+            let len = &array[ind + 1..]
+                .parse()
+                .context("failed to parse array length")?;
+
+            return Ok(QualType::Array {
+                element: Box::new(ele_type),
+                len,
+            });
+        }
+    }
+
+    fn parse_builtin(&self, kind: &AstType<'_>) -> Option<Builtin> {
+        let bi = match kind.as_ref() {
+            // See PxSimpleTypes for where the physx typedefs come from
+            "bool" => Builtin::Bool,
+            "float" | "physx::PxReal" | "physx::PxF32" => Builtin::Float,
+            "double" => Builtin::Double,
+            "int8_t" | "char" | "physx::PxI8" => Builtin::Char,
+            "uint8_t" | "unsigned char" | "physx::PxU8" => Builtin::UChar,
+            "int16_t" | "short" | "physx::PxI16" => Builtin::Short,
+            "uint16_t" | "unsigned short" | "physx::PxU16" => Builtin::UShort,
+            "int32_t" | "int" | "physx::PxI32" => Builtin::Int,
+            "uint32_t" | "unsigned int" | "physx::PxU32" => Builtin::UInt,
+            // Signed 64-bit integers are essentially unused in Physx
+            "int64_t" | "long" | "physx::PxI64" => Builtin::Long,
+            "uint64_t" | "unsigned long" | "physx::PxU64" => Builtin::ULong,
+            // See PxVecMath.h for the vector types
+            "physx::Vec3V" => Builtin::Vec3V,
+            "physx::Vec4V" => Builtin::Vec4V,
+            "physx::BoolV" => Builtin::BoolV,
+            "physx::VecU32V" => Builtin::U32V,
+            "physx::VecI32V" => Builtin::I32V,
+            "physx::Mat33V" => Builtin::Mat33V,
+            "physx::Mat34V" => Builtin::Mat34V,
+            "physx::Mat44V" => Builtin::Mat44V,
+            _ => return None,
+        };
+
+        Some(bi)
+    }
+}
+
+enum AstType<'ast> {
+    Simple(&'ast str),
+    Qualified(&'ast Type),
+}
+
+impl<'ast> AsRef<str> for AstType<'ast> {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::Simple(s) => s,
+            Self::Qualified(kind) => &kind.qual_type,
+        }
+    }
+}
+
+enum Builtin {
+    Bool,
+    Float,
+    Double,
+    Char,
+    UChar,
+    Short,
+    UShort,
+    Int,
+    UInt,
+    Long,
+    ULong,
+    Vec3V,
+    Vec4V,
+    BoolV,
+    U32V,
+    I32V,
+    Mat33V,
+    Mat34V,
+    Mat44V,
+}
+
+enum QualType<'ast> {
+    Pointer {
+        is_pointee_const: bool,
+        pointee: Box<QualType<'ast>>,
+    },
+    Reference {
+        is_pointee_const: bool,
+        pointee: Box<QualType<'ast>>,
+    },
+    Builtin(Builtin),
+    FunctionPointer,
+    Array {
+        element: Box<QualType<'ast>>,
+        len: u32,
+    },
+    Enum {
+        name: &'ast str,
+        repr: EnumRepr,
+        /// If the enum is used for flags we need to represent it on the FFI
+        /// boundary as the scalar type
+        is_flags: bool,
+    },
 }

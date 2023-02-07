@@ -26,6 +26,11 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
         // clang will complain about all physx headers when we are in C++
         // mode because it treats .h as "c headers", this is useless
         "-xc++-header",
+        // Define PX_DEPRECATED so that the attribute is emitted into the AST
+        "-DPX_DPRECATED=__attribute__((deprecated()))",
+        // Ignore the actual warning about deprecation, we don't care about
+        // warnings
+        "-Wno-deprecated-declarations",
         // Add the root include directory so that clang knows how to find
         // all of the includes
         "-I",
