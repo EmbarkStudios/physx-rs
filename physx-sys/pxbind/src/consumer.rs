@@ -1,3 +1,31 @@
+use crate::Node;
+
+use serde::Deserialize;
+use std::fmt::{self, Write};
+
+#[macro_export]
+macro_rules! writes {
+    ($s:expr, $f:expr $(,)?) => {{
+        write!($s, $f).unwrap();
+    }};
+    ($s:expr, $f:expr, $($arg:tt)*) => {{
+        write!($s, $f, $($arg)*).unwrap();
+    }};
+}
+
+#[macro_export]
+macro_rules! writesln {
+    ($s:expr) => {{
+        writeln!($s).unwrap();
+    }};
+    ($s:expr, $f:expr $(,)?) => {{
+        writeln!($s, $f).unwrap();
+    }};
+    ($s:expr, $f:expr, $($arg:tt)*) => {{
+        writeln!($s, $f, $($arg)*).unwrap();
+    }};
+}
+
 mod record;
 use anyhow::Context as _;
 use record::RecBinding;
@@ -5,11 +33,6 @@ pub use record::{Access, Constructor, Method, Record};
 mod enums;
 use clang_ast::Id;
 use enums::{EnumBinding, EnumRepr, FlagsBinding};
-
-use crate::Node;
-
-use serde::Deserialize;
-use std::fmt;
 
 /// It's impossible (I believe) with Rust's format strings to have the width
 /// of the alignment be dynamic, so we just uhhh...be lame
@@ -176,45 +199,41 @@ struct Comment<'ast> {
 }
 
 impl<'ast> Comment<'ast> {
-    fn emit_rust<W: std::io::Write>(&self, writer: &mut W, level: u32) -> anyhow::Result<()> {
+    fn emit_rust(&self, writer: &mut String, level: u32) {
         let indent = Indent(level);
 
-        let emit_lines = |w: &mut W, lines: &[&str]| -> anyhow::Result<()> {
+        let emit_lines = |w: &mut String, lines: &[&str]| {
             for line in lines {
                 if line.is_empty() {
-                    writeln!(w, "{indent}///")?;
+                    writesln!(w, "{indent}///");
                 // PhysX _tends_ to use `#type::field/variant` style intralinks
                 // so attempt to convert them to proper rustdoc style intralinks
                 } else if let Some(ind) = line.find('#') {
-                    write!(w, "{indent}/// {}", &line[..ind])?;
-                    write!(w, "[`")?;
+                    writes!(w, "{indent}/// {}", &line[..ind]);
+                    writes!(w, "[`");
                     match line[ind + 1..]
                         .find(|c: char| !c.is_alphanumeric() && c != ':' && c != '_')
                     {
                         Some(end) => {
-                            write!(w, "{}`]", &line[ind + 1..ind + end + 1])?;
-                            writeln!(w, "{}", &line[ind + end + 1..])?;
+                            writes!(w, "{}`]", &line[ind + 1..ind + end + 1]);
+                            writesln!(w, "{}", &line[ind + end + 1..]);
                         }
                         None => {
-                            writeln!(w, "{}`]", &line[ind + 1..])?;
+                            writesln!(w, "{}`]", &line[ind + 1..]);
                         }
                     };
                 } else {
-                    writeln!(w, "{indent}/// {line}")?;
+                    writesln!(w, "{indent}/// {line}");
                 }
             }
-
-            Ok(())
         };
 
-        emit_lines(writer, self.summary.as_slice())?;
+        emit_lines(writer, self.summary.as_slice());
 
         if !self.additional.is_empty() {
-            writeln!(writer, "{indent}///")?;
-            emit_lines(writer, self.additional.as_slice())?;
+            writesln!(writer, "{indent}///");
+            emit_lines(writer, self.additional.as_slice());
         }
-
-        Ok(())
     }
 }
 

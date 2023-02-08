@@ -1,17 +1,8 @@
 use super::{Comment, Indent, Item, Type};
-use crate::Node;
+use crate::{writes, Node};
 use anyhow::Context as _;
 use serde::Deserialize;
 use std::fmt::Write;
-
-macro_rules! writes {
-    ($s:expr, $f:expr $(,)?) => {{
-        write!($s, $f).unwrap();
-    }};
-    ($s:expr, $f:expr, $($arg:tt)*) => {{
-        write!($s, $f, $($arg)*).unwrap();
-    }};
-}
 
 enum TypeBinding<'ast> {
     SelfPod { typename: &'ast str, is_const: bool },
@@ -367,9 +358,9 @@ impl<'ast> FuncBinding<'ast> {
         Ok(())
     }
 
-    fn emit_rust<W: std::io::Write>(&self, writer: &mut W, level: u32) -> anyhow::Result<()> {
+    fn emit_rust(&self, writer: &mut String, level: u32) {
         if let Some(com) = &self.comment {
-            com.emit_rust(writer, level)?;
+            com.emit_rust(writer, level);
         }
 
         let indent = Indent(level);
@@ -391,8 +382,7 @@ impl<'ast> FuncBinding<'ast> {
             writes!(acc, ");");
         }
 
-        writeln!(writer, "{acc}")?;
-        Ok(())
+        writesln!(writer, "{acc}");
     }
 }
 

@@ -37,9 +37,9 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Default)]
     #[repr(transparent)]
     pub struct PxActorCacheFlags: u16 {
-        const eACTOR_DATA = 1;
-        const eFORCE = 4;
-        const eTORQUE = 8;
+        const eACTOR_DATA = 1 << 0;
+        const eFORCE = 1 << 2;
+        const eTORQUE = 1 << 3;
     }
 }
 
@@ -75,17 +75,17 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Default)]
     #[repr(transparent)]
     pub struct PxArticulationCacheFlags: u32 {
-        const eVELOCITY = 1;
-        const eACCELERATION = 2;
-        const ePOSITION = 4;
-        const eFORCE = 8;
-        const eLINK_VELOCITY = 16;
-        const eLINK_ACCELERATION = 32;
-        const eROOT_TRANSFORM = 64;
-        const eROOT_VELOCITIES = 128;
-        const eSENSOR_FORCES = 256;
-        const eJOINT_SOLVER_FORCES = 512;
-        const eALL = 247;
+        const eVELOCITY = 1 << 0;
+        const eACCELERATION = 1 << 1;
+        const ePOSITION = 1 << 2;
+        const eFORCE = 1 << 3;
+        const eLINK_VELOCITY = 1 << 4;
+        const eLINK_ACCELERATION = 1 << 5;
+        const eROOT_TRANSFORM = 1 << 6;
+        const eROOT_VELOCITIES = 1 << 7;
+        const eSENSOR_FORCES = 1 << 8;
+        const eJOINT_SOLVER_FORCES = 1 << 9;
+        const eALL = Self::eVELOCITY.bits | Self::eACCELERATION.bits | Self::ePOSITION.bits | Self::eLINK_VELOCITY.bits | Self::eLINK_ACCELERATION.bits | Self::eROOT_TRANSFORM.bits | Self::eROOT_VELOCITIES.bits;
     }
 }
 
@@ -130,10 +130,10 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Default)]
     #[repr(transparent)]
     pub struct PxShapeFlags: u8 {
-        const eSIMULATION_SHAPE = 1;
-        const eSCENE_QUERY_SHAPE = 2;
-        const eTRIGGER_SHAPE = 4;
-        const eVISUALIZATION = 8;
+        const eSIMULATION_SHAPE = 1 << 0;
+        const eSCENE_QUERY_SHAPE = 1 << 1;
+        const eTRIGGER_SHAPE = 1 << 2;
+        const eVISUALIZATION = 1 << 3;
     }
 }
 
