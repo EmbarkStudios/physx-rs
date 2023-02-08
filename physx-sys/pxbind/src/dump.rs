@@ -14,7 +14,10 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
             .output()
             .context("failed to run git to find repo root")?;
 
-        String::from_utf8(captured.stdout).context("git output was non-utf8")?
+        let mut rr = String::from_utf8(captured.stdout).context("git output was non-utf8")?;
+        // Removing trailing newline
+        rr.pop();
+        rr
     };
 
     cmd.args([
@@ -41,6 +44,7 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
     cmd.arg(header.as_ref());
 
     cmd.stdout(std::process::Stdio::piped());
+    cmd.stderr(std::process::Stdio::piped());
 
     let captured = cmd
         .output()
@@ -48,8 +52,9 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
 
     anyhow::ensure!(
         captured.status.success(),
-        "clang++ failed to gather AST {:?}",
-        captured.status
+        "clang++ failed to gather AST {:?}\n{}",
+        captured.status,
+        String::from_utf8(captured.stderr).unwrap_or(String::new()),
     );
 
     Ok(captured.stdout)

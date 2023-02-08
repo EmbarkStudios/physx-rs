@@ -1,2 +1,5 @@
 [workspace]
 members = ["physx", "physx-sys", "physx-sys/pxbind"]
+
+[patch.crates-io]
+clang-ast = { path = "../temp-clones/clang-ast" }

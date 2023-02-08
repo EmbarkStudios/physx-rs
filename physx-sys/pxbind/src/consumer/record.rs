@@ -1,17 +1,21 @@
 use super::{Comment, Indent, Item, Type};
 use crate::Node;
+use anyhow::Context as _;
 use serde::Deserialize;
+use std::fmt::Write;
 
 macro_rules! writes {
-    ($s:expr, $f:expr, $($opt:expr),* $(,)?) => {
-        use std::fmt::Write;
-        write!($s, $f, $($opt)*).unwrap();
-    }
+    ($s:expr, $f:expr $(,)?) => {{
+        write!($s, $f).unwrap();
+    }};
+    ($s:expr, $f:expr, $($arg:tt)*) => {{
+        write!($s, $f, $($arg)*).unwrap();
+    }};
 }
 
 enum TypeBinding<'ast> {
     SelfPod { typename: &'ast str, is_const: bool },
-    Builtin(Builtin),
+    Builtin(super::Builtin),
 }
 
 impl<'ast> TypeBinding<'ast> {
@@ -24,6 +28,7 @@ impl<'ast> TypeBinding<'ast> {
                     if *is_const { " const" } else { "" }
                 );
             }
+            _ => unreachable!(),
         }
     }
 
@@ -36,6 +41,7 @@ impl<'ast> TypeBinding<'ast> {
                     if *is_const { " const" } else { "" }
                 );
             }
+            _ => unreachable!(),
         }
     }
 
@@ -48,6 +54,7 @@ impl<'ast> TypeBinding<'ast> {
                     if *is_const { "const" } else { "mut" }
                 );
             }
+            _ => unreachable!(),
         }
     }
 }
@@ -76,6 +83,7 @@ impl<'ast> Param<'ast> {
                 self.kind.write_cpp_type(out);
                 writes!(out, ">({})", self.c_name);
             }
+            _ => unreachable!(),
         }
 
         writes!(out, ";\n");
@@ -103,7 +111,8 @@ enum PhysxInvoke<'ast> {
 
 impl<'ast> PhysxInvoke<'ast> {
     fn emit(&self, args: impl Iterator<Item = &'ast str>, out: &mut String) {
-        let args = args.peekable();
+        let mut args = args.peekable();
+        let has_args = args.peek().is_some();
 
         // Would be nice with https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.intersperse
         // but it's not stable yet
@@ -144,12 +153,12 @@ impl<'ast> PhysxInvoke<'ast> {
                 }
 
                 emit_args(out);
-                writes!(");\n");
+                writes!(out, ");\n");
             }
             Self::Ctor(class) => {
                 writes!(out, "{class} return_val");
                 // Deal with Most Vexing Parse, thanks C++
-                if args.peek().is_some() {
+                if has_args {
                     writes!(out, "(");
                     emit_args(out);
                     writes!(out, ");\n");
@@ -218,7 +227,7 @@ struct FuncBinding<'ast> {
     comment: Option<Comment<'ast>>,
     ext: FuncBindingExt<'ast>,
     params: Vec<Param<'ast>>,
-    ret: Option<TypeBinding>,
+    ret: Option<TypeBinding<'ast>>,
 }
 
 //     bool hasSelf = false;
@@ -309,7 +318,7 @@ impl<'ast> FuncBinding<'ast> {
                 writes!(acc, " {}", param.c_name);
             }
 
-            writeln!(writer, "{acc}) {")?;
+            writeln!(writer, "{acc}) {{")?;
             acc.clear();
         }
 
@@ -319,7 +328,7 @@ impl<'ast> FuncBinding<'ast> {
         // c++ variable
         if self.params.is_empty() {
             for param in &self.params {
-                writes!(out, "{indent}");
+                writes!(acc, "{indent}");
                 param.write_c_to_cpp(&mut acc);
             }
 
@@ -327,9 +336,9 @@ impl<'ast> FuncBinding<'ast> {
             acc.clear();
         }
 
-        let (invoke, arg_skip) = match self.ext {
+        let (invoke, arg_skip) = match &self.ext {
             FuncBindingExt::IsDelete => {
-                writeln!(writer, "{indent}delete self_;\n}")?;
+                writeln!(writer, "{indent}delete self_;\n}}")?;
                 return Ok(());
             }
             FuncBindingExt::None(inv) => (inv, 0),
@@ -345,8 +354,8 @@ impl<'ast> FuncBinding<'ast> {
 
         invoke.emit(args, &mut acc);
 
-        if let Some(rt) = self.ret {
-            rt
+        if let Some(rt) = &self.ret {
+            unreachable!()
             //     rt.
             // result += returnValue.getCpp2CCode();
 
@@ -388,6 +397,7 @@ impl<'ast> FuncBinding<'ast> {
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub enum Access {
     Public,
     Protected,
@@ -407,7 +417,7 @@ pub struct Method {
     name: String,
     #[serde(rename = "type")]
     kind: Type,
-    #[serde(rename = "storageClass", deserialize_with = "storage_class")]
+    #[serde(default, rename = "storageClass", deserialize_with = "storage_class")]
     is_static: bool,
     #[serde(default, rename = "virtual")]
     is_virtual: bool,
@@ -450,9 +460,10 @@ impl Constructor {
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct Dtor {
     irrelevant: bool,
-    #[serde(rename = "needsImplicit")]
+    #[serde(default)]
     needs_implicit: bool,
     simple: bool,
     trivial: bool,
@@ -480,6 +491,7 @@ struct Base {
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 enum Tag {
     Struct,
     Class,
@@ -489,7 +501,7 @@ enum Tag {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Record {
-    pub name: String,
+    pub name: Option<String>,
     tag_used: Tag,
     definition_data: Option<DefinitionData>,
     #[serde(default)]
@@ -532,15 +544,6 @@ pub(super) struct RecBinding<'ast> {
     fields: Vec<FieldBinding<'ast>>,
 }
 
-recField.name = fieldName;
-            recField.decl = fmt::format(
-                remapSingleField(field->getType(), fieldName, policy), "", "");
-            recField.cppType = field->getType().getAsString(policy);
-            recField.rustType = remapRustType(field->getType(), policy);
-            recField.isReference = field->getType()->isReferenceType();
-            recField.accessible =
-                field->getAccess() != AccessSpecifier::AS_private && !anonymous;
-
 struct FieldBinding<'ast> {
     name: &'ast str,
     is_public: bool,
@@ -575,7 +578,7 @@ impl<'ast> super::AstConsumer<'ast> {
                     // base class before any derived class, so if we didn't, something
                     // is wrong
                     anyhow::bail!(
-                        "{:?} {} has base `{}`, but we couldn't find it",
+                        "{:?} {:?} has base `{}`, but we couldn't find it",
                         rec.tag_used,
                         rec.name,
                         base.kind.qual_type
@@ -609,11 +612,13 @@ impl<'ast> super::AstConsumer<'ast> {
             }
         }
 
-        if had_enums && !had_more {
+        if had_enums && !had_more || true {
             return Ok(None);
         }
 
-        self.classes.insert(&rec.name, (node, rec));
+        let Some(rname) = rec.name.as_deref() else { return Ok(None) };
+
+        self.classes.insert(rname, (node, rec));
 
         let mut is_public = !matches!(rec.tag_used, Tag::Class);
 
@@ -630,7 +635,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 if !is_public {
                     continue;
                 } else if self.is_ignored(inn) {
-                    println!("skipping deprecated method {}::{}", rec.name, method.name);
+                    println!("skipping deprecated method {rname}::{}", method.name);
                     continue;
                 }
             }
@@ -652,18 +657,18 @@ impl<'ast> super::AstConsumer<'ast> {
 
                     let func_binding = if rec.is_polymorphic() || !rec.has_simple_destructor() {
                         FuncBinding {
-                            name: format!("{}_new_alloc", rec.name),
+                            name: format!("{rname}_new_alloc"),
                             ret: None, // TODO
                             comment,
-                            ext: FuncBindingExt::None(PhysxInvoke::New(&rec.name)),
+                            ext: FuncBindingExt::None(PhysxInvoke::New(rname)),
                             params: Vec::new(),
                         }
                     } else {
                         FuncBinding {
-                            name: format!("{}_new", rec.name),
+                            name: format!("{rname}_new"),
                             ret: None, // TODO
                             comment,
-                            ext: FuncBindingExt::None(PhysxInvoke::Ctor(&rec.name)),
+                            ext: FuncBindingExt::None(PhysxInvoke::Ctor(rname)),
                             params: Vec::new(),
                         }
                     };
@@ -678,8 +683,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
                     let func_binding = FuncBinding {
                         name: format!(
-                            "{}_{}{}",
-                            rec.name,
+                            "{rname}_{}{}",
                             method.name,
                             if method.is_const() { "" } else { "_mut" }
                         ),
@@ -689,7 +693,7 @@ impl<'ast> super::AstConsumer<'ast> {
                             FuncBindingExt::None(PhysxInvoke::Method {
                                 func_name: &method.name,
                                 return_type: None,
-                                class_name: Some(&rec.name),
+                                class_name: Some(rname),
                             })
                         } else {
                             FuncBindingExt::HasSelf(PhysxInvoke::Method {
@@ -719,7 +723,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
                     (
                         FuncBinding {
-                            name: format!("{}_delete", rec.name),
+                            name: format!("{rname}_delete"),
                             comment,
                             ext: FuncBindingExt::IsDelete,
                             params: Vec::new(),
@@ -732,8 +736,8 @@ impl<'ast> super::AstConsumer<'ast> {
                 Item::FieldDecl { name, kind } => {
                     fields.push((
                         name,
-                        self.get_type_binding(kind).with_context(|| {
-                            format!("failed to get type binding for {}::{name}", rec.name)
+                        self.parse_type(kind).with_context(|| {
+                            format!("failed to get type binding for {rname}::{name}")
                         })?,
                     ));
                     continue;
@@ -742,11 +746,10 @@ impl<'ast> super::AstConsumer<'ast> {
             };
 
             if !method.is_static {
-                func.params
-                    .push(Param::self_pod(&rec.name, method.is_const()));
+                func.params.push(Param::self_pod(rname, method.is_const()));
             }
         }
 
-        Ok(rec)
+        Ok(None)
     }
 }

@@ -5,7 +5,7 @@ fn gen_enums(which: &str) -> anyhow::Result<String> {
     consumer.consume(&ast)?;
 
     let mut buffer = Vec::new();
-    consumer.generate_rust_enums(&mut buffer)?;
+    consumer.generate_rust_enums(&mut buffer, 0)?;
 
     Ok(String::from_utf8(buffer)?)
 }
@@ -27,4 +27,10 @@ fn u32() {
 #[test]
 fn simple() {
     insta::assert_snapshot!(gen_enums("simple.h").unwrap());
+}
+
+/// Verifies that enums and their `PxFlags<>` wrappers can be properly bound
+#[test]
+fn flags() {
+    insta::assert_snapshot!(gen_enums("flags.h").unwrap());
 }

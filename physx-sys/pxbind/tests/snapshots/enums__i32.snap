@@ -1,6 +1,5 @@
 ---
 source: physx-sys/pxbind/tests/enums.rs
-assertion_line: 16
 expression: "gen_enums(\"i32.h\").unwrap()"
 ---
 /// Broad phase algorithm used in the simulation

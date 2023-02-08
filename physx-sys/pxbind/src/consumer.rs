@@ -4,7 +4,7 @@ use record::RecBinding;
 pub use record::{Access, Constructor, Method, Record};
 mod enums;
 use clang_ast::Id;
-use enums::{EnumBinding, EnumRepr};
+use enums::{EnumBinding, EnumRepr, FlagsBinding};
 
 use crate::Node;
 
@@ -47,7 +47,7 @@ pub struct EnumConstDecl {
 
 #[derive(Deserialize, Debug)]
 pub struct Param {
-    name: String,
+    name: Option<String>,
     #[serde(rename = "type")]
     kind: Type,
 }
@@ -57,11 +57,14 @@ pub struct Typedef {
     name: String,
     #[serde(rename = "type")]
     kind: Type,
-    id: Id,
+    id: Option<Id>,
 }
 
 #[derive(Deserialize, Debug)]
 pub enum Item {
+    NamespaceDecl {
+        name: String,
+    },
     /// Declarations for classes and structs
     CXXRecordDecl(Record),
     FieldDecl {
@@ -220,6 +223,7 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct AstConsumer<'ast> {
     enums: Vec<EnumBinding<'ast>>,
+    flags: Vec<FlagsBinding<'ast>>,
     enum_map: HashMap<&'ast str, EnumRepr>,
     recs: Vec<RecBinding<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
@@ -230,10 +234,10 @@ pub struct AstConsumer<'ast> {
 
 impl<'ast> AstConsumer<'ast> {
     pub fn consume(&mut self, root: &'ast Node) -> anyhow::Result<()> {
-        self.traverse(root)
+        self.traverse(root, false)
     }
 
-    fn traverse(&mut self, node: &'ast Node) -> anyhow::Result<()> {
+    fn traverse(&mut self, node: &'ast Node, in_physx: bool) -> anyhow::Result<()> {
         if self.is_ignored(node) {
             println!("skipping node");
             return Ok(());
@@ -241,6 +245,11 @@ impl<'ast> AstConsumer<'ast> {
 
         for inn in &node.inner {
             match &inn.kind {
+                Item::NamespaceDecl { name } => {
+                    if in_physx || name == "physx" {
+                        self.traverse(inn, true)?;
+                    }
+                }
                 Item::EnumDecl(decl) => {
                     self.consume_enum(node, inn, decl)?;
                 }
@@ -251,7 +260,10 @@ impl<'ast> AstConsumer<'ast> {
                         continue;
                     }
 
-                    if let Some(record) = self.consume_record(inn, rec)? {
+                    if let Some(record) = self
+                        .consume_record(inn, rec)
+                        .with_context(|| format!("failed to consume {rec:?}"))?
+                    {
                         self.recs.push(record);
                     }
                 }
@@ -259,7 +271,7 @@ impl<'ast> AstConsumer<'ast> {
                     self.consume_typedef(inn, td)?;
                 }
                 _ => {
-                    self.traverse(inn)?;
+                    self.traverse(inn, in_physx)?;
                 }
             }
         }
@@ -280,8 +292,13 @@ impl<'ast> AstConsumer<'ast> {
         //false
     }
 
-    fn consume_typedef(&mut self, node: &'ast Node, td: &Typedef) -> anyhow::Result<()> {
-        self.back_refs.insert(td.id, node);
+    fn consume_typedef(&mut self, node: &'ast Node, td: &'ast Typedef) -> anyhow::Result<()> {
+        if let Some(id) = td.id {
+            self.back_refs.insert(id, node);
+        }
+
+        self.consume_flags(node, td)?;
+
         Ok(())
     }
 
@@ -367,14 +384,16 @@ impl<'ast> AstConsumer<'ast> {
         })
     }
 
-    fn parse_type(&self, kind: &AstType<'_>) -> anyhow::Result<QualType> {
+    fn parse_type(&self, kind: impl Into<AstType<'ast>>) -> anyhow::Result<QualType<'ast>> {
+        let kind = kind.into();
+
         // Builtin types are the most common, we already handle the common typydefs as well
         if let Some(bi) = self.parse_builtin(kind) {
             return Ok(QualType::Builtin(bi));
         }
 
         // First check if the type has an alias, most likely a typedef
-        if let AstType::Qualified(kind) = kind {
+        if let AstType::Qualified(kind) = &kind {
             if let Some(alias_id) = kind.type_alias_decl_id {
                 let node = self
                     .back_refs
@@ -383,21 +402,52 @@ impl<'ast> AstConsumer<'ast> {
             }
         }
 
-        let type_str = kind.as_ref();
+        let type_str = kind.as_str();
 
         if let Some(ptr) = type_str.strip_suffix('*') {
+            let (inner, mut is_const) = if let Some(inner) = ptr.strip_suffix("const ") {
+                (inner, true)
+            } else {
+                (ptr, false)
+            };
+
+            let pointee = self.parse_type(inner)?;
+
+            if !inner.ends_with('*') {
+                is_const = inner.starts_with("const ");
+            }
+
+            return Ok(QualType::Pointer {
+                is_const,
+                pointee: Box::new(pointee),
+            });
         } else if let Some(refer) = type_str.strip_suffix('&') {
+            let (inner, mut is_const) = if let Some(inner) = refer.strip_suffix("const ") {
+                (inner, true)
+            } else {
+                (refer, false)
+            };
+
+            let pointee = self.parse_type(inner)?;
+
+            if !inner.ends_with('*') {
+                is_const = inner.starts_with("const ");
+            }
+
+            return Ok(QualType::Reference {
+                is_const,
+                pointee: Box::new(pointee),
+            });
         } else if let Some(array) = type_str.strip_suffix(']') {
             let ind = array
                 .find('[')
                 .context("uhm...we thought this was an array...")?;
 
-            let ele_type = AstType::Simple(&array[..ind]);
             let ele_type = self
-                .parse_type(&ele_type)
+                .parse_type(&array[..ind])
                 .context("failed to parse element type")?;
 
-            let len = &array[ind + 1..]
+            let len = array[ind + 1..]
                 .parse()
                 .context("failed to parse array length")?;
 
@@ -406,10 +456,22 @@ impl<'ast> AstConsumer<'ast> {
                 len,
             });
         }
+
+        // Check if it's an enum, we'll always know the enum by the time we hit
+        // a reference to it, since physx doesn't do forward declaration of
+        // enums, just old school
+        'ennum: {
+            let Some(name) = type_str.strip_prefix("physx::") else { break 'ennum };
+            let Some(repr) = self.enum_map.get(name) else { break 'ennum };
+
+            return Ok(QualType::Enum { name, repr: *repr });
+        }
+
+        anyhow::bail!("oops {kind:?}")
     }
 
-    fn parse_builtin(&self, kind: &AstType<'_>) -> Option<Builtin> {
-        let bi = match kind.as_ref() {
+    fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
+        let bi = match kind.into().as_str() {
             // See PxSimpleTypes for where the physx typedefs come from
             "bool" => Builtin::Bool,
             "float" | "physx::PxReal" | "physx::PxF32" => Builtin::Float,
@@ -439,13 +501,26 @@ impl<'ast> AstConsumer<'ast> {
     }
 }
 
+#[derive(Copy, Clone, Debug)]
 enum AstType<'ast> {
     Simple(&'ast str),
     Qualified(&'ast Type),
 }
 
-impl<'ast> AsRef<str> for AstType<'ast> {
-    fn as_ref(&self) -> &str {
+impl<'ast> From<&'ast Type> for AstType<'ast> {
+    fn from(t: &'ast Type) -> Self {
+        Self::Qualified(t)
+    }
+}
+
+impl<'ast> From<&'ast str> for AstType<'ast> {
+    fn from(t: &'ast str) -> Self {
+        Self::Simple(t)
+    }
+}
+
+impl<'ast> AstType<'ast> {
+    fn as_str(&self) -> &'ast str {
         match self {
             Self::Simple(s) => s,
             Self::Qualified(kind) => &kind.qual_type,
@@ -453,6 +528,7 @@ impl<'ast> AsRef<str> for AstType<'ast> {
     }
 }
 
+#[derive(Copy, Clone)]
 enum Builtin {
     Bool,
     Float,
@@ -475,13 +551,39 @@ enum Builtin {
     Mat44V,
 }
 
+impl Builtin {
+    fn rust_type(self) -> &'static str {
+        match self {
+            Self::Bool => "bool",
+            Self::Float => "f32",
+            Self::Double => "f64",
+            Self::Char => "i8",
+            Self::UChar => "u8",
+            Self::Short => "i16",
+            Self::UShort => "u16",
+            Self::Int => "i32",
+            Self::UInt => "u32",
+            Self::Long => "i64",
+            Self::ULong => "u64",
+            Self::Vec3V => "glam::Vec3A",
+            Self::Vec4V => "glam::Vec4",
+            Self::BoolV => "glam::BVec4A",
+            Self::U32V => "glam::UVec4",
+            Self::I32V => "glam::IVec4",
+            Self::Mat33V => "glam::Mat3A",
+            Self::Mat34V => "glam::Affine3A",
+            Self::Mat44V => "glam::Mat4",
+        }
+    }
+}
+
 enum QualType<'ast> {
     Pointer {
-        is_pointee_const: bool,
+        is_const: bool,
         pointee: Box<QualType<'ast>>,
     },
     Reference {
-        is_pointee_const: bool,
+        is_const: bool,
         pointee: Box<QualType<'ast>>,
     },
     Builtin(Builtin),
@@ -493,8 +595,9 @@ enum QualType<'ast> {
     Enum {
         name: &'ast str,
         repr: EnumRepr,
-        /// If the enum is used for flags we need to represent it on the FFI
-        /// boundary as the scalar type
-        is_flags: bool,
+    },
+    Flags {
+        name: &'ast str,
+        repr: Builtin,
     },
 }
