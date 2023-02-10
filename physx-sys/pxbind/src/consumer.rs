@@ -7,7 +7,7 @@ use anyhow::Context as _;
 pub use record::{Access, Constructor, Method, RecBinding, Record, Tag};
 mod enums;
 use clang_ast::Id;
-use enums::{EnumBinding, EnumRepr, FlagsBinding};
+pub use enums::{EnumBinding, EnumRepr, FlagsBinding};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -52,7 +52,7 @@ pub enum Item {
     /// Declarations for classes and structs
     CXXRecordDecl(Record),
     FieldDecl {
-        name: String,
+        name: Option<String>,
         #[serde(rename = "type")]
         kind: Type,
     },
@@ -432,14 +432,21 @@ impl<'ast> AstConsumer<'ast> {
             "int64_t" | "long" | "physx::PxI64" => Builtin::Long,
             "uint64_t" | "unsigned long" | "physx::PxU64" => Builtin::ULong,
             // See PxVecMath.h for the vector types
-            "physx::Vec3V" => Builtin::Vec3V,
-            "physx::Vec4V" => Builtin::Vec4V,
-            "physx::BoolV" => Builtin::BoolV,
-            "physx::VecU32V" => Builtin::U32V,
-            "physx::VecI32V" => Builtin::I32V,
-            "physx::Mat33V" => Builtin::Mat33V,
-            "physx::Mat34V" => Builtin::Mat34V,
-            "physx::Mat44V" => Builtin::Mat44V,
+            math if math.contains("aos::") => {
+                let mt = &math[math.rfind(':').unwrap() + 1..];
+
+                match mt {
+                    "Vec3V" => Builtin::Vec3V,
+                    "Vec4V" => Builtin::Vec4V,
+                    "BoolV" => Builtin::BoolV,
+                    "VecU32V" => Builtin::U32V,
+                    "VecI32V" => Builtin::I32V,
+                    "Mat33V" => Builtin::Mat33V,
+                    "Mat34V" => Builtin::Mat34V,
+                    "Mat44V" => Builtin::Mat44V,
+                    _ => return None,
+                }
+            }
             _ => return None,
         };
 
@@ -467,9 +474,15 @@ impl<'ast> From<&'ast str> for AstType<'ast> {
 
 impl<'ast> AstType<'ast> {
     fn as_str(&self) -> &'ast str {
-        match self {
+        let ty = match self {
             Self::Simple(s) => s,
-            Self::Qualified(kind) => &kind.qual_type,
+            Self::Qualified(kind) => kind.qual_type.as_str(),
+        };
+
+        if let Some(ty) = ty.strip_prefix("const ") {
+            ty
+        } else {
+            ty
         }
     }
 }
@@ -585,7 +598,8 @@ impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
                 write!(f, "{}", pointee.rust_type())
             }
             QualType::Reference { is_const, pointee } => {
-                unreachable!();
+                write!(f, "*{} ", if *is_const { "const" } else { "mut" })?;
+                write!(f, "{}", pointee.rust_type())
             }
             QualType::Builtin(bi) => f.write_str(bi.rust_type()),
             QualType::FunctionPointer => f.write_str("*mut std::ffi::c_void"),

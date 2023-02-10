@@ -494,6 +494,7 @@ pub struct RecBinding<'ast> {
     pub has_vtable: bool,
     pub ast: &'ast Record,
     pub fields: Vec<FieldBinding<'ast>>,
+    pub is_empty: bool,
 }
 
 pub struct FieldBinding<'ast> {
@@ -692,17 +693,20 @@ impl<'ast> super::AstConsumer<'ast> {
                     )
                 }
                 Item::FieldDecl { name, kind } => {
-                    let kind = self
-                        .parse_type(kind)
-                        .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
-                    let is_reference = matches!(kind, QualType::Reference { .. });
+                    // Skip anonymous fields, they aren't really accessible
+                    if let Some(name) = name.as_deref() {
+                        let kind = self
+                            .parse_type(kind)
+                            .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
+                        let is_reference = matches!(kind, QualType::Reference { .. });
 
-                    fields.push(FieldBinding {
-                        name,
-                        kind,
-                        is_public,
-                        is_reference,
-                    });
+                        fields.push(FieldBinding {
+                            name,
+                            kind,
+                            is_public,
+                            is_reference,
+                        });
+                    }
                     continue;
                 }
                 _ => continue,
@@ -718,7 +722,8 @@ impl<'ast> super::AstConsumer<'ast> {
         // If there are no fields, we need to add a dummy since C++ doesn't have
         // zero-sized types. This is fine in practice since these types are only
         // ever passed by pointer
-        if fields.is_empty() && !has_vtable {
+        let is_empty = fields.is_empty() && !has_vtable;
+        if is_empty {
             fields.push(FieldBinding {
                 name: "pxbind_dummy",
                 kind: QualType::Builtin(super::Builtin::Char),
@@ -732,6 +737,7 @@ impl<'ast> super::AstConsumer<'ast> {
             has_vtable,
             fields,
             ast: rec,
+            is_empty,
         };
 
         self.recs.push(record);

@@ -1,16 +1,22 @@
 struct RecordOutput {
     structgen: String,
-    //size_asserts: String,
-    //rust_decls: String,
+    size_asserts: String,
+    rust_decls: String,
 }
 
-fn gen_records(which: &str) -> anyhow::Result<RecordOutput> {
+fn gen_records(which: &str, to_emit: &'static [&str]) -> anyhow::Result<RecordOutput> {
     let ast = pxbind::get_parsed_ast(format!("tests/data/record/{which}"))?;
 
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;
 
-    let generator = pxbind::generator::Generator {};
+    let record_filter =
+        |rb: &pxbind::consumer::RecBinding<'_>| to_emit.iter().any(|te| *te == rb.name);
+
+    let generator = pxbind::generator::Generator {
+        record_filter: Box::new(record_filter),
+        ..Default::default()
+    };
 
     let structgen = {
         let mut sg = Vec::new();
@@ -18,18 +24,22 @@ fn gen_records(which: &str) -> anyhow::Result<RecordOutput> {
         String::from_utf8(sg)?
     };
 
-    // let mut sa = Vec::new();
-    // consumer.generate_size_asserts(&mut sa, 0)?;
-    // let size_asserts = String::from_utf8(sa)?;
+    let size_asserts = {
+        let mut sa = Vec::new();
+        generator.generate_size_asserts(&consumer, &mut sa)?;
+        String::from_utf8(sa)?
+    };
 
-    // let mut rp = Vec::new();
-    // consumer.generate_rust_pods(&mut rp, 0)?;
-    // let rust_decls = String::from_utf8(rp)?;
+    let rust_decls = {
+        let mut rd = Vec::new();
+        generator.generate_rust_records(&consumer, &mut rd)?;
+        String::from_utf8(rd)?
+    };
 
     Ok(RecordOutput {
         structgen,
-        //size_asserts,
-        //rust_decls,
+        size_asserts,
+        rust_decls,
     })
 }
 
@@ -37,9 +47,9 @@ fn gen_records(which: &str) -> anyhow::Result<RecordOutput> {
 /// actually publicly exposed
 #[test]
 fn ref_fields() {
-    let ro = gen_records("ref_fields.h").unwrap();
+    let ro = gen_records("ref_fields.h", &["SupportLocal"]).unwrap();
 
     insta::assert_snapshot!(ro.structgen);
-    //insta::assert_snapshot!(ro.size_asserts);
-    //insta::assert_snapshot!(ro.rust_decls);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
 }

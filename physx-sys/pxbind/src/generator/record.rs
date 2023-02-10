@@ -14,7 +14,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     fn should_calculate_layout(&self) -> bool {
         self.ast.definition_data.is_some()
             && !matches!(self.ast.tag_used, crate::consumer::Tag::Union)
-            && !self.fields.is_empty()
+            && !self.is_empty
     }
 
     pub(super) fn emit_structgen(&self, writer: &mut String, level: u32) {
@@ -83,5 +83,42 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
         }
 
         writesln!(w, "}};\\n\");");
+    }
+
+    pub fn emit_rust(&self, w: &mut String, level: u32) -> bool {
+        if self.should_calculate_layout() {
+            return false;
+        }
+
+        let indent = Indent(level);
+        let indent1 = Indent(level + 1);
+
+        writesln!(w, "{indent}#[derive(Clone, Copy)]");
+        writesln!(w, "{indent}#[repr(C)]");
+        writesln!(
+            w,
+            "{indent}pub {} {} {{",
+            if matches!(self.ast.tag_used, crate::consumer::Tag::Union) {
+                "union"
+            } else {
+                "struct"
+            },
+            self.name
+        );
+
+        if self.has_vtable {
+            writesln!(w, "{indent1}vtable_: *const std::ffi::c_void,");
+        }
+
+        for field in &self.fields {
+            if field.is_public {
+                writes!(w, "{indent1}pub ");
+            }
+
+            writesln!(w, "{}: {},", field.name, field.kind.rust_type());
+        }
+
+        writesln!(w, "{indent}}}");
+        true
     }
 }

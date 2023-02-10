@@ -1,28 +1,7 @@
 ---
 source: physx-sys/pxbind/tests/enums.rs
-expression: "gen_enums(\"flags.h\").unwrap()"
+expression: "gen_enums(\"flags.h\",\n        &[\"PxActorCacheFlag\", \"PxArticulationCacheFlag\",\n                    \"PxShapeFlag\"]).unwrap()"
 ---
-/// enum for empty constructor tag
-#[derive(Copy, Clone)]
-#[repr(i32)]
-pub enum PxEMPTY {
-    PxEmpty = 0,
-}
-
-/// enum for zero constructor tag for vectors and matrices
-#[derive(Copy, Clone)]
-#[repr(i32)]
-pub enum PxZERO {
-    PxZero = 0,
-}
-
-/// enum for identity constructor flag for quaternions, transforms, and matrices
-#[derive(Copy, Clone)]
-#[repr(i32)]
-pub enum PxIDENTITY {
-    PxIdentity = 0,
-}
-
 /// Identifies each type of information for retrieving from actor.
 #[derive(Copy, Clone)]
 #[repr(u32)]

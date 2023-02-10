@@ -1,6 +1,6 @@
 ---
 source: physx-sys/pxbind/tests/enums.rs
-expression: "gen_enums(\"u32.h\").unwrap()"
+expression: "gen_enums(\"u32.h\", &[]).unwrap()"
 ---
 #[derive(Copy, Clone)]
 #[repr(u32)]
