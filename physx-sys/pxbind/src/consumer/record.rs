@@ -489,6 +489,7 @@ impl Record {
     }
 }
 
+#[derive(Debug)]
 pub struct RecBinding<'ast> {
     pub name: &'ast str,
     pub has_vtable: bool,
@@ -497,6 +498,7 @@ pub struct RecBinding<'ast> {
     pub is_empty: bool,
 }
 
+#[derive(Debug)]
 pub struct FieldBinding<'ast> {
     pub name: &'ast str,
     pub kind: QualType<'ast>,
@@ -548,6 +550,7 @@ impl<'ast> super::AstConsumer<'ast> {
         &mut self,
         node: &'ast Node,
         rec: &'ast Record,
+        root: &'ast Node,
     ) -> anyhow::Result<()> {
         // Do a quick check of the inner nodes, if we have an enumdecl, but no fields
         // or methods, this is just a wrapper around an enum and we can just emit the enum
@@ -557,7 +560,8 @@ impl<'ast> super::AstConsumer<'ast> {
 
         for inn in &node.inner {
             match &inn.kind {
-                Item::FieldDecl { .. } | Item::CXXMethodDecl(..) => had_more = true,
+                Item::FieldDecl { .. } => had_more = true,
+                kind if kind.as_method().is_some() => had_more = true,
                 Item::EnumDecl(decl) => {
                     self.consume_enum(node, inn, decl)?;
                     had_enums = true;
@@ -572,11 +576,32 @@ impl<'ast> super::AstConsumer<'ast> {
 
         let Some(rname) = rec.name.as_deref() else { return Ok(()) };
 
-        // if rname == "__locale_struct" {
-        //     return Ok(());
-        // }
+        // Skip records we've already seen, this happens a lot as forward declarations
+        // and record definitions have the same kind
+        if self.classes.contains_key(rname) {
+            return Ok(());
+        }
 
-        self.classes.insert(rname, (node, rec));
+        // If we don't have definition data, that means this is a forward declaration,
+        // so we want to find the actual definition since that has information we need
+        let has_vtable = if rec.definition_data.is_none() {
+            if let Some(definition) = super::search(root, &|node: &Node| {
+                if let Item::CXXRecordDecl(rec) = &node.kind {
+                    rec.name.as_deref().filter(|rn| *rn == rname).map(|_| rec)
+                } else {
+                    None
+                }
+            }) {
+                self.classes.insert(rname, definition);
+                definition.1.is_polymorphic()
+            } else {
+                self.classes.insert(rname, (node, rec));
+                rec.is_polymorphic()
+            }
+        } else {
+            self.classes.insert(rname, (node, rec));
+            rec.is_polymorphic()
+        };
 
         let mut is_public = !matches!(rec.tag_used, Tag::Class);
 
@@ -716,8 +741,6 @@ impl<'ast> super::AstConsumer<'ast> {
                 func.params.push(Param::self_pod(rname, method.is_const()));
             }
         }
-
-        let has_vtable = rec.is_polymorphic();
 
         // If there are no fields, we need to add a dummy since C++ doesn't have
         // zero-sized types. This is fine in practice since these types are only

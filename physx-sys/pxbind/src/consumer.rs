@@ -149,6 +149,23 @@ impl<'ast> Block<'ast> {
     }
 }
 
+pub fn search<'ast, T>(
+    node: &'ast Node,
+    f: &impl Fn(&'ast Node) -> Option<&'ast T>,
+) -> Option<(&'ast Node, &'ast T)> {
+    if let Some(t) = f(node) {
+        return Some((node, t));
+    }
+
+    for inn in &node.inner {
+        if let Some(t) = search(inn, f) {
+            return Some(t);
+        }
+    }
+
+    None
+}
+
 pub struct Comment<'ast> {
     /// This is the top line, we attempt to retrieve this if the comment is a
     /// doxygen `/brief` section
@@ -175,10 +192,15 @@ pub struct AstConsumer<'ast> {
 
 impl<'ast> AstConsumer<'ast> {
     pub fn consume(&mut self, root: &'ast Node) -> anyhow::Result<()> {
-        self.traverse(root, false)
+        self.traverse(root, root, false)
     }
 
-    fn traverse(&mut self, node: &'ast Node, in_physx: bool) -> anyhow::Result<()> {
+    fn traverse(
+        &mut self,
+        node: &'ast Node,
+        root: &'ast Node,
+        in_physx: bool,
+    ) -> anyhow::Result<()> {
         if self.is_ignored(node) {
             println!("skipping node");
             return Ok(());
@@ -188,7 +210,7 @@ impl<'ast> AstConsumer<'ast> {
             match &inn.kind {
                 Item::NamespaceDecl { name } => {
                     if in_physx || name.as_deref() == Some("physx") {
-                        self.traverse(inn, true)?;
+                        self.traverse(inn, root, true)?;
                     }
                 }
                 Item::EnumDecl(decl) => {
@@ -205,14 +227,14 @@ impl<'ast> AstConsumer<'ast> {
                         continue;
                     }
 
-                    self.consume_record(inn, rec)
+                    self.consume_record(inn, rec, root)
                         .with_context(|| format!("failed to consume {rec:?}"))?;
                 }
                 Item::TypedefDecl(td) => {
                     self.consume_typedef(inn, td)?;
                 }
                 _ => {
-                    self.traverse(inn, in_physx)?;
+                    self.traverse(inn, root, in_physx)?;
                 }
             }
         }
@@ -487,7 +509,7 @@ impl<'ast> AstType<'ast> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Builtin {
     Bool,
     Float,
@@ -560,6 +582,7 @@ impl Builtin {
     }
 }
 
+#[derive(Debug)]
 pub enum QualType<'ast> {
     Pointer {
         is_const: bool,

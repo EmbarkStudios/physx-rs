@@ -10,8 +10,9 @@ fn gen_records(which: &str, to_emit: &'static [&str]) -> anyhow::Result<RecordOu
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;
 
-    let record_filter =
-        |rb: &pxbind::consumer::RecBinding<'_>| to_emit.iter().any(|te| *te == rb.name);
+    let record_filter = |rb: &pxbind::consumer::RecBinding<'_>| {
+        to_emit.is_empty() || to_emit.iter().any(|te| *te == rb.name)
+    };
 
     let generator = pxbind::generator::Generator {
         record_filter: Box::new(record_filter),
@@ -43,11 +44,32 @@ fn gen_records(which: &str, to_emit: &'static [&str]) -> anyhow::Result<RecordOu
     })
 }
 
+/// Verifies that abstract base classes with no fields are properly bound
+#[test]
+fn abstract_() {
+    let ro = gen_records("abstract.h", &[]).unwrap();
+
+    insta::assert_snapshot!(ro.structgen);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
+}
+
 /// Verifies that reference fields are reflected in the size and layout, but aren't
 /// actually publicly exposed
 #[test]
 fn ref_fields() {
     let ro = gen_records("ref_fields.h", &["SupportLocal"]).unwrap();
+
+    insta::assert_snapshot!(ro.structgen);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
+}
+
+/// Ensures we can generate PODs that wrap types that are only exposed publicly
+/// via pointer
+#[test]
+fn ptr_only() {
+    let ro = gen_records("ptr_only.h", &[]).unwrap();
 
     insta::assert_snapshot!(ro.structgen);
     insta::assert_snapshot!(ro.size_asserts);

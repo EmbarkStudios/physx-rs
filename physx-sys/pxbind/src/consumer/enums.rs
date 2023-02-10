@@ -2,7 +2,7 @@ use super::{Comment, EnumDecl, Item, Node, Typedef};
 use anyhow::Context as _;
 use std::fmt::{self};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum EnumRepr {
     I32,
     U32,

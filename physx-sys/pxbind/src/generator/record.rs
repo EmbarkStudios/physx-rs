@@ -86,7 +86,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     }
 
     pub fn emit_rust(&self, w: &mut String, level: u32) -> bool {
-        if self.should_calculate_layout() {
+        if dbg!(self.should_calculate_layout()) {
             return false;
         }
 
