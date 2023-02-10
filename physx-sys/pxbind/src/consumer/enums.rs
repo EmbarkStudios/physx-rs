@@ -1,10 +1,9 @@
-use super::{Comment, EnumDecl, Indent, Item, Node, Typedef};
-use crate::writes;
+use super::{Comment, EnumDecl, Item, Node, Typedef};
 use anyhow::Context as _;
-use std::fmt::{self, Write};
+use std::fmt::{self};
 
 #[derive(Copy, Clone)]
-pub(super) enum EnumRepr {
+pub enum EnumRepr {
     I32,
     U32,
 }
@@ -29,36 +28,36 @@ impl std::str::FromStr for EnumRepr {
     }
 }
 
-struct EnumVariant<'ast> {
+pub struct EnumVariant<'ast> {
     /// The name of the variant
-    name: &'ast str,
+    pub name: &'ast str,
     /// The constant value of the variant
-    value: i64,
+    pub value: i64,
     /// Text comment on the enum constant
-    comment: Option<Comment<'ast>>,
+    pub comment: Option<Comment<'ast>>,
 }
 
-pub(super) struct EnumBinding<'ast> {
+pub struct EnumBinding<'ast> {
     /// The repr() applied to the the Rust enum to get it the correct size
-    repr: EnumRepr,
+    pub repr: EnumRepr,
     /// The "friendly" name of the enum, eg `PxErrorCode`
-    name: &'ast str,
+    pub name: &'ast str,
     /// The qualified type of the enum, minus the physx:: namespace since all
     /// the c/cpp code we compile is done within that namespace, eg. PxErrorCode::Enum
-    pub(super) cxx_qt: &'ast str,
+    pub cxx_qt: &'ast str,
     /// Text comment on the enum (or more usually, the wrapping struct)
-    comment: Option<Comment<'ast>>,
+    pub comment: Option<Comment<'ast>>,
     /// The list of constants
-    variants: Vec<EnumVariant<'ast>>,
+    pub variants: Vec<EnumVariant<'ast>>,
 }
 
-pub(super) struct FlagsBinding<'ast> {
+pub struct FlagsBinding<'ast> {
     /// The name of the typedef used in the public API
-    name: &'ast str,
+    pub name: &'ast str,
     /// The index in the AstConsumer of the enum binding
-    enums_index: usize,
+    pub enums_index: usize,
     /// The storage type used by the flags
-    storage_type: super::Builtin,
+    pub storage_type: super::Builtin,
 }
 
 impl<'ast> super::AstConsumer<'ast> {
@@ -87,13 +86,18 @@ impl<'ast> super::AstConsumer<'ast> {
                 rname
             } else {
                 println!(
-                    "skipping enum {} with anonymous wrapper struct",
+                    "skipping enum {:?} with anonymous wrapper struct",
                     enum_decl.name
                 );
                 return Ok(());
             }
         } else {
-            &enum_decl.name
+            if let Some(ename) = enum_decl.name.as_deref() {
+                ename
+            } else {
+                println!("skipping anonymous enum");
+                return Ok(());
+            }
         };
 
         let mut repr = EnumRepr::I32;
@@ -233,114 +237,5 @@ impl<'ast> super::AstConsumer<'ast> {
         });
 
         Ok(())
-    }
-
-    pub fn generate_rust_enums(
-        &self,
-        writer: &mut impl std::io::Write,
-        level: u32,
-    ) -> anyhow::Result<u32> {
-        let indent = Indent(level);
-        let indent2 = Indent(level + 1);
-        let indent3 = Indent(level + 2);
-        let enum_derive = "#[derive(Copy, Clone)]";
-        let flags_derive = "#[derive(Copy, Clone, Default)]";
-
-        let mut fiter = self.flags.iter().peekable();
-        let mut acc = String::new();
-
-        for (i, enum_binding) in self.enums.iter().enumerate() {
-            acc.clear();
-
-            if i > 0 {
-                writesln!(acc);
-            }
-
-            if let Some(com) = &enum_binding.comment {
-                com.emit_rust(&mut acc, level);
-            }
-
-            let is_flags_enum = fiter.peek().map_or(false, |f| f.enums_index == i);
-
-            writesln!(acc, "{indent}{enum_derive}");
-            writesln!(acc, "{indent}#[repr({})]", enum_binding.repr);
-            writesln!(acc, "{indent}pub enum {} {{", enum_binding.name);
-
-            for var in &enum_binding.variants {
-                if let Some(com) = &var.comment {
-                    com.emit_rust(&mut acc, level + 1);
-                }
-
-                writesln!(acc, "{indent2}{} = {},", var.name, var.value);
-            }
-
-            writesln!(acc, "{indent}}}");
-
-            if is_flags_enum {
-                let flags = fiter.next().unwrap();
-
-                writesln!(acc);
-                writesln!(acc, "{indent}bitflags::bitflags! {{");
-                writesln!(acc, "{indent2}/// Flags for [`{}`]", enum_binding.name);
-                writesln!(acc, "{indent2}{flags_derive}");
-                writesln!(acc, "{indent2}#[repr(transparent)]");
-                writesln!(
-                    acc,
-                    "{indent2}pub struct {}: {} {{",
-                    flags.name,
-                    flags.storage_type.rust_type()
-                );
-
-                for var in &enum_binding.variants {
-                    // If used as flags, ignore emitting any zero value, see
-                    // https://docs.rs/bitflags/1.3.2/bitflags/#zero-flags
-                    if var.value == 0 {
-                        continue;
-                    }
-
-                    // if let Some(com) = &var.comment {
-                    //     com.emit_rust(writer, level + 2)?;
-                    // }
-
-                    writes!(acc, "{indent3}const {} = ", var.name);
-
-                    // Since bitflags are made up of power of 2 values that can
-                    // be combined, and the PhysX API sometimes defines named
-                    // combinations of flags, reconstruct the bitflags to be
-                    // easier to read
-                    let val = var.value as u64;
-                    if val & (val - 1) == 0 {
-                        writes!(acc, "1 << {}", val.ilog2());
-                    } else {
-                        // If we're not a power of 2, we're a combination of flags,
-                        // find which ones and emit them in a friendly way
-                        for (i, which) in enum_binding
-                            .variants
-                            .iter()
-                            .filter_map(|var| {
-                                let prev = var.value as u64;
-                                (prev & (prev - 1) == 0 && (prev & val) != 0).then_some(var.name)
-                            })
-                            .enumerate()
-                        {
-                            if i > 0 {
-                                writes!(acc, " | ");
-                            }
-
-                            writes!(acc, "Self::{which}.bits");
-                        }
-                    }
-
-                    writesln!(acc, ";");
-                }
-
-                writesln!(acc, "{indent2}}}");
-                writesln!(acc, "{indent}}}");
-            }
-
-            write!(writer, "{acc}")?;
-        }
-
-        Ok((self.enums.len() + self.flags.len()) as u32)
     }
 }

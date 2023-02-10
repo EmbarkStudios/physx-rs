@@ -1,5 +1,6 @@
 pub mod consumer;
 mod dump;
+pub mod generator;
 
 pub use dump::{get_ast, get_parsed_ast};
 

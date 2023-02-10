@@ -4,10 +4,14 @@ fn gen_enums(which: &str) -> anyhow::Result<String> {
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;
 
-    let mut buffer = Vec::new();
-    consumer.generate_rust_enums(&mut buffer, 0)?;
+    let generated = {
+        let generator = pxbind::generator::Generator {};
+        let mut buffer = Vec::new();
+        generator.generate_rust_enums(&consumer, &mut buffer, 0)?;
+        String::from_utf8(buffer)?
+    };
 
-    Ok(String::from_utf8(buffer)?)
+    Ok(generated)
 }
 
 /// Verifies we can generate appropriate Rust enums for vanilla, i32 default C++ enums

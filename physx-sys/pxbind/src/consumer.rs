@@ -1,52 +1,13 @@
 use crate::Node;
 
 use serde::Deserialize;
-use std::fmt::{self, Write};
-
-#[macro_export]
-macro_rules! writes {
-    ($s:expr, $f:expr $(,)?) => {{
-        write!($s, $f).unwrap();
-    }};
-    ($s:expr, $f:expr, $($arg:tt)*) => {{
-        write!($s, $f, $($arg)*).unwrap();
-    }};
-}
-
-#[macro_export]
-macro_rules! writesln {
-    ($s:expr) => {{
-        writeln!($s).unwrap();
-    }};
-    ($s:expr, $f:expr $(,)?) => {{
-        writeln!($s, $f).unwrap();
-    }};
-    ($s:expr, $f:expr, $($arg:tt)*) => {{
-        writeln!($s, $f, $($arg)*).unwrap();
-    }};
-}
 
 mod record;
 use anyhow::Context as _;
-use record::RecBinding;
-pub use record::{Access, Constructor, Method, Record};
+pub use record::{Access, Constructor, Method, RecBinding, Record, Tag};
 mod enums;
 use clang_ast::Id;
 use enums::{EnumBinding, EnumRepr, FlagsBinding};
-
-/// It's impossible (I believe) with Rust's format strings to have the width
-/// of the alignment be dynamic, so we just uhhh...be lame
-struct Indent(u32);
-
-impl fmt::Display for Indent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for _ in 0..self.0 {
-            f.write_str("    ")?;
-        }
-
-        Ok(())
-    }
-}
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -58,7 +19,7 @@ pub struct Type {
 
 #[derive(Deserialize, Debug)]
 pub struct EnumDecl {
-    name: String,
+    name: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -86,7 +47,7 @@ pub struct Typedef {
 #[derive(Deserialize, Debug)]
 pub enum Item {
     NamespaceDecl {
-        name: String,
+        name: Option<String>,
     },
     /// Declarations for classes and structs
     CXXRecordDecl(Record),
@@ -132,7 +93,7 @@ pub enum Item {
     DeprecatedAttr,
     /// We don't care about other items
     Other {
-        kind: clang_ast::Kind,
+        kind: Option<clang_ast::Kind>,
         name: Option<String>,
     },
 }
@@ -152,7 +113,7 @@ impl Item {
 }
 
 #[derive(Default)]
-struct Block<'ast> {
+pub struct Block<'ast> {
     b: Vec<&'ast str>,
 }
 
@@ -178,77 +139,38 @@ impl<'ast> Block<'ast> {
     }
 
     #[inline]
-    fn as_slice(&self) -> &[&'ast str] {
+    pub fn as_slice(&self) -> &[&'ast str] {
         self.b.as_slice()
     }
 
     #[inline]
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.b.is_empty()
     }
 }
 
-struct Comment<'ast> {
+pub struct Comment<'ast> {
     /// This is the top line, we attempt to retrieve this if the comment is a
     /// doxygen `/brief` section
-    summary: Block<'ast>,
+    pub summary: Block<'ast>,
     /// Additional information outside of the brief section, note that the content
     /// in this paragraph will be massaged so that doxygen style # references
     /// will be transformed into appropriate rustdoc intralinks
-    additional: Block<'ast>,
-}
-
-impl<'ast> Comment<'ast> {
-    fn emit_rust(&self, writer: &mut String, level: u32) {
-        let indent = Indent(level);
-
-        let emit_lines = |w: &mut String, lines: &[&str]| {
-            for line in lines {
-                if line.is_empty() {
-                    writesln!(w, "{indent}///");
-                // PhysX _tends_ to use `#type::field/variant` style intralinks
-                // so attempt to convert them to proper rustdoc style intralinks
-                } else if let Some(ind) = line.find('#') {
-                    writes!(w, "{indent}/// {}", &line[..ind]);
-                    writes!(w, "[`");
-                    match line[ind + 1..]
-                        .find(|c: char| !c.is_alphanumeric() && c != ':' && c != '_')
-                    {
-                        Some(end) => {
-                            writes!(w, "{}`]", &line[ind + 1..ind + end + 1]);
-                            writesln!(w, "{}", &line[ind + end + 1..]);
-                        }
-                        None => {
-                            writesln!(w, "{}`]", &line[ind + 1..]);
-                        }
-                    };
-                } else {
-                    writesln!(w, "{indent}/// {line}");
-                }
-            }
-        };
-
-        emit_lines(writer, self.summary.as_slice());
-
-        if !self.additional.is_empty() {
-            writesln!(writer, "{indent}///");
-            emit_lines(writer, self.additional.as_slice());
-        }
-    }
+    pub additional: Block<'ast>,
 }
 
 use std::collections::HashMap;
 
 #[derive(Default)]
 pub struct AstConsumer<'ast> {
-    enums: Vec<EnumBinding<'ast>>,
-    flags: Vec<FlagsBinding<'ast>>,
-    enum_map: HashMap<&'ast str, EnumRepr>,
-    recs: Vec<RecBinding<'ast>>,
+    pub enums: Vec<EnumBinding<'ast>>,
+    pub flags: Vec<FlagsBinding<'ast>>,
+    pub enum_map: HashMap<&'ast str, EnumRepr>,
+    pub recs: Vec<RecBinding<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
     /// for `release` methods, or whether something is a record at all
-    classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
-    back_refs: HashMap<Id, &'ast Node>,
+    pub classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
+    pub back_refs: HashMap<Id, &'ast Node>,
 }
 
 impl<'ast> AstConsumer<'ast> {
@@ -265,7 +187,7 @@ impl<'ast> AstConsumer<'ast> {
         for inn in &node.inner {
             match &inn.kind {
                 Item::NamespaceDecl { name } => {
-                    if in_physx || name == "physx" {
+                    if in_physx || name.as_deref() == Some("physx") {
                         self.traverse(inn, true)?;
                     }
                 }
@@ -279,12 +201,12 @@ impl<'ast> AstConsumer<'ast> {
                         continue;
                     }
 
-                    if let Some(record) = self
-                        .consume_record(inn, rec)
-                        .with_context(|| format!("failed to consume {rec:?}"))?
-                    {
-                        self.recs.push(record);
+                    if !in_physx {
+                        continue;
                     }
+
+                    self.consume_record(inn, rec)
+                        .with_context(|| format!("failed to consume {rec:?}"))?;
                 }
                 Item::TypedefDecl(td) => {
                     self.consume_typedef(inn, td)?;
@@ -327,7 +249,7 @@ impl<'ast> AstConsumer<'ast> {
             matches!(
                 inner.kind,
                 Item::Other {
-                    kind: clang_ast::Kind::FullComment,
+                    kind: Some(clang_ast::Kind::FullComment),
                     name: _,
                 }
             )
@@ -414,10 +336,11 @@ impl<'ast> AstConsumer<'ast> {
         // First check if the type has an alias, most likely a typedef
         if let AstType::Qualified(kind) = &kind {
             if let Some(alias_id) = kind.type_alias_decl_id {
-                let node = self
-                    .back_refs
-                    .get(&alias_id)
-                    .context("failed to located type alias")?;
+                // let node = self
+                //     .back_refs
+                //     .get(&alias_id)
+
+                //     .context("failed to locate type alias")?;
             }
         }
 
@@ -486,7 +409,11 @@ impl<'ast> AstConsumer<'ast> {
             return Ok(QualType::Enum { name, repr: *repr });
         }
 
-        anyhow::bail!("oops {kind:?}")
+        Ok(QualType::Enum {
+            name: "OHNO",
+            repr: EnumRepr::U32,
+        })
+        //anyhow::bail!("oops {kind:?}")
     }
 
     fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
@@ -548,7 +475,7 @@ impl<'ast> AstType<'ast> {
 }
 
 #[derive(Copy, Clone)]
-enum Builtin {
+pub enum Builtin {
     Bool,
     Float,
     Double,
@@ -571,7 +498,7 @@ enum Builtin {
 }
 
 impl Builtin {
-    fn rust_type(self) -> &'static str {
+    pub fn rust_type(self) -> &'static str {
         match self {
             Self::Bool => "bool",
             Self::Float => "f32",
@@ -594,9 +521,33 @@ impl Builtin {
             Self::Mat44V => "glam::Mat4",
         }
     }
+
+    fn c_type(self) -> &'static str {
+        match self {
+            Self::Bool => "bool",
+            Self::Float => "float",
+            Self::Double => "double",
+            Self::Char => "int8_t",
+            Self::UChar => "uint8_t",
+            Self::Short => "int16_t",
+            Self::UShort => "uint16_t",
+            Self::Int => "int32_t",
+            Self::UInt => "uint32_t",
+            Self::Long => "int64_t",
+            Self::ULong => "uint64_t",
+            Self::Vec3V => "Vec3V",
+            Self::Vec4V => "Vec4V",
+            Self::BoolV => "BoolV",
+            Self::U32V => "VecU32V",
+            Self::I32V => "VecI32V",
+            Self::Mat33V => "Mat33V",
+            Self::Mat34V => "Mat34V",
+            Self::Mat44V => "Mat44V",
+        }
+    }
 }
 
-enum QualType<'ast> {
+pub enum QualType<'ast> {
     Pointer {
         is_const: bool,
         pointee: Box<QualType<'ast>>,
@@ -619,4 +570,66 @@ enum QualType<'ast> {
         name: &'ast str,
         repr: Builtin,
     },
+}
+
+use std::fmt;
+
+#[derive(Copy, Clone)]
+pub struct RustType<'qt, 'ast>(&'qt QualType<'ast>);
+
+impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            QualType::Pointer { is_const, pointee } => {
+                write!(f, "*{} ", if *is_const { "const" } else { "mut" })?;
+                write!(f, "{}", pointee.rust_type())
+            }
+            QualType::Reference { is_const, pointee } => {
+                unreachable!();
+            }
+            QualType::Builtin(bi) => f.write_str(bi.rust_type()),
+            QualType::FunctionPointer => f.write_str("*mut std::ffi::c_void"),
+            QualType::Array { element, len } => {
+                write!(f, "[{}; {len}]", element.rust_type())
+            }
+            QualType::Enum { name, .. } => f.write_str(name),
+            QualType::Flags { name, .. } => f.write_str(name),
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct CppType<'qt, 'ast>(&'qt QualType<'ast>);
+
+impl<'qt, 'ast> fmt::Display for CppType<'qt, 'ast> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            QualType::Pointer { is_const, pointee } => {
+                write!(f, "{}", pointee.cpp_type())?;
+                write!(f, " {}*", if *is_const { "const" } else { "" })
+            }
+            QualType::Reference { is_const, pointee } => {
+                unreachable!();
+            }
+            QualType::Builtin(bi) => f.write_str(bi.c_type()),
+            QualType::FunctionPointer => f.write_str("void *"),
+            QualType::Array { element, len } => {
+                write!(f, "{}[{len}]", element.cpp_type())
+            }
+            QualType::Enum { name, .. } => f.write_str(name),
+            QualType::Flags { name, .. } => f.write_str(name),
+        }
+    }
+}
+
+impl<'ast> QualType<'ast> {
+    #[inline]
+    pub fn rust_type(&self) -> RustType<'_, 'ast> {
+        RustType(self)
+    }
+
+    #[inline]
+    pub fn cpp_type(&self) -> CppType<'_, 'ast> {
+        CppType(self)
+    }
 }

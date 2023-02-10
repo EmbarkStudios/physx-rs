@@ -1,8 +1,7 @@
-use super::{Comment, Indent, Item, Type};
+use super::{Comment, Item, QualType, Type};
 use crate::{writes, Node};
 use anyhow::Context as _;
 use serde::Deserialize;
-use std::fmt::Write;
 
 enum TypeBinding<'ast> {
     SelfPod { typename: &'ast str, is_const: bool },
@@ -172,47 +171,6 @@ enum FuncBindingExt<'ast> {
     HasSelf(PhysxInvoke<'ast>),
 }
 
-// physx_PxVec3_Pod PxBounds3_getDimensions_1(physx_PxBounds3_Pod const* self__pod) {
-//     physx::PxBounds3 const* self_ = reinterpret_cast<physx::PxBounds3 const*>(self__pod);
-//     physx::PxVec3 returnValue = self_->getDimensions();
-//     physx_PxVec3_Pod returnValue_pod;
-//     memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//     return returnValue_pod;
-//     }
-
-//     physx_PxVec3_Pod PxBounds3_getExtents_3(physx_PxBounds3_Pod const* self__pod) {
-//     physx::PxBounds3 const* self_ = reinterpret_cast<physx::PxBounds3 const*>(self__pod);
-//     physx::PxVec3 returnValue = self_->getExtents();
-//     physx_PxVec3_Pod returnValue_pod;
-//     memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//     return returnValue_pod;
-//     }
-
-//     void PxBounds3_scaleSafe_mut_1(physx_PxBounds3_Pod* self__pod, float scale) {
-//     physx::PxBounds3* self_ = reinterpret_cast<physx::PxBounds3*>(self__pod);
-//     self_->scaleSafe(scale);
-//     }
-
-//     void PxInputStream_delete(physx_PxInputStream_Pod* self__pod) {
-//         physx::PxInputStream* self_ = reinterpret_cast<physx::PxInputStream*>(self__pod);
-//         delete self_;
-//         }
-
-//         physx_PxVec4_Pod PxVec4_new() {
-//             physx::PxVec4 returnValue;
-//             physx_PxVec4_Pod returnValue_pod;
-//             memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//             return returnValue_pod;
-//             }
-
-//             physx_PxVec4_Pod PxVec4_new_1(unsigned int r_pod) {
-//             physx::PxZERO r = (physx::PxZERO)r_pod;
-//             physx::PxVec4 returnValue(r);
-//             physx_PxVec4_Pod returnValue_pod;
-//             memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//             return returnValue_pod;
-//             }
-
 struct FuncBinding<'ast> {
     name: String,
     comment: Option<Comment<'ast>>,
@@ -282,109 +240,109 @@ struct FuncBinding<'ast> {
 //     }
 // }
 
-impl<'ast> FuncBinding<'ast> {
-    fn emit_cpp<W: std::io::Write>(&self, writer: &mut W, level: u32) -> anyhow::Result<()> {
-        let mut acc = String::new();
+// impl<'ast> FuncBinding<'ast> {
+//     fn emit_cpp<W: std::io::Write>(&self, writer: &mut W, level: u32) -> anyhow::Result<()> {
+//         let mut acc = String::new();
 
-        // Emit the function signature
-        {
-            let indent = Indent(level);
+//         // Emit the function signature
+//         {
+//             let indent = Indent(level);
 
-            writes!(acc, "{indent}");
+//             writes!(acc, "{indent}");
 
-            if let Some(ret) = &self.ret {
-                ret.write_c_type(&mut acc);
-            } else {
-                acc.push_str("void")
-            }
+//             if let Some(ret) = &self.ret {
+//                 ret.write_c_type(&mut acc);
+//             } else {
+//                 acc.push_str("void")
+//             }
 
-            writes!(acc, " {}(", self.name);
+//             writes!(acc, " {}(", self.name);
 
-            for (i, param) in self.params.iter().enumerate() {
-                // No trailing commas :(
-                let sep = if i > 0 { ", " } else { "" };
+//             for (i, param) in self.params.iter().enumerate() {
+//                 // No trailing commas :(
+//                 let sep = if i > 0 { ", " } else { "" };
 
-                writes!(acc, "{sep}");
-                param.kind.write_c_type(&mut acc);
-                writes!(acc, " {}", param.c_name);
-            }
+//                 writes!(acc, "{sep}");
+//                 param.kind.write_c_type(&mut acc);
+//                 writes!(acc, " {}", param.c_name);
+//             }
 
-            writeln!(writer, "{acc}) {{")?;
-            acc.clear();
-        }
+//             writeln!(writer, "{acc}) {{")?;
+//             acc.clear();
+//         }
 
-        let indent = Indent(level + 1);
+//         let indent = Indent(level + 1);
 
-        // Emit the code that converts each argument to an appropriately typed/named
-        // c++ variable
-        if self.params.is_empty() {
-            for param in &self.params {
-                writes!(acc, "{indent}");
-                param.write_c_to_cpp(&mut acc);
-            }
+//         // Emit the code that converts each argument to an appropriately typed/named
+//         // c++ variable
+//         if self.params.is_empty() {
+//             for param in &self.params {
+//                 writes!(acc, "{indent}");
+//                 param.write_c_to_cpp(&mut acc);
+//             }
 
-            writeln!(writer, "{acc}")?;
-            acc.clear();
-        }
+//             writeln!(writer, "{acc}")?;
+//             acc.clear();
+//         }
 
-        let (invoke, arg_skip) = match &self.ext {
-            FuncBindingExt::IsDelete => {
-                writeln!(writer, "{indent}delete self_;\n}}")?;
-                return Ok(());
-            }
-            FuncBindingExt::None(inv) => (inv, 0),
-            FuncBindingExt::HasSelf(inv) => (inv, 1),
-        };
+//         let (invoke, arg_skip) = match &self.ext {
+//             FuncBindingExt::IsDelete => {
+//                 writeln!(writer, "{indent}delete self_;\n}}")?;
+//                 return Ok(());
+//             }
+//             FuncBindingExt::None(inv) => (inv, 0),
+//             FuncBindingExt::HasSelf(inv) => (inv, 1),
+//         };
 
-        // Emit the code that actually calls into physx
-        let args = self
-            .params
-            .iter()
-            .skip(arg_skip)
-            .map(|param| param.cpp_name);
+//         // Emit the code that actually calls into physx
+//         let args = self
+//             .params
+//             .iter()
+//             .skip(arg_skip)
+//             .map(|param| param.cpp_name);
 
-        invoke.emit(args, &mut acc);
+//         invoke.emit(args, &mut acc);
 
-        if let Some(rt) = &self.ret {
-            unreachable!()
-            //     rt.
-            // result += returnValue.getCpp2CCode();
+//         if let Some(rt) = &self.ret {
+//             unreachable!()
+//             //     rt.
+//             // result += returnValue.getCpp2CCode();
 
-            //     if (this->returnType.getCType() != "void") {
-            //         result += fmt::format("return {};\n", returnValue.cName());
-            //     }
-        }
+//             //     if (this->returnType.getCType() != "void") {
+//             //         result += fmt::format("return {};\n", returnValue.cName());
+//             //     }
+//         }
 
-        Ok(())
-    }
+//         Ok(())
+//     }
 
-    fn emit_rust(&self, writer: &mut String, level: u32) {
-        if let Some(com) = &self.comment {
-            com.emit_rust(writer, level);
-        }
+//     fn emit_rust(&self, writer: &mut String, level: u32) {
+//         if let Some(com) = &self.comment {
+//             com.emit_rust(writer, level);
+//         }
 
-        let indent = Indent(level);
+//         let indent = Indent(level);
 
-        let mut acc = String::new();
-        writes!(acc, "{indent}pub fn {}(", self.name);
+//         let mut acc = String::new();
+//         writes!(acc, "{indent}pub fn {}(", self.name);
 
-        for param in &self.params {
-            writes!(acc, "{}: ", param.c_name);
-            param.kind.write_rust_type(&mut acc);
-            writes!(acc, ", ");
-        }
+//         for param in &self.params {
+//             writes!(acc, "{}: ", param.c_name);
+//             param.kind.write_rust_type(&mut acc);
+//             writes!(acc, ", ");
+//         }
 
-        if let Some(ret) = &self.ret {
-            writes!(acc, ") -> ");
-            ret.write_rust_type(&mut acc);
-            writes!(acc, ";");
-        } else {
-            writes!(acc, ");");
-        }
+//         if let Some(ret) = &self.ret {
+//             writes!(acc, ") -> ");
+//             ret.write_rust_type(&mut acc);
+//             writes!(acc, ";");
+//         } else {
+//             writes!(acc, ");");
+//         }
 
-        writesln!(writer, "{acc}");
-    }
-}
+//         writesln!(writer, "{acc}");
+//     }
+// }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -452,10 +410,13 @@ impl Constructor {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct Dtor {
+    #[serde(default)]
     irrelevant: bool,
     #[serde(default)]
     needs_implicit: bool,
+    #[serde(default)]
     simple: bool,
+    #[serde(default)]
     trivial: bool,
 }
 
@@ -473,7 +434,7 @@ pub struct DefinitionData {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct Base {
+pub struct Base {
     access: String,
     #[serde(rename = "type")]
     kind: Type,
@@ -482,7 +443,7 @@ struct Base {
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-enum Tag {
+pub enum Tag {
     Struct,
     Class,
     Union,
@@ -492,10 +453,10 @@ enum Tag {
 #[serde(rename_all = "camelCase")]
 pub struct Record {
     pub name: Option<String>,
-    tag_used: Tag,
-    definition_data: Option<DefinitionData>,
+    pub tag_used: Tag,
+    pub definition_data: Option<DefinitionData>,
     #[serde(default)]
-    bases: Vec<Base>,
+    pub bases: Vec<Base>,
 }
 
 impl Record {
@@ -528,16 +489,18 @@ impl Record {
     }
 }
 
-pub(super) struct RecBinding<'ast> {
-    name: &'ast str,
-    has_vtable: bool,
-    fields: Vec<FieldBinding<'ast>>,
+pub struct RecBinding<'ast> {
+    pub name: &'ast str,
+    pub has_vtable: bool,
+    pub ast: &'ast Record,
+    pub fields: Vec<FieldBinding<'ast>>,
 }
 
-struct FieldBinding<'ast> {
-    name: &'ast str,
-    is_public: bool,
-    is_reference: bool,
+pub struct FieldBinding<'ast> {
+    pub name: &'ast str,
+    pub kind: QualType<'ast>,
+    pub is_public: bool,
+    pub is_reference: bool,
 }
 
 impl<'ast> super::AstConsumer<'ast> {
@@ -584,7 +547,7 @@ impl<'ast> super::AstConsumer<'ast> {
         &mut self,
         node: &'ast Node,
         rec: &'ast Record,
-    ) -> anyhow::Result<Option<RecBinding<'ast>>> {
+    ) -> anyhow::Result<()> {
         // Do a quick check of the inner nodes, if we have an enumdecl, but no fields
         // or methods, this is just a wrapper around an enum and we can just emit the enum
         // and exit
@@ -602,11 +565,15 @@ impl<'ast> super::AstConsumer<'ast> {
             }
         }
 
-        if had_enums && !had_more || true {
-            return Ok(None);
+        if had_enums && !had_more {
+            return Ok(());
         }
 
-        let Some(rname) = rec.name.as_deref() else { return Ok(None) };
+        let Some(rname) = rec.name.as_deref() else { return Ok(()) };
+
+        // if rname == "__locale_struct" {
+        //     return Ok(());
+        // }
 
         self.classes.insert(rname, (node, rec));
 
@@ -622,12 +589,13 @@ impl<'ast> super::AstConsumer<'ast> {
         for inn in &node.inner {
             // Ignore any method that isn't public, it's not part of the API we care about
             if let Some(method) = inn.kind.as_method() {
-                if !is_public {
-                    continue;
-                } else if self.is_ignored(inn) {
-                    println!("skipping deprecated method {rname}::{}", method.name);
-                    continue;
-                }
+                continue;
+                // if !is_public {
+                //     continue;
+                // } else if self.is_ignored(inn) {
+                //     println!("skipping deprecated method {rname}::{}", method.name);
+                //     continue;
+                // }
             }
 
             let comment = Self::get_comment(inn);
@@ -724,12 +692,17 @@ impl<'ast> super::AstConsumer<'ast> {
                     )
                 }
                 Item::FieldDecl { name, kind } => {
-                    fields.push((
+                    let kind = self
+                        .parse_type(kind)
+                        .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
+                    let is_reference = matches!(kind, QualType::Reference { .. });
+
+                    fields.push(FieldBinding {
                         name,
-                        self.parse_type(kind).with_context(|| {
-                            format!("failed to get type binding for {rname}::{name}")
-                        })?,
-                    ));
+                        kind,
+                        is_public,
+                        is_reference,
+                    });
                     continue;
                 }
                 _ => continue,
@@ -740,6 +713,28 @@ impl<'ast> super::AstConsumer<'ast> {
             }
         }
 
-        Ok(None)
+        let has_vtable = rec.is_polymorphic();
+
+        // If there are no fields, we need to add a dummy since C++ doesn't have
+        // zero-sized types. This is fine in practice since these types are only
+        // ever passed by pointer
+        if fields.is_empty() && !has_vtable {
+            fields.push(FieldBinding {
+                name: "pxbind_dummy",
+                kind: QualType::Builtin(super::Builtin::Char),
+                is_public: false,
+                is_reference: false,
+            });
+        }
+
+        let record = RecBinding {
+            name: rname,
+            has_vtable,
+            fields,
+            ast: rec,
+        };
+
+        self.recs.push(record);
+        Ok(())
     }
 }
