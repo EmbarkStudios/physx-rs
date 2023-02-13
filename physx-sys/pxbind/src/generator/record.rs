@@ -13,8 +13,8 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     #[inline]
     fn should_calculate_layout(&self) -> bool {
         self.ast.definition_data.is_some()
-            && !matches!(self.ast.tag_used, crate::consumer::Tag::Union)
-            && !self.is_empty
+            && !matches!(dbg!(self.ast.tag_used), crate::consumer::Tag::Union)
+            && !self.fields.is_empty()
     }
 
     pub(super) fn emit_structgen(&self, writer: &mut String, level: u32) {
@@ -64,6 +64,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
 
     fn emit_structgen_passthrough(&self, w: &mut String, level: u32) {
         let indent = Indent(level);
+        let cindent = Indent(1);
 
         writes!(w, "{indent}{SG}.pass_thru(\"struct physx_{}_Pod", self.name);
 
@@ -75,11 +76,11 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
         writes!(w, " {{\\n");
 
         if self.has_vtable {
-            writes!(w, "    void* vtable_;\\n");
+            writes!(w, "{cindent}void* vtable_;\\n");
         }
 
         for field in &self.fields {
-            writes!(w, "    {} {};\\n", field.kind.cpp_type(), field.name);
+            writes!(w, "{cindent}{} {};\\n", field.kind.cpp_type(), field.name);
         }
 
         writesln!(w, "}};\\n\");");

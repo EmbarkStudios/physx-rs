@@ -75,3 +75,14 @@ fn ptr_only() {
     insta::assert_snapshot!(ro.size_asserts);
     insta::assert_snapshot!(ro.rust_decls);
 }
+
+/// Ensures we can generate PODs for some templates types that are unfortunately
+/// now part of the core API
+#[test]
+fn simple_templates() {
+    let ro = gen_records("simple_templates.h", &[]).unwrap();
+
+    insta::assert_snapshot!(ro.structgen);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
+}

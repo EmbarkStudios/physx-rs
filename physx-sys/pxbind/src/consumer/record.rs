@@ -1,4 +1,4 @@
-use super::{Comment, Item, QualType, Type};
+use super::{Comment, Id, Item, QualType, Type, Typedef};
 use crate::{writes, Node};
 use anyhow::Context as _;
 use serde::Deserialize;
@@ -344,7 +344,7 @@ struct FuncBinding<'ast> {
 //     }
 // }
 
-#[derive(Deserialize, Debug)]
+#[derive(Copy, Clone, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum Access {
     Public,
@@ -441,7 +441,7 @@ pub struct Base {
     written_access: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Copy, Clone, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum Tag {
     Struct,
@@ -544,6 +544,32 @@ impl<'ast> super::AstConsumer<'ast> {
         }
 
         Ok(false)
+    }
+
+    #[inline]
+    pub(super) fn is_template_we_care_about(
+        &self,
+        node: &'ast Node,
+        td: &'ast Typedef,
+    ) -> Option<Id> {
+        let spec = node
+            .inner
+            .iter()
+            .find(|inn| matches!(inn.kind, Item::TemplateSpecializationType { .. }))?;
+
+        let decl = spec.inner.iter().find_map(|inn| {
+            if let Item::RecordType { kind, decl } = &inn.kind {
+                Some(decl)
+            } else {
+                None
+            }
+        })?;
+
+        Some(decl.id)
+    }
+
+    pub(super) fn consume_template(&self, node: &'ast Node, id: Id) -> anyhow::Result<()> {
+        unreachable!()
     }
 
     pub(super) fn consume_record(
@@ -742,7 +768,7 @@ impl<'ast> super::AstConsumer<'ast> {
             }
         }
 
-        // If there are no fields, we need to add a dummy since C++ doesn't have
+        // If there are no fields, we need to add a dummy field since C++ doesn't have
         // zero-sized types. This is fine in practice since these types are only
         // ever passed by pointer
         let is_empty = fields.is_empty() && !has_vtable;

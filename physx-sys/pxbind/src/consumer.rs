@@ -45,6 +45,13 @@ pub struct Typedef {
 }
 
 #[derive(Deserialize, Debug)]
+pub struct Decl {
+    id: Id,
+    kind: clang_ast::Kind,
+    name: String,
+}
+
+#[derive(Deserialize, Debug)]
 pub enum Item {
     NamespaceDecl {
         name: Option<String>,
@@ -88,6 +95,19 @@ pub enum Item {
         #[serde(rename = "type")]
         kind: Type,
     },
+    TemplateSpecializationType {
+        #[serde(rename = "templateName")]
+        template_name: String,
+    },
+    TemplateArgument {
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    RecordType {
+        #[serde(rename = "type")]
+        kind: Type,
+        decl: Decl,
+    }
     TypedefDecl(Typedef),
     /// The deprecated declspec has been defined on the item (PX_DEPRECATED)
     DeprecatedAttr,
@@ -260,7 +280,11 @@ impl<'ast> AstConsumer<'ast> {
             self.back_refs.insert(id, node);
         }
 
-        self.consume_flags(node, td)?;
+        if td.kind.qual_type.starts_with("PxFlags<") {
+            self.consume_flags(node, td)?;
+        } else if let Some(tid) = self.is_template_we_care_about(node, td) {
+            self.consume_template(node, tid)?;
+        }
 
         Ok(())
     }
