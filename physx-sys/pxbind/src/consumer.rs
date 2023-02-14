@@ -107,7 +107,9 @@ pub enum Item {
         #[serde(rename = "type")]
         kind: Type,
         decl: Decl,
-    }
+    },
+    ClassTemplateDecl,
+    ClassTemplateSpecializationDecl(Record),
     TypedefDecl(Typedef),
     /// The deprecated declspec has been defined on the item (PX_DEPRECATED)
     DeprecatedAttr,
@@ -251,8 +253,9 @@ impl<'ast> AstConsumer<'ast> {
                         .with_context(|| format!("failed to consume {rec:?}"))?;
                 }
                 Item::TypedefDecl(td) => {
-                    self.consume_typedef(inn, td)?;
+                    self.consume_typedef(inn, td, root)?;
                 }
+                Item::ClassTemplateDecl => {}
                 _ => {
                     self.traverse(inn, root, in_physx)?;
                 }
@@ -275,7 +278,12 @@ impl<'ast> AstConsumer<'ast> {
         //false
     }
 
-    fn consume_typedef(&mut self, node: &'ast Node, td: &'ast Typedef) -> anyhow::Result<()> {
+    fn consume_typedef(
+        &mut self,
+        node: &'ast Node,
+        td: &'ast Typedef,
+        root: &'ast Node,
+    ) -> anyhow::Result<()> {
         if let Some(id) = td.id {
             self.back_refs.insert(id, node);
         }
@@ -283,7 +291,7 @@ impl<'ast> AstConsumer<'ast> {
         if td.kind.qual_type.starts_with("PxFlags<") {
             self.consume_flags(node, td)?;
         } else if let Some(tid) = self.is_template_we_care_about(node, td) {
-            self.consume_template(node, tid)?;
+            self.consume_template(node, td, tid, root)?;
         }
 
         Ok(())
@@ -483,7 +491,9 @@ impl<'ast> AstConsumer<'ast> {
 
                 match mt {
                     "Vec3V" => Builtin::Vec3V,
+                    "Vec3" => Builtin::Vec3,
                     "Vec4V" => Builtin::Vec4V,
+                    "Vec4" => Builtin::Vec4,
                     "BoolV" => Builtin::BoolV,
                     "VecU32V" => Builtin::U32V,
                     "VecI32V" => Builtin::I32V,
@@ -546,7 +556,9 @@ pub enum Builtin {
     UInt,
     Long,
     ULong,
+    // SIMD
     Vec3V,
+    QuatV,
     Vec4V,
     BoolV,
     U32V,
@@ -554,6 +566,14 @@ pub enum Builtin {
     Mat33V,
     Mat34V,
     Mat44V,
+    // Non-SIMD
+    Vec3,
+    Vec3p,
+    Vec4,
+    Quat,
+    Mat33,
+    Mat34,
+    Mat44,
 }
 
 impl Builtin {
@@ -571,13 +591,18 @@ impl Builtin {
             Self::Long => "i64",
             Self::ULong => "u64",
             Self::Vec3V => "glam::Vec3A",
-            Self::Vec4V => "glam::Vec4",
+            Self::Vec3 => "glam::Vec3",
+            Self::Vec3p => "Vec3p",
+            Self::Vec4V | Self::Vec4 => "glam::Vec4",
+            Self::QuatV | Self::Quat => "glam::Quat",
             Self::BoolV => "glam::BVec4A",
             Self::U32V => "glam::UVec4",
             Self::I32V => "glam::IVec4",
             Self::Mat33V => "glam::Mat3A",
+            Self::Mat33 => "glam::Mat3",
             Self::Mat34V => "glam::Affine3A",
-            Self::Mat44V => "glam::Mat4",
+            Self::Mat34 => "Affine",
+            Self::Mat44V | Self::Mat44 => "glam::Mat4",
         }
     }
 
@@ -595,13 +620,21 @@ impl Builtin {
             Self::Long => "int64_t",
             Self::ULong => "uint64_t",
             Self::Vec3V => "Vec3V",
+            Self::Vec3 => "Vec3",
+            Self::Vec3p => "Vec3p",
             Self::Vec4V => "Vec4V",
+            Self::Vec4 => "Vec4",
+            Self::QuatV => "QuatV",
+            Self::Quat => "Quat",
             Self::BoolV => "BoolV",
             Self::U32V => "VecU32V",
             Self::I32V => "VecI32V",
             Self::Mat33V => "Mat33V",
+            Self::Mat33 => "Mat33",
             Self::Mat34V => "Mat34V",
+            Self::Mat34 => "Mat34",
             Self::Mat44V => "Mat44V",
+            Self::Mat44 => "Mat44",
         }
     }
 }

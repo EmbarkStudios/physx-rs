@@ -1,4 +1,4 @@
-use super::{Comment, Id, Item, QualType, Type, Typedef};
+use super::{Builtin, Comment, Id, Item, QualType, Type, Typedef};
 use crate::{writes, Node};
 use anyhow::Context as _;
 use serde::Deserialize;
@@ -452,6 +452,7 @@ pub enum Tag {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Record {
+    pub id: Option<Id>,
     pub name: Option<String>,
     pub tag_used: Tag,
     pub definition_data: Option<DefinitionData>,
@@ -551,25 +552,213 @@ impl<'ast> super::AstConsumer<'ast> {
         &self,
         node: &'ast Node,
         td: &'ast Typedef,
-    ) -> Option<Id> {
-        let spec = node
-            .inner
-            .iter()
-            .find(|inn| matches!(inn.kind, Item::TemplateSpecializationType { .. }))?;
+    ) -> Option<&'ast str> {
+        let tds = [
+            "PxVec3", "PxVec3p", "PxVec4", "PxQuat", "PxMat33", "PxMat34", "PxMat44",
+        ];
 
-        let decl = spec.inner.iter().find_map(|inn| {
-            if let Item::RecordType { kind, decl } = &inn.kind {
-                Some(decl)
+        if !tds.contains(&td.name.as_str()) {
+            return None;
+        }
+
+        node.inner.iter().find_map(|inn| {
+            if let Item::TemplateSpecializationType { template_name } = &inn.kind {
+                Some(template_name.as_str())
             } else {
                 None
             }
-        })?;
-
-        Some(decl.id)
+        })
     }
 
-    pub(super) fn consume_template(&self, node: &'ast Node, id: Id) -> anyhow::Result<()> {
-        unreachable!()
+    pub(super) fn consume_template(
+        &mut self,
+        node: &'ast Node,
+        td: &'ast Typedef,
+        template_name: &'ast str,
+        root: &'ast Node,
+    ) -> anyhow::Result<()> {
+        let mut fields = Vec::new();
+        match td.name.as_str() {
+            "PxVec3" => {
+                fields.push(FieldBinding {
+                    name: "x",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "y",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "z",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            "PxVec3p" => {
+                fields.push(FieldBinding {
+                    name: "x",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "y",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "z",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "padding",
+                    kind: QualType::Builtin(Builtin::UInt),
+                    is_public: false,
+                    is_reference: false,
+                });
+            }
+            "PxVec4" => {
+                fields.push(FieldBinding {
+                    name: "x",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "y",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "z",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "w",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            "PxQuat" => {
+                fields.push(FieldBinding {
+                    name: "x",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "y",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "z",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "w",
+                    kind: QualType::Builtin(Builtin::Float),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            "PxMat33" => {
+                fields.push(FieldBinding {
+                    name: "column0",
+                    kind: QualType::Builtin(Builtin::Vec3),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "column1",
+                    kind: QualType::Builtin(Builtin::Vec3),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "column2",
+                    kind: QualType::Builtin(Builtin::Vec3),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            "PxMat34" => {
+                fields.push(FieldBinding {
+                    name: "m",
+                    kind: QualType::Builtin(Builtin::Mat33),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "p",
+                    kind: QualType::Builtin(Builtin::Vec3),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            "PxMat44" => {
+                fields.push(FieldBinding {
+                    name: "column0",
+                    kind: QualType::Builtin(Builtin::Vec4),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "column1",
+                    kind: QualType::Builtin(Builtin::Vec4),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "column2",
+                    kind: QualType::Builtin(Builtin::Vec4),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "column3",
+                    kind: QualType::Builtin(Builtin::Vec4),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
+            other => anyhow::bail!("template typedef {other} is not implemented"),
+        }
+
+        let name = &td.name;
+        let (_node, ast) = super::search(root, &|node: &Node| match &node.kind {
+            Item::ClassTemplateSpecializationDecl(rec) | Item::CXXRecordDecl(rec) => {
+                dbg!(rec);
+                (rec.name.as_deref() == Some(template_name)).then_some(rec)
+            }
+            _ => None,
+        })
+        .with_context(|| format!("failed to locate template specialization for {name}"))?;
+
+        self.recs.push(RecBinding {
+            name,
+            has_vtable: ast.is_polymorphic(),
+            fields,
+            ast,
+            is_empty: false,
+        });
+
+        Ok(())
     }
 
     pub(super) fn consume_record(
