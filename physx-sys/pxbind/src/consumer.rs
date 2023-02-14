@@ -7,7 +7,9 @@ use anyhow::Context as _;
 pub use record::{Access, Constructor, Method, RecBinding, Record, Tag};
 mod enums;
 use clang_ast::Id;
-pub use enums::{EnumBinding, EnumRepr, FlagsBinding};
+pub use enums::{EnumBinding, FlagsBinding};
+pub mod functions;
+pub use functions::{FuncBinding, PhysxInvoke};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -101,7 +103,8 @@ pub enum Item {
     },
     TemplateArgument {
         #[serde(rename = "type")]
-        kind: Type,
+        kind: Option<Type>,
+        value: Option<i32>,
     },
     RecordType {
         #[serde(rename = "type")]
@@ -203,9 +206,11 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct AstConsumer<'ast> {
     pub enums: Vec<EnumBinding<'ast>>,
+    pub enum_map: HashMap<&'ast str, Builtin>,
     pub flags: Vec<FlagsBinding<'ast>>,
-    pub enum_map: HashMap<&'ast str, EnumRepr>,
+    pub flags_map: HashMap<&'ast str, Builtin>,
     pub recs: Vec<RecBinding<'ast>>,
+    pub funcs: Vec<FuncBinding<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
     /// for `release` methods, or whether something is a record at all
     pub classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
@@ -400,35 +405,37 @@ impl<'ast> AstConsumer<'ast> {
 
         let type_str = kind.as_str();
 
-        if let Some(ptr) = type_str.strip_suffix('*') {
-            let (inner, mut is_const) = if let Some(inner) = ptr.strip_suffix("const ") {
-                (inner, true)
+        // There's probably a smarter way to do this, but ugh, C++ pointers are so
+        // dumb
+        fn parse_ptr(inner: &str) -> (&str, bool) {
+            if inner.contains('*') {
+                if let Some(s) = inner.strip_suffix("const ") {
+                    (s, true)
+                } else {
+                    (inner, false)
+                }
             } else {
-                (ptr, false)
-            };
-
-            let pointee = self.parse_type(inner)?;
-
-            if !inner.ends_with('*') {
-                is_const = inner.starts_with("const ");
+                if let Some(s) = inner.strip_prefix("const ") {
+                    (s, true)
+                } else {
+                    (inner, false)
+                }
             }
+        }
+
+        if let Some(ptr) = type_str.strip_suffix('*') {
+            let (inner, is_const) = parse_ptr(ptr);
+
+            let pointee = self.parse_type(inner.trim())?;
 
             return Ok(QualType::Pointer {
                 is_const,
                 pointee: Box::new(pointee),
             });
         } else if let Some(refer) = type_str.strip_suffix('&') {
-            let (inner, mut is_const) = if let Some(inner) = refer.strip_suffix("const ") {
-                (inner, true)
-            } else {
-                (refer, false)
-            };
+            let (inner, is_const) = parse_ptr(refer);
 
-            let pointee = self.parse_type(inner)?;
-
-            if !inner.ends_with('*') {
-                is_const = inner.starts_with("const ");
-            }
+            let pointee = self.parse_type(inner.trim())?;
 
             return Ok(QualType::Reference {
                 is_const,
@@ -456,16 +463,23 @@ impl<'ast> AstConsumer<'ast> {
         // Check if it's an enum, we'll always know the enum by the time we hit
         // a reference to it, since physx doesn't do forward declaration of
         // enums, just old school
-        'ennum: {
-            let Some(name) = type_str.strip_prefix("physx::") else { break 'ennum };
-            let Some(repr) = self.enum_map.get(name) else { break 'ennum };
+        'physx: {
+            let Some(name) = type_str.strip_prefix("physx::") else { break 'physx };
 
-            return Ok(QualType::Enum { name, repr: *repr });
+            if let Some(repr) = self.enum_map.get(name) {
+                return Ok(QualType::Enum { name, repr: *repr });
+            }
+
+            if let Some(repr) = self.flags_map.get(name) {
+                return Ok(QualType::Flags { name, repr: *repr });
+            }
+
+            return Ok(QualType::Record { name });
         }
 
         Ok(QualType::Enum {
             name: "OHNO",
-            repr: EnumRepr::U32,
+            repr: Builtin::UInt,
         })
         //anyhow::bail!("oops {kind:?}")
     }
@@ -530,15 +544,9 @@ impl<'ast> From<&'ast str> for AstType<'ast> {
 
 impl<'ast> AstType<'ast> {
     fn as_str(&self) -> &'ast str {
-        let ty = match self {
+        match self {
             Self::Simple(s) => s,
             Self::Qualified(kind) => kind.qual_type.as_str(),
-        };
-
-        if let Some(ty) = ty.strip_prefix("const ") {
-            ty
-        } else {
-            ty
         }
     }
 }
@@ -577,6 +585,7 @@ pub enum Builtin {
 }
 
 impl Builtin {
+    #[inline]
     pub fn rust_type(self) -> &'static str {
         match self {
             Self::Bool => "bool",
@@ -606,7 +615,8 @@ impl Builtin {
         }
     }
 
-    fn c_type(self) -> &'static str {
+    #[inline]
+    pub fn c_type(self) -> &'static str {
         match self {
             Self::Bool => "bool",
             Self::Float => "float",
@@ -637,9 +647,60 @@ impl Builtin {
             Self::Mat44 => "Mat44",
         }
     }
+
+    #[inline]
+    pub fn cpp_type(self) -> &'static str {
+        match self {
+            Self::Bool => "bool",
+            Self::Float => "float",
+            Self::Double => "double",
+            Self::Char => "int8_t",
+            Self::UChar => "uint8_t",
+            Self::Short => "int16_t",
+            Self::UShort => "uint16_t",
+            Self::Int => "int32_t",
+            Self::UInt => "uint32_t",
+            Self::Long => "int64_t",
+            Self::ULong => "uint64_t",
+            Self::Vec3V => "physx::Vec3V",
+            Self::Vec3 => "physx::Vec3",
+            Self::Vec3p => "physx::Vec3p",
+            Self::Vec4V => "physx::Vec4V",
+            Self::Vec4 => "physx::Vec4",
+            Self::QuatV => "physx::QuatV",
+            Self::Quat => "physx::Quat",
+            Self::BoolV => "physx::BoolV",
+            Self::U32V => "physx::VecU32V",
+            Self::I32V => "physx::VecI32V",
+            Self::Mat33V => "physx::Mat33V",
+            Self::Mat33 => "physx::Mat33",
+            Self::Mat34V => "physx::Mat34V",
+            Self::Mat34 => "physx::Mat34",
+            Self::Mat44V => "physx::Mat44V",
+            Self::Mat44 => "physx::Mat44",
+        }
+    }
+
+    #[inline]
+    fn is_pod(self) -> bool {
+        !matches!(
+            self,
+            Self::Bool
+                | Self::Float
+                | Self::Double
+                | Self::Char
+                | Self::UChar
+                | Self::Short
+                | Self::UShort
+                | Self::Int
+                | Self::UInt
+                | Self::Long
+                | Self::ULong
+        )
+    }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum QualType<'ast> {
     Pointer {
         is_const: bool,
@@ -657,11 +718,14 @@ pub enum QualType<'ast> {
     },
     Enum {
         name: &'ast str,
-        repr: EnumRepr,
+        repr: Builtin,
     },
     Flags {
         name: &'ast str,
         repr: Builtin,
+    },
+    Record {
+        name: &'ast str,
     },
 }
 
@@ -688,6 +752,7 @@ impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
             }
             QualType::Enum { name, .. } => f.write_str(name),
             QualType::Flags { name, .. } => f.write_str(name),
+            QualType::Record { name } => write!(f, "physx_{name}_Pod"),
         }
     }
 }
@@ -700,18 +765,42 @@ impl<'qt, 'ast> fmt::Display for CppType<'qt, 'ast> {
         match self.0 {
             QualType::Pointer { is_const, pointee } => {
                 write!(f, "{}", pointee.cpp_type())?;
-                write!(f, " {}*", if *is_const { "const" } else { "" })
+                write!(f, "{}*", if *is_const { " const" } else { "" })
             }
             QualType::Reference { is_const, pointee } => {
-                unreachable!();
+                write!(f, "{}", pointee.cpp_type())?;
+                write!(f, "{}&", if *is_const { " const" } else { "" })
             }
-            QualType::Builtin(bi) => f.write_str(bi.c_type()),
+            QualType::Builtin(bi) => f.write_str(bi.cpp_type()),
             QualType::FunctionPointer => f.write_str("void *"),
             QualType::Array { element, len } => {
                 write!(f, "{}[{len}]", element.cpp_type())
             }
-            QualType::Enum { name, .. } => f.write_str(name),
-            QualType::Flags { name, .. } => f.write_str(name),
+            QualType::Enum { name, .. }
+            | QualType::Flags { name, .. }
+            | QualType::Record { name } => write!(f, "physx::{name}"),
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct CType<'qt, 'ast>(&'qt QualType<'ast>);
+
+impl<'qt, 'ast> fmt::Display for CType<'qt, 'ast> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            QualType::Pointer { is_const, pointee } | QualType::Reference { is_const, pointee } => {
+                write!(f, "{}", pointee.c_type())?;
+                write!(f, " {}*", if *is_const { "const" } else { "" })
+            }
+            QualType::Builtin(bi) => f.write_str(bi.c_type()),
+            QualType::FunctionPointer => f.write_str("void *"),
+            QualType::Array { element, len } => {
+                write!(f, "{}[{len}]", element.c_type())
+            }
+            QualType::Enum { name, repr } => f.write_str(repr.c_type()),
+            QualType::Flags { name, repr } => f.write_str(repr.c_type()),
+            QualType::Record { name } => write!(f, "physx_{name}_Pod"),
         }
     }
 }
@@ -725,5 +814,24 @@ impl<'ast> QualType<'ast> {
     #[inline]
     pub fn cpp_type(&self) -> CppType<'_, 'ast> {
         CppType(self)
+    }
+
+    #[inline]
+    pub fn c_type(&self) -> CType<'_, 'ast> {
+        CType(self)
+    }
+
+    #[inline]
+    pub fn is_pod(&self) -> bool {
+        match self {
+            QualType::Pointer { pointee, .. } => pointee.is_pod(),
+            QualType::Reference { is_const, pointee } => pointee.is_pod(),
+            QualType::Builtin(bi) => bi.is_pod(),
+            QualType::FunctionPointer => false,
+            QualType::Array { element, .. } => element.is_pod(),
+            QualType::Enum { name, .. } => true,
+            QualType::Flags { name, .. } => true,
+            QualType::Record { .. } => true,
+        }
     }
 }

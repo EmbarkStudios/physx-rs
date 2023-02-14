@@ -9,7 +9,7 @@ impl<'ast> crate::consumer::EnumBinding<'ast> {
         let indent = Indent(level);
         let indent1 = Indent(level + 1);
         writesln!(w, "{indent}#[derive(Copy, Clone)]");
-        writesln!(w, "{indent}#[repr({})]", self.repr);
+        writesln!(w, "{indent}#[repr({})]", self.repr.rust_type());
         writesln!(w, "{indent}pub enum {} {{", self.name);
 
         for var in &self.variants {

@@ -1,32 +1,6 @@
-use super::{Comment, EnumDecl, Item, Node, Typedef};
+use super::{Builtin, Comment, EnumDecl, Item, Node, Typedef};
 use anyhow::Context as _;
 use std::fmt::{self};
-
-#[derive(Copy, Clone, Debug)]
-pub enum EnumRepr {
-    I32,
-    U32,
-}
-
-impl fmt::Display for EnumRepr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::I32 => f.write_str("i32"),
-            Self::U32 => f.write_str("u32"),
-        }
-    }
-}
-
-impl std::str::FromStr for EnumRepr {
-    type Err = anyhow::Error;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "unsigned int" => Ok(Self::U32),
-            _ => anyhow::bail!("unknown enum repr {s}"),
-        }
-    }
-}
 
 pub struct EnumVariant<'ast> {
     /// The name of the variant
@@ -39,7 +13,7 @@ pub struct EnumVariant<'ast> {
 
 pub struct EnumBinding<'ast> {
     /// The repr() applied to the the Rust enum to get it the correct size
-    pub repr: EnumRepr,
+    pub repr: Builtin,
     /// The "friendly" name of the enum, eg `PxErrorCode`
     pub name: &'ast str,
     /// The qualified type of the enum, minus the physx:: namespace since all
@@ -100,19 +74,26 @@ impl<'ast> super::AstConsumer<'ast> {
             }
         };
 
-        let mut repr = EnumRepr::I32;
+        let mut repr = Builtin::Int;
         let mut variants = Vec::new();
 
         // Unfortunately the qualified type isn't present on the enum itself,
         // but rather each and every variant. They _should_ all be the same
         let mut cxx_qt = None;
 
-        fn get_value(node: &Node, current: i64, repr: &mut EnumRepr) -> anyhow::Result<i64> {
+        fn get_value(
+            ast: &super::AstConsumer<'_>,
+            node: &Node,
+            current: i64,
+            repr: &mut Builtin,
+        ) -> anyhow::Result<i64> {
             for inn in &node.inner {
                 match &inn.kind {
                     Item::ImplicitCastExpr { kind } => {
-                        *repr = kind.qual_type.parse()?;
-                        return get_value(inn, current, repr);
+                        *repr = ast
+                            .parse_builtin(kind)
+                            .context("enum repr was not could not be parsed as builtin")?;
+                        return get_value(ast, inn, current, repr);
                     }
                     Item::ConstantExpr { value, .. } => {
                         return value.parse().context("failed to parse enum constant");
@@ -146,7 +127,7 @@ impl<'ast> super::AstConsumer<'ast> {
             }
 
             let comment = Self::get_comment(varn);
-            let value = get_value(varn, current, &mut repr)?;
+            let value = get_value(self, varn, current, &mut repr)?;
             current = value + 1;
 
             variants.push(EnumVariant {
@@ -235,6 +216,7 @@ impl<'ast> super::AstConsumer<'ast> {
             enums_index,
             storage_type,
         });
+        self.flags_map.insert(&td.name, storage_type);
 
         Ok(())
     }

@@ -13,7 +13,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     #[inline]
     fn should_calculate_layout(&self) -> bool {
         self.ast.definition_data.is_some()
-            && !matches!(dbg!(self.ast.tag_used), crate::consumer::Tag::Union)
+            && !matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union))
             && !self.fields.is_empty()
     }
 
@@ -87,7 +87,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     }
 
     pub fn emit_rust(&self, w: &mut String, level: u32) -> bool {
-        if dbg!(self.should_calculate_layout()) {
+        if self.should_calculate_layout() {
             return false;
         }
 
@@ -99,7 +99,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
         writesln!(
             w,
             "{indent}pub {} {} {{",
-            if matches!(self.ast.tag_used, crate::consumer::Tag::Union) {
+            if matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union)) {
                 "union"
             } else {
                 "struct"

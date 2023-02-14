@@ -28,9 +28,10 @@ macro_rules! writesln {
 
 mod comment;
 mod enums;
+mod functions;
 mod record;
 
-use crate::consumer::{AstConsumer, EnumBinding, RecBinding};
+use crate::consumer::{AstConsumer, EnumBinding, FuncBinding, RecBinding};
 use std::{fmt, io::Write};
 
 /// The variable name of `PodStructGen` in the structgen program
@@ -55,6 +56,7 @@ impl fmt::Display for Indent {
 pub struct Generator {
     pub record_filter: Box<dyn Fn(&RecBinding<'_>) -> bool>,
     pub enum_filter: Box<dyn Fn(&EnumBinding<'_>) -> bool>,
+    pub func_filter: Box<dyn Fn(&FuncBinding<'_>) -> bool>,
 }
 
 impl Default for Generator {
@@ -62,6 +64,7 @@ impl Default for Generator {
         Self {
             record_filter: Box::new(|_rb| true),
             enum_filter: Box::new(|_eb| true),
+            func_filter: Box::new(|_fb| true),
         }
     }
 }
@@ -124,12 +127,8 @@ impl Generator {
 
     pub fn generate_cpp(&self, ast: &AstConsumer<'_>, out: &mut impl Write) -> anyhow::Result<()> {
         self.generate_size_asserts(ast, out)?;
+        self.generate_cpp_functions(ast, out, 0)?;
 
-        let level = 0;
-        let indent = Indent(level);
-        writeln!(out, "{indent}extern \"C\" {{")?;
-        self.generate_cpp_functions(ast, out, level + 1)?;
-        writeln!(out, "{indent}}}")?;
         Ok(())
     }
 
@@ -163,6 +162,17 @@ impl Generator {
         out: &mut impl Write,
         level: u32,
     ) -> anyhow::Result<()> {
+        let indent = Indent(level);
+
+        writeln!(out, "{indent}extern \"C\" {{")?;
+        let mut acc = String::new();
+        for func in ast.funcs.iter().filter(|fb| (self.func_filter)(fb)) {
+            acc.clear();
+            func.emit_cpp(&mut acc, level + 1)?;
+            writeln!(out, "{acc}")?;
+        }
+        writeln!(out, "{indent}}}")?;
+
         Ok(())
     }
 
@@ -171,11 +181,7 @@ impl Generator {
 
         self.generate_rust_enums(ast, w, level)?;
         self.generate_rust_records(ast, w)?;
-
-        let indent = Indent(level);
-        writeln!(w, "{indent}extern \"C\" {{")?;
-        self.generate_rust_functions(ast, w, level + 1)?;
-        writeln!(w, "{indent}}}")?;
+        self.generate_rust_functions(ast, w, level)?;
 
         Ok(())
     }
@@ -245,9 +251,20 @@ impl Generator {
     pub fn generate_rust_functions(
         &self,
         ast: &AstConsumer<'_>,
-        writer: &mut impl Write,
+        w: &mut impl Write,
         level: u32,
     ) -> anyhow::Result<u32> {
+        let indent = Indent(level);
+
+        writeln!(w, "{indent}extern \"C\" {{")?;
+        let mut acc = String::new();
+        for func in ast.funcs.iter().filter(|fb| (self.func_filter)(fb)) {
+            acc.clear();
+            func.emit_rust(&mut acc, level + 1);
+            writeln!(w, "{acc}")?;
+        }
+        writeln!(w, "{indent}}}")?;
+
         Ok(0)
     }
 }

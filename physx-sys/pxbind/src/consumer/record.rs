@@ -1,348 +1,8 @@
-use super::{Builtin, Comment, Id, Item, QualType, Type, Typedef};
+use super::{functions, Builtin, Comment, Id, Item, QualType, Type, Typedef};
 use crate::{writes, Node};
 use anyhow::Context as _;
+use functions::*;
 use serde::Deserialize;
-
-enum TypeBinding<'ast> {
-    SelfPod { typename: &'ast str, is_const: bool },
-    Builtin(super::Builtin),
-}
-
-impl<'ast> TypeBinding<'ast> {
-    fn write_c_type(&self, out: &mut String) {
-        match self {
-            Self::SelfPod { typename, is_const } => {
-                writes!(
-                    out,
-                    "physx_{typename}_Pod{}*",
-                    if *is_const { " const" } else { "" }
-                );
-            }
-            _ => unreachable!(),
-        }
-    }
-
-    fn write_cpp_type(&self, out: &mut String) {
-        match self {
-            Self::SelfPod { typename, is_const } => {
-                writes!(
-                    out,
-                    "physx::{typename}{}*",
-                    if *is_const { " const" } else { "" }
-                );
-            }
-            _ => unreachable!(),
-        }
-    }
-
-    fn write_rust_type(&self, out: &mut String) {
-        match self {
-            Self::SelfPod { typename, is_const } => {
-                writes!(
-                    out,
-                    "*{} physx_{typename}_Pod",
-                    if *is_const { "const" } else { "mut" }
-                );
-            }
-            _ => unreachable!(),
-        }
-    }
-}
-
-struct Param<'ast> {
-    c_name: &'ast str,
-    cpp_name: &'ast str,
-    kind: TypeBinding<'ast>,
-}
-
-impl<'ast> Param<'ast> {
-    #[inline]
-    fn self_pod(typename: &'ast str, is_const: bool) -> Self {
-        Self {
-            c_name: "self__pod",
-            cpp_name: "self_",
-            kind: TypeBinding::SelfPod { typename, is_const },
-        }
-    }
-
-    fn write_c_to_cpp(&self, out: &mut String) {
-        match &self.kind {
-            TypeBinding::SelfPod { typename, is_const } => {
-                self.kind.write_cpp_type(out);
-                writes!(out, " self_ = reinterpret_cast<");
-                self.kind.write_cpp_type(out);
-                writes!(out, ">({})", self.c_name);
-            }
-            _ => unreachable!(),
-        }
-
-        writes!(out, ";\n");
-    }
-}
-
-enum PhysxInvoke<'ast> {
-    /// Normal function call. Not many of these in PhysX, it's pretty OO
-    Func {
-        func_name: &'ast str,
-        return_type: Option<&'ast str>,
-    },
-    /// Method call
-    Method {
-        func_name: &'ast str,
-        return_type: Option<&'ast str>,
-        /// If set, this is a static method call
-        class_name: Option<&'ast str>,
-    },
-    /// Constructor call
-    Ctor(&'ast str),
-    /// New
-    New(&'ast str),
-}
-
-impl<'ast> PhysxInvoke<'ast> {
-    fn emit(&self, args: impl Iterator<Item = &'ast str>, out: &mut String) {
-        let mut args = args.peekable();
-        let has_args = args.peek().is_some();
-
-        // Would be nice with https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.intersperse
-        // but it's not stable yet
-        let emit_args = |out: &mut String| {
-            for (i, arg) in args.enumerate() {
-                let sep = if i > 0 { ", " } else { "" };
-
-                writes!(out, "{sep}{arg}");
-            }
-        };
-
-        match self {
-            Self::Func {
-                func_name,
-                return_type,
-            } => {
-                if let Some(rt) = return_type {
-                    writes!(out, "{rt} return_val = ");
-                }
-
-                writes!(out, "{func_name}(");
-                emit_args(out);
-                writes!(out, ");\n");
-            }
-            Self::Method {
-                func_name,
-                return_type,
-                class_name,
-            } => {
-                if let Some(rt) = return_type {
-                    writes!(out, "{rt} return_val = ");
-                }
-
-                if let Some(cn) = class_name {
-                    writes!(out, "{cn}::{func_name}(");
-                } else {
-                    writes!(out, "self_->{func_name}(");
-                }
-
-                emit_args(out);
-                writes!(out, ");\n");
-            }
-            Self::Ctor(class) => {
-                writes!(out, "{class} return_val");
-                // Deal with Most Vexing Parse, thanks C++
-                if has_args {
-                    writes!(out, "(");
-                    emit_args(out);
-                    writes!(out, ");\n");
-                } else {
-                    writes!(out, ";\n");
-                }
-            }
-            Self::New(class) => {
-                writes!(out, "auto return_val = new {}(", class);
-                emit_args(out);
-                writes!(out, ");\n");
-            }
-        }
-    }
-}
-
-enum FuncBindingExt<'ast> {
-    IsDelete,
-    None(PhysxInvoke<'ast>),
-    HasSelf(PhysxInvoke<'ast>),
-}
-
-struct FuncBinding<'ast> {
-    name: String,
-    comment: Option<Comment<'ast>>,
-    ext: FuncBindingExt<'ast>,
-    params: Vec<Param<'ast>>,
-    ret: Option<TypeBinding<'ast>>,
-}
-
-//     bool hasSelf = false;
-//     vector<CppFnArg> args;
-//     shared_ptr<CppResultCalc> valueExpr;
-//     CppType returnType;
-
-//     string genCppDef() const {
-//         string result;
-//         result += fmt::format("{} {}(", returnType.getCType(), name);
-
-//         int i = 0;
-//         for (auto& arg : args) {
-//             if (i > 0) {
-//                 result += ", ";
-//             }
-//             result += fmt::format("{} {}", arg.getCType(), arg.cName());
-//             ++i;
-//         }
-
-//         result += ") {\n";
-
-//         for (const CppFnArg& arg : this->args) {
-//             result += arg.getC2CppCode();
-//         }
-
-//         result += bodyPreamble;
-
-//         if (this->valueExpr) {
-//             vector<string> argNames;
-//             {
-//                 auto arg = this->args.begin();
-//                 if (this->hasSelf) {
-//                     // Skip self when calling the function
-//                     ++arg;
-//                 }
-
-//                 for (; arg != this->args.end(); ++arg) {
-//                     argNames.push_back(arg->cppName);
-//                 }
-//             }
-
-//             CppFnArg returnValue(this->returnType, "returnValue");
-
-//             // Calculate the result
-//             result +=
-//                 this->valueExpr->toString(
-//                     returnValue.cppName, returnValue.getCppType(), argNames) +
-//                 "\n";
-
-//             // Convert the result to a C POD representation
-//             result += returnValue.getCpp2CCode();
-
-//             if (this->returnType.getCType() != "void") {
-//                 result += fmt::format("return {};\n", returnValue.cName());
-//             }
-//         }
-//         result += "}\n";
-
-//         return result;
-//     }
-// }
-
-// impl<'ast> FuncBinding<'ast> {
-//     fn emit_cpp<W: std::io::Write>(&self, writer: &mut W, level: u32) -> anyhow::Result<()> {
-//         let mut acc = String::new();
-
-//         // Emit the function signature
-//         {
-//             let indent = Indent(level);
-
-//             writes!(acc, "{indent}");
-
-//             if let Some(ret) = &self.ret {
-//                 ret.write_c_type(&mut acc);
-//             } else {
-//                 acc.push_str("void")
-//             }
-
-//             writes!(acc, " {}(", self.name);
-
-//             for (i, param) in self.params.iter().enumerate() {
-//                 // No trailing commas :(
-//                 let sep = if i > 0 { ", " } else { "" };
-
-//                 writes!(acc, "{sep}");
-//                 param.kind.write_c_type(&mut acc);
-//                 writes!(acc, " {}", param.c_name);
-//             }
-
-//             writeln!(writer, "{acc}) {{")?;
-//             acc.clear();
-//         }
-
-//         let indent = Indent(level + 1);
-
-//         // Emit the code that converts each argument to an appropriately typed/named
-//         // c++ variable
-//         if self.params.is_empty() {
-//             for param in &self.params {
-//                 writes!(acc, "{indent}");
-//                 param.write_c_to_cpp(&mut acc);
-//             }
-
-//             writeln!(writer, "{acc}")?;
-//             acc.clear();
-//         }
-
-//         let (invoke, arg_skip) = match &self.ext {
-//             FuncBindingExt::IsDelete => {
-//                 writeln!(writer, "{indent}delete self_;\n}}")?;
-//                 return Ok(());
-//             }
-//             FuncBindingExt::None(inv) => (inv, 0),
-//             FuncBindingExt::HasSelf(inv) => (inv, 1),
-//         };
-
-//         // Emit the code that actually calls into physx
-//         let args = self
-//             .params
-//             .iter()
-//             .skip(arg_skip)
-//             .map(|param| param.cpp_name);
-
-//         invoke.emit(args, &mut acc);
-
-//         if let Some(rt) = &self.ret {
-//             unreachable!()
-//             //     rt.
-//             // result += returnValue.getCpp2CCode();
-
-//             //     if (this->returnType.getCType() != "void") {
-//             //         result += fmt::format("return {};\n", returnValue.cName());
-//             //     }
-//         }
-
-//         Ok(())
-//     }
-
-//     fn emit_rust(&self, writer: &mut String, level: u32) {
-//         if let Some(com) = &self.comment {
-//             com.emit_rust(writer, level);
-//         }
-
-//         let indent = Indent(level);
-
-//         let mut acc = String::new();
-//         writes!(acc, "{indent}pub fn {}(", self.name);
-
-//         for param in &self.params {
-//             writes!(acc, "{}: ", param.c_name);
-//             param.kind.write_rust_type(&mut acc);
-//             writes!(acc, ", ");
-//         }
-
-//         if let Some(ret) = &self.ret {
-//             writes!(acc, ") -> ");
-//             ret.write_rust_type(&mut acc);
-//             writes!(acc, ";");
-//         } else {
-//             writes!(acc, ");");
-//         }
-
-//         writesln!(writer, "{acc}");
-//     }
-// }
 
 #[derive(Copy, Clone, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -362,13 +22,13 @@ where
 
 #[derive(Deserialize, Debug)]
 pub struct Method {
-    name: String,
+    pub name: String,
     #[serde(rename = "type")]
-    kind: Type,
+    pub kind: Type,
     #[serde(default, rename = "storageClass", deserialize_with = "storage_class")]
-    is_static: bool,
+    pub is_static: bool,
     #[serde(default, rename = "virtual")]
-    is_virtual: bool,
+    pub is_virtual: bool,
 }
 
 impl Method {
@@ -454,7 +114,7 @@ pub enum Tag {
 pub struct Record {
     pub id: Option<Id>,
     pub name: Option<String>,
-    pub tag_used: Tag,
+    pub tag_used: Option<Tag>,
     pub definition_data: Option<DefinitionData>,
     #[serde(default)]
     pub bases: Vec<Base>,
@@ -499,7 +159,7 @@ pub struct RecBinding<'ast> {
     pub is_empty: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FieldBinding<'ast> {
     pub name: &'ast str,
     pub kind: QualType<'ast>,
@@ -577,6 +237,10 @@ impl<'ast> super::AstConsumer<'ast> {
         template_name: &'ast str,
         root: &'ast Node,
     ) -> anyhow::Result<()> {
+        if self.classes.contains_key(td.name.as_str()) {
+            return Ok(());
+        }
+
         let mut fields = Vec::new();
         match td.name.as_str() {
             "PxVec3" => {
@@ -741,9 +405,8 @@ impl<'ast> super::AstConsumer<'ast> {
         }
 
         let name = &td.name;
-        let (_node, ast) = super::search(root, &|node: &Node| match &node.kind {
+        let (node, ast) = super::search(root, &|node: &Node| match &node.kind {
             Item::ClassTemplateSpecializationDecl(rec) | Item::CXXRecordDecl(rec) => {
-                dbg!(rec);
                 (rec.name.as_deref() == Some(template_name)).then_some(rec)
             }
             _ => None,
@@ -757,6 +420,8 @@ impl<'ast> super::AstConsumer<'ast> {
             ast,
             is_empty: false,
         });
+
+        self.classes.insert(name, (node, ast));
 
         Ok(())
     }
@@ -818,25 +483,57 @@ impl<'ast> super::AstConsumer<'ast> {
             rec.is_polymorphic()
         };
 
-        let mut is_public = !matches!(rec.tag_used, Tag::Class);
+        let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
 
         let mut fields = Vec::new();
+
+        for base in &rec.bases {
+            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
+                println!("skipping non-physx base '{}'", base.kind.qual_type);
+                continue;
+            };
+            let base_rec = self
+                .recs
+                .iter()
+                .find(|r| r.name == base_name)
+                .with_context(|| {
+                    format!(
+                        "failed to find base '{}' for '{rname}'",
+                        base.kind.qual_type
+                    )
+                })?;
+            fields.extend(base_rec.fields.iter().cloned());
+        }
+
+        self.get_fields(node, rec, &mut fields)?;
 
         // Keep a record of each method that we are binding, to account for
         // overloading, particularly constructors, we need to append a counter
         // to keep the binding functions unique
-        let mut meth_map = std::collections::BTreeMap::<&str, u8>::new();
+        let mut meth_map = std::collections::BTreeMap::<String, u8>::new();
+
+        let mut get_name = |req: String| -> String {
+            match meth_map.get_mut(&req) {
+                Some(count) => {
+                    *count += 1;
+                    format!("{req}{count}")
+                }
+                None => {
+                    meth_map.insert(req.clone(), 0);
+                    req
+                }
+            }
+        };
 
         for inn in &node.inner {
             // Ignore any method that isn't public, it's not part of the API we care about
             if let Some(method) = inn.kind.as_method() {
-                continue;
-                // if !is_public {
-                //     continue;
-                // } else if self.is_ignored(inn) {
-                //     println!("skipping deprecated method {rname}::{}", method.name);
-                //     continue;
-                // }
+                if !is_public {
+                    continue;
+                } else if self.is_ignored(inn) {
+                    println!("skipping deprecated method {rname}::{}", method.name);
+                    continue;
+                }
             }
 
             let comment = Self::get_comment(inn);
@@ -856,16 +553,16 @@ impl<'ast> super::AstConsumer<'ast> {
 
                     let func_binding = if rec.is_polymorphic() || !rec.has_simple_destructor() {
                         FuncBinding {
-                            name: format!("{rname}_new_alloc"),
-                            ret: None, // TODO
+                            name: get_name(format!("{rname}_new_alloc")),
+                            ret: Some(QualType::Record { name: rname }),
                             comment,
                             ext: FuncBindingExt::None(PhysxInvoke::New(rname)),
                             params: Vec::new(),
                         }
                     } else {
                         FuncBinding {
-                            name: format!("{rname}_new"),
-                            ret: None, // TODO
+                            name: get_name(format!("{rname}_new")),
+                            ret: Some(QualType::Record { name: rname }),
                             comment,
                             ext: FuncBindingExt::None(PhysxInvoke::Ctor(rname)),
                             params: Vec::new(),
@@ -881,24 +578,24 @@ impl<'ast> super::AstConsumer<'ast> {
                     }
 
                     let func_binding = FuncBinding {
-                        name: format!(
+                        name: get_name(format!(
                             "{rname}_{}{}",
                             method.name,
                             if method.is_const() { "" } else { "_mut" }
-                        ),
-                        ret: None, // TODO
+                        )),
+                        ret: None,
                         comment,
                         ext: if method.is_static {
                             FuncBindingExt::None(PhysxInvoke::Method {
                                 func_name: &method.name,
-                                return_type: None,
-                                class_name: Some(rname),
+                                class_name: rname,
+                                is_static: method.is_static,
                             })
                         } else {
                             FuncBindingExt::HasSelf(PhysxInvoke::Method {
                                 func_name: &method.name,
-                                return_type: None,
-                                class_name: None,
+                                class_name: rname,
+                                is_static: method.is_static,
                             })
                         },
                         params: Vec::new(),
@@ -932,29 +629,17 @@ impl<'ast> super::AstConsumer<'ast> {
                         true,
                     )
                 }
-                Item::FieldDecl { name, kind } => {
-                    // Skip anonymous fields, they aren't really accessible
-                    if let Some(name) = name.as_deref() {
-                        let kind = self
-                            .parse_type(kind)
-                            .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
-                        let is_reference = matches!(kind, QualType::Reference { .. });
-
-                        fields.push(FieldBinding {
-                            name,
-                            kind,
-                            is_public,
-                            is_reference,
-                        });
-                    }
-                    continue;
-                }
                 _ => continue,
             };
 
             if !method.is_static {
-                func.params.push(Param::self_pod(rname, method.is_const()));
+                func.params.push(Param::self_pod(
+                    QualType::Record { name: rname },
+                    method.is_const(),
+                ));
             }
+
+            self.consume_method(inn, method, func)?;
         }
 
         // If there are no fields, we need to add a dummy field since C++ doesn't have
@@ -979,6 +664,45 @@ impl<'ast> super::AstConsumer<'ast> {
         };
 
         self.recs.push(record);
+        Ok(())
+    }
+
+    fn get_fields(
+        &self,
+        node: &'ast Node,
+        rec: &'ast Record,
+        fields: &mut Vec<FieldBinding<'ast>>,
+    ) -> anyhow::Result<()> {
+        let Some(rname) = rec.name.as_deref() else { return Ok(()) };
+        let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
+
+        for inn in &node.inner {
+            let comment = Self::get_comment(inn);
+
+            match &inn.kind {
+                Item::AccessSpecDecl { access } => {
+                    is_public = matches!(access, Access::Public);
+                }
+                Item::FieldDecl { name, kind } => {
+                    // Skip anonymous fields, they aren't really accessible
+                    if let Some(name) = name.as_deref() {
+                        let kind = self
+                            .parse_type(kind)
+                            .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
+                        let is_reference = matches!(kind, QualType::Reference { .. });
+
+                        fields.push(FieldBinding {
+                            name,
+                            kind,
+                            is_public,
+                            is_reference,
+                        });
+                    }
+                }
+                _ => {}
+            }
+        }
+
         Ok(())
     }
 }
