@@ -14,9 +14,9 @@ pub use functions::{FuncBinding, PhysxInvoke};
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Type {
-    desugured_qual_type: Option<String>,
+    //desugured_qual_type: Option<String>,
     qual_type: String,
-    type_alias_decl_id: Option<Id>,
+    //type_alias_decl_id: Option<Id>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -46,12 +46,12 @@ pub struct Typedef {
     id: Option<Id>,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct Decl {
-    id: Id,
-    kind: clang_ast::Kind,
-    name: String,
-}
+// #[derive(Deserialize, Debug)]
+// pub struct Decl {
+//     id: Id,
+//     kind: clang_ast::Kind,
+//     name: String,
+// }
 
 #[derive(Deserialize, Debug)]
 pub enum Item {
@@ -111,7 +111,7 @@ pub enum Item {
     RecordType {
         #[serde(rename = "type")]
         kind: Type,
-        decl: Decl,
+        //decl: Decl,
     },
     ClassTemplateDecl,
     ClassTemplateSpecializationDecl(Record),
@@ -329,7 +329,7 @@ impl<'ast> AstConsumer<'ast> {
 
         fn gather<'ast>(
             node: &'ast Node,
-            name: Option<&str>,
+            _name: Option<&str>,
             summary: &mut Block<'ast>,
             additional: &mut Block<'ast>,
         ) -> anyhow::Result<()> {
@@ -406,15 +406,15 @@ impl<'ast> AstConsumer<'ast> {
         }
 
         // First check if the type has an alias, most likely a typedef
-        if let AstType::Qualified(kind) = &kind {
-            if let Some(alias_id) = kind.type_alias_decl_id {
-                // let node = self
-                //     .back_refs
-                //     .get(&alias_id)
+        //if let AstType::Qualified(_kind) = &kind {
+        //if let Some(alias_id) = kind.type_alias_decl_id {
+        // let node = self
+        //     .back_refs
+        //     .get(&alias_id)
 
-                //     .context("failed to locate type alias")?;
-            }
-        }
+        //     .context("failed to locate type alias")?;
+        //}
+        //}
 
         let type_str = kind.as_str();
 

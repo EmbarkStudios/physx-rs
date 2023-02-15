@@ -1,5 +1,5 @@
-use super::{functions, Builtin, Comment, Id, Item, QualType, Type, Typedef};
-use crate::{writes, Node};
+use super::{functions, Builtin, Id, Item, QualType, Type, Typedef};
+use crate::Node;
 use anyhow::Context as _;
 use functions::*;
 use serde::Deserialize;
@@ -77,18 +77,14 @@ struct Dtor {
     #[serde(default)]
     irrelevant: bool,
     #[serde(default)]
-    needs_implicit: bool,
-    #[serde(default)]
     simple: bool,
-    #[serde(default)]
-    trivial: bool,
 }
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct DefinitionData {
-    #[serde(default, rename = "isPOD")]
-    is_pod: bool,
+    // #[serde(default, rename = "isPOD")]
+    // is_pod: bool,
     dtor: Dtor,
     #[serde(default)]
     is_abstract: bool,
@@ -99,10 +95,10 @@ pub struct DefinitionData {
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Base {
-    access: String,
+    //access: String,
     #[serde(rename = "type")]
     kind: Type,
-    written_access: String,
+    //written_access: String,
 }
 
 #[derive(Copy, Clone, Deserialize, Debug)]
@@ -243,7 +239,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
     pub(super) fn consume_template(
         &mut self,
-        node: &'ast Node,
+        _node: &'ast Node,
         td: &'ast Typedef,
         template_name: &'ast str,
         root: &'ast Node,

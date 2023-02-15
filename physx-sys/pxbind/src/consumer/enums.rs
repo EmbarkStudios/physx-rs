@@ -159,7 +159,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
     pub(super) fn consume_flags(
         &mut self,
-        node: &'ast Node,
+        _node: &'ast Node,
         td: &'ast Typedef,
     ) -> anyhow::Result<()> {
         // PhysX uses a PxFlags<> template typedef to create a bitfield type for
