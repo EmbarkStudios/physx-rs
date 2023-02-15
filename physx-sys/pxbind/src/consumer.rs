@@ -69,6 +69,8 @@ pub enum Item {
     CXXConstructorDecl(Constructor),
     CXXDestructorDecl(Method),
     ParmVarDecl(Param),
+    FunctionTemplateDecl,
+    FunctionDecl(functions::Function),
     /// Enums
     EnumDecl(EnumDecl),
     /// Enum variants
@@ -247,11 +249,7 @@ impl<'ast> AstConsumer<'ast> {
                 Item::CXXRecordDecl(rec) => {
                     // If a record decl doesn't have any inner nodes, it's just a foreward declaration
                     // and we can skip it
-                    if inn.inner.is_empty() {
-                        continue;
-                    }
-
-                    if !in_physx {
+                    if inn.inner.is_empty() || !in_physx {
                         continue;
                     }
 
@@ -261,7 +259,15 @@ impl<'ast> AstConsumer<'ast> {
                 Item::TypedefDecl(td) => {
                     self.consume_typedef(inn, td, root)?;
                 }
-                Item::ClassTemplateDecl => {}
+                Item::FunctionDecl(func) => {
+                    if !in_physx {
+                        continue;
+                    }
+
+                    println!("skipping function {}", func.name);
+                    //self.consume_function(inn, func)?;
+                }
+                Item::ClassTemplateDecl | Item::FunctionTemplateDecl => {}
                 _ => {
                     self.traverse(inn, root, in_physx)?;
                 }

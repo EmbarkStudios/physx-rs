@@ -3,6 +3,13 @@ use crate::Node;
 use anyhow::Context as _;
 use std::borrow::Cow;
 
+#[derive(serde::Deserialize, Debug)]
+pub struct Function {
+    pub name: String,
+    #[serde(rename = "type")]
+    pub kind: super::Type,
+}
+
 #[derive(Debug)]
 pub struct Param<'ast> {
     pub name: Cow<'ast, str>,
@@ -68,6 +75,34 @@ impl<'ast> FuncBinding<'ast> {
 }
 
 impl<'ast> super::AstConsumer<'ast> {
+    pub fn consume_function(
+        &mut self,
+        node: &'ast Node,
+        func: &'ast Function,
+    ) -> anyhow::Result<()> {
+        if func.name.starts_with("operator") {
+            return Ok(());
+        }
+
+        let comment = Self::get_comment(node);
+
+        let mut fb = FuncBinding {
+            name: func.name.to_owned(),
+            comment,
+            ext: FuncBindingExt::None(PhysxInvoke::Func {
+                func_name: &func.name,
+            }),
+            ret: None,
+            params: Vec::new(),
+        };
+
+        self.consume_return(dbg!(&func.name), &func.kind.qual_type, &mut fb)?;
+        self.consume_params(&func.name, node, &mut fb)?;
+
+        self.funcs.push(fb);
+        Ok(())
+    }
+
     pub fn consume_method(
         &mut self,
         node: &'ast Node,

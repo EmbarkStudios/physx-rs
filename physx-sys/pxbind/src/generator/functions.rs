@@ -228,8 +228,9 @@ impl<'ast> PhysxInvoke<'ast> {
 
         match self {
             Self::Func { func_name } => {
+                writes!(out, "{indent}");
                 if let Some(ret) = return_type {
-                    writes!(out, "{indent}{} {RET} = ", ret.cpp_type());
+                    writes!(out, "{} {RET} = ", ret.cpp_type());
                 }
 
                 writes!(out, "{func_name}(");
