@@ -716,7 +716,7 @@ impl Builtin {
     }
 
     #[inline]
-    fn is_pod(self) -> bool {
+    pub fn is_pod(self) -> bool {
         !matches!(
             self,
             Self::Void
@@ -861,7 +861,7 @@ impl<'ast> QualType<'ast> {
     pub fn is_pod(&self) -> bool {
         match self {
             QualType::Pointer { pointee, .. } => pointee.is_pod(),
-            QualType::Reference { pointee, .. } => pointee.is_pod(),
+            QualType::Reference { .. } => true,
             QualType::Builtin(bi) => bi.is_pod(),
             QualType::FunctionPointer => false,
             QualType::Array { element, .. } => element.is_pod(),

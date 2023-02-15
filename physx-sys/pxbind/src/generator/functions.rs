@@ -24,7 +24,18 @@ impl<'ast> Param<'ast> {
                     self.kind.cpp_type()
                 );
             }
-            QualType::Reference { .. } => {
+            QualType::Reference { pointee, .. } => {
+                if let QualType::Builtin(bi) = pointee.as_ref() {
+                    if !bi.is_pod() {
+                        writesln!(
+                            out,
+                            "{indent}{} {name} = *{name}_pod;",
+                            self.kind.cpp_type()
+                        );
+                        return;
+                    }
+                }
+
                 writesln!(
                     out,
                     "{indent}auto {name} = reinterpret_cast<{}>(*{name}_pod);",
