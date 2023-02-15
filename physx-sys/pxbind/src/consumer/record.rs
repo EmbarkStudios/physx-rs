@@ -47,7 +47,7 @@ pub struct Constructor {
 impl Constructor {
     /// Determines whether a constructor is a [copy constructor](https://en.cppreference.com/w/cpp/language/copy_constructor)
     #[inline]
-    fn is_copy_constructor(&self, node: &Node) -> bool {
+    fn is_copy_or_move_constructor(&self, node: &Node) -> bool {
         let mut iter = node.inner.iter().filter_map(|inn| {
             if let Item::ParmVarDecl(param) = &inn.kind {
                 Some(&param.kind.qual_type)
@@ -57,6 +57,10 @@ impl Constructor {
         });
 
         let Some(first) = iter.next() else { return false };
+
+        if first.ends_with(" &&") {
+            return true;
+        }
 
         let maybe_copy = first
             .strip_suffix(" &")
@@ -214,7 +218,14 @@ impl<'ast> super::AstConsumer<'ast> {
         td: &'ast Typedef,
     ) -> Option<&'ast str> {
         let tds = [
-            "PxVec3", "PxVec3p", "PxVec4", "PxQuat", "PxMat33", "PxMat34", "PxMat44",
+            "PxVec3",
+            "PxVec3p",
+            "PxVec4",
+            "PxQuat",
+            "PxMat33",
+            "PxMat34",
+            "PxMat44",
+            "PxTransform",
         ];
 
         if !tds.contains(&td.name.as_str()) {
@@ -401,6 +412,20 @@ impl<'ast> super::AstConsumer<'ast> {
                     is_reference: false,
                 });
             }
+            "PxTransform" => {
+                fields.push(FieldBinding {
+                    name: "q",
+                    kind: QualType::Builtin(Builtin::Quat),
+                    is_public: true,
+                    is_reference: false,
+                });
+                fields.push(FieldBinding {
+                    name: "p",
+                    kind: QualType::Builtin(Builtin::Vec3),
+                    is_public: true,
+                    is_reference: false,
+                });
+            }
             other => anyhow::bail!("template typedef {other} is not implemented"),
         }
 
@@ -516,7 +541,7 @@ impl<'ast> super::AstConsumer<'ast> {
             match meth_map.get_mut(&req) {
                 Some(count) => {
                     *count += 1;
-                    format!("{req}{count}")
+                    format!("{req}_{count}")
                 }
                 None => {
                     meth_map.insert(req.clone(), 0);
@@ -545,16 +570,18 @@ impl<'ast> super::AstConsumer<'ast> {
                 }
                 Item::CXXConstructorDecl(method) => {
                     // If the class is abstract we can't construct it directly so don't need to bind constructors
-                    // We don't care about copy constructors because we're rebels
-                    // We also don't care about move constructors, but physx doesn't have any
-                    if rec.is_abstract() || method.is_copy_constructor(inn) {
+                    // We don't care about copy or move constructors because they don't make sense in a C API
+                    if rec.is_abstract() || method.is_copy_or_move_constructor(inn) {
                         continue;
                     }
 
                     let func_binding = if rec.is_polymorphic() || !rec.has_simple_destructor() {
                         FuncBinding {
                             name: get_name(format!("{rname}_new_alloc")),
-                            ret: Some(QualType::Record { name: rname }),
+                            ret: Some(QualType::Pointer {
+                                is_const: false,
+                                pointee: Box::new(QualType::Record { name: rname }),
+                            }),
                             comment,
                             ext: FuncBindingExt::None(PhysxInvoke::New(rname)),
                             params: Vec::new(),
@@ -621,7 +648,7 @@ impl<'ast> super::AstConsumer<'ast> {
                         FuncBinding {
                             name: format!("{rname}_delete"),
                             comment,
-                            ext: FuncBindingExt::IsDelete,
+                            ext: FuncBindingExt::IsDelete(&rname),
                             params: Vec::new(),
                             ret: None,
                         },
@@ -632,7 +659,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 _ => continue,
             };
 
-            if !method.is_static {
+            if has_self {
                 func.params.push(Param::self_pod(
                     QualType::Record { name: rname },
                     method.is_const(),
@@ -677,7 +704,8 @@ impl<'ast> super::AstConsumer<'ast> {
         let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
 
         for inn in &node.inner {
-            let comment = Self::get_comment(inn);
+            // Note we could get comments for fields here, but due to the rust
+            // declarations being emitted by structgen, it becomes a bit noisy
 
             match &inn.kind {
                 Item::AccessSpecDecl { access } => {

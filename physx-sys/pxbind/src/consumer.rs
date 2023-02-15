@@ -206,9 +206,10 @@ use std::collections::HashMap;
 #[derive(Default)]
 pub struct AstConsumer<'ast> {
     pub enums: Vec<EnumBinding<'ast>>,
-    pub enum_map: HashMap<&'ast str, Builtin>,
+    pub enum_map: HashMap<&'ast str, (Builtin, &'ast str)>,
     pub flags: Vec<FlagsBinding<'ast>>,
     pub flags_map: HashMap<&'ast str, Builtin>,
+    pub type_defs: HashMap<&'ast str, QualType<'ast>>,
     pub recs: Vec<RecBinding<'ast>>,
     pub funcs: Vec<FuncBinding<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
@@ -293,10 +294,16 @@ impl<'ast> AstConsumer<'ast> {
             self.back_refs.insert(id, node);
         }
 
+        if self.type_defs.contains_key(&td.name.as_str()) {
+            return Ok(());
+        }
+
         if td.kind.qual_type.starts_with("PxFlags<") {
             self.consume_flags(node, td)?;
         } else if let Some(tid) = self.is_template_we_care_about(node, td) {
             self.consume_template(node, td, tid, root)?;
+        } else if let Ok(qt) = self.parse_type(&td.kind) {
+            self.type_defs.insert(&td.name, qt);
         }
 
         Ok(())
@@ -463,29 +470,42 @@ impl<'ast> AstConsumer<'ast> {
         // Check if it's an enum, we'll always know the enum by the time we hit
         // a reference to it, since physx doesn't do forward declaration of
         // enums, just old school
-        'physx: {
-            let Some(name) = type_str.strip_prefix("physx::") else { break 'physx };
+        if let Some((repr, name)) = self.enum_map.get(type_str) {
+            return Ok(QualType::Enum {
+                name,
+                cxx_qt: type_str,
+                repr: *repr,
+            });
+        } else if let Some(name) = type_str.strip_prefix("physx::") {
+            let qt = if let Some((repr, name)) = self.enum_map.get(name) {
+                QualType::Enum {
+                    name,
+                    cxx_qt: name,
+                    repr: *repr,
+                }
+            } else if let Some(repr) = self.flags_map.get(name) {
+                QualType::Flags { name, repr: *repr }
+            } else if let Some(qt) = self.type_defs.get(name) {
+                qt.clone()
+            } else {
+                QualType::Record { name }
+            };
 
-            if let Some(repr) = self.enum_map.get(name) {
-                return Ok(QualType::Enum { name, repr: *repr });
-            }
-
-            if let Some(repr) = self.flags_map.get(name) {
-                return Ok(QualType::Flags { name, repr: *repr });
-            }
-
-            return Ok(QualType::Record { name });
+            Ok(qt)
+        } else {
+            Ok(QualType::Enum {
+                name: "OHNO",
+                cxx_qt: "OHNOCPP",
+                repr: Builtin::UInt,
+            })
         }
 
-        Ok(QualType::Enum {
-            name: "OHNO",
-            repr: Builtin::UInt,
-        })
         //anyhow::bail!("oops {kind:?}")
     }
 
     fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
         let bi = match kind.into().as_str() {
+            "void" => Builtin::Void,
             // See PxSimpleTypes for where the physx typedefs come from
             "bool" => Builtin::Bool,
             "float" | "physx::PxReal" | "physx::PxF32" => Builtin::Float,
@@ -544,15 +564,26 @@ impl<'ast> From<&'ast str> for AstType<'ast> {
 
 impl<'ast> AstType<'ast> {
     fn as_str(&self) -> &'ast str {
-        match self {
+        let ty = match self {
             Self::Simple(s) => s,
             Self::Qualified(kind) => kind.qual_type.as_str(),
+        };
+
+        // If the type is _not_ a pointer or reference, strip any const prefix
+        // since it's useless and just makes parsing easier
+        if !ty.contains('*') && !ty.contains('&') {
+            if let Some(stripped) = ty.strip_prefix("const ") {
+                return stripped;
+            }
         }
+
+        ty
     }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub enum Builtin {
+    Void,
     Bool,
     Float,
     Double,
@@ -588,10 +619,11 @@ impl Builtin {
     #[inline]
     pub fn rust_type(self) -> &'static str {
         match self {
+            Self::Void => "std::ffi::c_void",
             Self::Bool => "bool",
             Self::Float => "f32",
             Self::Double => "f64",
-            Self::Char => "i8",
+            Self::Char => "std::ffi::c_char",
             Self::UChar => "u8",
             Self::Short => "i16",
             Self::UShort => "u16",
@@ -618,10 +650,11 @@ impl Builtin {
     #[inline]
     pub fn c_type(self) -> &'static str {
         match self {
+            Self::Void => "void",
             Self::Bool => "bool",
             Self::Float => "float",
             Self::Double => "double",
-            Self::Char => "int8_t",
+            Self::Char => "char",
             Self::UChar => "uint8_t",
             Self::Short => "int16_t",
             Self::UShort => "uint16_t",
@@ -651,10 +684,11 @@ impl Builtin {
     #[inline]
     pub fn cpp_type(self) -> &'static str {
         match self {
+            Self::Void => "void",
             Self::Bool => "bool",
             Self::Float => "float",
             Self::Double => "double",
-            Self::Char => "int8_t",
+            Self::Char => "char",
             Self::UChar => "uint8_t",
             Self::Short => "int16_t",
             Self::UShort => "uint16_t",
@@ -685,7 +719,8 @@ impl Builtin {
     fn is_pod(self) -> bool {
         !matches!(
             self,
-            Self::Bool
+            Self::Void
+                | Self::Bool
                 | Self::Float
                 | Self::Double
                 | Self::Char
@@ -718,6 +753,7 @@ pub enum QualType<'ast> {
     },
     Enum {
         name: &'ast str,
+        cxx_qt: &'ast str,
         repr: Builtin,
     },
     Flags {
@@ -776,7 +812,7 @@ impl<'qt, 'ast> fmt::Display for CppType<'qt, 'ast> {
             QualType::Array { element, len } => {
                 write!(f, "{}[{len}]", element.cpp_type())
             }
-            QualType::Enum { name, .. }
+            QualType::Enum { cxx_qt: name, .. }
             | QualType::Flags { name, .. }
             | QualType::Record { name } => write!(f, "physx::{name}"),
         }
@@ -791,15 +827,15 @@ impl<'qt, 'ast> fmt::Display for CType<'qt, 'ast> {
         match self.0 {
             QualType::Pointer { is_const, pointee } | QualType::Reference { is_const, pointee } => {
                 write!(f, "{}", pointee.c_type())?;
-                write!(f, " {}*", if *is_const { "const" } else { "" })
+                write!(f, "{}*", if *is_const { " const" } else { "" })
             }
             QualType::Builtin(bi) => f.write_str(bi.c_type()),
             QualType::FunctionPointer => f.write_str("void *"),
             QualType::Array { element, len } => {
                 write!(f, "{}[{len}]", element.c_type())
             }
-            QualType::Enum { name, repr } => f.write_str(repr.c_type()),
-            QualType::Flags { name, repr } => f.write_str(repr.c_type()),
+            QualType::Enum { repr, .. } => f.write_str(repr.c_type()),
+            QualType::Flags { repr, .. } => f.write_str(repr.c_type()),
             QualType::Record { name } => write!(f, "physx_{name}_Pod"),
         }
     }
@@ -825,12 +861,12 @@ impl<'ast> QualType<'ast> {
     pub fn is_pod(&self) -> bool {
         match self {
             QualType::Pointer { pointee, .. } => pointee.is_pod(),
-            QualType::Reference { is_const, pointee } => pointee.is_pod(),
+            QualType::Reference { pointee, .. } => pointee.is_pod(),
             QualType::Builtin(bi) => bi.is_pod(),
             QualType::FunctionPointer => false,
             QualType::Array { element, .. } => element.is_pod(),
-            QualType::Enum { name, .. } => true,
-            QualType::Flags { name, .. } => true,
+            QualType::Enum { .. } => true,
+            QualType::Flags { .. } => true,
             QualType::Record { .. } => true,
         }
     }

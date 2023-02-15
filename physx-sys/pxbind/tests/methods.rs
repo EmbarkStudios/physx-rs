@@ -50,3 +50,30 @@ fn methods_complex() {
     insta::assert_snapshot!(mo.cpp);
     insta::assert_snapshot!(mo.rust);
 }
+
+/// Verifies constructors of various kinds are properly bound, and properly
+/// named to avoid clashes
+#[test]
+fn constructors() {
+    let mo = gen_functions("constructors.h", &["PxBoxControllerDesc", "PxFilterData"]).unwrap();
+
+    insta::assert_snapshot!(mo.cpp);
+    insta::assert_snapshot!(mo.rust);
+}
+
+/// Verifies destructors are properly emitted or omitted
+#[test]
+fn destructor() {
+    let mo = gen_functions(
+        "destructors.h",
+        &[
+            "PxActor",
+            "PxJointLimitParameters",
+            "PxJointAngularLimitPair",
+        ],
+    )
+    .unwrap();
+
+    insta::assert_snapshot!(mo.cpp);
+    insta::assert_snapshot!(mo.rust);
+}

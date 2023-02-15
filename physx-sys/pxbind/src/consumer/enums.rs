@@ -1,6 +1,5 @@
 use super::{Builtin, Comment, EnumDecl, Item, Node, Typedef};
 use anyhow::Context as _;
-use std::fmt::{self};
 
 pub struct EnumVariant<'ast> {
     /// The name of the variant
@@ -142,6 +141,10 @@ impl<'ast> super::AstConsumer<'ast> {
             cxx_qt.with_context(|| format!("enum '{name}' never declared a qualified typename"))?;
         let cxx_qt = cxx_qt.strip_prefix("physx::").unwrap_or(cxx_qt);
 
+        if name == "PxEmpty" {
+            dbg!(cxx_qt);
+        }
+
         self.enums.push(EnumBinding {
             repr,
             name,
@@ -149,7 +152,7 @@ impl<'ast> super::AstConsumer<'ast> {
             comment,
             variants,
         });
-        self.enum_map.insert(cxx_qt, repr);
+        self.enum_map.insert(cxx_qt, (repr, name));
 
         Ok(())
     }

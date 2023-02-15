@@ -1,0 +1,127 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.rust
+---
+extern "C" {
+    /// Deletes the actor.
+    ///
+    /// Do not keep a reference to the deleted instance.
+    ///
+    /// If the actor belongs to a [`PxAggregate`] object, it is automatically removed from the aggregate.
+    pub fn PxActor_release_mut(self_: *mut physx_PxActor_Pod);
+
+    /// Retrieves the type of actor.
+    ///
+    /// The actor type of the actor.
+    pub fn PxActor_getType(self_: *const physx_PxActor_Pod) -> PxActorType;
+
+    /// Retrieves the scene which this actor belongs to.
+    ///
+    /// Owner Scene. NULL if not part of a scene.
+    pub fn PxActor_getScene(self_: *const physx_PxActor_Pod) -> *mut physx_PxScene_Pod;
+
+    /// Sets a name string for the object that can be retrieved with getName().
+    ///
+    /// This is for debugging and is not used by the SDK. The string is not copied by the SDK,
+    /// only the pointer is stored.
+    ///
+    /// Default:
+    /// NULL
+    pub fn PxActor_setName_mut(self_: *mut physx_PxActor_Pod, name: *const std::ffi::c_char);
+
+    /// Retrieves the name string set with setName().
+    ///
+    /// Name string associated with object.
+    pub fn PxActor_getName(self_: *const physx_PxActor_Pod) -> *const std::ffi::c_char;
+
+    /// Retrieves the axis aligned bounding box enclosing the actor.
+    ///
+    /// It is not allowed to use this method while the simulation is running (except during PxScene::collide(),
+    /// in PxContactModifyCallback or in contact report callbacks).
+    ///
+    /// The actor's bounding box.
+    pub fn PxActor_getWorldBounds(self_: *const physx_PxActor_Pod, inflation: f32) -> physx_PxBounds3_Pod;
+
+    /// Raises or clears a particular actor flag.
+    ///
+    /// See the list of flags [`PxActorFlag`]
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the actor up automatically.
+    pub fn PxActor_setActorFlag_mut(self_: *mut physx_PxActor_Pod, flag: PxActorFlag, value: bool);
+
+    /// Sets the actor flags.
+    ///
+    /// See the list of flags [`PxActorFlag`]
+    pub fn PxActor_setActorFlags_mut(self_: *mut physx_PxActor_Pod, inFlags: PxActorFlags);
+
+    /// Reads the PxActor flags.
+    ///
+    /// See the list of flags [`PxActorFlag`]
+    ///
+    /// The values of the PxActor flags.
+    pub fn PxActor_getActorFlags(self_: *const physx_PxActor_Pod) -> PxActorFlags;
+
+    /// Assigns dynamic actors a dominance group identifier.
+    ///
+    /// PxDominanceGroup is a 5 bit group identifier (legal range from 0 to 31).
+    ///
+    /// The PxScene::setDominanceGroupPair() lets you set certain behaviors for pairs of dominance groups.
+    /// By default every dynamic actor is created in group 0.
+    ///
+    /// Default:
+    /// 0
+    ///
+    /// Sleeping:
+    /// Changing the dominance group does
+    /// NOT
+    /// wake the actor up automatically.
+    pub fn PxActor_setDominanceGroup_mut(self_: *mut physx_PxActor_Pod, dominanceGroup: u8);
+
+    /// Retrieves the value set with setDominanceGroup().
+    ///
+    /// The dominance group of this actor.
+    pub fn PxActor_getDominanceGroup(self_: *const physx_PxActor_Pod) -> u8;
+
+    /// Sets the owner client of an actor.
+    ///
+    /// This cannot be done once the actor has been placed into a scene.
+    ///
+    /// Default:
+    /// PX_DEFAULT_CLIENT
+    pub fn PxActor_setOwnerClient_mut(self_: *mut physx_PxActor_Pod, inClient: u8);
+
+    /// Returns the owner client that was specified at creation time.
+    ///
+    /// This value cannot be changed once the object is placed into the scene.
+    pub fn PxActor_getOwnerClient(self_: *const physx_PxActor_Pod) -> u8;
+
+    /// Retrieves the aggregate the actor might be a part of.
+    ///
+    /// The aggregate the actor is a part of, or NULL if the actor does not belong to an aggregate.
+    pub fn PxActor_getAggregate(self_: *const physx_PxActor_Pod) -> *mut physx_PxAggregate_Pod;
+
+    pub fn PxJointLimitParameters_new_alloc() -> *mut physx_PxJointLimitParameters_Pod;
+
+    /// Returns true if the current settings are valid.
+    ///
+    /// true if the current settings are valid
+    pub fn PxJointLimitParameters_isValid(self_: *const physx_PxJointLimitParameters_Pod) -> bool;
+
+    pub fn PxJointLimitParameters_isSoft(self_: *const physx_PxJointLimitParameters_Pod) -> bool;
+
+    pub fn PxJointAngularLimitPair_new(lowerLimit: f32, upperLimit: f32, contactDist_deprecated: f32) -> physx_PxJointAngularLimitPair_Pod;
+
+    pub fn PxJointAngularLimitPair_new_1(lowerLimit: f32, upperLimit: f32, spring: *const physx_PxSpring_Pod) -> physx_PxJointAngularLimitPair_Pod;
+
+    /// Returns true if the limit is valid.
+    ///
+    /// true if the current settings are valid
+    pub fn PxJointAngularLimitPair_isValid(self_: *const physx_PxJointAngularLimitPair_Pod) -> bool;
+
+    pub fn PxJointAngularLimitPair_delete(self_: *mut physx_PxJointAngularLimitPair_Pod);
+
+}
+

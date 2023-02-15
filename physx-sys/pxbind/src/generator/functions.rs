@@ -11,21 +11,6 @@ impl<'ast> Param<'ast> {
         let indent = Indent(level);
 
         match &self.kind {
-            //            physx::PxVec3 const* self_ = reinterpret_cast<physx::PxVec3 const*>(self__pod);
-            //     physx::PxVec3 const& a = reinterpret_cast<physx::PxVec3 const&>(*a_pod);
-            // void PxShape_setMaterials_mut(physx_PxShape_Pod* self__pod, physx_PxMaterial_Pod* const* materials_pod, uint16_t materialCount) {
-            //     physx::PxShape* self_ = reinterpret_cast<physx::PxShape*>(self__pod);
-            //     physx::PxMaterial* const* materials = reinterpret_cast<physx::PxMaterial* const*>(materials_pod);
-            //     self_->setMaterials(materials, materialCount);
-            //     }
-            // physx_PxBoxGeometry_Pod PxBoxGeometry_new_2(physx_PxVec3_Pod halfExtents__pod) {
-            //     physx::PxVec3 halfExtents_;
-            //     memcpy(&halfExtents_, &halfExtents__pod, sizeof(halfExtents_));
-            //     physx::PxBoxGeometry returnValue(halfExtents_);
-            //     physx_PxBoxGeometry_Pod returnValue_pod;
-            //     memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-            //     return returnValue_pod;
-            //     }
             QualType::Builtin(bi) => {
                 // This means we got a pod type by value, so we need to copy
                 // from the C pod to the C++ type
@@ -46,14 +31,19 @@ impl<'ast> Param<'ast> {
                     self.kind.cpp_type()
                 );
             }
-            QualType::Enum { name: ename, .. } => {
+            QualType::Enum { .. } => {
                 writesln!(
                     out,
-                    "{indent}auto {name} = static_cast<{ename}>({name}_pod);"
+                    "{indent}auto {name} = static_cast<{}>({name}_pod);",
+                    self.kind.cpp_type(),
                 );
             }
-            QualType::Flags { name: fname, .. } => {
-                writesln!(out, "{indent}auto {name} = {fname}({name}_pod);");
+            QualType::Flags { .. } => {
+                writesln!(
+                    out,
+                    "{indent}auto {name} = {}({name}_pod);",
+                    self.kind.cpp_type()
+                );
             }
             _ => panic!("oh no {self:?}"),
         }
@@ -78,7 +68,6 @@ impl<'ast> FuncBinding<'ast> {
             writes!(acc, " {}(", self.name);
 
             for (i, param) in self.params.iter().enumerate() {
-                // No trailing commas :(
                 let sep = if i > 0 { ", " } else { "" };
 
                 writes!(
@@ -104,8 +93,8 @@ impl<'ast> FuncBinding<'ast> {
         }
 
         let (invoke, arg_skip) = match &self.ext {
-            FuncBindingExt::IsDelete => {
-                writesln!(acc, "{indent}delete self_;\n}}");
+            FuncBindingExt::IsDelete(_) => {
+                writesln!(acc, "{indent}delete self_;\n{}}}", Indent(level));
                 return Ok(());
             }
             FuncBindingExt::None(inv) => (inv, 0),
@@ -185,8 +174,12 @@ impl<'ast> FuncBinding<'ast> {
         let mut acc = String::new();
         writes!(acc, "{indent}pub fn {}(", self.name);
 
-        for param in &self.params {
-            writes!(acc, "{}: {}, ", param.name, param.kind.rust_type());
+        for (i, param) in self.params.iter().enumerate() {
+            // While Rust allows trailing commas in function signatures, it's
+            // kind of ugly
+            let sep = if i > 0 { ", " } else { "" };
+
+            writes!(acc, "{sep}{}: {}", param.name, param.kind.rust_type());
         }
 
         if let Some(ret) = &self.ret {

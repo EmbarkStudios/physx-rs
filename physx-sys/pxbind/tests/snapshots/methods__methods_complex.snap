@@ -1,0 +1,302 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.cpp
+---
+extern "C" {
+    void PxShape_release_mut(physx_PxShape_Pod* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->release();
+    }
+
+    void PxShape_setGeometry_mut(physx_PxShape_Pod* self__pod, physx_PxGeometry_Pod const* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxGeometry const&>(*geometry_pod);
+        self_->setGeometry(geometry);
+    }
+
+    physx_PxGeometry_Pod const* PxShape_getGeometry(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxGeometry const& return_val = self_->getGeometry();
+        auto return_val_pod = reinterpret_cast<physx_PxGeometry_Pod const*>(&return_val);
+        return return_val_pod;
+    }
+
+    int32_t PxShape_getGeometryType(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxGeometryType::Enum return_val = self_->getGeometryType();
+        int32_t return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    bool PxShape_getBoxGeometry(physx_PxShape_Pod const* self__pod, physx_PxBoxGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxBoxGeometry&>(*geometry_pod);
+        bool return_val = self_->getBoxGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getSphereGeometry(physx_PxShape_Pod const* self__pod, physx_PxSphereGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxSphereGeometry&>(*geometry_pod);
+        bool return_val = self_->getSphereGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getCapsuleGeometry(physx_PxShape_Pod const* self__pod, physx_PxCapsuleGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxCapsuleGeometry&>(*geometry_pod);
+        bool return_val = self_->getCapsuleGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getPlaneGeometry(physx_PxShape_Pod const* self__pod, physx_PxPlaneGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxPlaneGeometry&>(*geometry_pod);
+        bool return_val = self_->getPlaneGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getConvexMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxConvexMeshGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxConvexMeshGeometry&>(*geometry_pod);
+        bool return_val = self_->getConvexMeshGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getTriangleMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxTriangleMeshGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxTriangleMeshGeometry&>(*geometry_pod);
+        bool return_val = self_->getTriangleMeshGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getTetrahedronMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxTetrahedronMeshGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxTetrahedronMeshGeometry&>(*geometry_pod);
+        bool return_val = self_->getTetrahedronMeshGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getParticleSystemGeometry(physx_PxShape_Pod const* self__pod, physx_PxParticleSystemGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxParticleSystemGeometry&>(*geometry_pod);
+        bool return_val = self_->getParticleSystemGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getHeightFieldGeometry(physx_PxShape_Pod const* self__pod, physx_PxHeightFieldGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxHeightFieldGeometry&>(*geometry_pod);
+        bool return_val = self_->getHeightFieldGeometry(geometry);
+        return return_val;
+    }
+
+    bool PxShape_getCustomGeometry(physx_PxShape_Pod const* self__pod, physx_PxCustomGeometry_Pod* geometry_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto geometry = reinterpret_cast<physx::PxCustomGeometry&>(*geometry_pod);
+        bool return_val = self_->getCustomGeometry(geometry);
+        return return_val;
+    }
+
+    physx_PxRigidActor_Pod* PxShape_getActor(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxRigidActor* return_val = self_->getActor();
+        auto return_val_pod = reinterpret_cast<physx_PxRigidActor_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    void PxShape_setLocalPose_mut(physx_PxShape_Pod* self__pod, physx_PxTransform_Pod const* pose_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto pose = reinterpret_cast<physx::PxTransform const&>(*pose_pod);
+        self_->setLocalPose(pose);
+    }
+
+    physx_PxTransform_Pod PxShape_getLocalPose(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxTransform return_val = self_->getLocalPose();
+        physx_PxTransform_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    void PxShape_setSimulationFilterData_mut(physx_PxShape_Pod* self__pod, physx_PxFilterData_Pod const* data_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto data = reinterpret_cast<physx::PxFilterData const&>(*data_pod);
+        self_->setSimulationFilterData(data);
+    }
+
+    physx_PxFilterData_Pod PxShape_getSimulationFilterData(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxFilterData return_val = self_->getSimulationFilterData();
+        physx_PxFilterData_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    void PxShape_setQueryFilterData_mut(physx_PxShape_Pod* self__pod, physx_PxFilterData_Pod const* data_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto data = reinterpret_cast<physx::PxFilterData const&>(*data_pod);
+        self_->setQueryFilterData(data);
+    }
+
+    physx_PxFilterData_Pod PxShape_getQueryFilterData(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxFilterData return_val = self_->getQueryFilterData();
+        physx_PxFilterData_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    void PxShape_setMaterials_mut(physx_PxShape_Pod* self__pod, physx_PxMaterial_Pod* const* materials_pod, uint16_t materialCount) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto materials = reinterpret_cast<physx::PxMaterial* const*>(materials_pod);
+        self_->setMaterials(materials, materialCount);
+    }
+
+    void PxShape_setSoftBodyMaterials_mut(physx_PxShape_Pod* self__pod, physx_PxFEMSoftBodyMaterial_Pod* const* materials_pod, uint16_t materialCount) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto materials = reinterpret_cast<physx::PxFEMSoftBodyMaterial* const*>(materials_pod);
+        self_->setSoftBodyMaterials(materials, materialCount);
+    }
+
+    void PxShape_setClothMaterials_mut(physx_PxShape_Pod* self__pod, physx_PxFEMClothMaterial_Pod* const* materials_pod, uint16_t materialCount) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto materials = reinterpret_cast<physx::PxFEMClothMaterial* const*>(materials_pod);
+        self_->setClothMaterials(materials, materialCount);
+    }
+
+    uint16_t PxShape_getNbMaterials(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        uint16_t return_val = self_->getNbMaterials();
+        return return_val;
+    }
+
+    uint32_t PxShape_getMaterials(physx_PxShape_Pod const* self__pod, physx_PxMaterial_Pod** userBuffer_pod, uint32_t bufferSize, uint32_t startIndex) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto userBuffer = reinterpret_cast<physx::PxMaterial**>(userBuffer_pod);
+        uint32_t return_val = self_->getMaterials(userBuffer, bufferSize, startIndex);
+        return return_val;
+    }
+
+    uint32_t PxShape_getSoftBodyMaterials(physx_PxShape_Pod const* self__pod, physx_PxFEMSoftBodyMaterial_Pod** userBuffer_pod, uint32_t bufferSize, uint32_t startIndex) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto userBuffer = reinterpret_cast<physx::PxFEMSoftBodyMaterial**>(userBuffer_pod);
+        uint32_t return_val = self_->getSoftBodyMaterials(userBuffer, bufferSize, startIndex);
+        return return_val;
+    }
+
+    uint32_t PxShape_getClothMaterials(physx_PxShape_Pod const* self__pod, physx_PxFEMClothMaterial_Pod** userBuffer_pod, uint32_t bufferSize, uint32_t startIndex) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        auto userBuffer = reinterpret_cast<physx::PxFEMClothMaterial**>(userBuffer_pod);
+        uint32_t return_val = self_->getClothMaterials(userBuffer, bufferSize, startIndex);
+        return return_val;
+    }
+
+    physx_PxBaseMaterial_Pod* PxShape_getMaterialFromInternalFaceIndex(physx_PxShape_Pod const* self__pod, uint32_t faceIndex) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxBaseMaterial* return_val = self_->getMaterialFromInternalFaceIndex(faceIndex);
+        auto return_val_pod = reinterpret_cast<physx_PxBaseMaterial_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    void PxShape_setContactOffset_mut(physx_PxShape_Pod* self__pod, float contactOffset) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setContactOffset(contactOffset);
+    }
+
+    float PxShape_getContactOffset(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        float return_val = self_->getContactOffset();
+        return return_val;
+    }
+
+    void PxShape_setRestOffset_mut(physx_PxShape_Pod* self__pod, float restOffset) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setRestOffset(restOffset);
+    }
+
+    float PxShape_getRestOffset(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        float return_val = self_->getRestOffset();
+        return return_val;
+    }
+
+    void PxShape_setDensityForFluid_mut(physx_PxShape_Pod* self__pod, float densityForFluid) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setDensityForFluid(densityForFluid);
+    }
+
+    float PxShape_getDensityForFluid(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        float return_val = self_->getDensityForFluid();
+        return return_val;
+    }
+
+    void PxShape_setTorsionalPatchRadius_mut(physx_PxShape_Pod* self__pod, float radius) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setTorsionalPatchRadius(radius);
+    }
+
+    float PxShape_getTorsionalPatchRadius(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        float return_val = self_->getTorsionalPatchRadius();
+        return return_val;
+    }
+
+    void PxShape_setMinTorsionalPatchRadius_mut(physx_PxShape_Pod* self__pod, float radius) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setMinTorsionalPatchRadius(radius);
+    }
+
+    float PxShape_getMinTorsionalPatchRadius(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        float return_val = self_->getMinTorsionalPatchRadius();
+        return return_val;
+    }
+
+    void PxShape_setFlag_mut(physx_PxShape_Pod* self__pod, uint32_t flag_pod, bool value) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto flag = static_cast<physx::PxShapeFlag::Enum>(flag_pod);
+        self_->setFlag(flag, value);
+    }
+
+    void PxShape_setFlags_mut(physx_PxShape_Pod* self__pod, uint8_t inFlags_pod) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        auto inFlags = physx::PxShapeFlags(inFlags_pod);
+        self_->setFlags(inFlags);
+    }
+
+    uint8_t PxShape_getFlags(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        physx::PxShapeFlags return_val = self_->getFlags();
+        uint8_t return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    bool PxShape_isExclusive(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        bool return_val = self_->isExclusive();
+        return return_val;
+    }
+
+    void PxShape_setName_mut(physx_PxShape_Pod* self__pod, char const* name) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->setName(name);
+    }
+
+    char const* PxShape_getName(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        char const* return_val = self_->getName();
+        return return_val;
+    }
+
+    char const* PxShape_getConcreteTypeName(physx_PxShape_Pod const* self__pod) {
+        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
+        char const* return_val = self_->getConcreteTypeName();
+        return return_val;
+    }
+
+}
+

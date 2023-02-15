@@ -38,7 +38,7 @@ pub enum PhysxInvoke<'ast> {
 }
 
 pub enum FuncBindingExt<'ast> {
-    IsDelete,
+    IsDelete(&'ast str),
     None(PhysxInvoke<'ast>),
     HasSelf(PhysxInvoke<'ast>),
 }
@@ -62,7 +62,7 @@ impl<'ast> FuncBinding<'ast> {
                 } => Some(name),
                 _ => None,
             },
-            _ => None,
+            FuncBindingExt::IsDelete(class_name) => Some(class_name),
         }
     }
 }
