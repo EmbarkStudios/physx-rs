@@ -5,6 +5,7 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 ### Fixed
+- [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
 - [PR#176](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.65.0.
 
 ## [0.16.0] - 2022-10-20

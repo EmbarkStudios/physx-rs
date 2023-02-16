@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Fixed
+- [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
+
 ## [0.8.1] - 2022-11-22
 ### Fixed
 - [PR#176](https://github.com/EmbarkStudios/physx-rs/pull/176) removed warnings as errors when building the C++ code. This is not useful for end users and just results in sadness when eg. using newer compiler versions that introduce new/improved warnings.

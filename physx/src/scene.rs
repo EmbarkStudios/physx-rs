@@ -862,6 +862,8 @@ pub enum HitFlag {
 }
 
 impl HitFlag {
+    // Note[TSolberg]: This cannot be Default::default because it returns BitFlags<Self>, not Self.
+    #[allow(clippy::should_implement_trait)]
     pub fn default() -> BitFlags<HitFlag> {
         HitFlag::Position | HitFlag::Normal | HitFlag::FaceIndex
     }
