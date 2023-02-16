@@ -38,7 +38,13 @@ fn main() {
             &PxTransform_new_2(PxIdentity),
         );
         PxRigidBody_setAngularDamping_mut(sphere as *mut PxRigidBody, 0.5);
+        let mut sphere_shape: Vec<*mut PxShape> = vec![null_mut()];
+        PxRigidActor_getShapes(sphere as _, sphere_shape.as_mut_ptr() as _, 1, 0);
+        PxShape_setFlag_mut(sphere_shape[0], PxShapeFlag::eSCENE_QUERY_SHAPE, true);
         PxScene_addActor_mut(scene, sphere as *mut PxActor, null_mut());
+
+        let raycast_buffer = create_raycast_buffer();
+        let filter_data = PxQueryFilterData_new();
 
         let heights_over_time = (0..100)
             .map(|_| {
@@ -47,6 +53,36 @@ fn main() {
                 PxScene_fetchResults_mut(scene, true, &mut error);
                 assert!(error == 0, "fetchResults has failed");
                 let pose = PxRigidActor_getGlobalPose(sphere as *mut PxRigidActor);
+
+                if physx_sys::PxScene_raycast(
+                    scene,
+                    &PxVec3 {
+                        x: 0.,
+                        y: 100.,
+                        z: 100.,
+                    }, // origin
+                    &PxVec3 {
+                        x: 0.,
+                        y: -1.,
+                        z: 0.,
+                    }, // dir
+                    1000., // max distance
+                    raycast_buffer,
+                    physx_sys::PxHitFlags {
+                        mBits: PxHitFlag::eDEFAULT as u16,
+                    },
+                    &filter_data,
+                    null_mut(),
+                    null_mut(),
+                ) {
+                    if (*raycast_buffer).hasBlock {
+                        println!(
+                            "Raycast hit object {}m away",
+                            (*raycast_buffer).block.distance
+                        );
+                    }
+                }
+
                 (pose.p.y) as i32 - 10
             })
             .collect::<Vec<_>>();
@@ -63,6 +99,7 @@ fn main() {
             .for_each(|line| {
                 println!("{}", line);
             });
+        delete_raycast_callback(raycast_buffer);
         PxScene_release_mut(scene);
         PxDefaultCpuDispatcher_release_mut(dispatcher);
         PxPhysics_release_mut(physics);
