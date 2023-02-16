@@ -42,9 +42,9 @@ jobs:
     name: Test (Debug)
     strategy:
       matrix:
-        os: [ubuntu-20.04, macOS-latest]
+        os: [ubuntu-20.04, macos-12]
     env:
-      DEVELOPER_DIR: /Applications/Xcode_11.7.app
+      DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -59,7 +59,7 @@ jobs:
         run: cargo test
       - name: test - all features
         run: cargo test --all-features
-      - name: ball all features 
+      - name: ball all features
         run: cargo run --example ball --all-features
       - name: ball no features
         run: cargo run --example ball
@@ -88,8 +88,8 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          use-cross: true 
-          command: build 
+          use-cross: true
+          command: build
           args: --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
 
   build_release_aarch64_linux:
@@ -113,17 +113,17 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          use-cross: true 
-          command: build 
+          use-cross: true
+          command: build
           args: --release --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
 
   test_release:
     name: Test (Release)
     strategy:
       matrix:
-        os: [ubuntu-20.04, macOS-latest]
+        os: [ubuntu-20.04, macos-12]
     env:
-      DEVELOPER_DIR: /Applications/Xcode_11.7.app
+      DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -136,9 +136,9 @@ jobs:
       - run: cargo fetch
       - name: test - no features
         run: cargo test --release
-      - name: test - all features 
+      - name: test - all features
         run: cargo test --all-features --release
-      - name: ball all features 
+      - name: ball all features
         run: cargo run --example ball --all-features --release
       - name: ball no features
         run: cargo run --example ball --release
@@ -149,9 +149,9 @@ jobs:
     name: Package
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-latest]
+        os: [ubuntu-20.04, windows-2019, macos-12]
     env:
-      DEVELOPER_DIR: /Applications/Xcode_11.7.app
+      DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -167,9 +167,9 @@ jobs:
     name: Structgen
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-latest]
+        os: [ubuntu-20.04, windows-2019, macos-12]
     env:
-      DEVELOPER_DIR: /Applications/Xcode_11.7.app
+      DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
