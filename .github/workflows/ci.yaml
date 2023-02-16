@@ -42,7 +42,7 @@ jobs:
     name: Test (Debug)
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-12]
+        os: [ubuntu-20.04, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
@@ -121,7 +121,7 @@ jobs:
     name: Test (Release)
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-12]
+        os: [ubuntu-20.04, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
@@ -149,7 +149,7 @@ jobs:
     name: Package
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-12]
+        os: [ubuntu-20.04, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
@@ -167,7 +167,7 @@ jobs:
     name: Structgen
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-12]
+        os: [ubuntu-20.04, windows-2019, macOS-latest]
     env:
       DEVELOPER_DIR: /Applications/Xcode_14.2.app
     runs-on: ${{ matrix.os }}
