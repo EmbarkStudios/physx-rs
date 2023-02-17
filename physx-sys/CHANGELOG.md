@@ -4,6 +4,8 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+- [PR#181](https://github.com/EmbarkStudios/physx-rs/pull/181) add raycast, sweep and overlap buffer and callback create and delete methods, and update example to show how to use them for scene raycasting
+
 ### Fixed
 - [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
 
