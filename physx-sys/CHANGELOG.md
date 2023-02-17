@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.8.2] - 2023-02-17
 ### Added
 - [PR#181](https://github.com/EmbarkStudios/physx-rs/pull/181) add raycast, sweep and overlap buffer and callback create and delete methods, and update example to show how to use them for scene raycasting
 
@@ -157,7 +158,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.2...HEAD
+[0.8.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.1...physx-sys-v0.8.2
 [0.8.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.0...physx-sys-v0.8.1
 [0.8.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.7.0...physx-sys-v0.8.0
 [0.7.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.6.0...physx-sys-v0.7.0
