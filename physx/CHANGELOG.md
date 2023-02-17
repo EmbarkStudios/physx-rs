@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.16.1] - 2023-02-17
 ### Fixed
 - [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
 - [PR#176](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.65.0.
@@ -179,7 +180,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.1...HEAD
+[0.16.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.0...physx-v0.16.1
 [0.16.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.15.0...physx-v0.16.0
 [0.15.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.1...physx-v0.15.0
 [0.14.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.14.0...physx-v0.14.1
