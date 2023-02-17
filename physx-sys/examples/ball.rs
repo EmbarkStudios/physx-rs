@@ -74,13 +74,12 @@ fn main() {
                     &filter_data,
                     null_mut(),
                     null_mut(),
-                ) {
-                    if (*raycast_buffer).hasBlock {
-                        println!(
-                            "Raycast hit object {}m away",
-                            (*raycast_buffer).block.distance
-                        );
-                    }
+                ) && (*raycast_buffer).hasBlock
+                {
+                    println!(
+                        "Raycast hit object {}m away",
+                        (*raycast_buffer).block.distance
+                    );
                 }
 
                 (pose.p.y) as i32 - 10
