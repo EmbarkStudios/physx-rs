@@ -58,7 +58,7 @@ fn abstract_() {
 /// actually publicly exposed
 #[test]
 fn ref_fields() {
-    let ro = gen_records("ref_fields.h", &["SupportLocal"]).unwrap();
+    let ro = gen_records("ref_fields.h", &["PxReffyMcRefface"]).unwrap();
 
     insta::assert_snapshot!(ro.structgen);
     insta::assert_snapshot!(ro.size_asserts);

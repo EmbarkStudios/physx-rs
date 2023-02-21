@@ -1,6 +1,5 @@
 #include "common/PxBase.h"
 #include "foundation/PxMath.h"
-#include "extensions/PxJoint.h"
 
 namespace physx {
 class PxJointLimitParameters
@@ -64,14 +63,6 @@ public:
     {
         PxJointLimitParameters::contactDistance_deprecated = contactDist_deprecated ==-1.0f ? PxMin(0.1f, 0.49f*(upperLimit-lowerLimit)) : contactDist_deprecated;
         bounceThreshold = 0.5f;
-    }
-
-    PxJointAngularLimitPair(PxReal lowerLimit, PxReal upperLimit, const PxSpring& spring) :
-        upper(upperLimit),
-        lower(lowerLimit)
-    {
-        stiffness = spring.stiffness;
-        damping = spring.damping;
     }
 
     /**
