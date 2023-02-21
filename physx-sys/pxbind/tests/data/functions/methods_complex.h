@@ -2,6 +2,7 @@
 #include "common/PxBase.h"
 #include "geometry/PxGeometry.h"
 #include "geometry/PxGeometryHelpers.h"
+#include "foundation/PxThread.h"
 
 namespace physx {
 

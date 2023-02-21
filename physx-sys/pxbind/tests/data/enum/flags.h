@@ -1,4 +1,5 @@
 #include "foundation/PxFlags.h"
+#include "PxArticulationReducedCoordinate.h"
 
 namespace physx {
     // From PxActorData.h
@@ -25,32 +26,6 @@ namespace physx {
     typedef PxFlags<PxActorCacheFlag::Enum, PxU16> PxActorCacheFlags;
 
     // From PxArticulationFlags.h
-
-    /**
-    \brief These flags determine what data is read or written to the internal articulation data via cache.
-
-    @see PxArticulationCache PxArticulationReducedCoordinate::copyInternalStateToCache PxArticulationReducedCoordinate::applyCache
-    */
-    class PxArticulationCacheFlag
-    {
-    public:
-        enum Enum
-        {
-            eVELOCITY = (1 << 0),				//!< The joint velocities, see PxArticulationCache::jointVelocity.
-            eACCELERATION = (1 << 1),			//!< The joint accelerations, see PxArticulationCache::jointAcceleration.
-            ePOSITION = (1 << 2),				//!< The joint positions, see PxArticulationCache::jointPosition.
-            eFORCE = (1 << 3),					//!< The joint forces, see PxArticulationCache::jointForce.
-            eLINK_VELOCITY = (1 << 4),			//!< The link velocities, see PxArticulationCache::linkVelocity.
-            eLINK_ACCELERATION = (1 << 5),		//!< The link accelerations, see PxArticulationCache::linkAcceleration.
-            eROOT_TRANSFORM = (1 << 6),			//!< Root link transform, see PxArticulationCache::rootLinkData.
-            eROOT_VELOCITIES = (1 << 7),		//!< Root link velocities (read/write) and accelerations (read), see PxArticulationCache::rootLinkData.
-            eSENSOR_FORCES = (1 << 8),			//!< The spatial sensor forces, see PxArticulationCache::sensorForces.
-            eJOINT_SOLVER_FORCES = (1 << 9),	//!< Solver constraint joint forces, see PxArticulationCache::jointSolverForces.
-            eALL = (eVELOCITY | eACCELERATION | ePOSITION | eLINK_VELOCITY | eLINK_ACCELERATION | eROOT_TRANSFORM | eROOT_VELOCITIES)
-        };
-    };
-
-    typedef PxFlags<PxArticulationCacheFlag::Enum, PxU32> PxArticulationCacheFlags;
 
     /**
     \brief Flags which affect the behavior of PxShapes.

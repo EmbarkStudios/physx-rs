@@ -50,10 +50,10 @@ int main() {
     struct physx_PxMat44_Pod: public physx::PxMat44 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxMat44_Pod", "PxMat44");
-            sg.add_field("physx_Vec4_Pod column0", "column0", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column0));
-            sg.add_field("physx_Vec4_Pod column1", "column1", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column1));
-            sg.add_field("physx_Vec4_Pod column2", "column2", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column2));
-            sg.add_field("physx_Vec4_Pod column3", "column3", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column3));
+            sg.add_field("physx_PxVec4_Pod column0", "column0", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column0));
+            sg.add_field("physx_PxVec4_Pod column1", "column1", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column1));
+            sg.add_field("physx_PxVec4_Pod column2", "column2", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column2));
+            sg.add_field("physx_PxVec4_Pod column3", "column3", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column3));
             sg.end_struct(sizeof(physx::PxMat44));
         }
     };

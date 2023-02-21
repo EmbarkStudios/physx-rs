@@ -20,19 +20,19 @@ struct physx_PxQuat_Pod {
     float w;
 };
 struct physx_PxMat33_Pod {
-    physx_Vec3_Pod column0;
-    physx_Vec3_Pod column1;
-    physx_Vec3_Pod column2;
+    physx_PxVec3_Pod column0;
+    physx_PxVec3_Pod column1;
+    physx_PxVec3_Pod column2;
 };
 struct physx_PxMat44_Pod {
-    physx_Vec4_Pod column0;
-    physx_Vec4_Pod column1;
-    physx_Vec4_Pod column2;
-    physx_Vec4_Pod column3;
+    physx_PxVec4_Pod column0;
+    physx_PxVec4_Pod column1;
+    physx_PxVec4_Pod column2;
+    physx_PxVec4_Pod column3;
 };
 struct physx_PxTransform_Pod {
-    physx_Quat_Pod q;
-    physx_Vec3_Pod p;
+    physx_PxQuat_Pod q;
+    physx_PxVec3_Pod p;
 };
 struct physx_PxProcessPxBaseCallback_Pod {
     void* vtable_;
@@ -47,9 +47,6 @@ struct physx_PxSerializationRegistry_Pod {
     void* vtable_;
 };
 struct physx_PxCollection_Pod {
-    void* vtable_;
-};
-struct physx_PxAssertHandler_Pod {
     void* vtable_;
 };
 struct physx_PxBase_Pod {
@@ -211,6 +208,30 @@ struct physx_PxCustomGeometry_Pod {
 };
 struct physx_PxGeometryHolder_Pod {
     char structgen_pad0[56];
+};
+struct physx_PxAllocatorCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxFoundation_Pod {
+    void* vtable_;
+};
+struct physx_PxAllocator_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxRawAllocator_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxVirtualAllocatorCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxVirtualAllocator_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxUserAllocated_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxRunnable_Pod {
+    void* vtable_;
 };
 struct physx_PxShape_Pod {
     char structgen_pad0[16];

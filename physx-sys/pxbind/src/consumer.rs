@@ -320,7 +320,9 @@ impl<'ast> AstConsumer<'ast> {
             return Ok(());
         }
 
-        if td.kind.qual_type.starts_with("PxFlags<") {
+        if td.kind.qual_type.starts_with("physx::PxFlags<")
+            || td.kind.qual_type.starts_with("PxFlags<")
+        {
             self.consume_flags(node, td)?;
         } else if let Some(tid) = self.is_template_we_care_about(node, td) {
             self.consume_template_typedef(node, td, tid, root)?;
@@ -435,6 +437,10 @@ impl<'ast> AstConsumer<'ast> {
         // Builtin types are the most common, we already handle the common typedefs as well
         if let Some(bi) = self.parse_builtin(type_str) {
             return Ok(QualType::Builtin(bi));
+        }
+
+        if type_str.contains("(*)") {
+            return Ok(QualType::FunctionPointer);
         }
 
         // First check if the type has an alias, most likely a typedef
@@ -556,45 +562,38 @@ impl<'ast> AstConsumer<'ast> {
     }
 
     fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
-        let bi = match kind.into().as_str() {
+        let name = kind.into().as_str();
+        let name = no_physx(name);
+        let bi = match name {
             "void" => Builtin::Void,
             // See PxSimpleTypes for where the physx typedefs come from
             "bool" => Builtin::Bool,
-            "float" | "physx::PxReal" | "physx::PxF32" => Builtin::Float,
+            "float" | "PxReal" | "PxF32" => Builtin::Float,
             "double" => Builtin::Double,
-            "int8_t" | "char" | "physx::PxI8" => Builtin::Char,
-            "uint8_t" | "unsigned char" | "physx::PxU8" => Builtin::UChar,
-            "int16_t" | "short" | "physx::PxI16" => Builtin::Short,
-            "uint16_t" | "unsigned short" | "physx::PxU16" => Builtin::UShort,
-            "int32_t" | "int" | "physx::PxI32" => Builtin::Int,
-            "uint32_t" | "unsigned int" | "physx::PxU32" => Builtin::UInt,
+            "int8_t" | "char" | "PxI8" => Builtin::Char,
+            "uint8_t" | "unsigned char" | "PxU8" => Builtin::UChar,
+            "int16_t" | "short" | "PxI16" => Builtin::Short,
+            "uint16_t" | "unsigned short" | "PxU16" => Builtin::UShort,
+            "int32_t" | "int" | "PxI32" => Builtin::Int,
+            "uint32_t" | "unsigned int" | "PxU32" => Builtin::UInt,
             // Signed 64-bit integers are essentially unused in Physx
-            "int64_t" | "long" | "physx::PxI64" => Builtin::Long,
-            "uint64_t" | "unsigned long" | "physx::PxU64" => Builtin::ULong,
+            "int64_t" | "long" | "PxI64" => Builtin::Long,
+            "uint64_t" | "unsigned long" | "PxU64" => Builtin::ULong,
             "size_t" => Builtin::USize,
-            // See PxVecMath.h for the vector types
-            math if math.contains("aos::") => {
-                let mt = &math[math.rfind(':').unwrap() + 1..];
-
-                match mt {
-                    "Vec3V" => Builtin::Vec3V,
-                    "Vec3" => Builtin::Vec3,
-                    "Vec4V" => Builtin::Vec4V,
-                    "Vec4" => Builtin::Vec4,
-                    "BoolV" => Builtin::BoolV,
-                    "VecU32V" => Builtin::U32V,
-                    "VecI32V" => Builtin::I32V,
-                    "Mat33V" => Builtin::Mat33V,
-                    "Mat34V" => Builtin::Mat34V,
-                    "Mat44V" => Builtin::Mat44V,
-                    _ => return None,
-                }
-            }
+            "PxVec3" => Builtin::Vec3,
+            "PxVec4" => Builtin::Vec4,
+            "PxMat33" => Builtin::Mat33,
+            "PxMat44" => Builtin::Mat44,
             _ => return None,
         };
 
         Some(bi)
     }
+}
+
+#[inline]
+fn no_physx(n: &str) -> &str {
+    n.strip_prefix("physx::").unwrap_or(n)
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -725,21 +724,21 @@ impl Builtin {
             Self::ULong => "uint64_t",
             Self::USize => "size_t",
             Self::Vec3V => "physx_Vec3V_Pod",
-            Self::Vec3 => "physx_Vec3_Pod",
+            Self::Vec3 => "physx_PxVec3_Pod",
             Self::Vec3p => "physx_Vec3p_Pod",
             Self::Vec4V => "physx_Vec4V_Pod",
-            Self::Vec4 => "physx_Vec4_Pod",
+            Self::Vec4 => "physx_PxVec4_Pod",
             Self::QuatV => "physx_QuatV_Pod",
-            Self::Quat => "physx_Quat_Pod",
+            Self::Quat => "physx_PxQuat_Pod",
             Self::BoolV => "physx_BoolV_Pod",
             Self::U32V => "physx_VecU32V_Pod",
             Self::I32V => "physx_VecI32V_Pod",
             Self::Mat33V => "physx_Mat33V_Pod",
-            Self::Mat33 => "physx_Mat33_Pod",
+            Self::Mat33 => "physx_PxMat33_Pod",
             Self::Mat34V => "physx_Mat34V_Pod",
             Self::Mat34 => "physx_Mat34_Pod",
             Self::Mat44V => "physx_Mat44V_Pod",
-            Self::Mat44 => "physx_Mat44_Pod",
+            Self::Mat44 => "physx_PxMat44_Pod",
         }
     }
 

@@ -45,7 +45,7 @@ fn gen_functions(which: &str, to_emit: &'static [&str]) -> anyhow::Result<Functi
 /// actually publicly exposed
 #[test]
 fn methods_complex() {
-    let mo = gen_functions("methods_complex.h", &["PxShape"]).unwrap();
+    let mo = gen_functions("methods_complex.h", &["PxShape", "PxThreadImpl"]).unwrap();
 
     insta::assert_snapshot!(mo.cpp);
     insta::assert_snapshot!(mo.rust);

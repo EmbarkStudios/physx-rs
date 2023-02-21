@@ -50,9 +50,9 @@ int main() {
     struct physx_PxMat33_Pod: public physx::PxMat33 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxMat33_Pod", "PxMat33");
-            sg.add_field("physx_Vec3_Pod column0", "column0", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column0));
-            sg.add_field("physx_Vec3_Pod column1", "column1", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column1));
-            sg.add_field("physx_Vec3_Pod column2", "column2", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column2));
+            sg.add_field("physx_PxVec3_Pod column0", "column0", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column0));
+            sg.add_field("physx_PxVec3_Pod column1", "column1", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column1));
+            sg.add_field("physx_PxVec3_Pod column2", "column2", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMat33_Pod, column2));
             sg.end_struct(sizeof(physx::PxMat33));
         }
     };
@@ -61,10 +61,10 @@ int main() {
     struct physx_PxMat44_Pod: public physx::PxMat44 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxMat44_Pod", "PxMat44");
-            sg.add_field("physx_Vec4_Pod column0", "column0", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column0));
-            sg.add_field("physx_Vec4_Pod column1", "column1", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column1));
-            sg.add_field("physx_Vec4_Pod column2", "column2", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column2));
-            sg.add_field("physx_Vec4_Pod column3", "column3", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column3));
+            sg.add_field("physx_PxVec4_Pod column0", "column0", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column0));
+            sg.add_field("physx_PxVec4_Pod column1", "column1", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column1));
+            sg.add_field("physx_PxVec4_Pod column2", "column2", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column2));
+            sg.add_field("physx_PxVec4_Pod column3", "column3", "glam::Vec4", sizeof(physx::PxVec4), unsafe_offsetof(physx_PxMat44_Pod, column3));
             sg.end_struct(sizeof(physx::PxMat44));
         }
     };
@@ -73,8 +73,8 @@ int main() {
     struct physx_PxTransform_Pod: public physx::PxTransform {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxTransform_Pod", "PxTransform");
-            sg.add_field("physx_Quat_Pod q", "q", "glam::Quat", sizeof(physx::PxQuat), unsafe_offsetof(physx_PxTransform_Pod, q));
-            sg.add_field("physx_Vec3_Pod p", "p", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxTransform_Pod, p));
+            sg.add_field("physx_PxQuat_Pod q", "q", "glam::Quat", sizeof(physx::PxQuat), unsafe_offsetof(physx_PxTransform_Pod, q));
+            sg.add_field("physx_PxVec3_Pod p", "p", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxTransform_Pod, p));
             sg.end_struct(sizeof(physx::PxTransform));
         }
     };
@@ -89,8 +89,6 @@ int main() {
     sg.pass_thru("struct physx_PxSerializationRegistry_Pod {\n    void* vtable_;\n};\n");
 
     sg.pass_thru("struct physx_PxCollection_Pod {\n    void* vtable_;\n};\n");
-
-    sg.pass_thru("struct physx_PxAssertHandler_Pod {\n    void* vtable_;\n};\n");
 
     sg.pass_thru("struct physx_PxBase_Pod {\n    void* vtable_;\n};\n");
 
@@ -130,7 +128,7 @@ int main() {
     struct physx_PxPlane_Pod: public physx::PxPlane {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxPlane_Pod", "PxPlane");
-            sg.add_field("physx_PxVec3_Pod n", "n", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxPlane_Pod, n));
+            sg.add_field("physx_PxVec3_Pod n", "n", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxPlane_Pod, n));
             sg.add_field("float d", "d", "f32", sizeof(float), unsafe_offsetof(physx_PxPlane_Pod, d));
             sg.end_struct(sizeof(physx::PxPlane));
         }
@@ -141,7 +139,7 @@ int main() {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxBoxGeometry_Pod", "PxBoxGeometry");
             sg.add_field("float mTypePadding", "mTypePadding", "f32", sizeof(float), unsafe_offsetof(physx_PxBoxGeometry_Pod, mTypePadding));
-            sg.add_field("physx_PxVec3_Pod halfExtents", "halfExtents", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBoxGeometry_Pod, halfExtents));
+            sg.add_field("physx_PxVec3_Pod halfExtents", "halfExtents", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBoxGeometry_Pod, halfExtents));
             sg.end_struct(sizeof(physx::PxBoxGeometry));
         }
     };
@@ -180,7 +178,7 @@ int main() {
     struct physx_PxMeshScale_Pod: public physx::PxMeshScale {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxMeshScale_Pod", "PxMeshScale");
-            sg.add_field("physx_PxVec3_Pod scale", "scale", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMeshScale_Pod, scale));
+            sg.add_field("physx_PxVec3_Pod scale", "scale", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxMeshScale_Pod, scale));
             sg.add_field("physx_PxQuat_Pod rotation", "rotation", "PxQuat", sizeof(physx::PxQuat), unsafe_offsetof(physx_PxMeshScale_Pod, rotation));
             sg.end_struct(sizeof(physx::PxMeshScale));
         }
@@ -262,8 +260,8 @@ int main() {
     struct physx_PxBounds3_Pod: public physx::PxBounds3 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxBounds3_Pod", "PxBounds3");
-            sg.add_field("physx_PxVec3_Pod minimum", "minimum", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBounds3_Pod, minimum));
-            sg.add_field("physx_PxVec3_Pod maximum", "maximum", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBounds3_Pod, maximum));
+            sg.add_field("physx_PxVec3_Pod minimum", "minimum", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBounds3_Pod, minimum));
+            sg.add_field("physx_PxVec3_Pod maximum", "maximum", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxBounds3_Pod, maximum));
             sg.end_struct(sizeof(physx::PxBounds3));
         }
     };
@@ -312,8 +310,8 @@ int main() {
             sg.begin_struct("physx_PxLocationHit_Pod", "PxLocationHit");
             sg.add_field("uint32_t faceIndex", "faceIndex", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxLocationHit_Pod, faceIndex));
             sg.add_field("uint16_t flags", "flags", "PxHitFlags", sizeof(physx::PxHitFlags), unsafe_offsetof(physx_PxLocationHit_Pod, flags));
-            sg.add_field("physx_PxVec3_Pod position", "position", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxLocationHit_Pod, position));
-            sg.add_field("physx_PxVec3_Pod normal", "normal", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxLocationHit_Pod, normal));
+            sg.add_field("physx_PxVec3_Pod position", "position", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxLocationHit_Pod, position));
+            sg.add_field("physx_PxVec3_Pod normal", "normal", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxLocationHit_Pod, normal));
             sg.add_field("float distance", "distance", "f32", sizeof(float), unsafe_offsetof(physx_PxLocationHit_Pod, distance));
             sg.end_struct(sizeof(physx::PxLocationHit));
         }
@@ -325,8 +323,8 @@ int main() {
             sg.begin_struct("physx_PxGeomRaycastHit_Pod", "PxGeomRaycastHit");
             sg.add_field("uint32_t faceIndex", "faceIndex", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, faceIndex));
             sg.add_field("uint16_t flags", "flags", "PxHitFlags", sizeof(physx::PxHitFlags), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, flags));
-            sg.add_field("physx_PxVec3_Pod position", "position", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, position));
-            sg.add_field("physx_PxVec3_Pod normal", "normal", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, normal));
+            sg.add_field("physx_PxVec3_Pod position", "position", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, position));
+            sg.add_field("physx_PxVec3_Pod normal", "normal", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, normal));
             sg.add_field("float distance", "distance", "f32", sizeof(float), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, distance));
             sg.add_field("float u", "u", "f32", sizeof(float), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, u));
             sg.add_field("float v", "v", "f32", sizeof(float), unsafe_offsetof(physx_PxGeomRaycastHit_Pod, v));
@@ -349,8 +347,8 @@ int main() {
             sg.begin_struct("physx_PxGeomSweepHit_Pod", "PxGeomSweepHit");
             sg.add_field("uint32_t faceIndex", "faceIndex", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxGeomSweepHit_Pod, faceIndex));
             sg.add_field("uint16_t flags", "flags", "PxHitFlags", sizeof(physx::PxHitFlags), unsafe_offsetof(physx_PxGeomSweepHit_Pod, flags));
-            sg.add_field("physx_PxVec3_Pod position", "position", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomSweepHit_Pod, position));
-            sg.add_field("physx_PxVec3_Pod normal", "normal", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomSweepHit_Pod, normal));
+            sg.add_field("physx_PxVec3_Pod position", "position", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomSweepHit_Pod, position));
+            sg.add_field("physx_PxVec3_Pod normal", "normal", "glam::Vec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxGeomSweepHit_Pod, normal));
             sg.add_field("float distance", "distance", "f32", sizeof(float), unsafe_offsetof(physx_PxGeomSweepHit_Pod, distance));
             sg.end_struct(sizeof(physx::PxGeomSweepHit));
         }
@@ -392,6 +390,46 @@ int main() {
         }
     };
     physx_PxGeometryHolder_Pod::dump_layout(sg);
+
+    sg.pass_thru("struct physx_PxAllocatorCallback_Pod {\n    void* vtable_;\n};\n");
+
+    sg.pass_thru("struct physx_PxFoundation_Pod {\n    void* vtable_;\n};\n");
+
+    struct physx_PxAllocator_Pod: public physx::PxAllocator {
+        static void dump_layout(PodStructGen& sg) {
+            sg.begin_struct("physx_PxAllocator_Pod", "PxAllocator");
+            sg.end_struct(sizeof(physx::PxAllocator));
+        }
+    };
+    physx_PxAllocator_Pod::dump_layout(sg);
+
+    struct physx_PxRawAllocator_Pod: public physx::PxRawAllocator {
+        static void dump_layout(PodStructGen& sg) {
+            sg.begin_struct("physx_PxRawAllocator_Pod", "PxRawAllocator");
+            sg.end_struct(sizeof(physx::PxRawAllocator));
+        }
+    };
+    physx_PxRawAllocator_Pod::dump_layout(sg);
+
+    sg.pass_thru("struct physx_PxVirtualAllocatorCallback_Pod {\n    void* vtable_;\n};\n");
+
+    struct physx_PxVirtualAllocator_Pod: public physx::PxVirtualAllocator {
+        static void dump_layout(PodStructGen& sg) {
+            sg.begin_struct("physx_PxVirtualAllocator_Pod", "PxVirtualAllocator");
+            sg.end_struct(sizeof(physx::PxVirtualAllocator));
+        }
+    };
+    physx_PxVirtualAllocator_Pod::dump_layout(sg);
+
+    struct physx_PxUserAllocated_Pod: public physx::PxUserAllocated {
+        static void dump_layout(PodStructGen& sg) {
+            sg.begin_struct("physx_PxUserAllocated_Pod", "PxUserAllocated");
+            sg.end_struct(sizeof(physx::PxUserAllocated));
+        }
+    };
+    physx_PxUserAllocated_Pod::dump_layout(sg);
+
+    sg.pass_thru("struct physx_PxRunnable_Pod {\n    void* vtable_;\n};\n");
 
     struct physx_PxShape_Pod: public physx::PxShape {
         static void dump_layout(PodStructGen& sg) {

@@ -88,8 +88,8 @@ pub struct PxTransformPadded {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBounds3 {
-    pub minimum: PxVec3,
-    pub maximum: PxVec3,
+    pub minimum: glam::Vec3,
+    pub maximum: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -104,7 +104,7 @@ pub struct PxSIMDGuard {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxPlane {
-    pub n: PxVec3,
+    pub n: glam::Vec3,
     pub d: f32,
 }
 #[derive(Clone, Copy)]
@@ -149,11 +149,6 @@ pub struct PxSyncImpl {
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxThreadImpl {
-    pub structgen_pad0: [u8; 1],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
 pub struct PxCounterFrequencyToTensOfNanos {
     pub mNumerator: u64,
     pub mDenominator: u64,
@@ -182,31 +177,31 @@ pub struct PxBoundedData {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugPoint {
-    pub pos: PxVec3,
+    pub pos: glam::Vec3,
     pub color: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugLine {
-    pub pos0: PxVec3,
+    pub pos0: glam::Vec3,
     pub color0: u32,
-    pub pos1: PxVec3,
+    pub pos1: glam::Vec3,
     pub color1: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugTriangle {
-    pub pos0: PxVec3,
+    pub pos0: glam::Vec3,
     pub color0: u32,
-    pub pos1: PxVec3,
+    pub pos1: glam::Vec3,
     pub color1: u32,
-    pub pos2: PxVec3,
+    pub pos2: glam::Vec3,
     pub color2: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugText {
-    pub position: PxVec3,
+    pub position: glam::Vec3,
     pub size: f32,
     pub color: u32,
     pub structgen_pad0: [u8; 4],
@@ -241,7 +236,7 @@ pub struct PxGeometry {
 pub struct PxBoxGeometry {
     pub structgen_pad0: [u8; 4],
     pub mTypePadding: f32,
-    pub halfExtents: PxVec3,
+    pub halfExtents: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -261,7 +256,7 @@ pub struct PxHullPolygon {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMeshScale {
-    pub scale: PxVec3,
+    pub scale: glam::Vec3,
     pub rotation: PxQuat,
 }
 #[derive(Clone, Copy)]
@@ -341,8 +336,8 @@ pub struct PxLocationHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
 }
 #[derive(Clone, Copy)]
@@ -351,8 +346,8 @@ pub struct PxGeomRaycastHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
     pub u: f32,
     pub v: f32,
@@ -368,8 +363,8 @@ pub struct PxGeomSweepHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
 }
 #[derive(Clone, Copy)]
@@ -435,18 +430,18 @@ pub struct PxSimpleTriangleMesh {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTriangle {
-    pub verts: [PxVec3; 3],
+    pub verts: [glam::Vec3; 3],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTrianglePadded {
-    pub verts: [PxVec3; 3],
+    pub verts: [glam::Vec3; 3],
     pub padding: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTetrahedron {
-    pub verts: [PxVec3; 4],
+    pub verts: [glam::Vec3; 4],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -507,13 +502,13 @@ pub struct PxRestitutionModifiers {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct Px1DConstraint {
-    pub linear0: PxVec3,
+    pub linear0: glam::Vec3,
     pub geometricError: f32,
-    pub angular0: PxVec3,
+    pub angular0: glam::Vec3,
     pub velocityTarget: f32,
-    pub linear1: PxVec3,
+    pub linear1: glam::Vec3,
     pub minImpulse: f32,
-    pub angular1: PxVec3,
+    pub angular1: glam::Vec3,
     pub maxImpulse: f32,
     pub mods: Px1DConstraintMods,
     pub forInternalUse: f32,
@@ -532,11 +527,11 @@ pub struct PxConstraintInvMassScale {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactPoint {
-    pub normal: PxVec3,
+    pub normal: glam::Vec3,
     pub separation: f32,
-    pub point: PxVec3,
+    pub point: glam::Vec3,
     pub maxImpulse: f32,
-    pub targetVel: PxVec3,
+    pub targetVel: glam::Vec3,
     pub staticFriction: f32,
     pub materialFlags: u8,
     pub structgen_pad0: [u8; 3],
@@ -549,20 +544,20 @@ pub struct PxContactPoint {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSolverBody {
-    pub linearVelocity: PxVec3,
+    pub linearVelocity: glam::Vec3,
     pub maxSolverNormalProgress: u16,
     pub maxSolverFrictionProgress: u16,
-    pub angularState: PxVec3,
+    pub angularState: glam::Vec3,
     pub solverProgress: u32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSolverBodyData {
-    pub linearVelocity: PxVec3,
+    pub linearVelocity: glam::Vec3,
     pub invMass: f32,
-    pub angularVelocity: PxVec3,
+    pub angularVelocity: glam::Vec3,
     pub reportThreshold: f32,
-    pub sqrtInvInertia: PxMat33,
+    pub sqrtInvInertia: glam::Mat3,
     pub penBiasClamp: f32,
     pub nodeIndex: u32,
     pub maxContactImpulse: f32,
@@ -687,14 +682,14 @@ pub struct PxArticulationDrive {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTGSSolverBodyVel {
-    pub linearVelocity: PxVec3,
+    pub linearVelocity: glam::Vec3,
     pub nbStaticInteractions: u16,
     pub maxDynamicPartition: u16,
-    pub angularVelocity: PxVec3,
+    pub angularVelocity: glam::Vec3,
     pub partitionMask: u32,
-    pub deltaAngDt: PxVec3,
+    pub deltaAngDt: glam::Vec3,
     pub maxAngVel: f32,
-    pub deltaLinDt: PxVec3,
+    pub deltaLinDt: glam::Vec3,
     pub lockFlags: u16,
     pub isKinematic: bool,
     pub pad: u8,
@@ -703,14 +698,14 @@ pub struct PxTGSSolverBodyVel {
 #[repr(C)]
 pub struct PxTGSSolverBodyTxInertia {
     pub deltaBody2World: PxTransform,
-    pub sqrtInvInertia: PxMat33,
+    pub sqrtInvInertia: glam::Mat3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTGSSolverBodyData {
-    pub originalLinearVelocity: PxVec3,
+    pub originalLinearVelocity: glam::Vec3,
     pub maxContactImpulse: f32,
-    pub originalAngularVelocity: PxVec3,
+    pub originalAngularVelocity: glam::Vec3,
     pub penBiasClamp: f32,
     pub invMass: f32,
     pub nodeIndex: u32,
@@ -842,27 +837,27 @@ pub struct PxArticulationFixedTendon {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSpatialForce {
-    pub force: PxVec3,
+    pub force: glam::Vec3,
     pub pad0: f32,
-    pub torque: PxVec3,
+    pub torque: glam::Vec3,
     pub pad1: f32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSpatialVelocity {
-    pub linear: PxVec3,
+    pub linear: glam::Vec3,
     pub pad0: f32,
-    pub angular: PxVec3,
+    pub angular: glam::Vec3,
     pub pad1: f32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxArticulationRootLinkData {
     pub transform: PxTransform,
-    pub worldLinVel: PxVec3,
-    pub worldAngVel: PxVec3,
-    pub worldLinAccel: PxVec3,
-    pub worldAngAccel: PxVec3,
+    pub worldLinVel: glam::Vec3,
+    pub worldAngVel: glam::Vec3,
+    pub worldLinAccel: glam::Vec3,
+    pub worldAngAccel: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -936,7 +931,7 @@ pub struct PxArticulationLink {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConeLimitedConstraint {
-    pub mAxis: PxVec3,
+    pub mAxis: glam::Vec3,
     pub mAngle: f32,
     pub mLowLimit: f32,
     pub mHighLimit: f32,
@@ -944,17 +939,15 @@ pub struct PxConeLimitedConstraint {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConeLimitParams {
-    pub lowHighLimits: PxVec4,
-    pub axisAngle: PxVec4,
+    pub lowHighLimits: glam::Vec4,
+    pub axisAngle: glam::Vec4,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConstraintShaderTable {
-    pub solverPrep: PxU32 (*)(physx::Px1DConstraint *, physx::PxVec3p &, physx::PxU32, physx::PxConstraintInvMassScale &, const void *, const physx::PxTransform &, const physx::PxTransform &, bool, physx::PxVec3p &, physx::PxVec3p &),
-    pub project: PxConstraintProject,
-    pub visualize: PxConstraintVisualize,
+    pub structgen_pad0: [u8; 24],
     pub flag: PxConstraintFlag,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad1: [u8; 4],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -964,17 +957,9 @@ pub struct PxConstraint {
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxMassModificationProps {
-    pub mInvMassScale0: f32,
-    pub mInvInertiaScale0: f32,
-    pub mInvMassScale1: f32,
-    pub mInvInertiaScale1: f32,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
 pub struct PxContactPatch {
     pub mMassModification: PxMassModificationProps,
-    pub normal: PxVec3,
+    pub normal: glam::Vec3,
     pub restitution: f32,
     pub dynamicFriction: f32,
     pub staticFriction: f32,
@@ -990,25 +975,25 @@ pub struct PxContactPatch {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContact {
-    pub contact: PxVec3,
+    pub contact: glam::Vec3,
     pub separation: f32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxExtendedContact {
-    pub contact: PxVec3,
+    pub contact: glam::Vec3,
     pub separation: f32,
-    pub targetVelocity: PxVec3,
+    pub targetVelocity: glam::Vec3,
     pub maxImpulse: f32,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxModifiableContact {
-    pub contact: PxVec3,
+    pub contact: glam::Vec3,
     pub separation: f32,
-    pub targetVelocity: PxVec3,
+    pub targetVelocity: glam::Vec3,
     pub maxImpulse: f32,
-    pub normal: PxVec3,
+    pub normal: glam::Vec3,
     pub restitution: f32,
     pub materialFlags: u32,
     pub materialIndex0: u16,
@@ -1019,7 +1004,7 @@ pub struct PxModifiableContact {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactStreamIterator {
-    pub zero: PxVec3,
+    pub zero: glam::Vec3,
     pub structgen_pad0: [u8; 4],
     pub patch: *const PxContactPatch,
     pub contact: *const PxContact,
@@ -1172,7 +1157,7 @@ pub struct PxParticleClothDesc {
     pub cloths: *mut PxParticleCloth,
     pub triangles: *mut u32,
     pub springs: *mut PxParticleSpring,
-    pub restPositions: *mut PxVec4,
+    pub restPositions: *mut glam::Vec4,
     pub nbCloths: u32,
     pub nbSprings: u32,
     pub nbTriangles: u32,
@@ -1239,8 +1224,8 @@ pub struct PxRaycastHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
     pub u: f32,
     pub v: f32,
@@ -1262,8 +1247,8 @@ pub struct PxSweepHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
     pub structgen_pad1: [u8; 4],
     pub actor: *mut PxRigidActor,
@@ -1416,14 +1401,13 @@ pub struct PxSceneDesc {
     pub staticNbObjectsPerNode: u32,
     pub dynamicNbObjectsPerNode: u32,
     pub sceneQueryUpdateMode: PxSceneQueryUpdateMode,
-    pub gravity: PxVec3,
+    pub gravity: glam::Vec3,
     pub simulationEventCallback: *mut PxSimulationEventCallback,
     pub contactModifyCallback: *mut PxContactModifyCallback,
     pub ccdContactModifyCallback: *mut PxCCDContactModifyCallback,
     pub filterShaderData: *const std::ffi::c_void,
     pub filterShaderDataSize: u32,
-    pub structgen_pad0: [u8; 4],
-    pub filterShader: PxFilterFlags (*)(physx::PxFilterObjectAttributes, physx::PxFilterData, physx::PxFilterObjectAttributes, physx::PxFilterData, physx::PxPairFlags &, const void *, physx::PxU32),
+    pub structgen_pad0: [u8; 12],
     pub filterCallback: *mut PxSimulationFilterCallback,
     pub kineKineFilteringMode: PxPairFilteringMode,
     pub staticKineFilteringMode: PxPairFilteringMode,
@@ -1515,9 +1499,9 @@ pub struct PxSimulationStatistics {
 #[repr(C)]
 pub struct PxGpuBodyData {
     pub quat: PxQuat,
-    pub pos: PxVec4,
-    pub linVel: PxVec4,
-    pub angVel: PxVec4,
+    pub pos: glam::Vec4,
+    pub linVel: glam::Vec4,
+    pub angVel: glam::Vec4,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1565,8 +1549,8 @@ pub struct PxContactPairExtraDataItem {
 pub struct PxContactPairVelocity {
     pub type: u8,
     pub structgen_pad0: [u8; 3],
-    pub linearVelocity: [PxVec3; 2],
-    pub angularVelocity: [PxVec3; 2],
+    pub linearVelocity: [glam::Vec3; 2],
+    pub angularVelocity: [glam::Vec3; 2],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1608,11 +1592,11 @@ pub struct PxContactPairHeader {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactPairPoint {
-    pub position: PxVec3,
+    pub position: glam::Vec3,
     pub separation: f32,
-    pub normal: PxVec3,
+    pub normal: glam::Vec3,
     pub internalFaceIndex0: u32,
-    pub impulse: PxVec3,
+    pub impulse: glam::Vec3,
     pub internalFaceIndex1: u32,
 }
 #[derive(Clone, Copy)]
@@ -1688,7 +1672,7 @@ pub struct PxBoxObstacle {
     pub mUserData: *mut std::ffi::c_void,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
-    pub mHalfExtents: PxVec3,
+    pub mHalfExtents: glam::Vec3,
     pub structgen_pad1: [u8; 4],
 }
 #[derive(Clone, Copy)]
@@ -1704,7 +1688,7 @@ pub struct PxCapsuleObstacle {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllerState {
-    pub deltaXP: PxVec3,
+    pub deltaXP: glam::Vec3,
     pub structgen_pad0: [u8; 4],
     pub touchedShape: *mut PxShape,
     pub touchedActor: *mut PxRigidActor,
@@ -1728,8 +1712,8 @@ pub struct PxControllerStats {
 pub struct PxControllerHit {
     pub controller: *mut PxController,
     pub worldPos: PxExtendedVec3,
-    pub worldNormal: PxVec3,
-    pub dir: PxVec3,
+    pub worldNormal: glam::Vec3,
+    pub dir: glam::Vec3,
     pub length: f32,
     pub structgen_pad0: [u8; 4],
 }
@@ -1738,8 +1722,8 @@ pub struct PxControllerHit {
 pub struct PxControllerShapeHit {
     pub controller: *mut PxController,
     pub worldPos: PxExtendedVec3,
-    pub worldNormal: PxVec3,
-    pub dir: PxVec3,
+    pub worldNormal: glam::Vec3,
+    pub dir: glam::Vec3,
     pub length: f32,
     pub structgen_pad0: [u8; 4],
     pub shape: *mut PxShape,
@@ -1752,8 +1736,8 @@ pub struct PxControllerShapeHit {
 pub struct PxControllersHit {
     pub controller: *mut PxController,
     pub worldPos: PxExtendedVec3,
-    pub worldNormal: PxVec3,
-    pub dir: PxVec3,
+    pub worldNormal: glam::Vec3,
+    pub dir: glam::Vec3,
     pub length: f32,
     pub structgen_pad0: [u8; 4],
     pub other: *mut PxController,
@@ -1763,8 +1747,8 @@ pub struct PxControllersHit {
 pub struct PxControllerObstacleHit {
     pub controller: *mut PxController,
     pub worldPos: PxExtendedVec3,
-    pub worldNormal: PxVec3,
-    pub dir: PxVec3,
+    pub worldNormal: glam::Vec3,
+    pub dir: glam::Vec3,
     pub length: f32,
     pub structgen_pad0: [u8; 4],
     pub userData: *const std::ffi::c_void,
@@ -1783,7 +1767,7 @@ pub struct PxControllerFilters {
 pub struct PxControllerDesc {
     pub structgen_pad0: [u8; 8],
     pub position: PxExtendedVec3,
-    pub upDirection: PxVec3,
+    pub upDirection: glam::Vec3,
     pub slopeLimit: f32,
     pub invisibleWallHeight: f32,
     pub maxJumpHeight: f32,
@@ -1809,7 +1793,7 @@ pub struct PxControllerDesc {
 pub struct PxBoxControllerDesc {
     pub structgen_pad0: [u8; 8],
     pub position: PxExtendedVec3,
-    pub upDirection: PxVec3,
+    pub upDirection: glam::Vec3,
     pub slopeLimit: f32,
     pub invisibleWallHeight: f32,
     pub maxJumpHeight: f32,
@@ -1838,7 +1822,7 @@ pub struct PxBoxControllerDesc {
 pub struct PxCapsuleControllerDesc {
     pub structgen_pad0: [u8; 8],
     pub position: PxExtendedVec3,
-    pub upDirection: PxVec3,
+    pub upDirection: glam::Vec3,
     pub slopeLimit: f32,
     pub invisibleWallHeight: f32,
     pub maxJumpHeight: f32,
@@ -1874,7 +1858,7 @@ pub struct PxDim3 {
 pub struct PxSDFDesc {
     pub sdf: PxBoundedData,
     pub dims: PxDim3,
-    pub meshLower: PxVec3,
+    pub meshLower: glam::Vec3,
     pub spacing: f32,
     pub subgridSize: u32,
     pub bitsPerSubgridPixel: PxSdfBitsPerSubgridPixel,
@@ -1922,12 +1906,6 @@ pub struct PxTetrahedronMeshDesc {
 #[repr(C)]
 pub struct PxSoftBodySimulationDataDesc {
     pub vertexToTet: PxBoundedData,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBVH33MidphaseDesc {
-    pub meshSizePerformanceTradeOff: f32,
-    pub meshCookingHint: PxMeshCookingHint,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1989,10 +1967,10 @@ pub struct PxDistanceJoint {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJacobianRow {
-    pub linear0: PxVec3,
-    pub linear1: PxVec3,
-    pub angular0: PxVec3,
-    pub angular1: PxVec3,
+    pub linear0: glam::Vec3,
+    pub linear1: glam::Vec3,
+    pub angular0: glam::Vec3,
+    pub angular1: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -2131,8 +2109,8 @@ pub struct PxRigidActorExt {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMassProperties {
-    pub inertiaTensor: PxMat33,
-    pub centerOfMass: PxVec3,
+    pub inertiaTensor: glam::Mat3,
+    pub centerOfMass: glam::Vec3,
     pub mass: f32,
 }
 #[derive(Clone, Copy)]
@@ -2209,347 +2187,6 @@ pub struct PxRepXInstantiationArgs {
     pub cooker: *mut PxCooking,
     pub stringTable: *mut PxStringTable,
 }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleContext {
-    pub upAxis: PxVec3,
-    pub forwardAxis: PxVec3,
-    pub sideAxis: PxVec3,
-    pub updateMode: PxVehicleUpdateMode,
-    pub pointRejectAngleThresholdCosine: f32,
-    pub normalRejectAngleThresholdCosine: f32,
-    pub maxHitActorAcceleration: f32,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleChassisData {
-    pub mMOI: PxVec3,
-    pub mMass: f32,
-    pub mCMOffset: PxVec3,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleEngineData {
-    pub structgen_pad0: [u8; 80],
-    pub mMOI: f32,
-    pub mPeakTorque: f32,
-    pub mMaxOmega: f32,
-    pub mDampingRateFullThrottle: f32,
-    pub mDampingRateZeroThrottleClutchEngaged: f32,
-    pub mDampingRateZeroThrottleClutchDisengaged: f32,
-    pub structgen_pad1: [u8; 8],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGearsData {
-    pub mRatios: [f32; 32],
-    pub mFinalRatio: f32,
-    pub mNbRatios: u32,
-    pub mSwitchTime: f32,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAutoBoxData {
-    pub mUpRatios: [f32; 32],
-    pub mDownRatios: [f32; 32],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDifferential4WData {
-    pub mFrontRearSplit: f32,
-    pub mFrontLeftRightSplit: f32,
-    pub mRearLeftRightSplit: f32,
-    pub mCentreBias: f32,
-    pub mFrontBias: f32,
-    pub mRearBias: f32,
-    pub mType: Enum,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDifferentialNWData {
-    pub structgen_pad0: [u8; 16],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAckermannGeometryData {
-    pub mAccuracy: f32,
-    pub mFrontWidth: f32,
-    pub mRearWidth: f32,
-    pub mAxleSeparation: f32,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleClutchData {
-    pub mStrength: f32,
-    pub mAccuracyMode: PxVehicleClutchAccuracyMode,
-    pub mEstimateIterations: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTireLoadFilterData {
-    pub mMinNormalisedLoad: f32,
-    pub mMinFilteredNormalisedLoad: f32,
-    pub mMaxNormalisedLoad: f32,
-    pub mMaxFilteredNormalisedLoad: f32,
-    pub structgen_pad0: [u8; 16],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelData {
-    pub mRadius: f32,
-    pub mWidth: f32,
-    pub mMass: f32,
-    pub mMOI: f32,
-    pub mDampingRate: f32,
-    pub mMaxBrakeTorque: f32,
-    pub mMaxHandBrakeTorque: f32,
-    pub mMaxSteer: f32,
-    pub mToeAngle: f32,
-    pub structgen_pad0: [u8; 12],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleSuspensionData {
-    pub mSpringStrength: f32,
-    pub mSpringDamperRate: f32,
-    pub mMaxCompression: f32,
-    pub mMaxDroop: f32,
-    pub mSprungMass: f32,
-    pub mCamberAtRest: f32,
-    pub mCamberAtMaxCompression: f32,
-    pub mCamberAtMaxDroop: f32,
-    pub structgen_pad0: [u8; 16],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAntiRollBarData {
-    pub mWheel0: u32,
-    pub mWheel1: u32,
-    pub mStiffness: f32,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTireData {
-    pub mLatStiffX: f32,
-    pub mLatStiffY: f32,
-    pub mLongitudinalStiffnessPerUnitGravity: f32,
-    pub mCamberStiffnessPerUnitGravity: f32,
-    pub mFrictionVsSlipGraph: [[f32; 3]; 2],
-    pub mType: u32,
-    pub structgen_pad0: [u8; 20],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelsSimData {
-    pub structgen_pad0: [u8; 96],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelsDynData {
-    pub structgen_pad0: [u8; 48],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheels {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 32],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimData {
-    pub structgen_pad0: [u8; 528],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveDynData {
-    pub mControlAnalogVals: [f32; 16],
-    pub mUseAutoGears: bool,
-    pub mGearUpPressed: bool,
-    pub mGearDownPressed: bool,
-    pub structgen_pad0: [u8; 1],
-    pub mCurrentGear: u32,
-    pub mTargetGear: u32,
-    pub mEnginespeed: f32,
-    pub mGearSwitchTime: f32,
-    pub mAutoBoxSwitchTime: f32,
-    pub structgen_pad1: [u8; 8],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrive {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 28],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub structgen_pad2: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimData4W {
-    pub structgen_pad0: [u8; 576],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrive4W {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 28],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimData4W,
-    pub structgen_pad2: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveTank {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 28],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimData,
-    pub structgen_pad2: [u8; 20],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrivableSurfaceType {
-    pub mType: u32,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrivableSurfaceToTireFrictionPairs {
-    pub structgen_pad0: [u8; 48],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxWheelQueryResult {
-    pub suspLineStart: PxVec3,
-    pub suspLineDir: PxVec3,
-    pub suspLineLength: f32,
-    pub isInAir: bool,
-    pub structgen_pad0: [u8; 3],
-    pub tireContactActor: *mut PxActor,
-    pub tireContactShape: *mut PxShape,
-    pub tireSurfaceMaterial: *const PxMaterial,
-    pub tireSurfaceType: u32,
-    pub tireContactPoint: PxVec3,
-    pub tireContactNormal: PxVec3,
-    pub tireFriction: f32,
-    pub suspJounce: f32,
-    pub suspSpringForce: f32,
-    pub tireLongitudinalDir: PxVec3,
-    pub tireLateralDir: PxVec3,
-    pub longitudinalSlip: f32,
-    pub lateralSlip: f32,
-    pub steerAngle: f32,
-    pub localPose: PxTransform,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelQueryResult {
-    pub wheelQueryResults: *mut PxWheelQueryResult,
-    pub nbWheelQueryResults: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelConcurrentUpdateData {
-    pub structgen_pad0: [u8; 64],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleConcurrentUpdateData {
-    pub concurrentWheelUpdates: *mut PxVehicleWheelConcurrentUpdateData,
-    pub nbConcurrentWheelUpdates: u32,
-    pub structgen_pad0: [u8; 28],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimDataNW {
-    pub structgen_pad0: [u8; 544],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveNW {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 28],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimDataNW,
-    pub structgen_pad2: [u8; 4],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleSteerFilter {
-    pub mSharpness: f32,
-    pub mFilteredMaxSteer: f32,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleKeySmoothingData {
-    pub mRiseRates: [f32; 16],
-    pub mFallRates: [f32; 16],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehiclePadSmoothingData {
-    pub mRiseRates: [f32; 16],
-    pub mFallRates: [f32; 16],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveTankRawInputData {
-    pub structgen_pad0: [u8; 32],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleCopyDynamicsMap {
-    pub sourceWheelIds: [u8; 20],
-    pub targetWheelIds: [u8; 20],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraphDesc {
-    pub structgen_pad0: [u8; 32],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraphChannelDesc {
-    pub mMinY: f32,
-    pub mMaxY: f32,
-    pub mMidY: f32,
-    pub mColorLow: PxVec3,
-    pub mColorHigh: PxVec3,
-    pub structgen_pad0: [u8; 4],
-    pub mTitle: *mut std::ffi::c_char,
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraph {
-    pub structgen_pad0: [u8; 15840],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTelemetryData {
-    pub structgen_pad0: [u8; 48],
-}
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleNoDrive {
-    pub structgen_pad0: [u8; 16],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub structgen_pad1: [u8; 64],
-}
 #[cfg(test)]
 mod sizes {
     #[test]
@@ -2578,7 +2215,6 @@ mod sizes {
         assert_eq!(std::mem::size_of::<PxSListImpl>(), 1);
         assert_eq!(std::mem::size_of::<PxSocket>(), 16);
         assert_eq!(std::mem::size_of::<PxSyncImpl>(), 1);
-        assert_eq!(std::mem::size_of::<PxThreadImpl>(), 1);
         assert_eq!(std::mem::size_of::<PxCounterFrequencyToTensOfNanos>(), 16);
         assert_eq!(std::mem::size_of::<PxTime>(), 8);
         assert_eq!(std::mem::size_of::<PxStridedData>(), 16);
@@ -2669,7 +2305,6 @@ mod sizes {
         assert_eq!(std::mem::size_of::<PxConeLimitParams>(), 32);
         assert_eq!(std::mem::size_of::<PxConstraintShaderTable>(), 32);
         assert_eq!(std::mem::size_of::<PxConstraint>(), 24);
-        assert_eq!(std::mem::size_of::<PxMassModificationProps>(), 16);
         assert_eq!(std::mem::size_of::<PxContactPatch>(), 64);
         assert_eq!(std::mem::size_of::<PxContact>(), 16);
         assert_eq!(std::mem::size_of::<PxExtendedContact>(), 32);
@@ -2757,7 +2392,6 @@ mod sizes {
         assert_eq!(std::mem::size_of::<PxTriangleMeshDesc>(), 80);
         assert_eq!(std::mem::size_of::<PxTetrahedronMeshDesc>(), 72);
         assert_eq!(std::mem::size_of::<PxSoftBodySimulationDataDesc>(), 24);
-        assert_eq!(std::mem::size_of::<PxBVH33MidphaseDesc>(), 8);
         assert_eq!(std::mem::size_of::<PxBVH34MidphaseDesc>(), 12);
         assert_eq!(std::mem::size_of::<PxMidphaseDesc>(), 16);
         assert_eq!(std::mem::size_of::<PxBVHDesc>(), 40);
@@ -2798,47 +2432,6 @@ mod sizes {
         assert_eq!(std::mem::size_of::<PxTetrahedronMeshExt>(), 1);
         assert_eq!(std::mem::size_of::<PxRepXObject>(), 24);
         assert_eq!(std::mem::size_of::<PxRepXInstantiationArgs>(), 24);
-        assert_eq!(std::mem::size_of::<PxVehicleContext>(), 52);
-        assert_eq!(std::mem::size_of::<PxVehicleChassisData>(), 32);
-        assert_eq!(std::mem::size_of::<PxVehicleEngineData>(), 112);
-        assert_eq!(std::mem::size_of::<PxVehicleGearsData>(), 144);
-        assert_eq!(std::mem::size_of::<PxVehicleAutoBoxData>(), 256);
-        assert_eq!(std::mem::size_of::<PxVehicleDifferential4WData>(), 32);
-        assert_eq!(std::mem::size_of::<PxVehicleDifferentialNWData>(), 16);
-        assert_eq!(std::mem::size_of::<PxVehicleAckermannGeometryData>(), 16);
-        assert_eq!(std::mem::size_of::<PxVehicleClutchData>(), 16);
-        assert_eq!(std::mem::size_of::<PxVehicleTireLoadFilterData>(), 32);
-        assert_eq!(std::mem::size_of::<PxVehicleWheelData>(), 48);
-        assert_eq!(std::mem::size_of::<PxVehicleSuspensionData>(), 48);
-        assert_eq!(std::mem::size_of::<PxVehicleAntiRollBarData>(), 16);
-        assert_eq!(std::mem::size_of::<PxVehicleTireData>(), 64);
-        assert_eq!(std::mem::size_of::<PxVehicleWheelsSimData>(), 96);
-        assert_eq!(std::mem::size_of::<PxVehicleWheelsDynData>(), 48);
-        assert_eq!(std::mem::size_of::<PxVehicleWheels>(), 192);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveSimData>(), 528);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveDynData>(), 96);
-        assert_eq!(std::mem::size_of::<PxVehicleDrive>(), 288);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveSimData4W>(), 576);
-        assert_eq!(std::mem::size_of::<PxVehicleDrive4W>(), 864);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveTank>(), 832);
-        assert_eq!(std::mem::size_of::<PxVehicleDrivableSurfaceType>(), 4);
-        assert_eq!(std::mem::size_of::<PxVehicleDrivableSurfaceToTireFrictionPairs>(), 48);
-        assert_eq!(std::mem::size_of::<PxWheelQueryResult>(), 160);
-        assert_eq!(std::mem::size_of::<PxVehicleWheelQueryResult>(), 16);
-        assert_eq!(std::mem::size_of::<PxVehicleWheelConcurrentUpdateData>(), 64);
-        assert_eq!(std::mem::size_of::<PxVehicleConcurrentUpdateData>(), 40);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveSimDataNW>(), 544);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveNW>(), 832);
-        assert_eq!(std::mem::size_of::<PxVehicleSteerFilter>(), 8);
-        assert_eq!(std::mem::size_of::<PxVehicleKeySmoothingData>(), 128);
-        assert_eq!(std::mem::size_of::<PxVehiclePadSmoothingData>(), 128);
-        assert_eq!(std::mem::size_of::<PxVehicleDriveTankRawInputData>(), 32);
-        assert_eq!(std::mem::size_of::<PxVehicleCopyDynamicsMap>(), 40);
-        assert_eq!(std::mem::size_of::<PxVehicleGraphDesc>(), 32);
-        assert_eq!(std::mem::size_of::<PxVehicleGraphChannelDesc>(), 48);
-        assert_eq!(std::mem::size_of::<PxVehicleGraph>(), 15840);
-        assert_eq!(std::mem::size_of::<PxVehicleTelemetryData>(), 48);
-        assert_eq!(std::mem::size_of::<PxVehicleNoDrive>(), 224);
     }
 }
 

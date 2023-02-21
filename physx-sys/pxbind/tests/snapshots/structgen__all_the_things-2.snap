@@ -20,24 +20,21 @@ struct physx_PxQuat_Pod {
     float w;
 };
 struct physx_PxMat33_Pod {
-    physx_Vec3_Pod column0;
-    physx_Vec3_Pod column1;
-    physx_Vec3_Pod column2;
+    physx_PxVec3_Pod column0;
+    physx_PxVec3_Pod column1;
+    physx_PxVec3_Pod column2;
 };
 struct physx_PxMat44_Pod {
-    physx_Vec4_Pod column0;
-    physx_Vec4_Pod column1;
-    physx_Vec4_Pod column2;
-    physx_Vec4_Pod column3;
+    physx_PxVec4_Pod column0;
+    physx_PxVec4_Pod column1;
+    physx_PxVec4_Pod column2;
+    physx_PxVec4_Pod column3;
 };
 struct physx_PxTransform_Pod {
-    physx_Quat_Pod q;
-    physx_Vec3_Pod p;
+    physx_PxQuat_Pod q;
+    physx_PxVec3_Pod p;
 };
 struct physx_PxAllocatorCallback_Pod {
-    void* vtable_;
-};
-struct physx_PxAssertHandler_Pod {
     void* vtable_;
 };
 struct physx_PxFoundation_Pod {
@@ -142,9 +139,6 @@ struct physx_PxSyncImpl_Pod {
 };
 struct physx_PxRunnable_Pod {
     void* vtable_;
-};
-struct physx_PxThreadImpl_Pod {
-    char structgen_pad0[1];
 };
 struct physx_PxCounterFrequencyToTensOfNanos_Pod {
     uint64_t mNumerator;
@@ -417,9 +411,6 @@ struct physx_PxTrianglePadded_Pod {
     uint32_t padding;
 };
 struct physx_PxTriangleMesh_Pod {
-    void* vtable_;
-};
-struct physx_PxBVH33TriangleMesh_Pod {
     void* vtable_;
 };
 struct physx_PxBVH34TriangleMesh_Pod {
@@ -854,21 +845,13 @@ struct physx_PxConeLimitParams_Pod {
     physx_PxVec4_Pod axisAngle;
 };
 struct physx_PxConstraintShaderTable_Pod {
-    physx_PxU32 (*)(physx::Px1DConstraint *, physx::PxVec3p &, physx::PxU32, physx::PxConstraintInvMassScale &, const void *, const physx::PxTransform &, const physx::PxTransform &, bool, physx::PxVec3p &, physx::PxVec3p &)_Pod solverPrep;
-    physx_PxConstraintProject_Pod project;
-    physx_PxConstraintVisualize_Pod visualize;
+    char structgen_pad0[24];
     uint32_t flag;
-    char structgen_pad0[4];
+    char structgen_pad1[4];
 };
 struct physx_PxConstraint_Pod {
     char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxMassModificationProps_Pod {
-    float mInvMassScale0;
-    float mInvInertiaScale0;
-    float mInvMassScale1;
-    float mInvInertiaScale1;
 };
 struct physx_PxContactPatch_Pod {
     physx_PxMassModificationProps_Pod mMassModification;
@@ -1273,8 +1256,7 @@ struct physx_PxSceneDesc_Pod {
     physx_PxCCDContactModifyCallback_Pod* ccdContactModifyCallback;
     void const* filterShaderData;
     uint32_t filterShaderDataSize;
-    char structgen_pad0[4];
-    physx_PxFilterFlags (*)(physx::PxFilterObjectAttributes, physx::PxFilterData, physx::PxFilterObjectAttributes, physx::PxFilterData, physx::PxPairFlags &, const void *, physx::PxU32)_Pod filterShader;
+    char structgen_pad0[12];
     physx_PxSimulationFilterCallback_Pod* filterCallback;
     uint32_t kineKineFilteringMode;
     uint32_t staticKineFilteringMode;
@@ -1730,10 +1712,6 @@ struct physx_PxTetrahedronMeshDesc_Pod {
 struct physx_PxSoftBodySimulationDataDesc_Pod {
     physx_PxBoundedData_Pod vertexToTet;
 };
-struct physx_PxBVH33MidphaseDesc_Pod {
-    float meshSizePerformanceTradeOff;
-    uint32_t meshCookingHint;
-};
 struct physx_PxBVH34MidphaseDesc_Pod {
     uint32_t numPrimsPerLeaf;
     uint32_t buildStrategy;
@@ -1764,9 +1742,6 @@ struct physx_PxCookingParams_Pod {
     physx_PxMidphaseDesc_Pod midphaseDesc;
     uint32_t gaussMapLimit;
     float maxWeightRatioInTet;
-};
-struct physx_PxCooking_Pod {
-    void* vtable_;
 };
 struct physx_PxDefaultMemoryOutputStream_Pod {
     void* vtable_;
@@ -1957,9 +1932,6 @@ struct physx_PxTriangleMeshPoissonSampler_Pod {
 struct physx_PxTetrahedronMeshExt_Pod {
     char structgen_pad0[1];
 };
-struct physx_PxBinaryConverter_Pod {
-    void* vtable_;
-};
 struct physx_PxRepXObject_Pod {
     char const* typeName;
     void const* serializable;
@@ -1972,271 +1944,6 @@ struct physx_PxRepXInstantiationArgs_Pod {
 };
 struct physx_PxRepXSerializer_Pod {
     void* vtable_;
-};
-struct physx_PxVehicleContext_Pod {
-    physx_PxVec3_Pod upAxis;
-    physx_PxVec3_Pod forwardAxis;
-    physx_PxVec3_Pod sideAxis;
-    int32_t updateMode;
-    float pointRejectAngleThresholdCosine;
-    float normalRejectAngleThresholdCosine;
-    float maxHitActorAcceleration;
-};
-struct physx_PxVehicleChassisData_Pod {
-    physx_PxVec3_Pod mMOI;
-    float mMass;
-    physx_PxVec3_Pod mCMOffset;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleEngineData_Pod {
-    char structgen_pad0[80];
-    float mMOI;
-    float mPeakTorque;
-    float mMaxOmega;
-    float mDampingRateFullThrottle;
-    float mDampingRateZeroThrottleClutchEngaged;
-    float mDampingRateZeroThrottleClutchDisengaged;
-    char structgen_pad1[8];
-};
-struct physx_PxVehicleGearsData_Pod {
-    float[32] mRatios;
-    float mFinalRatio;
-    uint32_t mNbRatios;
-    float mSwitchTime;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleAutoBoxData_Pod {
-    float[32] mUpRatios;
-    float[32] mDownRatios;
-};
-struct physx_PxVehicleDifferential4WData_Pod {
-    float mFrontRearSplit;
-    float mFrontLeftRightSplit;
-    float mRearLeftRightSplit;
-    float mCentreBias;
-    float mFrontBias;
-    float mRearBias;
-    int32_t mType;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleDifferentialNWData_Pod {
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleAckermannGeometryData_Pod {
-    float mAccuracy;
-    float mFrontWidth;
-    float mRearWidth;
-    float mAxleSeparation;
-};
-struct physx_PxVehicleClutchData_Pod {
-    float mStrength;
-    uint32_t mAccuracyMode;
-    uint32_t mEstimateIterations;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleTireLoadFilterData_Pod {
-    float mMinNormalisedLoad;
-    float mMinFilteredNormalisedLoad;
-    float mMaxNormalisedLoad;
-    float mMaxFilteredNormalisedLoad;
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleWheelData_Pod {
-    float mRadius;
-    float mWidth;
-    float mMass;
-    float mMOI;
-    float mDampingRate;
-    float mMaxBrakeTorque;
-    float mMaxHandBrakeTorque;
-    float mMaxSteer;
-    float mToeAngle;
-    char structgen_pad0[12];
-};
-struct physx_PxVehicleSuspensionData_Pod {
-    float mSpringStrength;
-    float mSpringDamperRate;
-    float mMaxCompression;
-    float mMaxDroop;
-    float mSprungMass;
-    float mCamberAtRest;
-    float mCamberAtMaxCompression;
-    float mCamberAtMaxDroop;
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleAntiRollBarData_Pod {
-    uint32_t mWheel0;
-    uint32_t mWheel1;
-    float mStiffness;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleTireData_Pod {
-    float mLatStiffX;
-    float mLatStiffY;
-    float mLongitudinalStiffnessPerUnitGravity;
-    float mCamberStiffnessPerUnitGravity;
-    float[3][2] mFrictionVsSlipGraph;
-    uint32_t mType;
-    char structgen_pad0[20];
-};
-struct physx_PxVehicleWheelsSimData_Pod {
-    char structgen_pad0[96];
-};
-struct physx_PxVehicleWheelsDynData_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxVehicleWheels_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[32];
-};
-struct physx_PxVehicleDriveSimData_Pod {
-    char structgen_pad0[528];
-};
-struct physx_PxVehicleDriveDynData_Pod {
-    float[16] mControlAnalogVals;
-    bool mUseAutoGears;
-    bool mGearUpPressed;
-    bool mGearDownPressed;
-    char structgen_pad0[1];
-    uint32_t mCurrentGear;
-    uint32_t mTargetGear;
-    float mEnginespeed;
-    float mGearSwitchTime;
-    float mAutoBoxSwitchTime;
-    char structgen_pad1[8];
-};
-struct physx_PxVehicleDrive_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[28];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    char structgen_pad2[4];
-};
-struct physx_PxVehicleDriveSimData4W_Pod {
-    char structgen_pad0[576];
-};
-struct physx_PxVehicleDrive4W_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[28];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimData4W_Pod mDriveSimData;
-    char structgen_pad2[4];
-};
-struct physx_PxVehicleDriveTank_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[28];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimData_Pod mDriveSimData;
-    char structgen_pad2[20];
-};
-struct physx_PxVehicleDrivableSurfaceType_Pod {
-    uint32_t mType;
-};
-struct physx_PxVehicleDrivableSurfaceToTireFrictionPairs_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxWheelQueryResult_Pod {
-    physx_PxVec3_Pod suspLineStart;
-    physx_PxVec3_Pod suspLineDir;
-    float suspLineLength;
-    bool isInAir;
-    char structgen_pad0[3];
-    physx_PxActor_Pod* tireContactActor;
-    physx_PxShape_Pod* tireContactShape;
-    physx_PxMaterial_Pod const* tireSurfaceMaterial;
-    uint32_t tireSurfaceType;
-    physx_PxVec3_Pod tireContactPoint;
-    physx_PxVec3_Pod tireContactNormal;
-    float tireFriction;
-    float suspJounce;
-    float suspSpringForce;
-    physx_PxVec3_Pod tireLongitudinalDir;
-    physx_PxVec3_Pod tireLateralDir;
-    float longitudinalSlip;
-    float lateralSlip;
-    float steerAngle;
-    physx_PxTransform_Pod localPose;
-};
-struct physx_PxVehicleWheelQueryResult_Pod {
-    physx_PxWheelQueryResult_Pod* wheelQueryResults;
-    uint32_t nbWheelQueryResults;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleWheelConcurrentUpdateData_Pod {
-    char structgen_pad0[64];
-};
-struct physx_PxVehicleConcurrentUpdateData_Pod {
-    physx_PxVehicleWheelConcurrentUpdateData_Pod* concurrentWheelUpdates;
-    uint32_t nbConcurrentWheelUpdates;
-    char structgen_pad0[28];
-};
-struct physx_PxVehicleDriveSimDataNW_Pod {
-    char structgen_pad0[544];
-};
-struct physx_PxVehicleDriveNW_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[28];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimDataNW_Pod mDriveSimData;
-    char structgen_pad2[4];
-};
-struct physx_PxVehicleSteerFilter_Pod {
-    float mSharpness;
-    float mFilteredMaxSteer;
-};
-struct physx_PxVehicleKeySmoothingData_Pod {
-    float[16] mRiseRates;
-    float[16] mFallRates;
-};
-struct physx_PxVehiclePadSmoothingData_Pod {
-    float[16] mRiseRates;
-    float[16] mFallRates;
-};
-struct physx_PxVehicleDrive4WRawInputData_Pod {
-    void* vtable_;
-};
-struct physx_PxVehicleDriveNWRawInputData_Pod {
-    void* vtable_;
-};
-struct physx_PxVehicleDriveTankRawInputData_Pod {
-    char structgen_pad0[32];
-};
-struct physx_PxVehicleCopyDynamicsMap_Pod {
-    uint8_t[20] sourceWheelIds;
-    uint8_t[20] targetWheelIds;
-};
-struct physx_PxVehicleGraphDesc_Pod {
-    char structgen_pad0[32];
-};
-struct physx_PxVehicleGraphChannelDesc_Pod {
-    float mMinY;
-    float mMaxY;
-    float mMidY;
-    physx_PxVec3_Pod mColorLow;
-    physx_PxVec3_Pod mColorHigh;
-    char structgen_pad0[4];
-    char* mTitle;
-};
-struct physx_PxVehicleGraph_Pod {
-    char structgen_pad0[15840];
-};
-struct physx_PxVehicleTelemetryData_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxVehicleNoDrive_Pod {
-    char structgen_pad0[16];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    char structgen_pad1[64];
 };
 struct physx_PxPvd_Pod {
     void* vtable_;

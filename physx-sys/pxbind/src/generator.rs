@@ -146,7 +146,7 @@ impl Generator {
 
         for rec in ast.recs.iter().filter(|rb| (self.record_filter)(rb)) {
             let name = rec.name;
-            writeln!(out, "static_assert(sizeof(physx::{name}) == sizeof(physx_{name}_Pod), \"POD wrapper for `physx::{name}` has incorrect size")?;
+            writeln!(out, "static_assert(sizeof(physx::{name}) == sizeof(physx_{name}_Pod), \"POD wrapper for `physx::{name}` has incorrect size\");")?;
         }
 
         writeln!(out)?;

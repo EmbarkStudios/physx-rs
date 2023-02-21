@@ -69,7 +69,7 @@ pub struct PxTransformPadded {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxPlane {
-    pub n: PxVec3,
+    pub n: glam::Vec3,
     pub d: f32,
 }
 #[derive(Clone, Copy)]
@@ -77,7 +77,7 @@ pub struct PxPlane {
 pub struct PxBoxGeometry {
     pub structgen_pad0: [u8; 4],
     pub mTypePadding: f32,
-    pub halfExtents: PxVec3,
+    pub halfExtents: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -103,7 +103,7 @@ pub struct PxPlaneGeometry {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMeshScale {
-    pub scale: PxVec3,
+    pub scale: glam::Vec3,
     pub rotation: PxQuat,
 }
 #[derive(Clone, Copy)]
@@ -165,8 +165,8 @@ pub struct PxHeightFieldGeometry {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBounds3 {
-    pub minimum: PxVec3,
-    pub maximum: PxVec3,
+    pub minimum: glam::Vec3,
+    pub maximum: glam::Vec3,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -199,8 +199,8 @@ pub struct PxLocationHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
 }
 #[derive(Clone, Copy)]
@@ -209,8 +209,8 @@ pub struct PxGeomRaycastHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
     pub u: f32,
     pub v: f32,
@@ -226,8 +226,8 @@ pub struct PxGeomSweepHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
-    pub position: PxVec3,
-    pub normal: PxVec3,
+    pub position: glam::Vec3,
+    pub normal: glam::Vec3,
     pub distance: f32,
 }
 #[derive(Clone, Copy)]
@@ -252,6 +252,26 @@ pub struct PxCustomGeometry {
 #[repr(C)]
 pub struct PxGeometryHolder {
     pub structgen_pad0: [u8; 56],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxAllocator {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRawAllocator {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVirtualAllocator {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxUserAllocated {
+    pub structgen_pad0: [u8; 1],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -297,6 +317,10 @@ mod sizes {
         assert_eq!(std::mem::size_of::<PxQueryThreadContext>(), 1);
         assert_eq!(std::mem::size_of::<PxCustomGeometry>(), 16);
         assert_eq!(std::mem::size_of::<PxGeometryHolder>(), 56);
+        assert_eq!(std::mem::size_of::<PxAllocator>(), 1);
+        assert_eq!(std::mem::size_of::<PxRawAllocator>(), 1);
+        assert_eq!(std::mem::size_of::<PxVirtualAllocator>(), 16);
+        assert_eq!(std::mem::size_of::<PxUserAllocated>(), 1);
         assert_eq!(std::mem::size_of::<PxShape>(), 24);
     }
 }

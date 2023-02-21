@@ -56,7 +56,14 @@ impl<'ast> Param<'ast> {
                     self.kind.cpp_type()
                 );
             }
-            _ => panic!("oh no {self:?}"),
+            QualType::Record { name } => {
+                writesln!(out, "{indent}{} {name};", self.kind.cpp_type());
+                writesln!(out, "{indent}memcpy(&{name}, &{name}_pod, sizeof({name}));");
+            }
+            _ => panic!(
+                "parameter '{}' kind '{:?}' is not supported ",
+                self.name, self.kind
+            ),
         }
     }
 }
@@ -190,7 +197,13 @@ impl<'ast> FuncBinding<'ast> {
             // kind of ugly
             let sep = if i > 0 { ", " } else { "" };
 
-            writes!(acc, "{sep}{}: {}", param.name, param.kind.rust_type());
+            writes!(
+                acc,
+                "{sep}{}{}: {}",
+                param.name,
+                if needs_fixup(&param.name) { "_" } else { "" },
+                param.kind.rust_type()
+            );
         }
 
         if let Some(ret) = &self.ret {
@@ -201,6 +214,12 @@ impl<'ast> FuncBinding<'ast> {
 
         writesln!(writer, "{acc}");
     }
+}
+
+#[inline]
+fn needs_fixup(n: &str) -> bool {
+    static KEYWORDS: &[&str] = &["box", "type", "ref"];
+    KEYWORDS.contains(&n)
 }
 
 impl<'ast> PhysxInvoke<'ast> {
@@ -275,25 +294,3 @@ impl<'ast> PhysxInvoke<'ast> {
         }
     }
 }
-
-// physx_PxVec3_Pod PxVec3_new_3(float nx, float ny, float nz) {
-//     physx::PxVec3 returnValue(nx, ny, nz);
-//     physx_PxVec3_Pod returnValue_pod;
-//     memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//     return returnValue_pod;
-//     }
-
-// float PxVec3_normalizeFast_mut(physx_PxVec3_Pod* self__pod) {
-//     physx::PxVec3* self_ = reinterpret_cast<physx::PxVec3*>(self__pod);
-//     float returnValue = self_->normalizeFast();
-//     return returnValue;
-//     }
-
-// physx_PxVec3_Pod PxVec3_multiply(physx_PxVec3_Pod const* self__pod, physx_PxVec3_Pod const* a_pod) {
-//     physx::PxVec3 const* self_ = reinterpret_cast<physx::PxVec3 const*>(self__pod);
-//     physx::PxVec3 const& a = reinterpret_cast<physx::PxVec3 const&>(*a_pod);
-//     physx::PxVec3 returnValue = self_->multiply(a);
-//     physx_PxVec3_Pod returnValue_pod;
-//     memcpy(&returnValue_pod, &returnValue, sizeof(returnValue_pod));
-//     return returnValue_pod;
-//     }

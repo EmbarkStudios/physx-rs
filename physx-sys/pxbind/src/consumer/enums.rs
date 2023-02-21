@@ -155,7 +155,7 @@ impl<'ast> super::AstConsumer<'ast> {
         // All cpp code is used within the physx namespace, so strip that prefix
         let cxx_qt =
             cxx_qt.with_context(|| format!("enum '{name}' never declared a qualified typename"))?;
-        let cxx_qt = cxx_qt.strip_prefix("physx::").unwrap_or(cxx_qt);
+        let cxx_qt = super::no_physx(cxx_qt);
 
         self.enums.push(EnumBinding {
             repr,
@@ -177,7 +177,7 @@ impl<'ast> super::AstConsumer<'ast> {
         // PhysX uses a PxFlags<> template typedef to create a bitfield type for
         // a specific enum, we use this typedef to also generate an appropriate
         // bitflags that can be transparently passed between the FFI boundary
-        let Some(flags) = td.kind.qual_type.strip_prefix("PxFlags<") else { return Ok(()) };
+        let Some(flags) = super::no_physx(&td.kind.qual_type).strip_prefix("PxFlags<") else { return Ok(()) };
         // Get rid of `>`
         let flags = &flags[..flags.len() - 1];
 

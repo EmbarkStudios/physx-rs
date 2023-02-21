@@ -1,27 +1,7 @@
 ---
 source: physx-sys/pxbind/tests/enums.rs
-expression: "gen_enums(\"flags.h\",\n        &[\"PxActorCacheFlag\", \"PxArticulationCacheFlag\",\n                    \"PxShapeFlag\"]).unwrap()"
+expression: "gen_enums(\"flags.h\",\n        &[\"PxActorCacheFlag\", \"PxArticulationCacheFlag\", \"PxShapeFlag\",\n                    \"PxArticulationSensorFlag\"]).unwrap()"
 ---
-/// Identifies each type of information for retrieving from actor.
-#[derive(Copy, Clone)]
-#[repr(u32)]
-pub enum PxActorCacheFlag {
-    eACTOR_DATA = 1,
-    eFORCE = 4,
-    eTORQUE = 8,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxActorCacheFlag`]
-    #[derive(Copy, Clone, Default)]
-    #[repr(transparent)]
-    pub struct PxActorCacheFlags: u16 {
-        const eACTOR_DATA = 1 << 0;
-        const eFORCE = 1 << 2;
-        const eTORQUE = 1 << 3;
-    }
-}
-
 /// These flags determine what data is read or written to the internal articulation data via cache.
 #[derive(Copy, Clone)]
 #[repr(u32)]
@@ -65,6 +45,49 @@ bitflags::bitflags! {
         const eSENSOR_FORCES = 1 << 8;
         const eJOINT_SOLVER_FORCES = 1 << 9;
         const eALL = Self::eVELOCITY.bits | Self::eACCELERATION.bits | Self::ePOSITION.bits | Self::eLINK_VELOCITY.bits | Self::eLINK_ACCELERATION.bits | Self::eROOT_TRANSFORM.bits | Self::eROOT_VELOCITIES.bits;
+    }
+}
+
+/// Flags to configure the forces reported by articulation link sensors.
+#[derive(Copy, Clone)]
+#[repr(u32)]
+pub enum PxArticulationSensorFlag {
+    /// Raise to receive forces from forward dynamics.
+    eFORWARD_DYNAMICS_FORCES = 1,
+    /// Raise to receive forces from constraint solver.
+    eCONSTRAINT_SOLVER_FORCES = 2,
+    /// Raise to receive forces in the world rotation frame, otherwise they will be reported in the sensor's local frame.
+    eWORLD_FRAME = 4,
+}
+
+bitflags::bitflags! {
+    /// Flags for [`PxArticulationSensorFlag`]
+    #[derive(Copy, Clone, Default)]
+    #[repr(transparent)]
+    pub struct PxArticulationSensorFlags: u8 {
+        const eFORWARD_DYNAMICS_FORCES = 1 << 0;
+        const eCONSTRAINT_SOLVER_FORCES = 1 << 1;
+        const eWORLD_FRAME = 1 << 2;
+    }
+}
+
+/// Identifies each type of information for retrieving from actor.
+#[derive(Copy, Clone)]
+#[repr(u32)]
+pub enum PxActorCacheFlag {
+    eACTOR_DATA = 1,
+    eFORCE = 4,
+    eTORQUE = 8,
+}
+
+bitflags::bitflags! {
+    /// Flags for [`PxActorCacheFlag`]
+    #[derive(Copy, Clone, Default)]
+    #[repr(transparent)]
+    pub struct PxActorCacheFlags: u16 {
+        const eACTOR_DATA = 1 << 0;
+        const eFORCE = 1 << 2;
+        const eTORQUE = 1 << 3;
     }
 }
 

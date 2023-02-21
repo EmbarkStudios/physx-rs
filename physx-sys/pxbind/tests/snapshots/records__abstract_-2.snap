@@ -5,6 +5,6 @@ expression: ro.size_asserts
 using namespace physx;
 #include "structgen_out.hpp"
 
-static_assert(sizeof(physx::PxAllocatorCallback) == sizeof(physx_PxAllocatorCallback_Pod), "POD wrapper for `physx::PxAllocatorCallback` has incorrect size
+static_assert(sizeof(physx::PxAllocatorCallback) == sizeof(physx_PxAllocatorCallback_Pod), "POD wrapper for `physx::PxAllocatorCallback` has incorrect size");
 
 

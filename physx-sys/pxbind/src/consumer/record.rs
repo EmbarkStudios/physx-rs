@@ -483,7 +483,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
         // Skip records we've already seen, this happens a lot as forward declarations
         // and record definitions have the same kind
-        if self.classes.contains_key(rname) {
+        if self.classes.contains_key(rname) || self.is_ignored(node) {
             return Ok(());
         }
 
@@ -752,6 +752,10 @@ impl<'ast> super::AstConsumer<'ast> {
                         let kind = self
                             .parse_type(kind, template_types)
                             .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
+                        if matches!(&kind, QualType::FunctionPointer) {
+                            continue;
+                        }
+
                         let is_reference = matches!(kind, QualType::Reference { .. });
 
                         fields.push(FieldBinding {

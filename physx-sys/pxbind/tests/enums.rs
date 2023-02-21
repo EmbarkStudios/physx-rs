@@ -48,7 +48,12 @@ fn simple() {
 fn flags() {
     insta::assert_snapshot!(gen_enums(
         "flags.h",
-        &["PxActorCacheFlag", "PxArticulationCacheFlag", "PxShapeFlag"]
+        &[
+            "PxActorCacheFlag",
+            "PxArticulationCacheFlag",
+            "PxShapeFlag",
+            "PxArticulationSensorFlag"
+        ]
     )
     .unwrap());
 }
