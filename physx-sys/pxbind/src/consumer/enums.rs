@@ -58,7 +58,7 @@ impl<'ast> super::AstConsumer<'ast> {
             if let Some(rname) = rec.name.as_deref() {
                 rname
             } else {
-                println!(
+                log::debug!(
                     "skipping enum {:?} with anonymous wrapper struct",
                     enum_decl.name
                 );
@@ -68,7 +68,7 @@ impl<'ast> super::AstConsumer<'ast> {
             if let Some(ename) = enum_decl.name.as_deref() {
                 ename
             } else {
-                println!("skipping anonymous enum");
+                log::debug!("skipping anonymous enum");
                 return Ok(());
             }
         };

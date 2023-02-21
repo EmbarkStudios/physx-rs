@@ -86,3 +86,24 @@ fn simple_templates() {
     insta::assert_snapshot!(ro.size_asserts);
     insta::assert_snapshot!(ro.rust_decls);
 }
+
+/// Ensure we can parse templates, template specializations, and template parameters
+/// and stamp out unique types for each template + template param
+#[test]
+fn templates() {
+    let ro = gen_records(
+        "templates.h",
+        &[
+            "PxRaycastCallback",
+            "PxOverlapCallback",
+            "PxSweepCallback",
+            "PxRaycastBuffer",
+            "PxOverlapBuffer",
+        ],
+    )
+    .unwrap();
+
+    insta::assert_snapshot!(ro.structgen);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
+}

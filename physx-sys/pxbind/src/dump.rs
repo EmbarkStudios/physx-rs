@@ -1,24 +1,33 @@
 use crate::Node;
 use anyhow::Context as _;
 
+pub fn get_repo_root() -> anyhow::Result<String> {
+    let mut git = std::process::Command::new("git");
+    git.args(["rev-parse", "--show-toplevel"]);
+    git.stdout(std::process::Stdio::piped());
+    let captured = git
+        .output()
+        .context("failed to run git to find repo root")?;
+
+    let mut rr = String::from_utf8(captured.stdout).context("git output was non-utf8")?;
+    // Removing trailing newline
+    rr.pop();
+    Ok(rr)
+}
+
+#[inline]
+pub fn get_include_dir() -> anyhow::Result<String> {
+    // Acquire the repo root so we don't need to care about where we are executing
+    // this from (eg root, tests, wherever)
+    let repo_root = get_repo_root()?;
+
+    Ok(format!("{repo_root}/physx-sys/physx/physx/include"))
+}
+
 pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
     let mut cmd = std::process::Command::new("clang++");
 
-    // Acquire the repo root so we don't need to care about where we are executing
-    // this from (eg root, tests, wherever)
-    let repo_root = {
-        let mut git = std::process::Command::new("git");
-        git.args(["rev-parse", "--show-toplevel"]);
-        git.stdout(std::process::Stdio::piped());
-        let captured = git
-            .output()
-            .context("failed to run git to find repo root")?;
-
-        let mut rr = String::from_utf8(captured.stdout).context("git output was non-utf8")?;
-        // Removing trailing newline
-        rr.pop();
-        rr
-    };
+    let include_dir = get_include_dir()?;
 
     cmd.args([
         "-Xclang",
@@ -30,14 +39,17 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
         // mode because it treats .h as "c headers", this is useless
         "-xc++-header",
         // Define PX_DEPRECATED so that the attribute is emitted into the AST
-        "-DPX_DPRECATED=__attribute__((deprecated()))",
+        "-DPX_DEPRECATED=__attribute__((deprecated()))",
         // Ignore the actual warning about deprecation, we don't care about
         // warnings
         "-Wno-deprecated-declarations",
+        // We don't want this
+        "-DDISABLE_CUDA_PHYSX",
+        "-fcolor-diagnostics",
         // Add the root include directory so that clang knows how to find
         // all of the includes
         "-I",
-        &format!("{repo_root}/physx-sys/physx/physx/include"),
+        &include_dir,
         // Sigh, physx asserts that this is defined :p
         "-DNDEBUG",
     ]);

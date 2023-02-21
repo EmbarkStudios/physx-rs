@@ -1,4 +1,4 @@
-use super::{Comment, Item, Method, QualType};
+use super::{Comment, Item, Method, QualType, TemplateArg};
 use crate::Node;
 use anyhow::Context as _;
 use std::borrow::Cow;
@@ -79,6 +79,7 @@ impl<'ast> super::AstConsumer<'ast> {
         &mut self,
         node: &'ast Node,
         func: &'ast Function,
+        template_types: &[(&str, &TemplateArg<'ast>)],
     ) -> anyhow::Result<()> {
         if func.name.starts_with("operator") {
             return Ok(());
@@ -96,8 +97,8 @@ impl<'ast> super::AstConsumer<'ast> {
             params: Vec::new(),
         };
 
-        self.consume_return(dbg!(&func.name), &func.kind.qual_type, &mut fb)?;
-        self.consume_params(&func.name, node, &mut fb)?;
+        self.consume_return(&func.name, &func.kind.qual_type, template_types, &mut fb)?;
+        self.consume_params(&func.name, node, template_types, &mut fb)?;
 
         self.funcs.push(fb);
         Ok(())
@@ -107,12 +108,18 @@ impl<'ast> super::AstConsumer<'ast> {
         &mut self,
         node: &'ast Node,
         meth: &'ast Method,
+        template_types: &[(&str, &TemplateArg<'ast>)],
         mut func: FuncBinding<'ast>,
     ) -> anyhow::Result<()> {
-        // Unfortunately CXXMethodDecl's don't have a node for the return type,
-        // so we need to manually parse it from the function signature...
-        self.consume_return(&meth.name, &meth.kind.qual_type, &mut func)?;
-        self.consume_params(&meth.name, node, &mut func)?;
+        if meth.kind.qual_type.contains('<') {
+            log::debug!(
+                "ignoring method '{}' which has 1 or more templated parameters",
+                meth.name
+            );
+        }
+
+        self.consume_return(&meth.name, &meth.kind.qual_type, template_types, &mut func)?;
+        self.consume_params(&meth.name, node, template_types, &mut func)?;
 
         self.funcs.push(func);
 
@@ -124,6 +131,7 @@ impl<'ast> super::AstConsumer<'ast> {
         &self,
         name: &'ast str,
         node: &'ast Node,
+        template_types: &[(&str, &TemplateArg<'ast>)],
         func: &mut FuncBinding<'ast>,
     ) -> anyhow::Result<()> {
         for (i, param) in node
@@ -138,39 +146,45 @@ impl<'ast> super::AstConsumer<'ast> {
             })
             .enumerate()
         {
-            func.params.push(Param {
-                name: param
-                    .name
-                    .as_deref()
-                    .map_or_else(|| format!("anon_param{i}").into(), Cow::Borrowed),
-                kind: self.parse_type(&param.kind).with_context(|| {
+            let pname = param
+                .name
+                .as_deref()
+                .map_or_else(|| format!("anon_param{i}").into(), Cow::Borrowed);
+            let kind = self
+                .parse_type(&param.kind, template_types)
+                .with_context(|| {
                     format!(
-                        "failed to parse parameter '{:?}({})' for function '{name}'",
-                        param.name, param.kind.qual_type,
+                        "failed to parse parameter '{pname} ({})' for function '{name}'",
+                        param.kind.qual_type,
                     )
-                })?,
-            });
+                })?;
+
+            func.params.push(Param { name: pname, kind });
         }
 
         Ok(())
     }
 
+    /// Unfortunately CXXMethodDecl's don't have a node for the return type,
+    /// so we need to manually parse it from the function signature...
     #[inline]
     fn consume_return(
         &self,
         name: &str,
         sig: &'ast str,
+        template_types: &[(&str, &TemplateArg<'ast>)],
         func: &mut FuncBinding<'ast>,
     ) -> anyhow::Result<()> {
-        let open_ind = sig
-            .find('(')
-            .with_context(|| format!("function signature for '{name}' doesn't have a '('"))?;
-
+        // Ignore functions that already have a return type, notably constructors
         if func.ret.is_none() {
+            let open_ind = sig
+                .find('(')
+                .with_context(|| format!("function signature for '{name}' doesn't have a '('"))?;
+
             let ret = sig[..open_ind].trim();
             if ret != "void" {
                 func.ret = Some(
-                    self.parse_type(ret)
+                    self.parse_type(ret, template_types)
                         .with_context(|| format!("failed to parse return type for '{name}'"))?,
                 );
             }

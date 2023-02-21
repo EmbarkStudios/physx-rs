@@ -66,7 +66,7 @@ struct PodStructGen {
         pos += size;
     }
 
-    void endStruct(size_t size) {
+    void end_struct(size_t size) {
         assert(size >= pos);
         if (size > pos) {
             emit_padding(uint32_t(size - pos));

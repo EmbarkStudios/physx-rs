@@ -10,6 +10,8 @@ use clang_ast::Id;
 pub use enums::{EnumBinding, FlagsBinding};
 pub mod functions;
 pub use functions::{FuncBinding, PhysxInvoke};
+mod templates;
+pub use templates::{Template, TemplateArg};
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -113,7 +115,17 @@ pub enum Item {
         kind: Type,
         //decl: Decl,
     },
-    ClassTemplateDecl,
+    ClassTemplateDecl {
+        name: String,
+    },
+    TemplateTypeParmDecl {
+        name: Option<String>,
+    },
+    NonTypeTemplateParmDecl {
+        name: Option<String>,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
     ClassTemplateSpecializationDecl(Record),
     TypedefDecl(Typedef),
     /// The deprecated declspec has been defined on the item (PX_DEPRECATED)
@@ -214,6 +226,7 @@ pub struct AstConsumer<'ast> {
     pub type_defs: HashMap<&'ast str, QualType<'ast>>,
     pub recs: Vec<RecBinding<'ast>>,
     pub funcs: Vec<FuncBinding<'ast>>,
+    pub templates: HashMap<&'ast str, Template<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
     /// for `release` methods, or whether something is a record at all
     pub classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
@@ -232,14 +245,14 @@ impl<'ast> AstConsumer<'ast> {
         in_physx: bool,
     ) -> anyhow::Result<()> {
         if self.is_ignored(node) {
-            println!("skipping node");
+            log::debug!("skipping ignored node");
             return Ok(());
         }
 
         for inn in &node.inner {
             match &inn.kind {
                 Item::NamespaceDecl { name } => {
-                    if in_physx || name.as_deref() == Some("physx") {
+                    if name.as_deref() == Some("physx") {
                         self.traverse(inn, root, true)?;
                     }
                 }
@@ -264,10 +277,13 @@ impl<'ast> AstConsumer<'ast> {
                         continue;
                     }
 
-                    println!("skipping function {}", func.name);
+                    log::debug!("skipping function {}", func.name);
                     //self.consume_function(inn, func)?;
                 }
-                Item::ClassTemplateDecl | Item::FunctionTemplateDecl => {}
+                Item::ClassTemplateDecl { name } => {
+                    //self.consume_template_decl(inn, name)?;
+                }
+                Item::FunctionTemplateDecl => {}
                 _ => {
                     self.traverse(inn, root, in_physx)?;
                 }
@@ -307,8 +323,8 @@ impl<'ast> AstConsumer<'ast> {
         if td.kind.qual_type.starts_with("PxFlags<") {
             self.consume_flags(node, td)?;
         } else if let Some(tid) = self.is_template_we_care_about(node, td) {
-            self.consume_template(node, td, tid, root)?;
-        } else if let Ok(qt) = self.parse_type(&td.kind) {
+            self.consume_template_typedef(node, td, tid, root)?;
+        } else if let Ok(qt) = self.parse_type(&td.kind, &[]) {
             self.type_defs.insert(&td.name, qt);
         }
 
@@ -383,7 +399,7 @@ impl<'ast> AstConsumer<'ast> {
         let mut additional = Block::default();
 
         if let Err(err) = gather(full_comment, None, &mut summary, &mut additional) {
-            eprintln!("Failed to gather comment for {:?}: {err:#}", node.kind);
+            log::warn!("Failed to gather comment for {:?}: {err:#}", node.kind);
             return None;
         }
 
@@ -397,11 +413,27 @@ impl<'ast> AstConsumer<'ast> {
         })
     }
 
-    fn parse_type(&self, kind: impl Into<AstType<'ast>>) -> anyhow::Result<QualType<'ast>> {
+    fn parse_type(
+        &self,
+        kind: impl Into<AstType<'ast>>,
+        template_types: &[(&str, &TemplateArg<'ast>)],
+    ) -> anyhow::Result<QualType<'ast>> {
         let kind = kind.into();
 
-        // Builtin types are the most common, we already handle the common typydefs as well
-        if let Some(bi) = self.parse_builtin(kind) {
+        let type_str = kind.as_str();
+
+        if let Some(treplace) = template_types.iter().find_map(|(t, ty)| {
+            if let (TemplateArg::Type(ty), true) = (ty, *t == type_str) {
+                Some(ty)
+            } else {
+                None
+            }
+        }) {
+            return Ok(treplace.clone());
+        }
+
+        // Builtin types are the most common, we already handle the common typedefs as well
+        if let Some(bi) = self.parse_builtin(type_str) {
             return Ok(QualType::Builtin(bi));
         }
 
@@ -415,8 +447,6 @@ impl<'ast> AstConsumer<'ast> {
         //     .context("failed to locate type alias")?;
         //}
         //}
-
-        let type_str = kind.as_str();
 
         // There's probably a smarter way to do this, but ugh, C++ pointers are so
         // dumb
@@ -439,7 +469,7 @@ impl<'ast> AstConsumer<'ast> {
         if let Some(ptr) = type_str.strip_suffix('*') {
             let (inner, is_const) = parse_ptr(ptr);
 
-            let pointee = self.parse_type(inner.trim())?;
+            let pointee = self.parse_type(inner.trim(), template_types)?;
 
             return Ok(QualType::Pointer {
                 is_const,
@@ -448,29 +478,36 @@ impl<'ast> AstConsumer<'ast> {
         } else if let Some(refer) = type_str.strip_suffix('&') {
             let (inner, is_const) = parse_ptr(refer);
 
-            let pointee = self.parse_type(inner.trim())?;
+            let pointee = self.parse_type(inner.trim(), template_types)?;
 
             return Ok(QualType::Reference {
                 is_const,
                 pointee: Box::new(pointee),
             });
         } else if let Some(array) = type_str.strip_suffix(']') {
-            let ind = array
-                .find('[')
-                .context("uhm...we thought this was an array...")?;
+            let ind = array.rfind('[').context("found a closing ']' but no '['")?;
 
             let ele_type = self
-                .parse_type(&array[..ind])
+                .parse_type(&array[..ind], template_types)
                 .context("failed to parse element type")?;
 
-            let len = array[ind + 1..]
-                .parse()
-                .context("failed to parse array length")?;
+            let element = Box::new(ele_type);
 
-            return Ok(QualType::Array {
-                element: Box::new(ele_type),
-                len,
-            });
+            let arr_len = &array[ind + 1..];
+
+            let len = if let Some(len) = template_types.iter().find_map(|(tn, ta)| {
+                if let (TemplateArg::Value(val), true) = (ta, *tn == arr_len) {
+                    Some(*val)
+                } else {
+                    None
+                }
+            }) {
+                len
+            } else {
+                arr_len.parse().context("failed to parse array length")?
+            };
+
+            return Ok(QualType::Array { element, len });
         }
 
         // Check if it's an enum, we'll always know the enum by the time we hit
@@ -499,14 +536,8 @@ impl<'ast> AstConsumer<'ast> {
 
             Ok(qt)
         } else {
-            Ok(QualType::Enum {
-                name: "OHNO",
-                cxx_qt: "OHNOCPP",
-                repr: Builtin::UInt,
-            })
+            anyhow::bail!("Unknown type '{kind:?}'");
         }
-
-        //anyhow::bail!("oops {kind:?}")
     }
 
     fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
@@ -525,6 +556,7 @@ impl<'ast> AstConsumer<'ast> {
             // Signed 64-bit integers are essentially unused in Physx
             "int64_t" | "long" | "physx::PxI64" => Builtin::Long,
             "uint64_t" | "unsigned long" | "physx::PxU64" => Builtin::ULong,
+            "size_t" => Builtin::USize,
             // See PxVecMath.h for the vector types
             math if math.contains("aos::") => {
                 let mt = &math[math.rfind(':').unwrap() + 1..];
@@ -581,13 +613,19 @@ impl<'ast> AstType<'ast> {
             if let Some(stripped) = ty.strip_prefix("const ") {
                 return stripped;
             }
+        } else if ty.contains('*') {
+            if let Some(stripped) = ty.strip_suffix("__restrict") {
+                return stripped;
+            } else if ty.starts_with("class ") {
+                return "void *";
+            }
         }
 
         ty
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Builtin {
     Void,
     Bool,
@@ -601,6 +639,7 @@ pub enum Builtin {
     UInt,
     Long,
     ULong,
+    USize,
     // SIMD
     Vec3V,
     QuatV,
@@ -637,9 +676,10 @@ impl Builtin {
             Self::UInt => "u32",
             Self::Long => "i64",
             Self::ULong => "u64",
+            Self::USize => "usize",
             Self::Vec3V => "glam::Vec3A",
             Self::Vec3 => "glam::Vec3",
-            Self::Vec3p => "Vec3p",
+            Self::Vec3p => "glam::Vec3A",
             Self::Vec4V | Self::Vec4 => "glam::Vec4",
             Self::QuatV | Self::Quat => "glam::Quat",
             Self::BoolV => "glam::BVec4A",
@@ -668,22 +708,23 @@ impl Builtin {
             Self::UInt => "uint32_t",
             Self::Long => "int64_t",
             Self::ULong => "uint64_t",
-            Self::Vec3V => "Vec3V",
-            Self::Vec3 => "Vec3",
-            Self::Vec3p => "Vec3p",
-            Self::Vec4V => "Vec4V",
-            Self::Vec4 => "Vec4",
-            Self::QuatV => "QuatV",
-            Self::Quat => "Quat",
-            Self::BoolV => "BoolV",
-            Self::U32V => "VecU32V",
-            Self::I32V => "VecI32V",
-            Self::Mat33V => "Mat33V",
-            Self::Mat33 => "Mat33",
-            Self::Mat34V => "Mat34V",
-            Self::Mat34 => "Mat34",
-            Self::Mat44V => "Mat44V",
-            Self::Mat44 => "Mat44",
+            Self::USize => "size_t",
+            Self::Vec3V => "physx_Vec3V_Pod",
+            Self::Vec3 => "physx_Vec3_Pod",
+            Self::Vec3p => "physx_Vec3p_Pod",
+            Self::Vec4V => "physx_Vec4V_Pod",
+            Self::Vec4 => "physx_Vec4_Pod",
+            Self::QuatV => "physx_QuatV_Pod",
+            Self::Quat => "physx_Quat_Pod",
+            Self::BoolV => "physx_BoolV_Pod",
+            Self::U32V => "physx_VecU32V_Pod",
+            Self::I32V => "physx_VecI32V_Pod",
+            Self::Mat33V => "physx_Mat33V_Pod",
+            Self::Mat33 => "physx_Mat33_Pod",
+            Self::Mat34V => "physx_Mat34V_Pod",
+            Self::Mat34 => "physx_Mat34_Pod",
+            Self::Mat44V => "physx_Mat44V_Pod",
+            Self::Mat44 => "physx_Mat44_Pod",
         }
     }
 
@@ -702,22 +743,23 @@ impl Builtin {
             Self::UInt => "uint32_t",
             Self::Long => "int64_t",
             Self::ULong => "uint64_t",
-            Self::Vec3V => "physx::Vec3V",
-            Self::Vec3 => "physx::Vec3",
-            Self::Vec3p => "physx::Vec3p",
-            Self::Vec4V => "physx::Vec4V",
-            Self::Vec4 => "physx::Vec4",
-            Self::QuatV => "physx::QuatV",
-            Self::Quat => "physx::Quat",
-            Self::BoolV => "physx::BoolV",
-            Self::U32V => "physx::VecU32V",
-            Self::I32V => "physx::VecI32V",
-            Self::Mat33V => "physx::Mat33V",
-            Self::Mat33 => "physx::Mat33",
-            Self::Mat34V => "physx::Mat34V",
-            Self::Mat34 => "physx::Mat34",
-            Self::Mat44V => "physx::Mat44V",
-            Self::Mat44 => "physx::Mat44",
+            Self::USize => "size_t",
+            Self::Vec3V => "physx::PxVec3V",
+            Self::Vec3 => "physx::PxVec3",
+            Self::Vec3p => "physx::PxVec3p",
+            Self::Vec4V => "physx::PxVec4V",
+            Self::Vec4 => "physx::PxVec4",
+            Self::QuatV => "physx::PxQuatV",
+            Self::Quat => "physx::PxQuat",
+            Self::BoolV => "physx::PxBoolV",
+            Self::U32V => "physx::PxVecU32V",
+            Self::I32V => "physx::PxVecI32V",
+            Self::Mat33V => "physx::PxMat33V",
+            Self::Mat33 => "physx::PxMat33",
+            Self::Mat34V => "physx::PxMat34V",
+            Self::Mat34 => "physx::PxMat34",
+            Self::Mat44V => "physx::PxMat44V",
+            Self::Mat44 => "physx::PxMat44",
         }
     }
 
@@ -741,7 +783,7 @@ impl Builtin {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum QualType<'ast> {
     Pointer {
         is_const: bool,
@@ -769,6 +811,9 @@ pub enum QualType<'ast> {
     Record {
         name: &'ast str,
     },
+    TemplateTypedef {
+        name: String,
+    },
 }
 
 use std::fmt;
@@ -794,7 +839,8 @@ impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
             }
             QualType::Enum { name, .. } => f.write_str(name),
             QualType::Flags { name, .. } => f.write_str(name),
-            QualType::Record { name } => write!(f, "physx_{name}_Pod"),
+            QualType::Record { name } => f.write_str(name),
+            QualType::TemplateTypedef { name } => f.write_str(name),
         }
     }
 }
@@ -821,6 +867,7 @@ impl<'qt, 'ast> fmt::Display for CppType<'qt, 'ast> {
             QualType::Enum { cxx_qt: name, .. }
             | QualType::Flags { name, .. }
             | QualType::Record { name } => write!(f, "physx::{name}"),
+            QualType::TemplateTypedef { name } => f.write_str(name),
         }
     }
 }
@@ -843,6 +890,7 @@ impl<'qt, 'ast> fmt::Display for CType<'qt, 'ast> {
             QualType::Enum { repr, .. } => f.write_str(repr.c_type()),
             QualType::Flags { repr, .. } => f.write_str(repr.c_type()),
             QualType::Record { name } => write!(f, "physx_{name}_Pod"),
+            QualType::TemplateTypedef { name } => write!(f, "physx_{name}_Pod"),
         }
     }
 }
@@ -867,13 +915,14 @@ impl<'ast> QualType<'ast> {
     pub fn is_pod(&self) -> bool {
         match self {
             QualType::Pointer { pointee, .. } => pointee.is_pod(),
-            QualType::Reference { .. } => true,
             QualType::Builtin(bi) => bi.is_pod(),
             QualType::FunctionPointer => false,
             QualType::Array { element, .. } => element.is_pod(),
-            QualType::Enum { .. } => true,
-            QualType::Flags { .. } => true,
-            QualType::Record { .. } => true,
+            QualType::Enum { .. }
+            | QualType::Flags { .. }
+            | QualType::Record { .. }
+            | QualType::Reference { .. }
+            | QualType::TemplateTypedef { .. } => true,
         }
     }
 }

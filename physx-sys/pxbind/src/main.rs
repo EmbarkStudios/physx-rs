@@ -1,58 +1,21 @@
 fn main() -> anyhow::Result<()> {
-    // This is the root API include that includes all the other public
-    // APIs
-    let node = pxbind::get_ast("physx-sys/physx/physx/include/PxPhysicsAPI.h")?;
+    // This is the root API include that includes all the other public APIs
+    let api_h = format!("{}/PxPhysicsAPI.h", pxbind::get_include_dir()?);
+    let root = pxbind::get_parsed_ast(api_h)?;
 
-    // // Luckily PhysX is fairly consistent, all public structs and classes are
-    // // prefixed with `Px`, so we just use that to determine which records we
-    // // want to add bindings for. We could also just check to see if it's part
-    // // of the `physx` namespace.
-    // let mut pods = 0;
-    // let mut total = 0;
-    // let mut unique = std::collections::HashSet::<&str>::new();
+    let mut ast = pxbind::consumer::AstConsumer::default();
+    ast.consume(&root)?;
 
-    // fn print<'n>(
-    //     node: &'n Node,
-    //     unique: &mut std::collections::HashSet<&'n str>,
-    //     pods: &mut u32,
-    //     total: &mut u32,
-    // ) {
-    //     for record in node.inner.iter().filter_map(|inn| {
-    //         if let Item::CXXRecordDecl(rec) = &inn.kind {
-    //             Some(rec)
-    //         } else {
-    //             None
-    //         }
-    //     }) {
-    //         let Some(name) = record.name.as_deref().filter(|n| n.starts_with("Px")) else { continue };
+    let rr: std::path::PathBuf = pxbind::get_repo_root()?.into();
 
-    //         if !unique.insert(name) {
-    //             continue;
-    //         }
+    use std::fs::File;
 
-    //         *total += 1;
+    let mut structgen = File::create(rr.join("physx-sys/src/structgen/structgen2.cpp"))?;
+    let mut cpp = File::create(rr.join("physx-sys/src/physx_generated2.hpp"))?;
+    let mut rust = File::create(rr.join("physx-sys/src/physx_generated2.rs"))?;
 
-    //         if record
-    //             .definition_data
-    //             .as_ref()
-    //             .map_or(false, |dd| dd.is_pod)
-    //         {
-    //             *pods += 1;
-    //             println!("generate_pod!(\"physx::{name}\")");
-    //         } else {
-    //             println!("generate!(\"physx::{name}\")");
-    //         }
-    //     }
-
-    //     for node in &node.inner {
-    //         print(node, unique, pods, total);
-    //     }
-    // }
-
-    // print(&node, &mut unique, &mut pods, &mut total);
-
-    // println!("--- Summary ---");
-    // println!("PODs: {pods} NonPODs: {}", total - pods);
+    let generator = pxbind::generator::Generator::default();
+    generator.generate_all(&ast, &mut structgen, &mut cpp, &mut rust)?;
 
     Ok(())
 }

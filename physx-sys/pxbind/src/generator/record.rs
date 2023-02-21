@@ -1,24 +1,8 @@
 use super::{Indent, SG, UOF};
 
 impl<'ast> crate::consumer::RecBinding<'ast> {
-    /// Decide whether we should use "structgen" to calculate the exact layout of
-    /// this C++ struct.
-    ///
-    /// Ideally we would do this for all types, but we must be able to name them,
-    /// which is not feasible for anonymous types, or types which the generator
-    /// doesn't support yet (their cppTypeName will be empty).
-    ///
-    /// Note that empty types are only refered to by pointers and references in
-    /// PhysX, so we can generate dummy contents for them.
-    #[inline]
-    fn should_calculate_layout(&self) -> bool {
-        self.ast.definition_data.is_some()
-            && !matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union))
-            && !self.fields.is_empty()
-    }
-
     pub(super) fn emit_structgen(&self, writer: &mut String, level: u32) {
-        if self.should_calculate_layout() {
+        if self.calc_layout {
             self.emit_structgen_calc(writer, level);
         } else {
             self.emit_structgen_passthrough(writer, level);
@@ -48,12 +32,13 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
             }
 
             let fname = field.name;
+            let c_type = field.kind.c_type();
             let cpp_type = field.kind.cpp_type();
             let rust_type = field.kind.rust_type();
 
             writesln!(
                 w,
-                r#"{indent2}{SG}.add_field("{cpp_type} {fname}", "{fname}", "{rust_type}", sizeof({cpp_type}), {UOF}(physx_{name}_Pod, {fname});"#
+                r#"{indent2}{SG}.add_field("{c_type} {fname}", "{fname}", "{rust_type}", sizeof({cpp_type}), {UOF}(physx_{name}_Pod, {fname}));"#
             );
         }
 
@@ -87,7 +72,7 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
     }
 
     pub fn emit_rust(&self, w: &mut String, level: u32) -> bool {
-        if self.should_calculate_layout() {
+        if self.calc_layout {
             return false;
         }
 

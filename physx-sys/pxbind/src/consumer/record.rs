@@ -156,7 +156,7 @@ pub struct RecBinding<'ast> {
     pub has_vtable: bool,
     pub ast: &'ast Record,
     pub fields: Vec<FieldBinding<'ast>>,
-    pub is_empty: bool,
+    pub calc_layout: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -219,7 +219,7 @@ impl<'ast> super::AstConsumer<'ast> {
             "PxVec4",
             "PxQuat",
             "PxMat33",
-            "PxMat34",
+            //"PxMat34",
             "PxMat44",
             "PxTransform",
         ];
@@ -237,7 +237,7 @@ impl<'ast> super::AstConsumer<'ast> {
         })
     }
 
-    pub(super) fn consume_template(
+    pub(super) fn consume_template_typedef(
         &mut self,
         _node: &'ast Node,
         td: &'ast Typedef,
@@ -369,18 +369,20 @@ impl<'ast> super::AstConsumer<'ast> {
                 });
             }
             "PxMat34" => {
-                fields.push(FieldBinding {
-                    name: "m",
-                    kind: QualType::Builtin(Builtin::Mat33),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "p",
-                    kind: QualType::Builtin(Builtin::Vec3),
-                    is_public: true,
-                    is_reference: false,
-                });
+                // This type is not used in the public API so we ignore it
+                return Ok(());
+                // fields.push(FieldBinding {
+                //     name: "m",
+                //     kind: QualType::Builtin(Builtin::Mat33),
+                //     is_public: true,
+                //     is_reference: false,
+                // });
+                // fields.push(FieldBinding {
+                //     name: "p",
+                //     kind: QualType::Builtin(Builtin::Vec3),
+                //     is_public: true,
+                //     is_reference: false,
+                // });
             }
             "PxMat44" => {
                 fields.push(FieldBinding {
@@ -422,7 +424,9 @@ impl<'ast> super::AstConsumer<'ast> {
                     is_reference: false,
                 });
             }
-            other => anyhow::bail!("template typedef {other} is not implemented"),
+            _ => {
+                self.consume_template_instance(&td.kind.qual_type, Some(&td.name))?;
+            }
         }
 
         let name = &td.name;
@@ -439,7 +443,7 @@ impl<'ast> super::AstConsumer<'ast> {
             has_vtable: ast.is_polymorphic(),
             fields,
             ast,
-            is_empty: false,
+            calc_layout: true,
         });
 
         self.classes.insert(name, (node, ast));
@@ -510,7 +514,7 @@ impl<'ast> super::AstConsumer<'ast> {
 
         for base in &rec.bases {
             let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
-                println!("skipping non-physx base '{}'", base.kind.qual_type);
+                log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
                 continue;
             };
             let base_rec = self
@@ -526,7 +530,7 @@ impl<'ast> super::AstConsumer<'ast> {
             fields.extend(base_rec.fields.iter().cloned());
         }
 
-        self.get_fields(node, rec, &mut fields)?;
+        self.get_fields(node, rec, &[], &mut fields)?;
 
         // Keep a record of each method that we are binding, to account for
         // overloading, particularly constructors, we need to append a counter
@@ -552,7 +556,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 if !is_public {
                     continue;
                 } else if self.is_ignored(inn) {
-                    println!("skipping deprecated method {rname}::{}", method.name);
+                    log::debug!("skipping deprecated method {rname}::{}", method.name);
                     continue;
                 }
             }
@@ -662,7 +666,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 ));
             }
 
-            self.consume_method(inn, method, func)?;
+            self.consume_method(inn, method, &[], func)?;
         }
 
         // If there are no fields, we need to add a dummy field since C++ doesn't have
@@ -678,40 +682,62 @@ impl<'ast> super::AstConsumer<'ast> {
             });
         }
 
+        // Decide whether we should use "structgen" to calculate the exact layout of
+        // this C++ struct.
+        //
+        // Ideally we would do this for all types, but we must be able to name them,
+        // which is not feasible for anonymous types, or types which the generator
+        // doesn't support yet (their cppTypeName will be empty).
+        //
+        // Note that empty types are only refered to by pointers and references in
+        // PhysX, so we can generate dummy contents for them.
+        let calc_layout = rec.definition_data.is_some()
+            && !matches!(rec.tag_used, Some(crate::consumer::Tag::Union))
+            && !fields.is_empty();
+
         let record = RecBinding {
             name: rname,
             has_vtable,
             fields,
             ast: rec,
-            is_empty,
+            calc_layout,
         };
 
         self.recs.push(record);
         Ok(())
     }
 
-    fn get_fields(
+    pub fn get_fields(
         &self,
         node: &'ast Node,
         rec: &'ast Record,
+        template_types: &[(&str, &super::TemplateArg<'ast>)],
         fields: &mut Vec<FieldBinding<'ast>>,
     ) -> anyhow::Result<()> {
         let Some(rname) = rec.name.as_deref() else { return Ok(()) };
         let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
 
         for inn in &node.inner {
-            // Note we could get comments for fields here, but due to the rust
+            // We _could_ get comments for fields here, but due to the rust
             // declarations being emitted by structgen, it becomes a bit noisy
 
             match &inn.kind {
                 Item::AccessSpecDecl { access } => {
                     is_public = matches!(access, Access::Public);
                 }
-                Item::FieldDecl { name, kind } => {
+                Item::FieldDecl { name, kind } if is_public => {
                     // Skip anonymous fields, they aren't really accessible
                     if let Some(name) = name.as_deref() {
+                        // PhysX uses PxPadding<BYTES> in some struct, but this
+                        // is uninteresting so we can just skip it, they'll be
+                        // accounted for in our own padding calculations regardless
+                        if kind.qual_type.starts_with("PxPadding<") {
+                            log::debug!("skipping padding field");
+                            continue;
+                        }
+
                         let kind = self
-                            .parse_type(kind)
+                            .parse_type(kind, template_types)
                             .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
                         let is_reference = matches!(kind, QualType::Reference { .. });
 
