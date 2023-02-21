@@ -467,12 +467,23 @@ impl<'ast> AstConsumer<'ast> {
         }
 
         if let Some(ptr) = type_str.strip_suffix('*') {
-            let (inner, is_const) = parse_ptr(ptr);
+            let (inner, is_pointee_const) = parse_ptr(ptr);
 
             let pointee = self.parse_type(inner.trim(), template_types)?;
 
             return Ok(QualType::Pointer {
-                is_const,
+                is_const: false,
+                is_pointee_const,
+                pointee: Box::new(pointee),
+            });
+        } else if let Some(ptr) = type_str.strip_suffix("*const") {
+            let (inner, is_pointee_const) = parse_ptr(ptr);
+
+            let pointee = self.parse_type(inner.trim(), template_types)?;
+
+            return Ok(QualType::Pointer {
+                is_const: true,
+                is_pointee_const,
                 pointee: Box::new(pointee),
             });
         } else if let Some(refer) = type_str.strip_suffix('&') {
@@ -520,9 +531,9 @@ impl<'ast> AstConsumer<'ast> {
                 repr: *repr,
             });
         } else if let Some(name) = type_str.strip_prefix("physx::") {
-            let qt = if let Some((repr, name)) = self.enum_map.get(name) {
+            let qt = if let Some((repr, unqualified)) = self.enum_map.get(name) {
                 QualType::Enum {
-                    name,
+                    name: unqualified,
                     cxx_qt: name,
                     repr: *repr,
                 }
@@ -535,6 +546,10 @@ impl<'ast> AstConsumer<'ast> {
             };
 
             Ok(qt)
+        } else if let Some(name) = type_str.strip_prefix("union ") {
+            Ok(QualType::Record { name })
+        } else if let Some(name) = type_str.strip_prefix("struct ") {
+            Ok(QualType::Record { name })
         } else {
             anyhow::bail!("Unknown type '{kind:?}'");
         }
@@ -787,6 +802,7 @@ impl Builtin {
 pub enum QualType<'ast> {
     Pointer {
         is_const: bool,
+        is_pointee_const: bool,
         pointee: Box<QualType<'ast>>,
     },
     Reference {
@@ -824,11 +840,17 @@ pub struct RustType<'qt, 'ast>(&'qt QualType<'ast>);
 impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            QualType::Pointer { is_const, pointee } => {
-                write!(f, "*{} ", if *is_const { "const" } else { "mut" })?;
+            QualType::Pointer {
+                is_pointee_const,
+                pointee,
+                ..
+            } => {
+                write!(f, "*{} ", if *is_pointee_const { "const" } else { "mut" })?;
                 write!(f, "{}", pointee.rust_type())
             }
-            QualType::Reference { is_const, pointee } => {
+            QualType::Reference {
+                is_const, pointee, ..
+            } => {
                 write!(f, "*{} ", if *is_const { "const" } else { "mut" })?;
                 write!(f, "{}", pointee.rust_type())
             }
@@ -837,9 +859,9 @@ impl<'qt, 'ast> fmt::Display for RustType<'qt, 'ast> {
             QualType::Array { element, len } => {
                 write!(f, "[{}; {len}]", element.rust_type())
             }
-            QualType::Enum { name, .. } => f.write_str(name),
-            QualType::Flags { name, .. } => f.write_str(name),
-            QualType::Record { name } => f.write_str(name),
+            QualType::Enum { name, .. }
+            | QualType::Flags { name, .. }
+            | QualType::Record { name } => f.write_str(name),
             QualType::TemplateTypedef { name } => f.write_str(name),
         }
     }
@@ -851,11 +873,22 @@ pub struct CppType<'qt, 'ast>(&'qt QualType<'ast>);
 impl<'qt, 'ast> fmt::Display for CppType<'qt, 'ast> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            QualType::Pointer { is_const, pointee } => {
+            QualType::Pointer {
+                is_const,
+                pointee,
+                is_pointee_const,
+            } => {
                 write!(f, "{}", pointee.cpp_type())?;
-                write!(f, "{}*", if *is_const { " const" } else { "" })
+                write!(f, "{}*", if *is_pointee_const { " const" } else { "" })?;
+                if *is_const {
+                    write!(f, "const")?;
+                }
+
+                Ok(())
             }
-            QualType::Reference { is_const, pointee } => {
+            QualType::Reference {
+                is_const, pointee, ..
+            } => {
                 write!(f, "{}", pointee.cpp_type())?;
                 write!(f, "{}&", if *is_const { " const" } else { "" })
             }
@@ -878,7 +911,19 @@ pub struct CType<'qt, 'ast>(&'qt QualType<'ast>);
 impl<'qt, 'ast> fmt::Display for CType<'qt, 'ast> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            QualType::Pointer { is_const, pointee } | QualType::Reference { is_const, pointee } => {
+            QualType::Pointer {
+                is_const,
+                pointee,
+                is_pointee_const,
+            } => {
+                write!(f, "{}", pointee.c_type())?;
+                write!(f, "{}*", if *is_pointee_const { " const" } else { "" })?;
+                if *is_const {
+                    write!(f, "const")?;
+                }
+                Ok(())
+            }
+            QualType::Reference { is_const, pointee } => {
                 write!(f, "{}", pointee.c_type())?;
                 write!(f, "{}*", if *is_const { " const" } else { "" })
             }

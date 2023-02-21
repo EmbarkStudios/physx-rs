@@ -56,7 +56,23 @@ impl<'ast> super::AstConsumer<'ast> {
 
         let name = if let Item::CXXRecordDecl(rec) = &parent.kind {
             if let Some(rname) = rec.name.as_deref() {
-                rname
+                // Check if the record is actually not just a wrapper (ie, has fields or methods)
+                // as that means we'll need to the name the enum with the inner name
+                // as that is _probably_ still unique
+                if parent
+                    .inner
+                    .iter()
+                    .any(|inn| matches!(&inn.kind, Item::FieldDecl { .. }))
+                {
+                    if let Some(ename) = enum_decl.name.as_deref() {
+                        ename
+                    } else {
+                        log::debug!("Wrapper struct {rname} that will also be a POD contained an anonymous enum");
+                        return Ok(());
+                    }
+                } else {
+                    rname
+                }
             } else {
                 log::debug!(
                     "skipping enum {:?} with anonymous wrapper struct",
@@ -140,10 +156,6 @@ impl<'ast> super::AstConsumer<'ast> {
         let cxx_qt =
             cxx_qt.with_context(|| format!("enum '{name}' never declared a qualified typename"))?;
         let cxx_qt = cxx_qt.strip_prefix("physx::").unwrap_or(cxx_qt);
-
-        if name == "PxEmpty" {
-            dbg!(cxx_qt);
-        }
 
         self.enums.push(EnumBinding {
             repr,

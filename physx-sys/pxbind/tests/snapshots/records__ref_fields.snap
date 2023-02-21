@@ -12,15 +12,15 @@ using namespace physx;
 
 int main() {
     PodStructGen sg;
-    struct physx_SupportLocal_Pod: public physx::SupportLocal {
+    struct physx_PxReffyMcRefface_Pod: public physx::PxReffyMcRefface {
         static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_SupportLocal_Pod", "SupportLocal");
-            sg.add_field("physx::Vec3V shapeSpaceCenterOfMass", "shapeSpaceCenterOfMass", "glam::Vec3A", sizeof(physx::Vec3V), unsafe_offsetof(physx_SupportLocal_Pod, shapeSpaceCenterOfMass);
-            sg.add_field("bool isIdentityScale", "isIdentityScale", "bool", sizeof(bool), unsafe_offsetof(physx_SupportLocal_Pod, isIdentityScale);
-            sg.end_struct(sizeof(physx::SupportLocal));
+            sg.begin_struct("physx_PxReffyMcRefface_Pod", "PxReffyMcRefface");
+            sg.add_field("physx_PxVec3_Pod shapeSpaceCenterOfMass", "shapeSpaceCenterOfMass", "PxVec3", sizeof(physx::PxVec3), unsafe_offsetof(physx_PxReffyMcRefface_Pod, shapeSpaceCenterOfMass));
+            sg.add_field("bool isIdentityScale", "isIdentityScale", "bool", sizeof(bool), unsafe_offsetof(physx_PxReffyMcRefface_Pod, isIdentityScale));
+            sg.end_struct(sizeof(physx::PxReffyMcRefface));
         }
     };
-    physx_SupportLocal_Pod::dump_layout(sg);
+    physx_PxReffyMcRefface_Pod::dump_layout(sg);
 
     sg.finish();
 }

@@ -1,0 +1,78 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.rust_decls
+---
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxAssertHandler {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxProcessPxBaseCallback {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSerializationContext {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxDeserializationContext {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSerializationRegistry {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCollection {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBase {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRefCounted {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub union Px1DConstraintMods {
+    pub spring: PxSpringModifiers,
+    pub bounce: PxRestitutionModifiers,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConstraintVisualizer {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConstraintConnector {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConstraintAllocator {
+    vtable_: *const std::ffi::c_void,
+}
+

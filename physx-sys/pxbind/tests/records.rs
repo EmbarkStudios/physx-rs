@@ -107,3 +107,13 @@ fn templates() {
     insta::assert_snapshot!(ro.size_asserts);
     insta::assert_snapshot!(ro.rust_decls);
 }
+
+/// More complicated records with multiple levels of inheritance
+#[test]
+fn complex() {
+    let ro = gen_records("complex.h", &[]).unwrap();
+
+    insta::assert_snapshot!(ro.structgen);
+    insta::assert_snapshot!(ro.size_asserts);
+    insta::assert_snapshot!(ro.rust_decls);
+}

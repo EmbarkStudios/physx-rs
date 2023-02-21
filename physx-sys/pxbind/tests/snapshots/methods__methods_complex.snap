@@ -14,89 +14,16 @@ extern "C" {
         self_->setGeometry(geometry);
     }
 
+    void PxShape_computeLambda_mut(physx_PxShape_Pod* self__pod, float const*const boop) {
+        auto self_ = reinterpret_cast<physx::PxShape*>(self__pod);
+        self_->computeLambda(boop);
+    }
+
     physx_PxGeometry_Pod const* PxShape_getGeometry(physx_PxShape_Pod const* self__pod) {
         auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
         physx::PxGeometry const& return_val = self_->getGeometry();
         auto return_val_pod = reinterpret_cast<physx_PxGeometry_Pod const*>(&return_val);
         return return_val_pod;
-    }
-
-    int32_t PxShape_getGeometryType(physx_PxShape_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        physx::PxGeometryType::Enum return_val = self_->getGeometryType();
-        int32_t return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxShape_getBoxGeometry(physx_PxShape_Pod const* self__pod, physx_PxBoxGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxBoxGeometry&>(*geometry_pod);
-        bool return_val = self_->getBoxGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getSphereGeometry(physx_PxShape_Pod const* self__pod, physx_PxSphereGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxSphereGeometry&>(*geometry_pod);
-        bool return_val = self_->getSphereGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getCapsuleGeometry(physx_PxShape_Pod const* self__pod, physx_PxCapsuleGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxCapsuleGeometry&>(*geometry_pod);
-        bool return_val = self_->getCapsuleGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getPlaneGeometry(physx_PxShape_Pod const* self__pod, physx_PxPlaneGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxPlaneGeometry&>(*geometry_pod);
-        bool return_val = self_->getPlaneGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getConvexMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxConvexMeshGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxConvexMeshGeometry&>(*geometry_pod);
-        bool return_val = self_->getConvexMeshGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getTriangleMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxTriangleMeshGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxTriangleMeshGeometry&>(*geometry_pod);
-        bool return_val = self_->getTriangleMeshGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getTetrahedronMeshGeometry(physx_PxShape_Pod const* self__pod, physx_PxTetrahedronMeshGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxTetrahedronMeshGeometry&>(*geometry_pod);
-        bool return_val = self_->getTetrahedronMeshGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getParticleSystemGeometry(physx_PxShape_Pod const* self__pod, physx_PxParticleSystemGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxParticleSystemGeometry&>(*geometry_pod);
-        bool return_val = self_->getParticleSystemGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getHeightFieldGeometry(physx_PxShape_Pod const* self__pod, physx_PxHeightFieldGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxHeightFieldGeometry&>(*geometry_pod);
-        bool return_val = self_->getHeightFieldGeometry(geometry);
-        return return_val;
-    }
-
-    bool PxShape_getCustomGeometry(physx_PxShape_Pod const* self__pod, physx_PxCustomGeometry_Pod* geometry_pod) {
-        auto self_ = reinterpret_cast<physx::PxShape const*>(self__pod);
-        auto geometry = reinterpret_cast<physx::PxCustomGeometry&>(*geometry_pod);
-        bool return_val = self_->getCustomGeometry(geometry);
-        return return_val;
     }
 
     physx_PxRigidActor_Pod* PxShape_getActor(physx_PxShape_Pod const* self__pod) {

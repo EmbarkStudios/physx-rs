@@ -3,94 +3,6 @@ source: physx-sys/pxbind/tests/methods.rs
 expression: mo.cpp
 ---
 extern "C" {
-    void PxActor_release_mut(physx_PxActor_Pod* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        self_->release();
-    }
-
-    uint32_t PxActor_getType(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        physx::PxActorType::Enum return_val = self_->getType();
-        uint32_t return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    physx_PxScene_Pod* PxActor_getScene(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        physx::PxScene* return_val = self_->getScene();
-        auto return_val_pod = reinterpret_cast<physx_PxScene_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxActor_setName_mut(physx_PxActor_Pod* self__pod, char const* name) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        self_->setName(name);
-    }
-
-    char const* PxActor_getName(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        char const* return_val = self_->getName();
-        return return_val;
-    }
-
-    physx_PxBounds3_Pod PxActor_getWorldBounds(physx_PxActor_Pod const* self__pod, float inflation) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        physx::PxBounds3 return_val = self_->getWorldBounds(inflation);
-        physx_PxBounds3_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    void PxActor_setActorFlag_mut(physx_PxActor_Pod* self__pod, uint32_t flag_pod, bool value) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        auto flag = static_cast<physx::PxActorFlag::Enum>(flag_pod);
-        self_->setActorFlag(flag, value);
-    }
-
-    void PxActor_setActorFlags_mut(physx_PxActor_Pod* self__pod, uint8_t inFlags_pod) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        auto inFlags = physx::PxActorFlags(inFlags_pod);
-        self_->setActorFlags(inFlags);
-    }
-
-    uint8_t PxActor_getActorFlags(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        physx::PxActorFlags return_val = self_->getActorFlags();
-        uint8_t return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    void PxActor_setDominanceGroup_mut(physx_PxActor_Pod* self__pod, uint8_t dominanceGroup) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        self_->setDominanceGroup(dominanceGroup);
-    }
-
-    uint8_t PxActor_getDominanceGroup(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        uint8_t return_val = self_->getDominanceGroup();
-        return return_val;
-    }
-
-    void PxActor_setOwnerClient_mut(physx_PxActor_Pod* self__pod, uint8_t inClient) {
-        auto self_ = reinterpret_cast<physx::PxActor*>(self__pod);
-        self_->setOwnerClient(inClient);
-    }
-
-    uint8_t PxActor_getOwnerClient(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        uint8_t return_val = self_->getOwnerClient();
-        return return_val;
-    }
-
-    physx_PxAggregate_Pod* PxActor_getAggregate(physx_PxActor_Pod const* self__pod) {
-        auto self_ = reinterpret_cast<physx::PxActor const*>(self__pod);
-        physx::PxAggregate* return_val = self_->getAggregate();
-        auto return_val_pod = reinterpret_cast<physx_PxAggregate_Pod*>(return_val);
-        return return_val_pod;
-    }
-
     physx_PxJointLimitParameters_Pod* PxJointLimitParameters_new_alloc() {
         auto return_val = new PxJointLimitParameters();
         auto return_val_pod = reinterpret_cast<physx_PxJointLimitParameters_Pod*>(return_val);
@@ -111,14 +23,6 @@ extern "C" {
 
     physx_PxJointAngularLimitPair_Pod PxJointAngularLimitPair_new(float lowerLimit, float upperLimit, float contactDist_deprecated) {
         PxJointAngularLimitPair return_val(lowerLimit, upperLimit, contactDist_deprecated);
-        physx_PxJointAngularLimitPair_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    physx_PxJointAngularLimitPair_Pod PxJointAngularLimitPair_new_1(float lowerLimit, float upperLimit, physx_PxSpring_Pod const* spring_pod) {
-        auto spring = reinterpret_cast<physx::PxSpring const&>(*spring_pod);
-        PxJointAngularLimitPair return_val(lowerLimit, upperLimit, spring);
         physx_PxJointAngularLimitPair_Pod return_val_pod;
         memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
         return return_val_pod;

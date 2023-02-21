@@ -64,8 +64,20 @@ fn run_structgen(sg: String) -> anyhow::Result<StructgenOut> {
 }
 
 #[test]
-fn all_the_things() {
+fn many_things() {
     let sg = gen_structgen("functions/methods_complex.h", &[]).unwrap();
+
+    insta::assert_snapshot!(sg);
+
+    let generated = run_structgen(sg).unwrap();
+
+    insta::assert_snapshot!(generated.cpp);
+    insta::assert_snapshot!(generated.rust);
+}
+
+#[test]
+fn all_the_things() {
+    let sg = gen_structgen("all_the_things.h", &[]).unwrap();
 
     insta::assert_snapshot!(sg);
 

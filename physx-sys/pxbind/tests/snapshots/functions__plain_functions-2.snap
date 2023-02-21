@@ -1,0 +1,7 @@
+---
+source: physx-sys/pxbind/tests/functions.rs
+expression: mo.rust
+---
+extern "C" {
+}
+

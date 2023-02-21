@@ -51,7 +51,16 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
         let indent = Indent(level);
         let cindent = Indent(1);
 
-        writes!(w, "{indent}{SG}.pass_thru(\"struct physx_{}_Pod", self.name);
+        writes!(
+            w,
+            "{indent}{SG}.pass_thru(\"{} physx_{}_Pod",
+            if !matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union)) {
+                "struct"
+            } else {
+                "union"
+            },
+            self.name
+        );
 
         if self.ast.definition_data.is_none() {
             writesln!(w, ";\\n\");");

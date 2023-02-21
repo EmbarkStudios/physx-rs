@@ -240,9 +240,8 @@ impl Generator {
 
             if rec.emit_rust(&mut acc, 0) {
                 num += 1;
+                write!(writer, "{acc}")?;
             }
-
-            write!(writer, "{acc}")?;
         }
 
         Ok(num)

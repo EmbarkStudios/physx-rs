@@ -517,6 +517,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
                 continue;
             };
+
             let base_rec = self
                 .recs
                 .iter()
@@ -555,6 +556,12 @@ impl<'ast> super::AstConsumer<'ast> {
             if let Some(method) = inn.kind.as_method() {
                 if !is_public {
                     continue;
+                } else if method.kind.qual_type.contains('<') {
+                    log::debug!(
+                        "skipping `{rname}::{}` as it contains a templated parameter",
+                        method.name
+                    );
+                    continue;
                 } else if self.is_ignored(inn) {
                     log::debug!("skipping deprecated method {rname}::{}", method.name);
                     continue;
@@ -580,6 +587,7 @@ impl<'ast> super::AstConsumer<'ast> {
                             name: get_name(format!("{rname}_new_alloc")),
                             ret: Some(QualType::Pointer {
                                 is_const: false,
+                                is_pointee_const: false,
                                 pointee: Box::new(QualType::Record { name: rname }),
                             }),
                             comment,
@@ -733,6 +741,11 @@ impl<'ast> super::AstConsumer<'ast> {
                         // accounted for in our own padding calculations regardless
                         if kind.qual_type.starts_with("PxPadding<") {
                             log::debug!("skipping padding field");
+                            continue;
+                        }
+
+                        if kind.qual_type.contains('<') {
+                            log::debug!("skipping templated field {rname}::{name}");
                             continue;
                         }
 

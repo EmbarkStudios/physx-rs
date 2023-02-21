@@ -134,6 +134,11 @@ public:
     virtual		void	setGeometry(const PxGeometry& geometry) = 0;
 
     /**
+    \brief Fake function just to test handling of const pointers to const things
+    */
+    virtual void computeLambda(const PxReal* const boop) = 0;
+
+    /**
     \brief Retrieve a reference to the shape's geometry.
 
     \warning The returned reference has the same lifetime as the PxShape it comes from.

@@ -22,7 +22,8 @@ impl<'ast> Param<'ast> {
         Self {
             name: Cow::Borrowed("self_"),
             kind: QualType::Pointer {
-                is_const,
+                is_const: false,
+                is_pointee_const: is_const,
                 pointee: Box::new(rec_type),
             },
         }
