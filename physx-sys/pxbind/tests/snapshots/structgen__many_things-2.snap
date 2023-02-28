@@ -2,38 +2,28 @@
 source: physx-sys/pxbind/tests/structgen.rs
 expression: generated.cpp
 ---
-struct physx_PxVec3_Pod {
-    float x;
-    float y;
-    float z;
-};
-struct physx_PxVec4_Pod {
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct physx_PxQuat_Pod {
-    float x;
-    float y;
-    float z;
-    float w;
-};
-struct physx_PxMat33_Pod {
-    physx_PxVec3_Pod column0;
-    physx_PxVec3_Pod column1;
-    physx_PxVec3_Pod column2;
-};
-struct physx_PxMat44_Pod {
-    physx_PxVec4_Pod column0;
-    physx_PxVec4_Pod column1;
-    physx_PxVec4_Pod column2;
-    physx_PxVec4_Pod column3;
-};
-struct physx_PxTransform_Pod {
-    physx_PxQuat_Pod q;
-    physx_PxVec3_Pod p;
-};
+struct physx_PxAllocatorCallback_Pod;
+struct physx_PxErrorCallback_Pod;
+struct physx_PxAssertHandler_Pod;
+struct physx_PxInputStream_Pod;
+struct physx_PxInputData_Pod;
+struct physx_PxOutputStream_Pod;
+struct physx_PxVec2_Pod;
+struct physx_PxVec3_Pod;
+struct physx_PxVec4_Pod;
+struct physx_PxQuat_Pod;
+struct physx_PxMat33_Pod;
+struct physx_PxMat34_Pod;
+struct physx_PxMat44_Pod;
+struct physx_PxTransform_Pod;
+struct physx_PxPlane_Pod;
+struct physx_PxBounds3_Pod;
+struct physx_PxBase_Pod;
+struct physx_PxSerializationContext_Pod;
+struct physx_PxRepXSerializer_Pod;
+struct physx_PxSerializer_Pod;
+struct physx_PxPhysics_Pod;
+struct physx_PxCollection_Pod;
 struct physx_PxProcessPxBaseCallback_Pod {
     void* vtable_;
 };
@@ -41,7 +31,7 @@ struct physx_PxSerializationContext_Pod {
     void* vtable_;
 };
 struct physx_PxDeserializationContext_Pod {
-    void* vtable_;
+    char structgen_pad0[16];
 };
 struct physx_PxSerializationRegistry_Pod {
     void* vtable_;
@@ -49,21 +39,74 @@ struct physx_PxSerializationRegistry_Pod {
 struct physx_PxCollection_Pod {
     void* vtable_;
 };
+struct physx_PxTypeInfo_Pod;
+struct physx_PxMaterial_Pod;
+struct physx_PxFEMSoftBodyMaterial_Pod;
+struct physx_PxFEMClothMaterial_Pod;
+struct physx_PxPBDMaterial_Pod;
+struct physx_PxFLIPMaterial_Pod;
+struct physx_PxMPMMaterial_Pod;
+struct physx_PxCustomMaterial_Pod;
+struct physx_PxConvexMesh_Pod;
+struct physx_PxTriangleMesh_Pod;
+struct physx_PxBVH33TriangleMesh_Pod;
+struct physx_PxBVH34TriangleMesh_Pod;
+struct physx_PxTetrahedronMesh_Pod;
+struct physx_PxHeightField_Pod;
+struct physx_PxActor_Pod;
+struct physx_PxRigidActor_Pod;
+struct physx_PxRigidBody_Pod;
+struct physx_PxRigidDynamic_Pod;
+struct physx_PxRigidStatic_Pod;
+struct physx_PxArticulationLink_Pod;
+struct physx_PxArticulationJointReducedCoordinate_Pod;
+struct physx_PxArticulationReducedCoordinate_Pod;
+struct physx_PxAggregate_Pod;
+struct physx_PxConstraint_Pod;
+struct physx_PxShape_Pod;
+struct physx_PxPruningStructure_Pod;
+struct physx_PxParticleSystem_Pod;
+struct physx_PxPBDParticleSystem_Pod;
+struct physx_PxFLIPParticleSystem_Pod;
+struct physx_PxMPMParticleSystem_Pod;
+struct physx_PxCustomParticleSystem_Pod;
+struct physx_PxSoftBody_Pod;
+struct physx_PxFEMCloth_Pod;
+struct physx_PxHairSystem_Pod;
+struct physx_PxParticleBuffer_Pod;
+struct physx_PxParticleAndDiffuseBuffer_Pod;
+struct physx_PxParticleClothBuffer_Pod;
+struct physx_PxParticleRigidBuffer_Pod;
 struct physx_PxBase_Pod {
-    void* vtable_;
+    char structgen_pad0[16];
 };
 struct physx_PxRefCounted_Pod {
-    void* vtable_;
+    char structgen_pad0[16];
 };
 struct physx_PxGeometry_Pod {
     char structgen_pad0[4];
     float mTypePadding;
+};
+struct physx_PxVec3_Pod {
+    float x;
+    float y;
+    float z;
 };
 struct physx_PxVec3Padded_Pod {
     float x;
     float y;
     float z;
     uint32_t padding;
+};
+struct physx_PxQuat_Pod {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+struct physx_PxTransform_Pod {
+    physx_PxQuat_Pod q;
+    physx_PxVec3_Pod p;
 };
 struct physx_PxTransformPadded_Pod {
     physx_PxTransform_Pod transform;
@@ -93,6 +136,11 @@ struct physx_PxPlaneGeometry_Pod {
     char structgen_pad0[4];
     float mTypePadding;
 };
+struct physx_PxMat33_Pod {
+    physx_PxVec3_Pod column0;
+    physx_PxVec3_Pod column1;
+    physx_PxVec3_Pod column2;
+};
 struct physx_PxMeshScale_Pod {
     physx_PxVec3_Pod scale;
     physx_PxQuat_Pod rotation;
@@ -110,12 +158,12 @@ struct physx_PxBoundedData_Pod {
     char structgen_pad1[4];
 };
 struct physx_PxHullPolygon_Pod {
-    float[4] mPlane;
+    float mPlane[4];
     uint16_t mNbVerts;
     uint16_t mIndexBase;
 };
 struct physx_PxConvexMesh_Pod {
-    void* vtable_;
+    char structgen_pad0[16];
 };
 struct physx_PxConvexMeshGeometry_Pod {
     char structgen_pad0[4];
@@ -148,10 +196,16 @@ struct physx_PxBounds3_Pod {
     physx_PxVec3_Pod minimum;
     physx_PxVec3_Pod maximum;
 };
+struct physx_PxVec4_Pod {
+    float x;
+    float y;
+    float z;
+    float w;
+};
 struct physx_PxParticleSystemGeometry_Pod {
     char structgen_pad0[4];
     float mTypePadding;
-    uint32_t mSolverType;
+    int32_t mSolverType;
 };
 struct physx_PxHairSystemGeometry_Pod {
     char structgen_pad0[4];
@@ -201,38 +255,25 @@ struct physx_PxGeomIndexPair_Pod {
 struct physx_PxQueryThreadContext_Pod {
     char structgen_pad0[1];
 };
+struct physx_PxContactBuffer_Pod;
+struct physx_PxRenderOutput_Pod;
+struct physx_PxMassProperties_Pod;
+struct physx_PxCustomGeometryType_Pod {
+    char structgen_pad0[4];
+};
+struct physx_PxCustomGeometryCallbacks_Pod {
+    void* vtable_;
+};
 struct physx_PxCustomGeometry_Pod {
     char structgen_pad0[4];
     float mTypePadding;
-    physx_PxCustomGeometry::Callbacks_Pod* callbacks;
+    physx_PxCustomGeometryCallbacks_Pod* callbacks;
 };
 struct physx_PxGeometryHolder_Pod {
     char structgen_pad0[56];
 };
-struct physx_PxAllocatorCallback_Pod {
-    void* vtable_;
-};
-struct physx_PxFoundation_Pod {
-    void* vtable_;
-};
-struct physx_PxAllocator_Pod {
-    char structgen_pad0[1];
-};
-struct physx_PxRawAllocator_Pod {
-    char structgen_pad0[1];
-};
-struct physx_PxVirtualAllocatorCallback_Pod {
-    void* vtable_;
-};
-struct physx_PxVirtualAllocator_Pod {
-    char structgen_pad0[16];
-};
-struct physx_PxUserAllocated_Pod {
-    char structgen_pad0[1];
-};
-struct physx_PxRunnable_Pod {
-    void* vtable_;
-};
+struct physx_PxFilterData_Pod;
+struct physx_PxBaseMaterial_Pod;
 struct physx_PxShape_Pod {
     char structgen_pad0[16];
     void* userData;

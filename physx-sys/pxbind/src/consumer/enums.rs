@@ -80,13 +80,11 @@ impl<'ast> super::AstConsumer<'ast> {
                 );
                 return Ok(());
             }
+        } else if let Some(ename) = enum_decl.name.as_deref() {
+            ename
         } else {
-            if let Some(ename) = enum_decl.name.as_deref() {
-                ename
-            } else {
-                log::debug!("skipping anonymous enum");
-                return Ok(());
-            }
+            log::debug!("skipping anonymous enum");
+            return Ok(());
         };
 
         let mut repr = Builtin::Int;
@@ -96,21 +94,22 @@ impl<'ast> super::AstConsumer<'ast> {
         // but rather each and every variant. They _should_ all be the same
         let mut cxx_qt = None;
 
-        fn get_value(
-            ast: &super::AstConsumer<'_>,
-            node: &Node,
-            current: i64,
-            repr: &mut Builtin,
-        ) -> anyhow::Result<i64> {
+        fn get_value(node: &Node, current: i64, repr: &mut Builtin) -> anyhow::Result<i64> {
             for inn in &node.inner {
                 match &inn.kind {
-                    Item::ImplicitCastExpr { kind } => {
-                        *repr = ast
-                            .parse_builtin(kind)
-                            .context("enum repr was not could not be parsed as builtin")?;
-                        return get_value(ast, inn, current, repr);
+                    Item::ImplicitCastExpr { .. } => {
+                        return get_value(inn, current, repr);
                     }
-                    Item::ConstantExpr { value, .. } => {
+                    Item::ConstantExpr { value, kind } => {
+                        // There are a couple of cases where clang will emit
+                        // unsigned int for some variants and int for others,
+                        // so we need to just ignore changes once it's not the default
+                        if matches!(repr, Builtin::Int) {
+                            if let Some(builtin) = super::AstConsumer::parse_builtin(kind) {
+                                *repr = builtin;
+                            }
+                        }
+
                         return value.parse().context("failed to parse enum constant");
                     }
                     _ => continue,
@@ -129,6 +128,11 @@ impl<'ast> super::AstConsumer<'ast> {
                 None
             }
         }) {
+            if Self::is_deprecated(varn) {
+                log::debug!("ignoring deprecated variant {name}::{}", vard.name);
+                continue;
+            }
+
             let name = &vard.name;
 
             if let Some(cxx_qt) = cxx_qt {
@@ -142,7 +146,8 @@ impl<'ast> super::AstConsumer<'ast> {
             }
 
             let comment = Self::get_comment(varn);
-            let value = get_value(self, varn, current, &mut repr)?;
+            let value = get_value(varn, current, &mut repr)?;
+
             current = value + 1;
 
             variants.push(EnumVariant {
@@ -205,7 +210,7 @@ impl<'ast> super::AstConsumer<'ast> {
             })?
             .trim();
 
-        let storage_type = self.parse_builtin(storage_type).with_context(|| {
+        let storage_type = Self::parse_builtin(storage_type).with_context(|| {
             format!(
                 "PxFlags typedef '{}' has storage type '{storage_type}' which is not a builtin",
                 td.name

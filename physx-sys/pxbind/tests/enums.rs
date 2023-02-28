@@ -1,5 +1,5 @@
 fn gen_enums(which: &str, to_emit: &'static [&str]) -> anyhow::Result<String> {
-    let ast = pxbind::get_parsed_ast(format!("tests/data/enum/{which}"))?;
+    let (ast, _) = pxbind::get_parsed_ast(format!("tests/data/enum/{which}"))?;
 
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;

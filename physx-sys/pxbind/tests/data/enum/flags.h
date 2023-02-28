@@ -62,7 +62,7 @@ namespace physx {
 
             \note Shapes marked as triggers do not collide with other objects. If an object should act both
             as a trigger shape and a collision shape then create a rigid body with two shapes, one being a 
-            trigger shape and the other a collision shape. 	It is illegal to raise the eTRIGGER_SHAPE and 
+            trigger shape and the other a collision shape. It is illegal to raise the eTRIGGER_SHAPE and 
             eSIMULATION_SHAPE flags on a single PxShape instance.  In the event that one of these flags is already 
             raised the sdk will reject any attempt to raise the other.  To raise the eTRIGGER_SHAPE flag first 
             ensure that eSIMULATION_SHAPE flag is already lowered.

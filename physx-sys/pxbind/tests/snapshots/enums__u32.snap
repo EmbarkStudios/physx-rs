@@ -2,25 +2,25 @@
 source: physx-sys/pxbind/tests/enums.rs
 expression: "gen_enums(\"u32.h\", &[]).unwrap()"
 ---
-#[derive(Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum PxThreadPriority {
     /// High priority
-    eHIGH = 0,
+    High = 0,
     /// Above Normal priority
-    eABOVE_NORMAL = 1,
+    AboveNormal = 1,
     /// Normal/default priority
-    eNORMAL = 2,
+    Normal = 2,
     /// Below Normal priority
-    eBELOW_NORMAL = 3,
+    BelowNormal = 3,
     /// Low priority.
-    eLOW = 4,
-    eFORCE_DWORD = 4294967295,
+    Low = 4,
+    ForceDword = 4294967295,
 }
 
 /// Flags which affect the behavior of PxShapes.
-#[derive(Copy, Clone)]
-#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum PxShapeFlag {
     /// The shape will partake in collision in the physical simulation.
     ///
@@ -30,16 +30,16 @@ pub enum PxShapeFlag {
     /// eTRIGGER_SHAPE is already lowered.
     ///
     /// This flag has no effect if simulation is disabled for the corresponding actor (see [`PxActorFlag::eDISABLE_SIMULATION`]).
-    eSIMULATION_SHAPE = 1,
+    SimulationShape = 1,
     /// The shape will partake in scene queries (ray casts, overlap tests, sweeps, ...).
-    eSCENE_QUERY_SHAPE = 2,
+    SceneQueryShape = 2,
     /// The shape is a trigger which can send reports whenever other shapes enter/leave its volume.
     ///
     /// Triangle meshes and heightfields can not be triggers. Shape creation will fail in these cases.
     ///
     /// Shapes marked as triggers do not collide with other objects. If an object should act both
     /// as a trigger shape and a collision shape then create a rigid body with two shapes, one being a
-    /// trigger shape and the other a collision shape. 	It is illegal to raise the eTRIGGER_SHAPE and
+    /// trigger shape and the other a collision shape. It is illegal to raise the eTRIGGER_SHAPE and
     /// eSIMULATION_SHAPE flags on a single PxShape instance.  In the event that one of these flags is already
     /// raised the sdk will reject any attempt to raise the other.  To raise the eTRIGGER_SHAPE flag first
     /// ensure that eSIMULATION_SHAPE flag is already lowered.
@@ -49,8 +49,8 @@ pub enum PxShapeFlag {
     /// Shapes marked as triggers are allowed to participate in scene queries, provided the eSCENE_QUERY_SHAPE flag is set.
     ///
     /// This flag has no effect if simulation is disabled for the corresponding actor (see [`PxActorFlag::eDISABLE_SIMULATION`]).
-    eTRIGGER_SHAPE = 4,
+    TriggerShape = 4,
     /// Enable debug renderer for this shape
-    eVISUALIZATION = 8,
+    Visualization = 8,
 }
 

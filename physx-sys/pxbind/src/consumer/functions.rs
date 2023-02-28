@@ -8,6 +8,7 @@ pub struct Function {
     pub name: String,
     #[serde(rename = "type")]
     pub kind: super::Type,
+    pub range: Option<clang_ast::SourceRange>,
 }
 
 #[derive(Debug)]
@@ -32,7 +33,7 @@ impl<'ast> Param<'ast> {
 
 pub enum PhysxInvoke<'ast> {
     /// Normal function call. Not many of these in PhysX, it's pretty OO
-    Func { func_name: &'ast str },
+    Func { func_name: &'ast str, is_c: bool },
     /// Method call
     Method {
         func_name: &'ast str,
@@ -68,7 +69,7 @@ impl<'ast> FuncBinding<'ast> {
                 | PhysxInvoke::Method {
                     class_name: name, ..
                 } => Some(name),
-                _ => None,
+                PhysxInvoke::Func { .. } => None,
             },
             FuncBindingExt::IsDelete(class_name) => Some(class_name),
         }
@@ -76,23 +77,68 @@ impl<'ast> FuncBinding<'ast> {
 }
 
 impl<'ast> super::AstConsumer<'ast> {
+    /// Retrieves a unique name for the function to ensure that overloads have
+    /// different names. It also appends `phys_` before the name to ensure that
+    /// the C++ code compiles by avoiding errors due to functions that only
+    /// differ by return type being ambiguous
+    fn get_func_name(&mut self, name: &'ast str) -> String {
+        if let Some(count) = self.func_map.get_mut(name) {
+            *count += 1;
+            format!("phys_{name}_{count}")
+        } else {
+            self.func_map.insert(name, 0);
+            format!("phys_{name}")
+        }
+    }
+
     pub fn consume_function(
         &mut self,
         node: &'ast Node,
         func: &'ast Function,
         template_types: &[(&str, &TemplateArg<'ast>)],
+        is_c: bool,
     ) -> anyhow::Result<()> {
         if func.name.starts_with("operator") {
+            return Ok(());
+        }
+
+        // Check the source location for the function
+        //
+        // - PxMath - trivial functions that we can just do in Rust if needed
+        // without crossing the FFI boundary
+        // - PxString - internal-only string funtions we don't care about
+        // - PxUtilities - useless internal-only functions
+        // - PxAtomic - internal-only functions
+        // - PxHash - internal-only functions
+        let ignored = [
+            "PxMath.h",
+            "PxString.h",
+            "PxUtilities.h",
+            "PxAtomic.h",
+            "PxHash.h",
+        ];
+        if func
+            .range
+            .as_ref()
+            .and_then(|r| r.begin.expansion_loc.as_ref())
+            .map_or(false, |el| {
+                el.file
+                    .rfind('/')
+                    .map_or(false, |sep| ignored.contains(&&el.file[sep + 1..]))
+            })
+        {
+            log::debug!("skipping PxMath.h function {}", func.name);
             return Ok(());
         }
 
         let comment = Self::get_comment(node);
 
         let mut fb = FuncBinding {
-            name: func.name.to_owned(),
+            name: self.get_func_name(&func.name),
             comment,
             ext: FuncBindingExt::None(PhysxInvoke::Func {
                 func_name: &func.name,
+                is_c,
             }),
             ret: None,
             params: Vec::new(),
@@ -166,7 +212,7 @@ impl<'ast> super::AstConsumer<'ast> {
         Ok(())
     }
 
-    /// Unfortunately CXXMethodDecl's don't have a node for the return type,
+    /// Unfortunately `CXXMethodDecl`'s don't have a node for the return type,
     /// so we need to manually parse it from the function signature...
     #[inline]
     fn consume_return(

@@ -3,97 +3,97 @@ source: physx-sys/pxbind/tests/enums.rs
 expression: "gen_enums(\"flags.h\",\n        &[\"PxActorCacheFlag\", \"PxArticulationCacheFlag\", \"PxShapeFlag\",\n                    \"PxArticulationSensorFlag\"]).unwrap()"
 ---
 /// These flags determine what data is read or written to the internal articulation data via cache.
-#[derive(Copy, Clone)]
-#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum PxArticulationCacheFlag {
     /// The joint velocities, see PxArticulationCache::jointVelocity.
-    eVELOCITY = 1,
+    Velocity = 1,
     /// The joint accelerations, see PxArticulationCache::jointAcceleration.
-    eACCELERATION = 2,
+    Acceleration = 2,
     /// The joint positions, see PxArticulationCache::jointPosition.
-    ePOSITION = 4,
+    Position = 4,
     /// The joint forces, see PxArticulationCache::jointForce.
-    eFORCE = 8,
+    Force = 8,
     /// The link velocities, see PxArticulationCache::linkVelocity.
-    eLINK_VELOCITY = 16,
+    LinkVelocity = 16,
     /// The link accelerations, see PxArticulationCache::linkAcceleration.
-    eLINK_ACCELERATION = 32,
+    LinkAcceleration = 32,
     /// Root link transform, see PxArticulationCache::rootLinkData.
-    eROOT_TRANSFORM = 64,
+    RootTransform = 64,
     /// Root link velocities (read/write) and accelerations (read), see PxArticulationCache::rootLinkData.
-    eROOT_VELOCITIES = 128,
+    RootVelocities = 128,
     /// The spatial sensor forces, see PxArticulationCache::sensorForces.
-    eSENSOR_FORCES = 256,
+    SensorForces = 256,
     /// Solver constraint joint forces, see PxArticulationCache::jointSolverForces.
-    eJOINT_SOLVER_FORCES = 512,
-    eALL = 247,
+    JointSolverForces = 512,
+    All = 247,
 }
 
 bitflags::bitflags! {
     /// Flags for [`PxArticulationCacheFlag`]
-    #[derive(Copy, Clone, Default)]
+    #[derive(Default)]
     #[repr(transparent)]
     pub struct PxArticulationCacheFlags: u32 {
-        const eVELOCITY = 1 << 0;
-        const eACCELERATION = 1 << 1;
-        const ePOSITION = 1 << 2;
-        const eFORCE = 1 << 3;
-        const eLINK_VELOCITY = 1 << 4;
-        const eLINK_ACCELERATION = 1 << 5;
-        const eROOT_TRANSFORM = 1 << 6;
-        const eROOT_VELOCITIES = 1 << 7;
-        const eSENSOR_FORCES = 1 << 8;
-        const eJOINT_SOLVER_FORCES = 1 << 9;
-        const eALL = Self::eVELOCITY.bits | Self::eACCELERATION.bits | Self::ePOSITION.bits | Self::eLINK_VELOCITY.bits | Self::eLINK_ACCELERATION.bits | Self::eROOT_TRANSFORM.bits | Self::eROOT_VELOCITIES.bits;
+        const Velocity = 1 << 0;
+        const Acceleration = 1 << 1;
+        const Position = 1 << 2;
+        const Force = 1 << 3;
+        const LinkVelocity = 1 << 4;
+        const LinkAcceleration = 1 << 5;
+        const RootTransform = 1 << 6;
+        const RootVelocities = 1 << 7;
+        const SensorForces = 1 << 8;
+        const JointSolverForces = 1 << 9;
+        const All = Self::Velocity.bits | Self::Acceleration.bits | Self::Position.bits | Self::LinkVelocity.bits | Self::LinkAcceleration.bits | Self::RootTransform.bits | Self::RootVelocities.bits;
     }
 }
 
 /// Flags to configure the forces reported by articulation link sensors.
-#[derive(Copy, Clone)]
-#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum PxArticulationSensorFlag {
     /// Raise to receive forces from forward dynamics.
-    eFORWARD_DYNAMICS_FORCES = 1,
+    ForwardDynamicsForces = 1,
     /// Raise to receive forces from constraint solver.
-    eCONSTRAINT_SOLVER_FORCES = 2,
+    ConstraintSolverForces = 2,
     /// Raise to receive forces in the world rotation frame, otherwise they will be reported in the sensor's local frame.
-    eWORLD_FRAME = 4,
+    WorldFrame = 4,
 }
 
 bitflags::bitflags! {
     /// Flags for [`PxArticulationSensorFlag`]
-    #[derive(Copy, Clone, Default)]
+    #[derive(Default)]
     #[repr(transparent)]
     pub struct PxArticulationSensorFlags: u8 {
-        const eFORWARD_DYNAMICS_FORCES = 1 << 0;
-        const eCONSTRAINT_SOLVER_FORCES = 1 << 1;
-        const eWORLD_FRAME = 1 << 2;
+        const ForwardDynamicsForces = 1 << 0;
+        const ConstraintSolverForces = 1 << 1;
+        const WorldFrame = 1 << 2;
     }
 }
 
 /// Identifies each type of information for retrieving from actor.
-#[derive(Copy, Clone)]
-#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum PxActorCacheFlag {
-    eACTOR_DATA = 1,
-    eFORCE = 4,
-    eTORQUE = 8,
+    ActorData = 1,
+    Force = 4,
+    Torque = 8,
 }
 
 bitflags::bitflags! {
     /// Flags for [`PxActorCacheFlag`]
-    #[derive(Copy, Clone, Default)]
+    #[derive(Default)]
     #[repr(transparent)]
     pub struct PxActorCacheFlags: u16 {
-        const eACTOR_DATA = 1 << 0;
-        const eFORCE = 1 << 2;
-        const eTORQUE = 1 << 3;
+        const ActorData = 1 << 0;
+        const Force = 1 << 2;
+        const Torque = 1 << 3;
     }
 }
 
 /// Flags which affect the behavior of PxShapes.
-#[derive(Copy, Clone)]
-#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
 pub enum PxShapeFlag {
     /// The shape will partake in collision in the physical simulation.
     ///
@@ -103,16 +103,16 @@ pub enum PxShapeFlag {
     /// eTRIGGER_SHAPE is already lowered.
     ///
     /// This flag has no effect if simulation is disabled for the corresponding actor (see [`PxActorFlag::eDISABLE_SIMULATION`]).
-    eSIMULATION_SHAPE = 1,
+    SimulationShape = 1,
     /// The shape will partake in scene queries (ray casts, overlap tests, sweeps, ...).
-    eSCENE_QUERY_SHAPE = 2,
+    SceneQueryShape = 2,
     /// The shape is a trigger which can send reports whenever other shapes enter/leave its volume.
     ///
     /// Triangle meshes and heightfields can not be triggers. Shape creation will fail in these cases.
     ///
     /// Shapes marked as triggers do not collide with other objects. If an object should act both
     /// as a trigger shape and a collision shape then create a rigid body with two shapes, one being a
-    /// trigger shape and the other a collision shape. 	It is illegal to raise the eTRIGGER_SHAPE and
+    /// trigger shape and the other a collision shape. It is illegal to raise the eTRIGGER_SHAPE and
     /// eSIMULATION_SHAPE flags on a single PxShape instance.  In the event that one of these flags is already
     /// raised the sdk will reject any attempt to raise the other.  To raise the eTRIGGER_SHAPE flag first
     /// ensure that eSIMULATION_SHAPE flag is already lowered.
@@ -122,20 +122,20 @@ pub enum PxShapeFlag {
     /// Shapes marked as triggers are allowed to participate in scene queries, provided the eSCENE_QUERY_SHAPE flag is set.
     ///
     /// This flag has no effect if simulation is disabled for the corresponding actor (see [`PxActorFlag::eDISABLE_SIMULATION`]).
-    eTRIGGER_SHAPE = 4,
+    TriggerShape = 4,
     /// Enable debug renderer for this shape
-    eVISUALIZATION = 8,
+    Visualization = 8,
 }
 
 bitflags::bitflags! {
     /// Flags for [`PxShapeFlag`]
-    #[derive(Copy, Clone, Default)]
+    #[derive(Default)]
     #[repr(transparent)]
     pub struct PxShapeFlags: u8 {
-        const eSIMULATION_SHAPE = 1 << 0;
-        const eSCENE_QUERY_SHAPE = 1 << 1;
-        const eTRIGGER_SHAPE = 1 << 2;
-        const eVISUALIZATION = 1 << 3;
+        const SimulationShape = 1 << 0;
+        const SceneQueryShape = 1 << 1;
+        const TriggerShape = 1 << 2;
+        const Visualization = 1 << 3;
     }
 }
 

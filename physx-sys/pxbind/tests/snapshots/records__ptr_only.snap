@@ -12,8 +12,9 @@ using namespace physx;
 
 int main() {
     PodStructGen sg;
+    sg.pass_thru("struct physx_PxAllocatorCallback_Pod;\n");
     sg.pass_thru("struct physx_PxAllocatorCallback_Pod {\n    void* vtable_;\n};\n");
-
+    sg.pass_thru("struct physx_MemoryBuffer_Pod;\n");
     sg.finish();
 }
 

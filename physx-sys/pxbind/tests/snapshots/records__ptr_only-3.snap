@@ -9,3 +9,8 @@ pub struct PxAllocatorCallback {
     vtable_: *const std::ffi::c_void,
 }
 
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct MemoryBuffer {
+_unused: [u8; 0],
+}

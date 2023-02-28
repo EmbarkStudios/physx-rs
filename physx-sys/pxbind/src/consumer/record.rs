@@ -1,4 +1,6 @@
-use super::{functions, Builtin, Id, Item, QualType, Type, Typedef};
+use std::fmt;
+
+use super::{functions, Builtin, ClassDef, Id, Item, QualType, Type, Typedef};
 use crate::Node;
 use anyhow::Context as _;
 use functions::*;
@@ -64,8 +66,7 @@ impl Constructor {
 
         let maybe_copy = first
             .strip_suffix(" &")
-            .map(|is_ref| is_ref.ends_with(&self.inner.name))
-            .unwrap_or(false);
+            .map_or(false, |is_ref| is_ref.ends_with(&self.inner.name));
 
         maybe_copy && iter.next().is_none()
     }
@@ -107,6 +108,16 @@ pub enum Tag {
     Struct,
     Class,
     Union,
+}
+
+impl fmt::Display for Tag {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Struct => f.write_str("struct"),
+            Self::Class => f.write_str("class"),
+            Self::Union => f.write_str("union"),
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -151,12 +162,41 @@ impl Record {
 }
 
 #[derive(Debug)]
-pub struct RecBinding<'ast> {
+pub struct RecBindingDef<'ast> {
     pub name: &'ast str,
     pub has_vtable: bool,
     pub ast: &'ast Record,
     pub fields: Vec<FieldBinding<'ast>>,
     pub calc_layout: bool,
+}
+
+#[derive(Debug)]
+pub struct RecBindingForward<'ast> {
+    pub name: &'ast str,
+}
+
+#[derive(Debug)]
+pub enum RecBinding<'ast> {
+    Forward(RecBindingForward<'ast>),
+    Def(RecBindingDef<'ast>),
+}
+
+impl<'ast> RecBinding<'ast> {
+    pub fn name(&self) -> &'ast str {
+        match self {
+            Self::Def(def) => def.name,
+            Self::Forward(fwd) => fwd.name,
+        }
+    }
+}
+
+impl<'ast> PartialEq<str> for RecBinding<'ast> {
+    fn eq(&self, other: &str) -> bool {
+        match self {
+            Self::Def(def) => def.name == other,
+            Self::Forward(fwd) => fwd.name == other,
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -169,38 +209,20 @@ pub struct FieldBinding<'ast> {
 
 impl<'ast> super::AstConsumer<'ast> {
     fn has_release_method(&self, node: &'ast Node, rec: &'ast Record) -> anyhow::Result<bool> {
-        if node
-            .inner
-            .iter()
-            .find(|inn| {
-                if let Item::CXXMethodDecl(method) = &inn.kind {
-                    method.name == "release"
-                } else {
-                    false
-                }
-            })
-            .is_some()
-        {
+        if node.inner.iter().any(|inn| {
+            if let Item::CXXMethodDecl(method) = &inn.kind {
+                method.name == "release"
+            } else {
+                false
+            }
+        }) {
             return Ok(true);
         }
 
-        for base in &rec.bases {
-            if let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") {
-                if let Some((supern, superr)) = self.classes.get(base_name) {
-                    if self.has_release_method(supern, superr)? {
-                        return Ok(true);
-                    }
-                } else {
-                    // Explicitly fail here, we _should_ always have encountered the
-                    // base class before any derived class, so if we didn't, something
-                    // is wrong
-                    anyhow::bail!(
-                        "{:?} {:?} has base `{}`, but we couldn't find it",
-                        rec.tag_used,
-                        rec.name,
-                        base.kind.qual_type
-                    );
-                }
+        for base in self.iter_bases(rec) {
+            let (cdef, _) = base?;
+            if self.has_release_method(cdef.node, cdef.rec)? {
+                return Ok(true);
             }
         }
 
@@ -209,19 +231,18 @@ impl<'ast> super::AstConsumer<'ast> {
 
     #[inline]
     pub(super) fn is_template_we_care_about(
-        &self,
         node: &'ast Node,
         td: &'ast Typedef,
     ) -> Option<&'ast str> {
         let tds = [
-            "PxVec3",
-            "PxVec3p",
-            "PxVec4",
-            "PxQuat",
-            "PxMat33",
-            //"PxMat34",
-            "PxMat44",
-            "PxTransform",
+            "PxBitAndByte",
+            "PxRaycastCallback",
+            "PxOverlapCallback",
+            "PxSweepCallback",
+            "PxRaycastBuffer",
+            "PxOverlapBuffer",
+            "PxSweepBuffer",
+            "PxBitMap",
         ];
 
         if !tds.contains(&td.name.as_str()) {
@@ -250,177 +271,73 @@ impl<'ast> super::AstConsumer<'ast> {
 
         let mut fields = Vec::new();
         match td.name.as_str() {
-            "PxVec3" => {
+            "PxBitAndByte" => {
                 fields.push(FieldBinding {
-                    name: "x",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "y",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "z",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-            }
-            "PxVec3p" => {
-                fields.push(FieldBinding {
-                    name: "x",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "y",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "z",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "padding",
-                    kind: QualType::Builtin(Builtin::UInt),
+                    name: "mData",
+                    kind: QualType::Builtin(Builtin::UChar),
                     is_public: false,
                     is_reference: false,
                 });
             }
-            "PxVec4" => {
+            "PxRaycastCallback" | "PxOverlapCallback" | "PxSweepCallback" | "PxRaycastBuffer"
+            | "PxOverlapBuffer" | "PxSweepBuffer" => {
+                let hit_type = match td.name.as_str() {
+                    "PxRaycastCallback" | "PxRaycastBuffer" => "PxRaycastHit",
+                    "PxOverlapCallback" | "PxOverlapBuffer" => "PxOverlapHit",
+                    "PxSweepCallback" | "PxSweepBuffer" => "PxSweepHit",
+                    _ => unreachable!(),
+                };
+
                 fields.push(FieldBinding {
-                    name: "x",
-                    kind: QualType::Builtin(Builtin::Float),
+                    name: "block",
+                    kind: QualType::Record { name: hit_type },
                     is_public: true,
                     is_reference: false,
                 });
                 fields.push(FieldBinding {
-                    name: "y",
-                    kind: QualType::Builtin(Builtin::Float),
+                    name: "hasBlock",
+                    kind: QualType::Builtin(Builtin::Bool),
                     is_public: true,
                     is_reference: false,
                 });
                 fields.push(FieldBinding {
-                    name: "z",
-                    kind: QualType::Builtin(Builtin::Float),
+                    name: "touches",
+                    kind: QualType::Pointer {
+                        is_const: false,
+                        is_pointee_const: false,
+                        pointee: Box::new(QualType::Record { name: hit_type }),
+                    },
                     is_public: true,
                     is_reference: false,
                 });
                 fields.push(FieldBinding {
-                    name: "w",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-            }
-            "PxQuat" => {
-                fields.push(FieldBinding {
-                    name: "x",
-                    kind: QualType::Builtin(Builtin::Float),
+                    name: "maxNbTouches",
+                    kind: QualType::Builtin(Builtin::UInt),
                     is_public: true,
                     is_reference: false,
                 });
                 fields.push(FieldBinding {
-                    name: "y",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "z",
-                    kind: QualType::Builtin(Builtin::Float),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "w",
-                    kind: QualType::Builtin(Builtin::Float),
+                    name: "nbTouches",
+                    kind: QualType::Builtin(Builtin::UInt),
                     is_public: true,
                     is_reference: false,
                 });
             }
-            "PxMat33" => {
+            "PxBitMap" => {
                 fields.push(FieldBinding {
-                    name: "column0",
-                    kind: QualType::Builtin(Builtin::Vec3),
-                    is_public: true,
+                    name: "mMap",
+                    kind: QualType::Pointer {
+                        is_const: false,
+                        is_pointee_const: false,
+                        pointee: Box::new(QualType::Builtin(Builtin::UInt)),
+                    },
+                    is_public: false,
                     is_reference: false,
                 });
                 fields.push(FieldBinding {
-                    name: "column1",
-                    kind: QualType::Builtin(Builtin::Vec3),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "column2",
-                    kind: QualType::Builtin(Builtin::Vec3),
-                    is_public: true,
-                    is_reference: false,
-                });
-            }
-            "PxMat34" => {
-                // This type is not used in the public API so we ignore it
-                return Ok(());
-                // fields.push(FieldBinding {
-                //     name: "m",
-                //     kind: QualType::Builtin(Builtin::Mat33),
-                //     is_public: true,
-                //     is_reference: false,
-                // });
-                // fields.push(FieldBinding {
-                //     name: "p",
-                //     kind: QualType::Builtin(Builtin::Vec3),
-                //     is_public: true,
-                //     is_reference: false,
-                // });
-            }
-            "PxMat44" => {
-                fields.push(FieldBinding {
-                    name: "column0",
-                    kind: QualType::Builtin(Builtin::Vec4),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "column1",
-                    kind: QualType::Builtin(Builtin::Vec4),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "column2",
-                    kind: QualType::Builtin(Builtin::Vec4),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "column3",
-                    kind: QualType::Builtin(Builtin::Vec4),
-                    is_public: true,
-                    is_reference: false,
-                });
-            }
-            "PxTransform" => {
-                fields.push(FieldBinding {
-                    name: "q",
-                    kind: QualType::Builtin(Builtin::Quat),
-                    is_public: true,
-                    is_reference: false,
-                });
-                fields.push(FieldBinding {
-                    name: "p",
-                    kind: QualType::Builtin(Builtin::Vec3),
-                    is_public: true,
+                    name: "mWordCount",
+                    kind: QualType::Builtin(Builtin::UInt),
+                    is_public: false,
                     is_reference: false,
                 });
             }
@@ -438,24 +355,71 @@ impl<'ast> super::AstConsumer<'ast> {
         })
         .with_context(|| format!("failed to locate template specialization for {name}"))?;
 
-        self.recs.push(RecBinding {
+        self.classes.insert(
+            name,
+            Some(super::ClassDef {
+                index: self.recs.len(),
+                node,
+                rec: ast,
+            }),
+        );
+
+        self.recs.push(RecBinding::Def(RecBindingDef {
             name,
             has_vtable: ast.is_polymorphic(),
             fields,
             ast,
             calc_layout: true,
-        });
-
-        self.classes.insert(name, (node, ast));
+        }));
 
         Ok(())
+    }
+
+    fn iter_bases(
+        &self,
+        rec: &'ast Record,
+    ) -> impl Iterator<Item = anyhow::Result<(&ClassDef<'ast>, &RecBindingDef<'ast>)>> {
+        rec.bases.iter().filter_map(|base| {
+            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
+                log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
+                return None;
+            };
+
+            let get = || {
+                let base_rec = self.classes.get(base_name).with_context(|| {
+                    format!(
+                        "failed to find base '{}' for '{}'",
+                        base.kind.qual_type,
+                        rec.name.as_deref().unwrap(),
+                    )
+                })?;
+
+                let base_rec = base_rec.as_ref().with_context(|| {
+                    format!(
+                        "Definition for base class {} has not been consumed",
+                        base.kind.qual_type
+                    )
+                })?;
+
+                if let RecBinding::Def(base_binding) = &self.recs[base_rec.index] {
+                    anyhow::ensure!(
+                        base_binding.name == base_name,
+                        "Retrieved incorrect binding for base class"
+                    );
+                    Ok((base_rec, base_binding))
+                } else {
+                    anyhow::bail!("Found a forward declaration instead of the base definition");
+                }
+            };
+
+            Some(get())
+        })
     }
 
     pub(super) fn consume_record(
         &mut self,
         node: &'ast Node,
         rec: &'ast Record,
-        root: &'ast Node,
     ) -> anyhow::Result<()> {
         // Do a quick check of the inner nodes, if we have an enumdecl, but no fields
         // or methods, this is just a wrapper around an enum and we can just emit the enum
@@ -481,54 +445,18 @@ impl<'ast> super::AstConsumer<'ast> {
 
         let Some(rname) = rec.name.as_deref() else { return Ok(()) };
 
-        // Skip records we've already seen, this happens a lot as forward declarations
-        // and record definitions have the same kind
-        if self.classes.contains_key(rname) || self.is_ignored(node) {
-            return Ok(());
-        }
-
-        // If we don't have definition data, that means this is a forward declaration,
-        // so we want to find the actual definition since that has information we need
-        let has_vtable = if rec.definition_data.is_none() {
-            if let Some(definition) = super::search(root, &|node: &Node| {
-                if let Item::CXXRecordDecl(rec) = &node.kind {
-                    rec.name.as_deref().filter(|rn| *rn == rname).map(|_| rec)
-                } else {
-                    None
-                }
-            }) {
-                self.classes.insert(rname, definition);
-                definition.1.is_polymorphic()
-            } else {
-                self.classes.insert(rname, (node, rec));
-                rec.is_polymorphic()
-            }
-        } else {
-            self.classes.insert(rname, (node, rec));
-            rec.is_polymorphic()
-        };
+        anyhow::ensure!(
+            rec.definition_data.is_some(),
+            "can't consume a record without a definition"
+        );
+        let has_vtable = rec.is_polymorphic();
 
         let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
 
         let mut fields = Vec::new();
-
-        for base in &rec.bases {
-            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
-                log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
-                continue;
-            };
-
-            let base_rec = self
-                .recs
-                .iter()
-                .find(|r| r.name == base_name)
-                .with_context(|| {
-                    format!(
-                        "failed to find base '{}' for '{rname}'",
-                        base.kind.qual_type
-                    )
-                })?;
-            fields.extend(base_rec.fields.iter().cloned());
+        for base_binding in self.iter_bases(rec) {
+            let (_, base_binding) = base_binding?;
+            fields.extend(base_binding.fields.iter().cloned());
         }
 
         self.get_fields(node, rec, &[], &mut fields)?;
@@ -539,15 +467,12 @@ impl<'ast> super::AstConsumer<'ast> {
         let mut meth_map = std::collections::BTreeMap::<String, u8>::new();
 
         let mut get_name = |req: String| -> String {
-            match meth_map.get_mut(&req) {
-                Some(count) => {
-                    *count += 1;
-                    format!("{req}_{count}")
-                }
-                None => {
-                    meth_map.insert(req.clone(), 0);
-                    req
-                }
+            if let Some(count) = meth_map.get_mut(&req) {
+                *count += 1;
+                format!("{req}_{count}")
+            } else {
+                meth_map.insert(req.clone(), 0);
+                req
             }
         };
 
@@ -562,7 +487,7 @@ impl<'ast> super::AstConsumer<'ast> {
                         method.name
                     );
                     continue;
-                } else if self.is_ignored(inn) {
+                } else if Self::is_deprecated(inn) {
                     log::debug!("skipping deprecated method {rname}::{}", method.name);
                     continue;
                 }
@@ -656,7 +581,7 @@ impl<'ast> super::AstConsumer<'ast> {
                         FuncBinding {
                             name: format!("{rname}_delete"),
                             comment,
-                            ext: FuncBindingExt::IsDelete(&rname),
+                            ext: FuncBindingExt::IsDelete(rname),
                             params: Vec::new(),
                             ret: None,
                         },
@@ -675,6 +600,25 @@ impl<'ast> super::AstConsumer<'ast> {
             }
 
             self.consume_method(inn, method, &[], func)?;
+        }
+
+        // Check the fields to see if any records need to be forward declared
+        // Note this doesn't apply to function parameters since functions are
+        // emitted after all Pod types
+        for field in &fields {
+            if let QualType::Pointer { pointee, .. } | QualType::Reference { pointee, .. } =
+                &field.kind
+            {
+                if let QualType::Record { name } = &**pointee {
+                    // Special case for PxTempAllocatorChunk which is an internal
+                    // linked list
+                    if *name != rname && !self.classes.contains_key(name) {
+                        self.recs
+                            .push(RecBinding::Forward(RecBindingForward { name }));
+                        self.classes.insert(name, None);
+                    }
+                }
+            }
         }
 
         // If there are no fields, we need to add a dummy field since C++ doesn't have
@@ -699,11 +643,11 @@ impl<'ast> super::AstConsumer<'ast> {
         //
         // Note that empty types are only refered to by pointers and references in
         // PhysX, so we can generate dummy contents for them.
-        let calc_layout = rec.definition_data.is_some()
-            && !matches!(rec.tag_used, Some(crate::consumer::Tag::Union))
-            && !fields.is_empty();
+        let calc_layout = (!matches!(rec.tag_used, Some(crate::consumer::Tag::Union))
+            && !fields.is_empty())
+            || rname == "PxBroadcastingErrorCallback";
 
-        let record = RecBinding {
+        let record = RecBindingDef {
             name: rname,
             has_vtable,
             fields,
@@ -711,7 +655,15 @@ impl<'ast> super::AstConsumer<'ast> {
             calc_layout,
         };
 
-        self.recs.push(record);
+        self.classes.insert(
+            rname,
+            Some(super::ClassDef {
+                index: self.recs.len(),
+                node,
+                rec,
+            }),
+        );
+        self.recs.push(RecBinding::Def(record));
         Ok(())
     }
 
@@ -733,7 +685,7 @@ impl<'ast> super::AstConsumer<'ast> {
                 Item::AccessSpecDecl { access } => {
                     is_public = matches!(access, Access::Public);
                 }
-                Item::FieldDecl { name, kind } if is_public => {
+                Item::FieldDecl { name, kind } => {
                     // Skip anonymous fields, they aren't really accessible
                     if let Some(name) = name.as_deref() {
                         // PhysX uses PxPadding<BYTES> in some struct, but this
@@ -749,12 +701,19 @@ impl<'ast> super::AstConsumer<'ast> {
                             continue;
                         }
 
+                        // We've made modifications to the C++ code to deprecate
+                        // fields that are using deprecated types
+                        if Self::is_deprecated(inn) {
+                            continue;
+                        }
+
                         let kind = self
                             .parse_type(kind, template_types)
                             .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
-                        if matches!(&kind, QualType::FunctionPointer) {
-                            continue;
-                        }
+
+                        // if matches!(&kind, QualType::FunctionPointer) {
+                        //     continue;
+                        // }
 
                         let is_reference = matches!(kind, QualType::Reference { .. });
 

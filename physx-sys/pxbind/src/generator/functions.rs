@@ -18,10 +18,10 @@ impl<'ast> Param<'ast> {
                 writesln!(out, "{indent}memcpy(&{name}, &{name}_pod, sizeof({name}));");
             }
             QualType::Pointer { .. } => {
+                let ty = self.kind.cpp_type();
                 writesln!(
                     out,
-                    "{indent}auto {name} = reinterpret_cast<{}>({name}_pod);",
-                    self.kind.cpp_type()
+                    "{indent}{ty} {name} = reinterpret_cast<{ty}>({name}_pod);",
                 );
             }
             QualType::Reference { pointee, .. } => {
@@ -36,10 +36,10 @@ impl<'ast> Param<'ast> {
                     }
                 }
 
+                let ty = self.kind.cpp_type();
                 writesln!(
                     out,
-                    "{indent}auto {name} = reinterpret_cast<{}>(*{name}_pod);",
-                    self.kind.cpp_type()
+                    "{indent}{ty} {name} = reinterpret_cast<{ty}>(*{name}_pod);",
                 );
             }
             QualType::Enum { .. } => {
@@ -56,7 +56,7 @@ impl<'ast> Param<'ast> {
                     self.kind.cpp_type()
                 );
             }
-            QualType::Record { name } => {
+            QualType::Record { .. } => {
                 writesln!(out, "{indent}{} {name};", self.kind.cpp_type());
                 writesln!(out, "{indent}memcpy(&{name}, &{name}_pod, sizeof({name}));");
             }
@@ -80,7 +80,7 @@ impl<'ast> FuncBinding<'ast> {
             if let Some(ret) = &self.ret {
                 writes!(acc, "{}", ret.c_type());
             } else {
-                acc.push_str("void")
+                acc.push_str("void");
             }
 
             writes!(acc, " {}(", self.name);
@@ -170,8 +170,10 @@ impl<'ast> FuncBinding<'ast> {
                             ret.c_type()
                         );
                     }
-
-                    _ => panic!("da fuq {:?}", ret),
+                    #[allow(clippy::unimplemented)]
+                    _ => {
+                        unimplemented!("return type is not supported {:?}", ret);
+                    }
                 }
 
                 writesln!(acc, "{indent}return {RET_POD};");
@@ -199,9 +201,8 @@ impl<'ast> FuncBinding<'ast> {
 
             writes!(
                 acc,
-                "{sep}{}{}: {}",
-                param.name,
-                if needs_fixup(&param.name) { "_" } else { "" },
+                "{sep}{}: {}",
+                super::RustIdent(&param.name),
                 param.kind.rust_type()
             );
         }
@@ -214,12 +215,6 @@ impl<'ast> FuncBinding<'ast> {
 
         writesln!(writer, "{acc}");
     }
-}
-
-#[inline]
-fn needs_fixup(n: &str) -> bool {
-    static KEYWORDS: &[&str] = &["box", "type", "ref"];
-    KEYWORDS.contains(&n)
 }
 
 impl<'ast> PhysxInvoke<'ast> {
@@ -246,7 +241,7 @@ impl<'ast> PhysxInvoke<'ast> {
         };
 
         match self {
-            Self::Func { func_name } => {
+            Self::Func { func_name, .. } => {
                 writes!(out, "{indent}");
                 if let Some(ret) = return_type {
                     writes!(out, "{} {RET} = ", ret.cpp_type());
@@ -287,7 +282,7 @@ impl<'ast> PhysxInvoke<'ast> {
                 }
             }
             Self::New(class) => {
-                writes!(out, "{indent}auto {RET} = new {}(", class);
+                writes!(out, "{indent}auto {RET} = new physx::{}(", class);
                 emit_args(out);
                 writes!(out, ");\n");
             }

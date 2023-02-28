@@ -1,6 +1,7 @@
 use super::{Indent, SG, UOF};
+use crate::consumer::QualType;
 
-impl<'ast> crate::consumer::RecBinding<'ast> {
+impl<'ast> crate::consumer::RecBindingDef<'ast> {
     pub(super) fn emit_structgen(&self, writer: &mut String, level: u32) {
         if self.calc_layout {
             self.emit_structgen_calc(writer, level);
@@ -32,13 +33,35 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
             }
 
             let fname = field.name;
-            let c_type = field.kind.c_type();
             let cpp_type = field.kind.cpp_type();
             let rust_type = field.kind.rust_type();
 
+            writes!(w, "{indent2}{SG}.add_field(\"");
+
+            // We need to handle arrays specially since they break the pattern of literally every other
+            // C type since the element and array lengths are split by the identifier. Sigh.
+            if let QualType::Array { element, len } = &field.kind {
+                // There are a couple of cases of 2-dimensional arrays :p
+                if let QualType::Array {
+                    element: inner,
+                    len: len1,
+                } = &**element
+                {
+                    writes!(w, "{} {fname}[{len1}]", inner.c_type());
+                } else {
+                    writes!(w, "{} {fname}", element.c_type());
+                }
+
+                writes!(w, "[{len}]");
+            } else {
+                let c_type = field.kind.c_type();
+                writes!(w, "{c_type} {fname}");
+            }
+
             writesln!(
                 w,
-                r#"{indent2}{SG}.add_field("{c_type} {fname}", "{fname}", "{rust_type}", sizeof({cpp_type}), {UOF}(physx_{name}_Pod, {fname}));"#
+                r#"", "{}", "{rust_type}", sizeof({cpp_type}), {UOF}(physx_{name}_Pod, {fname}));"#,
+                super::RustIdent(fname),
             );
         }
 
@@ -74,10 +97,14 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
         }
 
         for field in &self.fields {
-            writes!(w, "{cindent}{} {};\\n", field.kind.cpp_type(), field.name);
+            if let QualType::Array { element, len } = &field.kind {
+                writes!(w, "{cindent}{} {}[{len}];\\n", element.c_type(), field.name);
+            } else {
+                writes!(w, "{cindent}{} {};\\n", field.kind.c_type(), field.name);
+            }
         }
 
-        writesln!(w, "}};\\n\");");
+        writes!(w, "}};\\n\");");
     }
 
     pub fn emit_rust(&self, w: &mut String, level: u32) -> bool {
@@ -115,5 +142,27 @@ impl<'ast> crate::consumer::RecBinding<'ast> {
 
         writesln!(w, "{indent}}}");
         true
+    }
+}
+
+impl<'ast> crate::consumer::RecBindingForward<'ast> {
+    pub fn emit_structgen(&self, w: &mut String, level: u32) {
+        let indent = Indent(level);
+
+        writes!(
+            w,
+            "{indent}{SG}.pass_thru(\"struct physx_{}_Pod;\\n\");",
+            self.name
+        );
+    }
+
+    pub fn emit_rust(&self, w: &mut String, level: u32) {
+        let indent = Indent(level);
+
+        writesln!(w, "{indent}#[derive(Copy, Clone)]");
+        writesln!(w, "{indent}#[repr(C)]");
+        writesln!(w, "{indent}pub struct {} {{", self.name);
+        writesln!(w, "{indent}{indent}_unused: [u8; 0],");
+        writes!(w, "}}");
     }
 }

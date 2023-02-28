@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 mod record;
 use anyhow::Context as _;
-pub use record::{Access, Constructor, Method, RecBinding, Record, Tag};
+pub use record::*;
 mod enums;
 use clang_ast::Id;
 pub use enums::{EnumBinding, FlagsBinding};
@@ -16,7 +16,7 @@ pub use templates::{Template, TemplateArg};
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Type {
-    //desugured_qual_type: Option<String>,
+    desugared_qual_type: Option<String>,
     qual_type: String,
     //type_alias_decl_id: Option<Id>,
 }
@@ -73,6 +73,9 @@ pub enum Item {
     ParmVarDecl(Param),
     FunctionTemplateDecl,
     FunctionDecl(functions::Function),
+    LinkageSpecDecl {
+        language: String,
+    },
     /// Enums
     EnumDecl(EnumDecl),
     /// Enum variants
@@ -135,6 +138,25 @@ pub enum Item {
         kind: Option<clang_ast::Kind>,
         name: Option<String>,
     },
+}
+
+impl fmt::Display for Item {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NamespaceDecl { name } => write!(f, "namespace '{name:?}'"),
+            Self::CXXRecordDecl(rec) => {
+                write!(f, "{} '{:?}'", rec.tag_used.unwrap_or(Tag::Class), rec.name)
+            }
+            Self::FieldDecl { name, .. } => write!(f, "field '{name:?}'"),
+            Self::CXXMethodDecl(method) => write!(f, "method '{:?}'", method.name),
+            Self::CXXConstructorDecl(ctor) => write!(f, "constructor '{:?}'", ctor.inner.name),
+            Self::CXXDestructorDecl(dtor) => write!(f, "destructor '{:?}'", dtor.name),
+            Self::EnumDecl(enm) => write!(f, "enum '{:?}'", enm.name),
+            Self::FunctionDecl(fun) => write!(f, "function '{}'", fun.name),
+            Self::TypedefDecl(td) => write!(f, "typedef '{}'", td.name),
+            _ => write!(f, "{self:?}"),
+        }
+    }
 }
 
 impl Item {
@@ -217,6 +239,13 @@ pub struct Comment<'ast> {
 
 use std::collections::HashMap;
 
+pub struct ClassDef<'ast> {
+    /// Index in `recs` where the binding is located
+    pub index: usize,
+    pub node: &'ast Node,
+    pub rec: &'ast Record,
+}
+
 #[derive(Default)]
 pub struct AstConsumer<'ast> {
     pub enums: Vec<EnumBinding<'ast>>,
@@ -226,16 +255,17 @@ pub struct AstConsumer<'ast> {
     pub type_defs: HashMap<&'ast str, QualType<'ast>>,
     pub recs: Vec<RecBinding<'ast>>,
     pub funcs: Vec<FuncBinding<'ast>>,
+    func_map: HashMap<&'ast str, u8>,
     pub templates: HashMap<&'ast str, Template<'ast>>,
     /// Mapping of class names -> node & record so we can check hierarchies
     /// for `release` methods, or whether something is a record at all
-    pub classes: HashMap<&'ast str, (&'ast Node, &'ast Record)>,
+    pub classes: HashMap<&'ast str, Option<ClassDef<'ast>>>,
     pub back_refs: HashMap<Id, &'ast Node>,
 }
 
 impl<'ast> AstConsumer<'ast> {
     pub fn consume(&mut self, root: &'ast Node) -> anyhow::Result<()> {
-        self.traverse(root, root, false)
+        self.traverse(root, root, false, false)
     }
 
     fn traverse(
@@ -243,49 +273,63 @@ impl<'ast> AstConsumer<'ast> {
         node: &'ast Node,
         root: &'ast Node,
         in_physx: bool,
+        in_c: bool,
     ) -> anyhow::Result<()> {
-        if self.is_ignored(node) {
-            log::debug!("skipping ignored node");
-            return Ok(());
-        }
-
         for inn in &node.inner {
+            if Self::is_deprecated(inn) {
+                log::debug!("skipping deprecated node {}", inn.kind);
+                continue;
+            }
+
+            #[allow(clippy::match_same_arms)]
             match &inn.kind {
                 Item::NamespaceDecl { name } => {
                     if name.as_deref() == Some("physx") {
-                        self.traverse(inn, root, true)?;
+                        self.traverse(inn, root, true, false)?;
                     }
                 }
-                Item::EnumDecl(decl) => {
+                Item::EnumDecl(decl) if in_physx => {
                     self.consume_enum(node, inn, decl)?;
                 }
-                Item::CXXRecordDecl(rec) => {
-                    // If a record decl doesn't have any inner nodes, it's just a foreward declaration
-                    // and we can skip it
-                    if inn.inner.is_empty() || !in_physx {
-                        continue;
-                    }
-
-                    self.consume_record(inn, rec, root)
-                        .with_context(|| format!("failed to consume {rec:?}"))?;
-                }
-                Item::TypedefDecl(td) => {
-                    self.consume_typedef(inn, td, root)?;
-                }
-                Item::FunctionDecl(func) => {
+                Item::CXXRecordDecl(rec) if in_physx => {
                     if !in_physx {
                         continue;
                     }
 
-                    log::debug!("skipping function {}", func.name);
-                    //self.consume_function(inn, func)?;
+                    // If a record decl doesn't have any inner nodes, it's just
+                    // a foreward declaration and we can skip it
+                    if inn.inner.is_empty() || rec.definition_data.is_none() {
+                        let Some(name) = rec.name.as_deref() else { continue; };
+
+                        if !self.classes.contains_key(name) {
+                            self.recs
+                                .push(RecBinding::Forward(RecBindingForward { name }));
+                            self.classes.insert(name, None);
+                        }
+
+                        continue;
+                    }
+
+                    self.consume_record(inn, rec)
+                        .with_context(|| format!("failed to consume {rec:?}"))?;
                 }
-                Item::ClassTemplateDecl { name } => {
+                Item::TypedefDecl(td) if in_physx => {
+                    self.consume_typedef(inn, td, root)?;
+                }
+                Item::FunctionDecl(func) => {
+                    if in_physx || (in_c && func.name.starts_with("Px")) {
+                        self.consume_function(inn, func, &[], in_c)?;
+                    }
+                }
+                Item::ClassTemplateDecl { .. } => {
                     //self.consume_template_decl(inn, name)?;
                 }
                 Item::FunctionTemplateDecl => {}
+                Item::LinkageSpecDecl { language } if language == "C" => {
+                    self.traverse(inn, root, in_physx, true)?;
+                }
                 _ => {
-                    self.traverse(inn, root, in_physx)?;
+                    self.traverse(inn, root, in_physx, in_c)?;
                 }
             }
         }
@@ -293,11 +337,13 @@ impl<'ast> AstConsumer<'ast> {
         Ok(())
     }
 
+    /// Check to see if the node has the deprecated attribute, if so we can
+    /// ignore emitting it.
+    ///
+    /// This can get rid of entire types, so we need to account for that when
+    /// traversing the graph to emit types and functions
     #[inline]
-    fn is_ignored(&self, node: &'ast Node) -> bool {
-        // Check to see if the node has the deprecated attribute, if so we can
-        // ignore emitting it. This can get rid of entire types, so we need to
-        // account for that when traversing the graph to emit types and functions
+    fn is_deprecated(node: &'ast Node) -> bool {
         node.inner
             .iter()
             .any(|inn| matches!(inn.kind, Item::DeprecatedAttr))
@@ -324,8 +370,17 @@ impl<'ast> AstConsumer<'ast> {
             || td.kind.qual_type.starts_with("PxFlags<")
         {
             self.consume_flags(node, td)?;
-        } else if let Some(tid) = self.is_template_we_care_about(node, td) {
+        } else if let Some(tid) = Self::is_template_we_care_about(node, td) {
             self.consume_template_typedef(node, td, tid, root)?;
+        } else if td.name == "PxFileHandle" {
+            self.type_defs.insert(
+                &td.name,
+                QualType::Pointer {
+                    is_const: false,
+                    is_pointee_const: false,
+                    pointee: Box::new(QualType::Builtin(Builtin::Void)),
+                },
+            );
         } else if let Ok(qt) = self.parse_type(&td.kind, &[]) {
             self.type_defs.insert(&td.name, qt);
         }
@@ -351,7 +406,7 @@ impl<'ast> AstConsumer<'ast> {
             summary: &mut Block<'ast>,
             additional: &mut Block<'ast>,
         ) -> anyhow::Result<()> {
-            fn gather_paragraph<'ast>(node: &'ast Node) -> Block<'ast> {
+            fn gather_paragraph(node: &Node) -> Block<'_> {
                 let mut block = Block::default();
 
                 for inner in &node.inner {
@@ -435,7 +490,7 @@ impl<'ast> AstConsumer<'ast> {
         }
 
         // Builtin types are the most common, we already handle the common typedefs as well
-        if let Some(bi) = self.parse_builtin(type_str) {
+        if let Some(bi) = Self::parse_builtin(type_str) {
             return Ok(QualType::Builtin(bi));
         }
 
@@ -443,16 +498,13 @@ impl<'ast> AstConsumer<'ast> {
             return Ok(QualType::FunctionPointer);
         }
 
-        // First check if the type has an alias, most likely a typedef
-        //if let AstType::Qualified(_kind) = &kind {
-        //if let Some(alias_id) = kind.type_alias_decl_id {
-        // let node = self
-        //     .back_refs
-        //     .get(&alias_id)
-
-        //     .context("failed to locate type alias")?;
-        //}
-        //}
+        if let AstType::Qualified(kind) = &kind {
+            if let Some(qt) = &kind.desugared_qual_type {
+                if qt.contains("(*)") {
+                    return Ok(QualType::FunctionPointer);
+                }
+            }
+        }
 
         // There's probably a smarter way to do this, but ugh, C++ pointers are so
         // dumb
@@ -463,12 +515,10 @@ impl<'ast> AstConsumer<'ast> {
                 } else {
                     (inner, false)
                 }
+            } else if let Some(s) = inner.strip_prefix("const ") {
+                (s, true)
             } else {
-                if let Some(s) = inner.strip_prefix("const ") {
-                    (s, true)
-                } else {
-                    (inner, false)
-                }
+                (inner, false)
             }
         }
 
@@ -531,11 +581,11 @@ impl<'ast> AstConsumer<'ast> {
         // a reference to it, since physx doesn't do forward declaration of
         // enums, just old school
         if let Some((repr, name)) = self.enum_map.get(type_str) {
-            return Ok(QualType::Enum {
+            Ok(QualType::Enum {
                 name,
                 cxx_qt: type_str,
                 repr: *repr,
-            });
+            })
         } else if let Some(name) = type_str.strip_prefix("physx::") {
             let qt = if let Some((repr, unqualified)) = self.enum_map.get(name) {
                 QualType::Enum {
@@ -561,7 +611,7 @@ impl<'ast> AstConsumer<'ast> {
         }
     }
 
-    fn parse_builtin(&self, kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
+    fn parse_builtin(kind: impl Into<AstType<'ast>>) -> Option<Builtin> {
         let name = kind.into().as_str();
         let name = no_physx(name);
         let bi = match name {
@@ -620,6 +670,8 @@ impl<'ast> AstType<'ast> {
             Self::Simple(s) => s,
             Self::Qualified(kind) => kind.qual_type.as_str(),
         };
+
+        let ty = ty.strip_prefix("volatile ").unwrap_or(ty);
 
         // If the type is _not_ a pointer or reference, strip any const prefix
         // since it's useless and just makes parsing easier
@@ -692,18 +744,18 @@ impl Builtin {
             Self::ULong => "u64",
             Self::USize => "usize",
             Self::Vec3V => "glam::Vec3A",
-            Self::Vec3 => "glam::Vec3",
-            Self::Vec3p => "glam::Vec3A",
-            Self::Vec4V | Self::Vec4 => "glam::Vec4",
-            Self::QuatV | Self::Quat => "glam::Quat",
+            Self::Vec3 => "PxVec3",
+            Self::Vec3p => "PxVec3Padded",
+            Self::Vec4V | Self::Vec4 => "PxVec4",
+            Self::QuatV | Self::Quat => "PxQuat",
             Self::BoolV => "glam::BVec4A",
             Self::U32V => "glam::UVec4",
             Self::I32V => "glam::IVec4",
             Self::Mat33V => "glam::Mat3A",
-            Self::Mat33 => "glam::Mat3",
+            Self::Mat33 => "PxMat33",
             Self::Mat34V => "glam::Affine3A",
             Self::Mat34 => "Affine",
-            Self::Mat44V | Self::Mat44 => "glam::Mat4",
+            Self::Mat44V | Self::Mat44 => "PxMat44",
         }
     }
 
@@ -929,10 +981,11 @@ impl<'qt, 'ast> fmt::Display for CType<'qt, 'ast> {
             QualType::Builtin(bi) => f.write_str(bi.c_type()),
             QualType::FunctionPointer => f.write_str("void *"),
             QualType::Array { element, len } => {
-                write!(f, "{}[{len}]", element.c_type())
+                panic!("C array `{}[{len}]` breaks the pattern of every other type by have elements on both sides of an identifier", element.c_type());
             }
-            QualType::Enum { repr, .. } => f.write_str(repr.c_type()),
-            QualType::Flags { repr, .. } => f.write_str(repr.c_type()),
+            QualType::Enum { repr, .. } | QualType::Flags { repr, .. } => {
+                f.write_str(repr.c_type())
+            }
             QualType::Record { name } => write!(f, "physx_{name}_Pod"),
             QualType::TemplateTypedef { name } => write!(f, "physx_{name}_Pod"),
         }

@@ -30,19 +30,19 @@ expression: "gen_enums(\"i32.h\", &[]).unwrap()"
 /// performance bottleneck if there are a very large number of shapes roughly projecting to the same values
 /// on a given axis. If the scene has a very large number of shapes in an actor, e.g. a humanoid, it is recommended
 /// to use an aggregate to represent multi-shape or multi-body actors to minimize stress placed on the broad phase.
-#[derive(Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum PxBroadPhaseType {
     /// 3-axes sweep-and-prune
-    eSAP = 0,
+    Sap = 0,
     /// Multi box pruning
-    eMBP = 1,
+    Mbp = 1,
     /// Automatic box pruning
-    eABP = 2,
+    Abp = 2,
     /// Parallel automatic box pruning
-    ePABP = 3,
+    Pabp = 3,
     /// GPU broad phase
-    eGPU = 4,
-    eLAST = 5,
+    Gpu = 4,
+    Last = 5,
 }
 

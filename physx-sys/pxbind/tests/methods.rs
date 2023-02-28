@@ -4,7 +4,7 @@ struct Functions {
 }
 
 fn gen_functions(which: &str, to_emit: &'static [&str]) -> anyhow::Result<Functions> {
-    let ast = pxbind::get_parsed_ast(format!("tests/data/functions/{which}"))?;
+    let (ast, _) = pxbind::get_parsed_ast(format!("tests/data/functions/{which}"))?;
 
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;

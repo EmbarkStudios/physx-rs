@@ -1,10 +1,10 @@
 fn gen_structgen(which: &str, _to_emit: &'static [&str]) -> anyhow::Result<String> {
-    let ast = pxbind::get_parsed_ast(format!("tests/data/{which}"))?;
+    let (ast, _) = pxbind::get_parsed_ast(format!("tests/data/{which}"))?;
 
     let mut consumer = pxbind::consumer::AstConsumer::default();
     consumer.consume(&ast)?;
 
-    let record_filter = |rb: &pxbind::consumer::RecBinding<'_>| rb.name.starts_with("Px");
+    let record_filter = |rb: &pxbind::consumer::RecBinding<'_>| rb.name().starts_with("Px");
 
     let generator = pxbind::generator::Generator {
         record_filter: Box::new(record_filter),

@@ -20,9 +20,6 @@ extern "C" {
     /// This function does not guarantee correct/continuous behavior when objects are resting on top of old or new geometry.
     pub fn PxShape_setGeometry_mut(self_: *mut PxShape, geometry: *const PxGeometry);
 
-    /// Fake function just to test handling of const pointers to const things
-    pub fn PxShape_computeLambda_mut(self_: *mut PxShape, boop: *const f32);
-
     /// Retrieve a reference to the shape's geometry.
     ///
     /// The returned reference has the same lifetime as the PxShape it comes from.
@@ -91,24 +88,6 @@ extern "C" {
     /// wake the associated actor up automatically.
     pub fn PxShape_setMaterials_mut(self_: *mut PxShape, materials: *const *mut PxMaterial, materialCount: u16);
 
-    /// Assigns FEM soft body material(s) to the shape. Will remove existing materials from the shape.
-    ///
-    /// Sleeping:
-    /// Does
-    /// NOT
-    /// wake the associated actor up automatically.
-    pub fn PxShape_setSoftBodyMaterials_mut(self_: *mut PxShape, materials: *const *mut PxFEMSoftBodyMaterial, materialCount: u16);
-
-    /// Assigns FEM cloth material(s) to the shape. Will remove existing materials from the shape.
-    ///
-    /// Feature under development, only for internal usage.
-    ///
-    /// Sleeping:
-    /// Does
-    /// NOT
-    /// wake the associated actor up automatically.
-    pub fn PxShape_setClothMaterials_mut(self_: *mut PxShape, materials: *const *mut PxFEMClothMaterial, materialCount: u16);
-
     /// Returns the number of materials assigned to the shape.
     ///
     /// You can use [`getMaterials`]() to retrieve the material pointers.
@@ -125,26 +104,6 @@ extern "C" {
     /// Number of material pointers written to the buffer.
     pub fn PxShape_getMaterials(self_: *const PxShape, userBuffer: *mut *mut PxMaterial, bufferSize: u32, startIndex: u32) -> u32;
 
-    /// Retrieve all the FEM soft body material pointers associated with the shape.
-    ///
-    /// You can retrieve the number of material pointers by calling [`getNbMaterials`]()
-    ///
-    /// Note: The returned data may contain invalid pointers if you release materials using [`PxMaterial::release`]().
-    ///
-    /// Number of material pointers written to the buffer.
-    pub fn PxShape_getSoftBodyMaterials(self_: *const PxShape, userBuffer: *mut *mut PxFEMSoftBodyMaterial, bufferSize: u32, startIndex: u32) -> u32;
-
-    /// Retrieve all the FEM cloth material pointers associated with the shape.
-    ///
-    /// Feature under development, only for internal usage.
-    ///
-    /// You can retrieve the number of material pointers by calling [`getNbMaterials`]()
-    ///
-    /// Note: The returned data may contain invalid pointers if you release materials using [`PxMaterial::release`]().
-    ///
-    /// Number of material pointers written to the buffer.
-    pub fn PxShape_getClothMaterials(self_: *const PxShape, userBuffer: *mut *mut PxFEMClothMaterial, bufferSize: u32, startIndex: u32) -> u32;
-
     /// Retrieve material from given triangle index.
     ///
     /// The input index is the internal triangle index as used inside the SDK. This is the index
@@ -152,7 +111,7 @@ extern "C" {
     ///
     /// This function is only useful for triangle meshes or heightfields, which have per-triangle
     /// materials. For other shapes or SDF triangle meshes, the function returns the single material
-    /// associated with the	shape, regardless of the index.
+    /// associated with the shape, regardless of the index.
     ///
     /// Material from input triangle
     ///

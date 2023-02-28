@@ -1,4 +1,6 @@
-use crate::{consumer::record::FieldBinding, Node};
+#![allow(unused)]
+
+use crate::Node;
 
 use super::{AstConsumer, Builtin, QualType, Record};
 use anyhow::Context as _;

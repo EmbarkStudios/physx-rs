@@ -31,7 +31,7 @@ mod enums;
 mod functions;
 mod record;
 
-use crate::consumer::{AstConsumer, EnumBinding, FuncBinding, RecBinding};
+use crate::consumer::{AstConsumer, Builtin, EnumBinding, FuncBinding, RecBinding};
 use std::{fmt, io::Write};
 
 /// The variable name of `PodStructGen` in the structgen program
@@ -116,7 +116,11 @@ impl Generator {
         let mut acc = String::new();
         for rec in ast.recs.iter().filter(|rb| (self.record_filter)(rb)) {
             acc.clear();
-            rec.emit_structgen(&mut acc, 1);
+
+            match rec {
+                RecBinding::Def(def) => def.emit_structgen(&mut acc, 1),
+                RecBinding::Forward(forward) => forward.emit_structgen(&mut acc, 1),
+            }
             writeln!(out, "{acc}")?;
         }
 
@@ -144,7 +148,15 @@ impl Generator {
             "using namespace physx;\n#include \"structgen_out.hpp\"\n"
         )?;
 
-        for rec in ast.recs.iter().filter(|rb| (self.record_filter)(rb)) {
+        for rec in ast.recs.iter().filter_map(|rb| {
+            if let RecBinding::Def(def) = rb {
+                if (self.record_filter)(rb) {
+                    return Some(def);
+                }
+            }
+
+            None
+        }) {
             let name = rec.name;
             writeln!(out, "static_assert(sizeof(physx::{name}) == sizeof(physx_{name}_Pod), \"POD wrapper for `physx::{name}` has incorrect size\");")?;
         }
@@ -195,6 +207,9 @@ impl Generator {
         let mut fiter = ast.flags.iter().peekable();
         let mut acc = String::new();
 
+        const INT_ENUMS: &[(&str, Builtin, &str)] =
+            &[("PxConcreteType", Builtin::UShort, "Undefined")];
+
         for (enum_binding, flags_binding) in ast.enums.iter().enumerate().filter_map(|(i, eb)| {
             let fb = if fiter.peek().map_or(false, |f| f.enums_index == i) {
                 fiter.next()
@@ -214,6 +229,17 @@ impl Generator {
             }
 
             enum_binding.emit_rust(&mut acc, level);
+
+            if let Some((builtin, default)) = INT_ENUMS.iter().find_map(|(name, bi, def)| {
+                if *name == enum_binding.name {
+                    Some((*bi, *def))
+                } else {
+                    None
+                }
+            }) {
+                writesln!(acc);
+                enum_binding.emit_rust_conversion(&mut acc, level, builtin, default);
+            }
 
             if let Some(flags) = flags_binding {
                 writesln!(acc);
@@ -238,9 +264,20 @@ impl Generator {
             acc.clear();
             writesln!(acc);
 
-            if rec.emit_rust(&mut acc, 0) {
-                num += 1;
-                write!(writer, "{acc}")?;
+            match rec {
+                RecBinding::Def(def) => {
+                    if def.emit_rust(&mut acc, 0) {
+                        num += 1;
+                        write!(writer, "{acc}")?;
+                    }
+                }
+                RecBinding::Forward(forward) => {
+                    if matches!(ast.classes.get(forward.name), Some(None)) {
+                        forward.emit_rust(&mut acc, 0);
+                        write!(writer, "{acc}")?;
+                        num += 1;
+                    }
+                }
             }
         }
 
@@ -265,5 +302,21 @@ impl Generator {
         writeln!(w, "{indent}}}")?;
 
         Ok(0)
+    }
+}
+
+struct RustIdent<'ast>(&'ast str);
+
+impl<'ast> fmt::Display for RustIdent<'ast> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        static KEYWORDS: &[&str] = &["box", "type", "ref"];
+
+        f.write_str(self.0)?;
+
+        if KEYWORDS.contains(&self.0) {
+            f.write_str("_")?;
+        }
+
+        Ok(())
     }
 }

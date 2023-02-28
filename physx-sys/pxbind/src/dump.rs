@@ -73,8 +73,15 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
 }
 
 /// Dump the AST of a header and all of its includes and parses it into a [`Node`]
-pub fn get_parsed_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Node> {
+pub fn get_parsed_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<(Node, Vec<u8>)> {
+    log::info!("Gathering AST via clang...");
+    let t = std::time::Instant::now();
     let ast = get_ast(header)?;
+    log::info!("Gathered AST in {}ms", t.elapsed().as_millis());
 
-    Ok(serde_json::from_slice(&ast).context("failed to parse AST")?)
+    log::info!("Parsing AST...");
+    let t = std::time::Instant::now();
+    let root_node: Node = serde_json::from_slice(&ast).context("failed to parse AST")?;
+    log::info!("Parsed AST in {}ms", t.elapsed().as_millis());
+    Ok((root_node, ast))
 }
