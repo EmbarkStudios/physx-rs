@@ -2,19 +2,12 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 17 June 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
-
 mod transform;
 pub use transform::PxTransform;
 mod quat;
 pub use quat::PxQuat;
 mod vec3;
 pub use vec3::PxVec3;
-#[cfg(feature = "glam")]
 mod glam;
 
 #[derive(Copy, Clone)]

@@ -17,7 +17,7 @@ crate::DeriveClassForNewType!(PxVec3: PxVec3);
 
 impl Default for PxVec3 {
     fn default() -> Self {
-        unsafe { PxVec3_new_1(0).into() }
+        unsafe { PxVec3_new_1(physx_sys::PxZERO::PxZero).into() }
     }
 }
 

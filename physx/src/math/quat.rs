@@ -18,7 +18,7 @@ crate::DeriveClassForNewType!(PxQuat: PxQuat);
 
 impl Default for PxQuat {
     fn default() -> PxQuat {
-        unsafe { PxQuat_new_1(0).into() }
+        unsafe { PxQuat_new_1(physx_sys::PxIDENTITY::PxIdentity).into() }
     }
 }
 
