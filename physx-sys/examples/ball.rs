@@ -2,6 +2,8 @@ use physx_sys::*;
 use std::ptr::null_mut;
 
 fn main() {
+    #[allow(unsafe_code)]
+    // SAFETY: It works...but is it safe? :D
     unsafe {
         let foundation = physx_create_foundation();
         let physics = physx_create_physics(foundation);
@@ -13,7 +15,12 @@ fn main() {
             z: 0.0,
         };
 
-        let dispatcher = phys_PxDefaultCpuDispatcherCreate(1, null_mut());
+        let dispatcher = phys_PxDefaultCpuDispatcherCreate(
+            1,
+            null_mut(),
+            PxDefaultCpuDispatcherWaitForWorkMode::WaitForWork,
+            0,
+        );
         scene_desc.cpuDispatcher = dispatcher as *mut PxCpuDispatcher;
         scene_desc.filterShader = get_default_simulation_filter_shader();
 
@@ -24,7 +31,7 @@ fn main() {
             phys_PxCreatePlane(physics, &PxPlane_new_1(0.0, 1.0, 0.0, 0.0), material);
         PxScene_addActor_mut(scene, ground_plane as *mut PxActor, null_mut());
 
-        let sphere_geo = PxSphereGeometry_new_1(10.0);
+        let sphere_geo = PxSphereGeometry_new(10.0);
         let sphere = phys_PxCreateDynamic(
             physics,
             &PxTransform_new_1(&PxVec3 {
@@ -35,7 +42,7 @@ fn main() {
             &sphere_geo as *const PxSphereGeometry as *const PxGeometry,
             material,
             10.0,
-            &PxTransform_new_2(PxIdentity),
+            &PxTransform_new_2(PxIDENTITY::PxIdentity),
         );
         PxRigidBody_setAngularDamping_mut(sphere as *mut PxRigidBody, 0.5);
         let mut sphere_shape: Vec<*mut PxShape> = vec![null_mut()];
@@ -96,7 +103,7 @@ fn main() {
                     .collect::<String>()
             })
             .for_each(|line| {
-                println!("{}", line);
+                println!("{line}");
             });
         delete_raycast_callback(raycast_buffer);
         PxScene_release_mut(scene);
