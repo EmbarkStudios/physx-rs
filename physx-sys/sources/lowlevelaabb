@@ -1,9 +1,12 @@
 [
+    "BpAABBManagerBase",
     "BpAABBManager",
-    "BpBroadPhase",
     "BpBroadPhaseABP",
+    "BpBroadPhase",
     "BpBroadPhaseMBP",
-    "BpBroadPhaseSap",
     "BpBroadPhaseSapAux",
+    "BpBroadPhaseSap",
     "BpBroadPhaseShared",
+    "BpBroadPhaseUpdate",
+    "BpFiltering",
 ]

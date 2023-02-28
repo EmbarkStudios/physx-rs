@@ -1,13 +1,68 @@
+struct physx_PxAllocatorCallback_Pod;
+struct physx_PxErrorCallback_Pod;
+struct physx_PxAssertHandler_Pod;
+struct physx_PxInputStream_Pod;
+struct physx_PxInputData_Pod;
+struct physx_PxOutputStream_Pod;
+struct physx_PxVec2_Pod;
+struct physx_PxVec3_Pod;
+struct physx_PxVec4_Pod;
+struct physx_PxQuat_Pod;
+struct physx_PxMat33_Pod;
+struct physx_PxMat34_Pod;
+struct physx_PxMat44_Pod;
+struct physx_PxTransform_Pod;
+struct physx_PxPlane_Pod;
+struct physx_PxBounds3_Pod;
 struct physx_PxAllocatorCallback_Pod {
     void* vtable_;
 };
-struct physx_PxAssertHandler_Pod {
+struct physx_PxAllocationListener_Pod;
+struct physx_PxFoundation_Pod {
     void* vtable_;
+};
+struct physx_PxProfilerCallback_Pod;
+struct physx_PxAllocator_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxRawAllocator_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxVirtualAllocatorCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxVirtualAllocator_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxUserAllocated_Pod {
+    char structgen_pad0[1];
+};
+union physx_PxTempAllocatorChunk_Pod {
+    physx_PxTempAllocatorChunk_Pod* mNext;
+    uint32_t mIndex;
+    uint8_t mPad[16];
+};
+struct physx_PxTempAllocator_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxLogTwo_Pod;
+struct physx_PxUnConst_Pod;
+struct physx_PxBitAndByte_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxBitMap_Pod {
+    char structgen_pad0[16];
 };
 struct physx_PxVec3_Pod {
     float x;
     float y;
     float z;
+};
+struct physx_PxVec3Padded_Pod {
+    float x;
+    float y;
+    float z;
+    uint32_t padding;
 };
 struct physx_PxQuat_Pod {
     float x;
@@ -15,18 +70,50 @@ struct physx_PxQuat_Pod {
     float z;
     float w;
 };
+struct physx_PxTransform_Pod {
+    physx_PxQuat_Pod q;
+    physx_PxVec3_Pod p;
+};
+struct physx_PxTransformPadded_Pod {
+    physx_PxTransform_Pod transform;
+    uint32_t padding;
+};
 struct physx_PxMat33_Pod {
     physx_PxVec3_Pod column0;
     physx_PxVec3_Pod column1;
     physx_PxVec3_Pod column2;
 };
-struct physx_PxPlane_Pod {
-    physx_PxVec3_Pod n;
-    float d;
+struct physx_PxBounds3_Pod {
+    physx_PxVec3_Pod minimum;
+    physx_PxVec3_Pod maximum;
 };
-struct physx_PxTransform_Pod {
-    physx_PxQuat_Pod q;
-    physx_PxVec3_Pod p;
+struct physx_PxErrorCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxAllocationListener_Pod {
+    void* vtable_;
+};
+struct physx_PxBroadcastingAllocator_Pod {
+    char structgen_pad0[176];
+};
+struct physx_PxBroadcastingErrorCallback_Pod {
+    char structgen_pad0[160];
+};
+struct physx_PxFPUGuard_Pod {
+    char structgen_pad0[32];
+};
+struct physx_PxSIMDGuard_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxHash_Pod;
+struct physx_PxInputStream_Pod {
+    void* vtable_;
+};
+struct physx_PxInputData_Pod {
+    void* vtable_;
+};
+struct physx_PxOutputStream_Pod {
+    void* vtable_;
 };
 struct physx_PxVec4_Pod {
     float x;
@@ -40,21 +127,48 @@ struct physx_PxMat44_Pod {
     physx_PxVec4_Pod column2;
     physx_PxVec4_Pod column3;
 };
-struct physx_PxBounds3_Pod {
-    physx_PxVec3_Pod minimum;
-    physx_PxVec3_Pod maximum;
+struct physx_PxPlane_Pod {
+    physx_PxVec3_Pod n;
+    float d;
 };
-struct physx_PxErrorCallback_Pod {
+struct physx_Interpolation_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxMutexImpl_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxReadWriteLock_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxProfilerCallback_Pod {
     void* vtable_;
 };
-struct physx_PxInputStream_Pod {
+struct physx_PxProfileScoped_Pod {
+    physx_PxProfilerCallback_Pod* mCallback;
+    char const* mEventName;
+    void* mProfilerData;
+    uint64_t mContextId;
+    bool mDetached;
+    char structgen_pad0[7];
+};
+struct physx_PxSListEntry_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxSListImpl_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxSyncImpl_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxRunnable_Pod {
     void* vtable_;
 };
-struct physx_PxInputData_Pod {
-    void* vtable_;
+struct physx_PxCounterFrequencyToTensOfNanos_Pod {
+    uint64_t mNumerator;
+    uint64_t mDenominator;
 };
-struct physx_PxOutputStream_Pod {
-    void* vtable_;
+struct physx_PxTime_Pod {
+    char structgen_pad0[8];
 };
 struct physx_PxVec2_Pod {
     float x;
@@ -63,12 +177,12 @@ struct physx_PxVec2_Pod {
 struct physx_PxStridedData_Pod {
     uint32_t stride;
     char structgen_pad0[4];
-    void* data;
+    void const* data;
 };
 struct physx_PxBoundedData_Pod {
     uint32_t stride;
     char structgen_pad0[4];
-    void* data;
+    void const* data;
     uint32_t count;
     char structgen_pad1[4];
 };
@@ -95,41 +209,75 @@ struct physx_PxDebugText_Pod {
     float size;
     uint32_t color;
     char structgen_pad0[4];
-    char* string;
+    char const* string;
 };
 struct physx_PxRenderBuffer_Pod {
     void* vtable_;
 };
+struct physx_PxBase_Pod;
+struct physx_PxSerializationContext_Pod;
+struct physx_PxRepXSerializer_Pod;
+struct physx_PxSerializer_Pod;
+struct physx_PxPhysics_Pod;
+struct physx_PxCollection_Pod;
 struct physx_PxProcessPxBaseCallback_Pod {
     void* vtable_;
 };
-struct physx_PxBaseFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxBase_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-};
 struct physx_PxSerializationContext_Pod {
+    void* vtable_;
+};
+struct physx_PxDeserializationContext_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxSerializationRegistry_Pod {
     void* vtable_;
 };
 struct physx_PxCollection_Pod {
     void* vtable_;
 };
-struct physx_PxDeserializationContext_Pod {
-    char structgen_pad0[8];
-    unsigned char* mExtraDataAddress;
+struct physx_PxTypeInfo_Pod;
+struct physx_PxMaterial_Pod;
+struct physx_PxFEMSoftBodyMaterial_Pod;
+struct physx_PxFEMClothMaterial_Pod;
+struct physx_PxPBDMaterial_Pod;
+struct physx_PxFLIPMaterial_Pod;
+struct physx_PxMPMMaterial_Pod;
+struct physx_PxCustomMaterial_Pod;
+struct physx_PxConvexMesh_Pod;
+struct physx_PxTriangleMesh_Pod;
+struct physx_PxBVH33TriangleMesh_Pod;
+struct physx_PxBVH34TriangleMesh_Pod;
+struct physx_PxTetrahedronMesh_Pod;
+struct physx_PxHeightField_Pod;
+struct physx_PxActor_Pod;
+struct physx_PxRigidActor_Pod;
+struct physx_PxRigidBody_Pod;
+struct physx_PxRigidDynamic_Pod;
+struct physx_PxRigidStatic_Pod;
+struct physx_PxArticulationLink_Pod;
+struct physx_PxArticulationJointReducedCoordinate_Pod;
+struct physx_PxArticulationReducedCoordinate_Pod;
+struct physx_PxAggregate_Pod;
+struct physx_PxConstraint_Pod;
+struct physx_PxShape_Pod;
+struct physx_PxPruningStructure_Pod;
+struct physx_PxParticleSystem_Pod;
+struct physx_PxPBDParticleSystem_Pod;
+struct physx_PxFLIPParticleSystem_Pod;
+struct physx_PxMPMParticleSystem_Pod;
+struct physx_PxCustomParticleSystem_Pod;
+struct physx_PxSoftBody_Pod;
+struct physx_PxFEMCloth_Pod;
+struct physx_PxHairSystem_Pod;
+struct physx_PxParticleBuffer_Pod;
+struct physx_PxParticleAndDiffuseBuffer_Pod;
+struct physx_PxParticleClothBuffer_Pod;
+struct physx_PxParticleRigidBuffer_Pod;
+struct physx_PxBase_Pod {
+    char structgen_pad0[16];
 };
-struct physx_PxSerializationRegistry_Pod {
-    void* vtable_;
-};
-struct physx_PxSerializer_Pod {
-    void* vtable_;
-};
-struct physx_PxRepXSerializer_Pod {
-    void* vtable_;
+struct physx_PxRefCounted_Pod {
+    char structgen_pad0[16];
 };
 struct physx_PxTolerancesScale_Pod {
     float length;
@@ -138,289 +286,299 @@ struct physx_PxTolerancesScale_Pod {
 struct physx_PxStringTable_Pod {
     void* vtable_;
 };
-struct physx_PxFoundation_Pod {
+struct physx_PxSerializer_Pod {
     void* vtable_;
 };
-struct physx_PxProfilerCallback_Pod {
+struct physx_PxMetaDataEntry_Pod {
+    char const* type;
+    char const* name;
+    uint32_t offset;
+    uint32_t size;
+    uint32_t count;
+    uint32_t offsetSize;
+    uint32_t flags;
+    uint32_t alignment;
+};
+struct physx_PxInsertionCallback_Pod {
     void* vtable_;
 };
-struct physx_PxPhysicsInsertionCallback_Pod {
-    void* vtable_;
-};
+struct physx_PxBaseTask_Pod;
+struct physx_PxTask_Pod;
+struct physx_PxLightCpuTask_Pod;
+struct physx_PxCpuDispatcher_Pod;
 struct physx_PxTaskManager_Pod {
     void* vtable_;
 };
 struct physx_PxCpuDispatcher_Pod {
     void* vtable_;
 };
-struct physx_PxTask_Pod {
-    char structgen_pad0[8];
-    uint64_t mContextID;
-    physx_PxTaskManager_Pod* mTm;
-    uint32_t mTaskID;
-    char structgen_pad1[4];
-};
 struct physx_PxBaseTask_Pod {
-    char structgen_pad0[8];
-    uint64_t mContextID;
-    physx_PxTaskManager_Pod* mTm;
+    char structgen_pad0[24];
+};
+struct physx_PxTask_Pod {
+    char structgen_pad0[32];
 };
 struct physx_PxLightCpuTask_Pod {
-    char structgen_pad0[8];
-    uint64_t mContextID;
-    physx_PxTaskManager_Pod* mTm;
-    physx_PxBaseTask_Pod* mCont;
-    int32_t mRefCount;
-    char structgen_pad1[4];
+    char structgen_pad0[40];
 };
 struct physx_PxGeometry_Pod {
-    int mType;
+    char structgen_pad0[4];
+    float mTypePadding;
 };
 struct physx_PxBoxGeometry_Pod {
-    int mType;
+    char structgen_pad0[4];
+    float mTypePadding;
     physx_PxVec3_Pod halfExtents;
 };
-struct physx_PxBVHStructure_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+struct physx_PxBVHRaycastCallback_Pod {
+    void* vtable_;
 };
+struct physx_PxBVHOverlapCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxBVHTraversalCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxBVH_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxGeomIndexPair_Pod;
 struct physx_PxCapsuleGeometry_Pod {
-    int mType;
+    char structgen_pad0[4];
+    float mTypePadding;
     float radius;
     float halfHeight;
-};
-struct physx_PxConvexMesh_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
 };
 struct physx_PxHullPolygon_Pod {
     float mPlane[4];
     uint16_t mNbVerts;
     uint16_t mIndexBase;
 };
+struct physx_PxConvexMesh_Pod {
+    char structgen_pad0[16];
+};
 struct physx_PxMeshScale_Pod {
     physx_PxVec3_Pod scale;
     physx_PxQuat_Pod rotation;
 };
-struct physx_PxConvexMeshGeometryFlags_Pod {
-    unsigned char mBits;
-};
-struct PxPadding_3__Pod {
-    unsigned char mPadding[3];
-};
 struct physx_PxConvexMeshGeometry_Pod {
-    int mType;
-    physx_PxMeshScale_Pod scale;
-    physx_PxConvexMesh_Pod* convexMesh;
-    physx_PxConvexMeshGeometryFlags_Pod meshFlags;
-    PxPadding_3__Pod paddingFromFlags;
     char structgen_pad0[4];
+    float mTypePadding;
+    physx_PxMeshScale_Pod scale;
+    char structgen_pad1[4];
+    physx_PxConvexMesh_Pod* convexMesh;
+    uint8_t meshFlags;
+    char structgen_pad2[7];
 };
 struct physx_PxSphereGeometry_Pod {
-    int mType;
+    char structgen_pad0[4];
+    float mTypePadding;
     float radius;
 };
 struct physx_PxPlaneGeometry_Pod {
-    int mType;
-};
-struct physx_PxMeshGeometryFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_PxTriangleMesh_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[4];
+    float mTypePadding;
 };
 struct physx_PxTriangleMeshGeometry_Pod {
-    int mType;
-    physx_PxMeshScale_Pod scale;
-    physx_PxMeshGeometryFlags_Pod meshFlags;
-    PxPadding_3__Pod paddingFromFlags;
     char structgen_pad0[4];
+    float mTypePadding;
+    physx_PxMeshScale_Pod scale;
+    uint8_t meshFlags;
+    char structgen_pad1[3];
     physx_PxTriangleMesh_Pod* triangleMesh;
 };
-struct physx_PxHeightField_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-};
 struct physx_PxHeightFieldGeometry_Pod {
-    int mType;
     char structgen_pad0[4];
+    float mTypePadding;
     physx_PxHeightField_Pod* heightField;
     float heightScale;
     float rowScale;
     float columnScale;
-    physx_PxMeshGeometryFlags_Pod heightFieldFlags;
-    PxPadding_3__Pod paddingFromFlags;
+    uint8_t heightFieldFlags;
+    char structgen_pad1[3];
 };
-struct Anonymous59_Pod {
-    unsigned char geometry[4];
-    unsigned char box[16];
-    unsigned char sphere[8];
-    unsigned char capsule[12];
-    unsigned char plane[4];
-    unsigned char convex[48];
-    unsigned char mesh[48];
-    unsigned char heightfield[32];
+struct physx_PxParticleSystemGeometry_Pod {
+    char structgen_pad0[4];
+    float mTypePadding;
+    int32_t mSolverType;
 };
-struct physx_PxGeometryHolder_Pod {
-    char structgen_pad0[48];
+struct physx_PxHairSystemGeometry_Pod {
+    char structgen_pad0[4];
+    float mTypePadding;
 };
-struct physx_PxRigidActor_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxShape_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxActorShape_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
+struct physx_PxTetrahedronMeshGeometry_Pod {
+    char structgen_pad0[4];
+    float mTypePadding;
+    physx_PxTetrahedronMesh_Pod* tetrahedronMesh;
 };
 struct physx_PxQueryHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
     uint32_t faceIndex;
-    char structgen_pad0[4];
-};
-struct physx_PxHitFlags_Pod {
-    uint16_t mBits;
 };
 struct physx_PxLocationHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
     uint32_t faceIndex;
-    physx_PxHitFlags_Pod flags;
+    uint16_t flags;
     char structgen_pad0[2];
     physx_PxVec3_Pod position;
     physx_PxVec3_Pod normal;
     float distance;
-    char structgen_pad1[4];
 };
-struct physx_PxRaycastHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
+struct physx_PxGeomRaycastHit_Pod {
     uint32_t faceIndex;
-    physx_PxHitFlags_Pod flags;
+    uint16_t flags;
     char structgen_pad0[2];
     physx_PxVec3_Pod position;
     physx_PxVec3_Pod normal;
     float distance;
     float u;
     float v;
-    char structgen_pad1[4];
 };
-struct physx_PxSweepHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
+struct physx_PxGeomOverlapHit_Pod {
     uint32_t faceIndex;
-    physx_PxHitFlags_Pod flags;
+};
+struct physx_PxGeomSweepHit_Pod {
+    uint32_t faceIndex;
+    uint16_t flags;
     char structgen_pad0[2];
     physx_PxVec3_Pod position;
     physx_PxVec3_Pod normal;
     float distance;
-    uint32_t padTo16Bytes;
 };
-struct physx_PxBitAndByte_Pod {
-    unsigned char mData;
+struct physx_PxGeomIndexPair_Pod {
+    uint32_t id0;
+    uint32_t id1;
+};
+struct physx_PxQueryThreadContext_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxContactBuffer_Pod;
+struct physx_PxRenderOutput_Pod;
+struct physx_PxMassProperties_Pod;
+struct physx_PxCustomGeometryType_Pod {
+    char structgen_pad0[4];
+};
+struct physx_PxCustomGeometryCallbacks_Pod {
+    void* vtable_;
+};
+struct physx_PxCustomGeometry_Pod {
+    char structgen_pad0[4];
+    float mTypePadding;
+    physx_PxCustomGeometryCallbacks_Pod* callbacks;
+};
+struct physx_PxGeometryHolder_Pod {
+    char structgen_pad0[56];
+};
+struct physx_PxGeometryQuery_Pod {
+    char structgen_pad0[1];
 };
 struct physx_PxHeightFieldSample_Pod {
     int16_t height;
     physx_PxBitAndByte_Pod materialIndex0;
     physx_PxBitAndByte_Pod materialIndex1;
 };
-struct physx_PxHeightFieldFlags_Pod {
-    uint16_t mBits;
+struct physx_PxHeightFieldDesc_Pod;
+struct physx_PxHeightField_Pod {
+    char structgen_pad0[16];
 };
 struct physx_PxHeightFieldDesc_Pod {
     uint32_t nbRows;
     uint32_t nbColumns;
-    unsigned int format;
+    int32_t format;
     char structgen_pad0[4];
     physx_PxStridedData_Pod samples;
     float convexEdgeThreshold;
-    physx_PxHeightFieldFlags_Pod flags;
+    uint16_t flags;
     char structgen_pad1[2];
 };
-struct physx_PxTriangle_Pod {
-    physx_PxVec3_Pod verts[3];
-};
-struct physx_PxMeshFlags_Pod {
-    uint16_t mBits;
+struct physx_PxTriangle_Pod;
+struct physx_PxMeshQuery_Pod {
+    char structgen_pad0[1];
 };
 struct physx_PxSimpleTriangleMesh_Pod {
     physx_PxBoundedData_Pod points;
     physx_PxBoundedData_Pod triangles;
-    physx_PxMeshFlags_Pod flags;
+    uint16_t flags;
     char structgen_pad0[6];
 };
-struct physx_PxTriangleMeshFlags_Pod {
-    unsigned char mBits;
+struct physx_PxTriangle_Pod {
+    physx_PxVec3_Pod verts[3];
 };
+struct physx_PxTrianglePadded_Pod {
+    physx_PxVec3_Pod verts[3];
+    uint32_t padding;
+};
+struct physx_PxTriangleMesh_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxBVH34TriangleMesh_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxTetrahedron_Pod {
+    physx_PxVec3_Pod verts[4];
+};
+struct physx_PxSoftBodyAuxData_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxTetrahedronMesh_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxSoftBodyMesh_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxCollisionMeshMappingData_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxSoftBodyCollisionData_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxTetrahedronMeshData_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxSoftBodySimulationData_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxCollisionTetrahedronMeshData_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxSimulationTetrahedronMeshData_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxScene_Pod;
 struct physx_PxActor_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxScene_Pod {
-    char structgen_pad0[8];
-    void* userData;
-};
-struct physx_PxActorFlags_Pod {
-    unsigned char mBits;
 };
 struct physx_PxAggregate_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-};
-struct physx_PxArticulationBase_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
 };
-struct physx_PxArticulationLink_Pod {
+struct physx_PxSpringModifiers_Pod {
+    float stiffness;
+    float damping;
     char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
 };
-struct physx_PxArticulationImpl_Pod;
-struct physx_PxArticulationJointBase_Pod {
+struct physx_PxRestitutionModifiers_Pod {
+    float restitution;
+    float velocityThreshold;
     char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
 };
-struct physx_PxArticulation_Pod {
+union physx_Px1DConstraintMods_Pod {
+    physx_PxSpringModifiers_Pod spring;
+    physx_PxRestitutionModifiers_Pod bounce;
+};
+struct physx_Px1DConstraint_Pod {
+    physx_PxVec3_Pod linear0;
+    float geometricError;
+    physx_PxVec3_Pod angular0;
+    float velocityTarget;
+    physx_PxVec3_Pod linear1;
+    float minImpulse;
+    physx_PxVec3_Pod angular1;
+    float maxImpulse;
+    physx_Px1DConstraintMods_Pod mods;
+    float forInternalUse;
+    uint16_t flags;
+    uint16_t solveHint;
     char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxArticulationDriveCache_Pod {
-    char structgen_pad0[1];
 };
 struct physx_PxConstraintInvMassScale_Pod {
     float linear0;
@@ -434,13 +592,22 @@ struct physx_PxConstraintVisualizer_Pod {
 struct physx_PxConstraintConnector_Pod {
     void* vtable_;
 };
-struct physx_pvdsdk_PvdDataStream_Pod;
-struct physx_PxConstraint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+struct physx_PxContactPoint_Pod {
+    physx_PxVec3_Pod normal;
+    float separation;
+    physx_PxVec3_Pod point;
+    float maxImpulse;
+    physx_PxVec3_Pod targetVel;
+    float staticFriction;
+    uint8_t materialFlags;
+    char structgen_pad0[3];
+    uint32_t internalFaceIndex1;
+    float dynamicFriction;
+    float restitution;
+    float damping;
+    char structgen_pad1[12];
 };
+struct physx_PxTGSSolverBodyVel_Pod;
 struct physx_PxSolverBody_Pod {
     physx_PxVec3_Pod linearVelocity;
     uint16_t maxSolverNormalProgress;
@@ -458,11 +625,111 @@ struct physx_PxSolverBodyData_Pod {
     uint32_t nodeIndex;
     float maxContactImpulse;
     physx_PxTransform_Pod body2World;
-    uint16_t lockFlags;
     uint16_t pad;
+    char structgen_pad0[2];
+};
+struct physx_PxConstraintBatchHeader_Pod {
+    uint32_t startIndex;
+    uint16_t stride;
+    uint16_t constraintType;
+};
+struct physx_PxSolverConstraintDesc_Pod {
+    char structgen_pad0[16];
+    uint32_t bodyADataIndex;
+    uint32_t bodyBDataIndex;
+    uint32_t linkIndexA;
+    uint32_t linkIndexB;
+    uint8_t* constraint;
+    void* writeBack;
+    uint16_t progressA;
+    uint16_t progressB;
+    uint16_t constraintLengthOver16;
+    uint8_t padding[10];
+};
+struct physx_PxSolverConstraintPrepDescBase_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxSolverBody_Pod const* body0;
+    physx_PxSolverBody_Pod const* body1;
+    physx_PxSolverBodyData_Pod const* data0;
+    physx_PxSolverBodyData_Pod const* data1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    char structgen_pad0[8];
+};
+struct physx_PxSolverConstraintPrepDesc_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxSolverBody_Pod const* body0;
+    physx_PxSolverBody_Pod const* body1;
+    physx_PxSolverBodyData_Pod const* data0;
+    physx_PxSolverBodyData_Pod const* data1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    char structgen_pad0[8];
+    physx_Px1DConstraint_Pod* rows;
+    uint32_t numRows;
+    float linBreakForce;
+    float angBreakForce;
+    float minResponseThreshold;
+    void* writeback;
+    bool disablePreprocessing;
+    bool improvedSlerp;
+    bool driveLimitsAreForces;
+    bool extendedLimits;
+    bool disableConstraint;
+    char structgen_pad1[3];
+    physx_PxVec3Padded_Pod body0WorldOffset;
+    char structgen_pad2[8];
+};
+struct physx_PxSolverContactDesc_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxSolverBody_Pod const* body0;
+    physx_PxSolverBody_Pod const* body1;
+    physx_PxSolverBodyData_Pod const* data0;
+    physx_PxSolverBodyData_Pod const* data1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    void* shapeInteraction;
+    physx_PxContactPoint_Pod* contacts;
+    uint32_t numContacts;
+    bool hasMaxImpulse;
+    bool disableStrongFriction;
+    bool hasForceThresholds;
+    char structgen_pad0[1];
+    float restDistance;
+    float maxCCDSeparation;
+    uint8_t* frictionPtr;
+    uint8_t frictionCount;
+    char structgen_pad1[7];
+    float* contactForces;
+    uint32_t startFrictionPatchIndex;
+    uint32_t numFrictionPatches;
+    uint32_t startContactPatchIndex;
+    uint16_t numContactPatches;
+    uint16_t axisConstraintCount;
+    float offsetSlop;
+    char structgen_pad2[12];
 };
 struct physx_PxConstraintAllocator_Pod {
     void* vtable_;
+};
+struct physx_PxArticulationLimit_Pod {
+    float low;
+    float high;
+};
+struct physx_PxArticulationDrive_Pod {
+    float stiffness;
+    float damping;
+    float maxForce;
+    int32_t driveType;
 };
 struct physx_PxTGSSolverBodyVel_Pod {
     physx_PxVec3_Pod linearVelocity;
@@ -475,7 +742,11 @@ struct physx_PxTGSSolverBodyVel_Pod {
     physx_PxVec3_Pod deltaLinDt;
     uint16_t lockFlags;
     bool isKinematic;
-    unsigned char pad;
+    uint8_t pad;
+};
+struct physx_PxTGSSolverBodyTxInertia_Pod {
+    physx_PxTransform_Pod deltaBody2World;
+    physx_PxMat33_Pod sqrtInvInertia;
 };
 struct physx_PxTGSSolverBodyData_Pod {
     physx_PxVec3_Pod originalLinearVelocity;
@@ -486,6 +757,112 @@ struct physx_PxTGSSolverBodyData_Pod {
     uint32_t nodeIndex;
     float reportThreshold;
     uint32_t pad;
+};
+struct physx_PxTGSSolverConstraintPrepDescBase_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxTGSSolverBodyVel_Pod const* body0;
+    physx_PxTGSSolverBodyVel_Pod const* body1;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body0TxI;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body1TxI;
+    physx_PxTGSSolverBodyData_Pod const* bodyData0;
+    physx_PxTGSSolverBodyData_Pod const* bodyData1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    char structgen_pad0[8];
+};
+struct physx_PxTGSSolverConstraintPrepDesc_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxTGSSolverBodyVel_Pod const* body0;
+    physx_PxTGSSolverBodyVel_Pod const* body1;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body0TxI;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body1TxI;
+    physx_PxTGSSolverBodyData_Pod const* bodyData0;
+    physx_PxTGSSolverBodyData_Pod const* bodyData1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    physx_Px1DConstraint_Pod* rows;
+    uint32_t numRows;
+    float linBreakForce;
+    float angBreakForce;
+    float minResponseThreshold;
+    void* writeback;
+    bool disablePreprocessing;
+    bool improvedSlerp;
+    bool driveLimitsAreForces;
+    bool extendedLimits;
+    bool disableConstraint;
+    char structgen_pad0[3];
+    physx_PxVec3Padded_Pod body0WorldOffset;
+    physx_PxVec3Padded_Pod cA2w;
+    physx_PxVec3Padded_Pod cB2w;
+};
+struct physx_PxTGSSolverContactDesc_Pod {
+    physx_PxConstraintInvMassScale_Pod invMassScales;
+    physx_PxSolverConstraintDesc_Pod* desc;
+    physx_PxTGSSolverBodyVel_Pod const* body0;
+    physx_PxTGSSolverBodyVel_Pod const* body1;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body0TxI;
+    physx_PxTGSSolverBodyTxInertia_Pod const* body1TxI;
+    physx_PxTGSSolverBodyData_Pod const* bodyData0;
+    physx_PxTGSSolverBodyData_Pod const* bodyData1;
+    physx_PxTransform_Pod bodyFrame0;
+    physx_PxTransform_Pod bodyFrame1;
+    int32_t bodyState0;
+    int32_t bodyState1;
+    void* shapeInteraction;
+    physx_PxContactPoint_Pod* contacts;
+    uint32_t numContacts;
+    bool hasMaxImpulse;
+    bool disableStrongFriction;
+    bool hasForceThresholds;
+    char structgen_pad0[1];
+    float restDistance;
+    float maxCCDSeparation;
+    uint8_t* frictionPtr;
+    uint8_t frictionCount;
+    char structgen_pad1[7];
+    float* contactForces;
+    uint32_t startFrictionPatchIndex;
+    uint32_t numFrictionPatches;
+    uint32_t startContactPatchIndex;
+    uint16_t numContactPatches;
+    uint16_t axisConstraintCount;
+    float maxImpulse;
+    float torsionalPatchRadius;
+    float minTorsionalPatchRadius;
+    float offsetSlop;
+};
+struct physx_PxArticulationSpatialTendon_Pod;
+struct physx_PxArticulationFixedTendon_Pod;
+struct physx_PxArticulationTendonLimit_Pod {
+    float lowLimit;
+    float highLimit;
+};
+struct physx_PxArticulationAttachment_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxArticulationTendonJoint_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxArticulationTendon_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxArticulationSpatialTendon_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxArticulationFixedTendon_Pod {
+    char structgen_pad0[16];
+    void* userData;
 };
 struct physx_PxSpatialForce_Pod {
     physx_PxVec3_Pod force;
@@ -514,9 +891,11 @@ struct physx_PxArticulationCache_Pod {
     float* jointAcceleration;
     float* jointPosition;
     float* jointForce;
+    float* jointSolverForces;
     physx_PxSpatialVelocity_Pod* linkVelocity;
     physx_PxSpatialVelocity_Pod* linkAcceleration;
     physx_PxArticulationRootLinkData_Pod* rootLinkData;
+    physx_PxSpatialForce_Pod* sensorForces;
     float* coefficientMatrix;
     float* lambda;
     void* scratchMemory;
@@ -524,134 +903,59 @@ struct physx_PxArticulationCache_Pod {
     uint32_t version;
     char structgen_pad0[4];
 };
+struct physx_PxArticulationSensor_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
 struct physx_PxArticulationReducedCoordinate_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxArticulationFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_PxArticulationCacheFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_PxJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxArticulationJointImpl_Pod;
-struct physx_PxArticulationJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
 };
 struct physx_PxArticulationJointReducedCoordinate_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-};
-struct physx_PxFilterData_Pod {
-    uint32_t word0;
-    uint32_t word1;
-    uint32_t word2;
-    uint32_t word3;
-};
-struct physx_PxMaterial_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
 };
-struct physx_PxShapeFlags_Pod {
-    unsigned char mBits;
+struct physx_PxFilterData_Pod;
+struct physx_PxBaseMaterial_Pod;
+struct physx_PxShape_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxRigidActor_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxNodeIndex_Pod {
+    char structgen_pad0[8];
 };
 struct physx_PxRigidBody_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
 };
-struct physx_PxRigidBodyFlags_Pod {
-    unsigned char mBits;
+struct physx_PxArticulationLink_Pod {
+    char structgen_pad0[16];
+    void* userData;
 };
-struct physx_PxFilterFlags_Pod {
-    uint16_t mBits;
+struct physx_PxConeLimitedConstraint_Pod {
+    physx_PxVec3_Pod mAxis;
+    float mAngle;
+    float mLowLimit;
+    float mHighLimit;
 };
-struct physx_PxSimulationFilterCallback_Pod {
-    void* vtable_;
-};
-struct physx_PxPairFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxQueryFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxQueryFilterData_Pod {
-    physx_PxFilterData_Pod data;
-    physx_PxQueryFlags_Pod flags;
-    char structgen_pad0[2];
-};
-struct physx_PxQueryFilterCallback_Pod {
-    void* vtable_;
-};
-struct physx_PxRaycastQueryResult_Pod;
-struct physx_PxSweepQueryResult_Pod;
-struct physx_PxOverlapQueryResult_Pod;
-struct physx_PxOverlapHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
-    uint32_t faceIndex;
-    uint32_t padTo16Bytes;
-};
-struct physx_PxBatchQueryMemory_Pod {
-    physx_PxRaycastQueryResult_Pod* userRaycastResultBuffer;
-    physx_PxRaycastHit_Pod* userRaycastTouchBuffer;
-    physx_PxSweepQueryResult_Pod* userSweepResultBuffer;
-    physx_PxSweepHit_Pod* userSweepTouchBuffer;
-    physx_PxOverlapQueryResult_Pod* userOverlapResultBuffer;
-    physx_PxOverlapHit_Pod* userOverlapTouchBuffer;
-    uint32_t raycastTouchBufferSize;
-    uint32_t sweepTouchBufferSize;
-    uint32_t overlapTouchBufferSize;
-    uint32_t raycastResultBufferSize;
-    uint32_t sweepResultBufferSize;
-    uint32_t overlapResultBufferSize;
-};
-struct physx_PxBatchQueryDesc_Pod {
-    void* filterShaderData;
-    uint32_t filterShaderDataSize;
-    char structgen_pad0[4];
-    void* preFilterShader;
-    void* postFilterShader;
-    physx_PxBatchQueryMemory_Pod queryMemory;
-};
-struct physx_PxBatchQuery_Pod {
-    void* vtable_;
-};
-struct physx_PxQueryCache_Pod {
-    physx_PxShape_Pod* shape;
-    physx_PxRigidActor_Pod* actor;
-    uint32_t faceIndex;
-    char structgen_pad0[4];
-};
-struct physx_PxConstraintFlags_Pod {
-    uint16_t mBits;
+struct physx_PxConeLimitParams_Pod {
+    physx_PxVec4_Pod lowHighLimits;
+    physx_PxVec4_Pod axisAngle;
 };
 struct physx_PxConstraintShaderTable_Pod {
-    void* solverPrep;
-    void* project;
-    void* visualize;
-    unsigned int flag;
-    char structgen_pad0[4];
+    void * solverPrep;
+    char structgen_pad0[8];
+    void * visualize;
+    int32_t flag;
+    char structgen_pad1[4];
+};
+struct physx_PxConstraint_Pod {
+    char structgen_pad0[16];
+    void* userData;
 };
 struct physx_PxMassModificationProps_Pod {
     float mInvMassScale0;
@@ -665,34 +969,24 @@ struct physx_PxContactPatch_Pod {
     float restitution;
     float dynamicFriction;
     float staticFriction;
-    unsigned char startContactIndex;
-    unsigned char nbContacts;
-    unsigned char materialFlags;
-    unsigned char internalFlags;
+    float damping;
+    uint16_t startContactIndex;
+    uint8_t nbContacts;
+    uint8_t materialFlags;
+    uint16_t internalFlags;
     uint16_t materialIndex0;
     uint16_t materialIndex1;
+    uint16_t pad[5];
 };
 struct physx_PxContact_Pod {
     physx_PxVec3_Pod contact;
     float separation;
 };
-struct physx_PxContactStreamIterator_Pod {
-    physx_PxVec3_Pod zero;
-    char structgen_pad0[4];
-    physx_PxContactPatch_Pod* patch;
-    physx_PxContact_Pod* contact;
-    uint32_t* faceIndice;
-    uint32_t totalPatches;
-    uint32_t totalContacts;
-    uint32_t nextContactIndex;
-    uint32_t nextPatchIndex;
-    uint32_t contactPatchHeaderSize;
-    uint32_t contactPointSize;
-    unsigned int mStreamFormat;
-    uint32_t forceNoResponse;
-    bool pointStepped;
-    char structgen_pad1[3];
-    uint32_t hasFaceIndices;
+struct physx_PxExtendedContact_Pod {
+    physx_PxVec3_Pod contact;
+    float separation;
+    physx_PxVec3_Pod targetVelocity;
+    float maxImpulse;
 };
 struct physx_PxModifiableContact_Pod {
     physx_PxVec3_Pod contact;
@@ -707,19 +1001,49 @@ struct physx_PxModifiableContact_Pod {
     float staticFriction;
     float dynamicFriction;
 };
-struct physx_PxContactSet_Pod {
-    uint32_t mCount;
+struct physx_PxContactStreamIterator_Pod {
+    physx_PxVec3_Pod zero;
     char structgen_pad0[4];
-    physx_PxModifiableContact_Pod* mContacts;
+    physx_PxContactPatch_Pod const* patch;
+    physx_PxContact_Pod const* contact;
+    uint32_t const* faceIndice;
+    uint32_t totalPatches;
+    uint32_t totalContacts;
+    uint32_t nextContactIndex;
+    uint32_t nextPatchIndex;
+    uint32_t contactPatchHeaderSize;
+    uint32_t contactPointSize;
+    int32_t mStreamFormat;
+    uint32_t forceNoResponse;
+    bool pointStepped;
+    char structgen_pad1[3];
+    uint32_t hasFaceIndices;
+};
+struct physx_PxGpuContactPair_Pod {
+    uint8_t* contactPatches;
+    uint8_t* contactPoints;
+    float* contactForces;
+    uint32_t transformCacheRef0;
+    uint32_t transformCacheRef1;
+    physx_PxNodeIndex_Pod nodeIndex0;
+    physx_PxNodeIndex_Pod nodeIndex1;
+    physx_PxActor_Pod* actor0;
+    physx_PxActor_Pod* actor1;
+    uint16_t nbContacts;
+    uint16_t nbPatches;
+    char structgen_pad0[4];
+};
+struct physx_PxContactSet_Pod {
+    char structgen_pad0[16];
+};
+struct physx_PxContactModifyPair_Pod {
+    physx_PxRigidActor_Pod const* actor[2];
+    physx_PxShape_Pod const* shape[2];
+    physx_PxTransform_Pod transform[2];
+    physx_PxContactSet_Pod contacts;
 };
 struct physx_PxContactModifyCallback_Pod {
     void* vtable_;
-};
-struct physx_PxContactModifyPair_Pod {
-    physx_PxRigidActor_Pod* actor[2];
-    physx_PxShape_Pod* shape[2];
-    physx_PxTransform_Pod transform[2];
-    physx_PxContactSet_Pod contacts;
 };
 struct physx_PxCCDContactModifyCallback_Pod {
     void* vtable_;
@@ -727,24 +1051,271 @@ struct physx_PxCCDContactModifyCallback_Pod {
 struct physx_PxDeletionListener_Pod {
     void* vtable_;
 };
-struct physx_PxDataAccessFlags_Pod {
-    unsigned char mBits;
+struct physx_PxBaseMaterial_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxFEMMaterial_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxFilterData_Pod {
+    uint32_t word0;
+    uint32_t word1;
+    uint32_t word2;
+    uint32_t word3;
+};
+struct physx_PxSimulationFilterCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxParticleRigidFilterPair_Pod {
+    uint64_t mID0;
+    uint64_t mID1;
 };
 struct physx_PxLockedData_Pod {
     void* vtable_;
 };
-struct physx_PxMaterialFlags_Pod {
-    uint16_t mBits;
+struct physx_PxMaterial_Pod {
+    char structgen_pad0[16];
+    void* userData;
 };
+struct physx_PxGpuParticleBufferIndexPair_Pod {
+    uint32_t systemIndex;
+    uint32_t bufferIndex;
+};
+struct physx_PxCudaContextManager_Pod;
+struct physx_PxParticleRigidAttachment_Pod;
+struct physx_PxParticleVolume_Pod {
+    physx_PxBounds3_Pod bound;
+    uint32_t particleIndicesOffset;
+    uint32_t numParticles;
+};
+struct physx_PxDiffuseParticleParams_Pod {
+    float threshold;
+    float lifetime;
+    float airDrag;
+    float bubbleDrag;
+    float buoyancy;
+    float kineticEnergyWeight;
+    float pressureWeight;
+    float divergenceWeight;
+    float collisionDecay;
+    bool useAccurateVelocity;
+    char structgen_pad0[3];
+};
+struct physx_PxParticleSpring_Pod {
+    uint32_t ind0;
+    uint32_t ind1;
+    float length;
+    float stiffness;
+    float damping;
+    float pad;
+};
+struct physx_PxParticleMaterial_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxSceneDesc_Pod;
+struct physx_PxPvd_Pod;
+struct physx_PxOmniPvd_Pod;
 struct physx_PxPhysics_Pod {
     void* vtable_;
 };
-struct physx_PxSimulationEventCallback_Pod {
+struct physx_PxActorShape_Pod {
+    physx_PxRigidActor_Pod* actor;
+    physx_PxShape_Pod* shape;
+};
+struct physx_PxRaycastHit_Pod {
+    uint32_t faceIndex;
+    uint16_t flags;
+    char structgen_pad0[2];
+    physx_PxVec3_Pod position;
+    physx_PxVec3_Pod normal;
+    float distance;
+    float u;
+    float v;
+    char structgen_pad1[4];
+    physx_PxRigidActor_Pod* actor;
+    physx_PxShape_Pod* shape;
+};
+struct physx_PxOverlapHit_Pod {
+    uint32_t faceIndex;
+    char structgen_pad0[4];
+    physx_PxRigidActor_Pod* actor;
+    physx_PxShape_Pod* shape;
+};
+struct physx_PxSweepHit_Pod {
+    uint32_t faceIndex;
+    uint16_t flags;
+    char structgen_pad0[2];
+    physx_PxVec3_Pod position;
+    physx_PxVec3_Pod normal;
+    float distance;
+    char structgen_pad1[4];
+    physx_PxRigidActor_Pod* actor;
+    physx_PxShape_Pod* shape;
+};
+struct physx_PxRaycastCallback_Pod {
+    char structgen_pad0[8];
+    physx_PxRaycastHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxRaycastHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxOverlapCallback_Pod {
+    char structgen_pad0[8];
+    physx_PxOverlapHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxOverlapHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxSweepCallback_Pod {
+    char structgen_pad0[8];
+    physx_PxSweepHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxSweepHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxRaycastBuffer_Pod {
+    char structgen_pad0[8];
+    physx_PxRaycastHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxRaycastHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxOverlapBuffer_Pod {
+    char structgen_pad0[8];
+    physx_PxOverlapHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxOverlapHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxSweepBuffer_Pod {
+    char structgen_pad0[8];
+    physx_PxSweepHit_Pod block;
+    bool hasBlock;
+    char structgen_pad1[7];
+    physx_PxSweepHit_Pod* touches;
+    uint32_t maxNbTouches;
+    uint32_t nbTouches;
+};
+struct physx_PxQueryCache_Pod {
+    physx_PxShape_Pod* shape;
+    physx_PxRigidActor_Pod* actor;
+    uint32_t faceIndex;
+    char structgen_pad0[4];
+};
+struct physx_PxQueryFilterData_Pod {
+    physx_PxFilterData_Pod data;
+    uint16_t flags;
+    char structgen_pad0[2];
+};
+struct physx_PxQueryFilterCallback_Pod {
     void* vtable_;
 };
-struct physx_PxBroadPhaseCallback_Pod {
+struct physx_PxRigidDynamic_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxRigidStatic_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxSceneQuerySystem_Pod;
+struct physx_PxSceneQueryDesc_Pod {
+    int32_t staticStructure;
+    int32_t dynamicStructure;
+    uint32_t dynamicTreeRebuildRateHint;
+    int32_t dynamicTreeSecondaryPruner;
+    int32_t staticBVHBuildStrategy;
+    int32_t dynamicBVHBuildStrategy;
+    uint32_t staticNbObjectsPerNode;
+    uint32_t dynamicNbObjectsPerNode;
+    int32_t sceneQueryUpdateMode;
+};
+struct physx_PxSceneQuerySystemBase_Pod {
     void* vtable_;
 };
+struct physx_PxSceneSQSystem_Pod {
+    void* vtable_;
+};
+struct physx_PxSceneQuerySystem_Pod {
+    void* vtable_;
+};
+struct physx_PxBroadPhaseRegion_Pod {
+    physx_PxBounds3_Pod mBounds;
+    void* mUserData;
+};
+struct physx_PxBroadPhaseRegionInfo_Pod {
+    physx_PxBroadPhaseRegion_Pod mRegion;
+    uint32_t mNbStaticObjects;
+    uint32_t mNbDynamicObjects;
+    bool mActive;
+    bool mOverlap;
+    char structgen_pad0[6];
+};
+struct physx_PxBroadPhaseCaps_Pod {
+    uint32_t mMaxNbRegions;
+};
+struct physx_PxBroadPhaseDesc_Pod {
+    int32_t mType;
+    char structgen_pad0[4];
+    uint64_t mContextID;
+    char structgen_pad1[8];
+    uint32_t mFoundLostPairsCapacity;
+    bool mDiscardStaticVsKinematic;
+    bool mDiscardKinematicVsKinematic;
+    char structgen_pad2[2];
+};
+struct physx_PxBroadPhaseUpdateData_Pod {
+    uint32_t const* mCreated;
+    uint32_t mNbCreated;
+    char structgen_pad0[4];
+    uint32_t const* mUpdated;
+    uint32_t mNbUpdated;
+    char structgen_pad1[4];
+    uint32_t const* mRemoved;
+    uint32_t mNbRemoved;
+    char structgen_pad2[4];
+    physx_PxBounds3_Pod const* mBounds;
+    uint32_t const* mGroups;
+    float const* mDistances;
+    uint32_t mCapacity;
+    char structgen_pad3[4];
+};
+struct physx_PxBroadPhasePair_Pod {
+    uint32_t mID0;
+    uint32_t mID1;
+};
+struct physx_PxBroadPhaseResults_Pod {
+    uint32_t mNbCreatedPairs;
+    char structgen_pad0[4];
+    physx_PxBroadPhasePair_Pod const* mCreatedPairs;
+    uint32_t mNbDeletedPairs;
+    char structgen_pad1[4];
+    physx_PxBroadPhasePair_Pod const* mDeletedPairs;
+};
+struct physx_PxBroadPhaseRegions_Pod {
+    void* vtable_;
+};
+struct physx_PxBroadPhase_Pod {
+    void* vtable_;
+};
+struct physx_PxAABBManager_Pod {
+    void* vtable_;
+};
+struct physx_PxBroadPhaseCallback_Pod;
+struct physx_PxSimulationEventCallback_Pod;
 struct physx_PxSceneLimits_Pod {
     uint32_t maxNbActors;
     uint32_t maxNbBodies;
@@ -755,51 +1326,53 @@ struct physx_PxSceneLimits_Pod {
     uint32_t maxNbRegions;
     uint32_t maxNbBroadPhaseOverlaps;
 };
-struct physx_PxSceneFlags_Pod {
-    uint32_t mBits;
-};
-struct physx_PxCudaContextManager_Pod;
 struct physx_PxgDynamicsMemoryConfig_Pod {
-    uint32_t constraintBufferCapacity;
-    uint32_t contactBufferCapacity;
     uint32_t tempBufferCapacity;
-    uint32_t contactStreamSize;
-    uint32_t patchStreamSize;
-    uint32_t forceStreamCapacity;
+    uint32_t maxRigidContactCount;
+    uint32_t maxRigidPatchCount;
     uint32_t heapCapacity;
     uint32_t foundLostPairsCapacity;
+    uint32_t foundLostAggregatePairsCapacity;
+    uint32_t totalAggregatePairsCapacity;
+    uint32_t maxSoftBodyContacts;
+    uint32_t maxFemClothContacts;
+    uint32_t maxParticleContacts;
+    uint32_t collisionStackSize;
+    uint32_t maxHairContacts;
 };
 struct physx_PxSceneDesc_Pod {
+    int32_t staticStructure;
+    int32_t dynamicStructure;
+    uint32_t dynamicTreeRebuildRateHint;
+    int32_t dynamicTreeSecondaryPruner;
+    int32_t staticBVHBuildStrategy;
+    int32_t dynamicBVHBuildStrategy;
+    uint32_t staticNbObjectsPerNode;
+    uint32_t dynamicNbObjectsPerNode;
+    int32_t sceneQueryUpdateMode;
     physx_PxVec3_Pod gravity;
-    char structgen_pad0[4];
     physx_PxSimulationEventCallback_Pod* simulationEventCallback;
     physx_PxContactModifyCallback_Pod* contactModifyCallback;
     physx_PxCCDContactModifyCallback_Pod* ccdContactModifyCallback;
-    void* filterShaderData;
+    void const* filterShaderData;
     uint32_t filterShaderDataSize;
-    char structgen_pad1[4];
-    void* filterShader;
+    char structgen_pad0[4];
+    void * filterShader;
     physx_PxSimulationFilterCallback_Pod* filterCallback;
-    unsigned int kineKineFilteringMode;
-    unsigned int staticKineFilteringMode;
-    unsigned int broadPhaseType;
-    char structgen_pad2[4];
+    int32_t kineKineFilteringMode;
+    int32_t staticKineFilteringMode;
+    int32_t broadPhaseType;
+    char structgen_pad1[4];
     physx_PxBroadPhaseCallback_Pod* broadPhaseCallback;
     physx_PxSceneLimits_Pod limits;
-    unsigned int frictionType;
-    unsigned int solverType;
+    int32_t frictionType;
+    int32_t solverType;
     float bounceThresholdVelocity;
     float frictionOffsetThreshold;
-    float ccdMaxSeparation;
-    float solverOffsetSlop;
-    physx_PxSceneFlags_Pod flags;
-    char structgen_pad3[4];
+    float frictionCorrelationDistance;
+    uint32_t flags;
     physx_PxCpuDispatcher_Pod* cpuDispatcher;
-    physx_PxCudaContextManager_Pod* cudaContextManager;
-    unsigned int staticStructure;
-    unsigned int dynamicStructure;
-    uint32_t dynamicTreeRebuildRateHint;
-    unsigned int sceneQueryUpdateMode;
+    char structgen_pad2[8];
     void* userData;
     uint32_t solverBatchSize;
     uint32_t solverArticulationBatchSize;
@@ -809,41 +1382,16 @@ struct physx_PxSceneDesc_Pod {
     uint32_t contactReportStreamBufferSize;
     uint32_t ccdMaxPasses;
     float ccdThreshold;
+    float ccdMaxSeparation;
     float wakeCounterResetValue;
     physx_PxBounds3_Pod sanityBounds;
     physx_PxgDynamicsMemoryConfig_Pod gpuDynamicsConfig;
     uint32_t gpuMaxNumPartitions;
+    uint32_t gpuMaxNumStaticPartitions;
     uint32_t gpuComputeVersion;
-    char structgen_pad4[12];
-};
-struct physx_PxRigidStatic_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxRigidDynamic_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxPruningStructure_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-};
-struct physx_PxDeletionEventFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_PxPvd_Pod {
-    void* vtable_;
-};
-struct physx_PxRigidDynamicLockFlags_Pod {
-    unsigned char mBits;
+    uint32_t contactPairSlabSize;
+    physx_PxSceneQuerySystem_Pod* sceneQuerySystem;
+    char structgen_pad3[8];
 };
 struct physx_PxSimulationStatistics_Pod {
     uint32_t nbActiveConstraints;
@@ -852,7 +1400,7 @@ struct physx_PxSimulationStatistics_Pod {
     uint32_t nbStaticBodies;
     uint32_t nbDynamicBodies;
     uint32_t nbKinematicBodies;
-    uint32_t nbShapes[7];
+    uint32_t nbShapes[11];
     uint32_t nbAggregates;
     uint32_t nbArticulations;
     uint32_t nbAxisSolverConstraints;
@@ -867,102 +1415,64 @@ struct physx_PxSimulationStatistics_Pod {
     uint32_t nbNewTouches;
     uint32_t nbLostTouches;
     uint32_t nbPartitions;
+    char structgen_pad0[4];
+    uint64_t gpuMemParticles;
+    uint64_t gpuMemSoftBodies;
+    uint64_t gpuMemFEMCloths;
+    uint64_t gpuMemHairSystems;
+    uint64_t gpuMemHeap;
+    uint64_t gpuMemHeapBroadPhase;
+    uint64_t gpuMemHeapNarrowPhase;
+    uint64_t gpuMemHeapSolver;
+    uint64_t gpuMemHeapArticulation;
+    uint64_t gpuMemHeapSimulation;
+    uint64_t gpuMemHeapSimulationArticulation;
+    uint64_t gpuMemHeapSimulationParticles;
+    uint64_t gpuMemHeapSimulationSoftBody;
+    uint64_t gpuMemHeapSimulationFEMCloth;
+    uint64_t gpuMemHeapSimulationHairSystem;
+    uint64_t gpuMemHeapParticles;
+    uint64_t gpuMemHeapSoftBodies;
+    uint64_t gpuMemHeapFEMCloths;
+    uint64_t gpuMemHeapHairSystems;
+    uint64_t gpuMemHeapOther;
     uint32_t nbBroadPhaseAdds;
     uint32_t nbBroadPhaseRemoves;
-    uint32_t nbDiscreteContactPairs[7][7];
-    uint32_t nbCCDPairs[7][7];
-    uint32_t nbModifiedContactPairs[7][7];
-    uint32_t nbTriggerPairs[7][7];
+    uint32_t nbDiscreteContactPairs[11][11];
+    uint32_t nbCCDPairs[11][11];
+    uint32_t nbModifiedContactPairs[11][11];
+    uint32_t nbTriggerPairs[11][11];
+};
+struct physx_PxGpuBodyData_Pod {
+    physx_PxQuat_Pod quat;
+    physx_PxVec4_Pod pos;
+    physx_PxVec4_Pod linVel;
+    physx_PxVec4_Pod angVel;
+};
+struct physx_PxGpuActorPair_Pod {
+    uint32_t srcIndex;
+    char structgen_pad0[4];
+    physx_PxNodeIndex_Pod nodeIndex;
+};
+struct physx_PxIndexDataPair_Pod {
+    uint32_t index;
+    char structgen_pad0[4];
+    void* data;
 };
 struct physx_PxPvdSceneClient_Pod {
     void* vtable_;
 };
-struct physx_PxPvdSceneFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_pvdsdk_PvdDebugPoint_Pod;
-struct physx_pvdsdk_PvdDebugLine_Pod;
-struct physx_pvdsdk_PvdDebugTriangle_Pod;
-struct physx_pvdsdk_PvdDebugText_Pod;
-struct physx_pvdsdk_PvdClient_Pod;
+struct physx_PxContactPairHeader_Pod;
 struct physx_PxDominanceGroupPair_Pod {
-    unsigned char dominance0;
-    unsigned char dominance1;
+    uint8_t dominance0;
+    uint8_t dominance1;
 };
-struct physx_PxActorTypeFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxContactPairHeaderFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxContactPairFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxContactPair_Pod {
-    physx_PxShape_Pod* shapes[2];
-    unsigned char* contactPatches;
-    unsigned char* contactPoints;
-    float* contactImpulses;
-    uint32_t requiredBufferSize;
-    unsigned char contactCount;
-    unsigned char patchCount;
-    uint16_t contactStreamSize;
-    physx_PxContactPairFlags_Pod flags;
-    physx_PxPairFlags_Pod events;
-    uint32_t internalData[2];
-    char structgen_pad0[4];
-};
-struct physx_PxContactPairHeader_Pod {
-    physx_PxRigidActor_Pod* actors[2];
-    unsigned char* extraDataStream;
-    uint16_t extraDataStreamSize;
-    physx_PxContactPairHeaderFlags_Pod flags;
-    char structgen_pad0[4];
-    physx_PxContactPair_Pod* pairs;
-    uint32_t nbPairs;
-    char structgen_pad1[4];
-};
-struct physx_PxRaycastCallback_Pod {
+struct physx_PxBroadPhaseCallback_Pod {
     void* vtable_;
-    physx_PxRaycastHit_Pod block;
-    bool hasBlock;
-    physx_PxRaycastHit_Pod* touches;
-    uint32_t maxNbTouches;
-    uint32_t nbTouches;
 };
-struct physx_PxSweepCallback_Pod {
-    void* vtable_;
-    physx_PxSweepHit_Pod block;
-    bool hasBlock;
-    physx_PxSweepHit_Pod* touches;
-    uint32_t maxNbTouches;
-    uint32_t nbTouches;
-};
-struct physx_PxOverlapCallback_Pod {
-    void* vtable_;
-    physx_PxOverlapHit_Pod block;
-    bool hasBlock;
-    physx_PxOverlapHit_Pod* touches;
-    uint32_t maxNbTouches;
-    uint32_t nbTouches;
-};
-struct physx_PxBroadPhaseCaps_Pod {
-    uint32_t maxNbRegions;
-    uint32_t maxNbObjects;
-    bool needsPredefinedBounds;
-    char structgen_pad0[3];
-};
-struct physx_PxBroadPhaseRegion_Pod {
-    physx_PxBounds3_Pod bounds;
+struct physx_PxScene_Pod {
+    char structgen_pad0[8];
     void* userData;
-};
-struct physx_PxBroadPhaseRegionInfo_Pod {
-    physx_PxBroadPhaseRegion_Pod region;
-    uint32_t nbStaticObjects;
-    uint32_t nbDynamicObjects;
-    bool active;
-    bool overlap;
-    char structgen_pad0[6];
 };
 struct physx_PxSceneReadLock_Pod {
     char structgen_pad0[8];
@@ -971,32 +1481,43 @@ struct physx_PxSceneWriteLock_Pod {
     char structgen_pad0[8];
 };
 struct physx_PxContactPairExtraDataItem_Pod {
-    unsigned char type;
+    uint8_t type;
 };
 struct physx_PxContactPairVelocity_Pod {
-    unsigned char type;
+    uint8_t type;
     char structgen_pad0[3];
     physx_PxVec3_Pod linearVelocity[2];
     physx_PxVec3_Pod angularVelocity[2];
 };
 struct physx_PxContactPairPose_Pod {
-    unsigned char type;
+    uint8_t type;
     char structgen_pad0[3];
     physx_PxTransform_Pod globalPose[2];
 };
 struct physx_PxContactPairIndex_Pod {
-    unsigned char type;
+    uint8_t type;
     char structgen_pad0[1];
     uint16_t index;
 };
 struct physx_PxContactPairExtraDataIterator_Pod {
-    unsigned char* currPtr;
-    unsigned char* endPtr;
-    physx_PxContactPairVelocity_Pod* preSolverVelocity;
-    physx_PxContactPairVelocity_Pod* postSolverVelocity;
-    physx_PxContactPairPose_Pod* eventPose;
+    uint8_t const* currPtr;
+    uint8_t const* endPtr;
+    physx_PxContactPairVelocity_Pod const* preSolverVelocity;
+    physx_PxContactPairVelocity_Pod const* postSolverVelocity;
+    physx_PxContactPairPose_Pod const* eventPose;
     uint32_t contactPairIndex;
     char structgen_pad0[4];
+};
+struct physx_PxContactPair_Pod;
+struct physx_PxContactPairHeader_Pod {
+    physx_PxActor_Pod* actors[2];
+    uint8_t const* extraDataStream;
+    uint16_t extraDataStreamSize;
+    uint16_t flags;
+    char structgen_pad0[4];
+    physx_PxContactPair_Pod const* pairs;
+    uint32_t nbPairs;
+    char structgen_pad1[4];
 };
 struct physx_PxContactPairPoint_Pod {
     physx_PxVec3_Pod position;
@@ -1006,16 +1527,27 @@ struct physx_PxContactPairPoint_Pod {
     physx_PxVec3_Pod impulse;
     uint32_t internalFaceIndex1;
 };
-struct physx_PxTriggerPairFlags_Pod {
-    unsigned char mBits;
+struct physx_PxContactPair_Pod {
+    physx_PxShape_Pod* shapes[2];
+    uint8_t const* contactPatches;
+    uint8_t const* contactPoints;
+    float const* contactImpulses;
+    uint32_t requiredBufferSize;
+    uint8_t contactCount;
+    uint8_t patchCount;
+    uint16_t contactStreamSize;
+    uint16_t flags;
+    uint16_t events;
+    uint32_t internalData[2];
+    char structgen_pad0[4];
 };
 struct physx_PxTriggerPair_Pod {
     physx_PxShape_Pod* triggerShape;
-    physx_PxRigidActor_Pod* triggerActor;
+    physx_PxActor_Pod* triggerActor;
     physx_PxShape_Pod* otherShape;
-    physx_PxRigidActor_Pod* otherActor;
-    unsigned int status;
-    physx_PxTriggerPairFlags_Pod flags;
+    physx_PxActor_Pod* otherActor;
+    int32_t status;
+    uint8_t flags;
     char structgen_pad0[3];
 };
 struct physx_PxConstraintInfo_Pod {
@@ -1024,21 +1556,34 @@ struct physx_PxConstraintInfo_Pod {
     uint32_t type;
     char structgen_pad0[4];
 };
+struct physx_PxSimulationEventCallback_Pod {
+    void* vtable_;
+};
+struct physx_PxFEMParameters_Pod {
+    float velocityDamping;
+    float settlingThreshold;
+    float sleepThreshold;
+    float sleepDamping;
+    float selfCollisionFilterDistance;
+    float selfCollisionStressTolerance;
+};
+struct physx_PxPruningStructure_Pod {
+    char structgen_pad0[16];
+};
 struct physx_PxExtendedVec3_Pod {
     double x;
     double y;
     double z;
 };
+struct physx_PxControllerManager_Pod;
 struct physx_PxObstacle_Pod {
-    int mType;
-    char structgen_pad0[4];
+    char structgen_pad0[8];
     void* mUserData;
     physx_PxExtendedVec3_Pod mPos;
     physx_PxQuat_Pod mRot;
 };
 struct physx_PxBoxObstacle_Pod {
-    int mType;
-    char structgen_pad0[4];
+    char structgen_pad0[8];
     void* mUserData;
     physx_PxExtendedVec3_Pod mPos;
     physx_PxQuat_Pod mRot;
@@ -1046,8 +1591,7 @@ struct physx_PxBoxObstacle_Pod {
     char structgen_pad1[4];
 };
 struct physx_PxCapsuleObstacle_Pod {
-    int mType;
-    char structgen_pad0[4];
+    char structgen_pad0[8];
     void* mUserData;
     physx_PxExtendedVec3_Pod mPos;
     physx_PxQuat_Pod mRot;
@@ -1057,14 +1601,33 @@ struct physx_PxCapsuleObstacle_Pod {
 struct physx_PxObstacleContext_Pod {
     void* vtable_;
 };
-struct physx_PxControllerManager_Pod {
-    void* vtable_;
+struct physx_PxController_Pod;
+struct physx_PxControllerBehaviorCallback_Pod;
+struct physx_PxControllerState_Pod {
+    physx_PxVec3_Pod deltaXP;
+    char structgen_pad0[4];
+    physx_PxShape_Pod* touchedShape;
+    physx_PxRigidActor_Pod* touchedActor;
+    uint32_t touchedObstacleHandle;
+    uint32_t collisionFlags;
+    bool standOnAnotherCCT;
+    bool standOnObstacle;
+    bool isMovingUp;
+    char structgen_pad1[5];
 };
-struct physx_PxUserControllerHitReport_Pod {
-    void* vtable_;
+struct physx_PxControllerStats_Pod {
+    uint16_t nbIterations;
+    uint16_t nbFullUpdates;
+    uint16_t nbPartialUpdates;
+    uint16_t nbTessellation;
 };
-struct physx_PxController_Pod {
-    void* vtable_;
+struct physx_PxControllerHit_Pod {
+    physx_PxController_Pod* controller;
+    physx_PxExtendedVec3_Pod worldPos;
+    physx_PxVec3_Pod worldNormal;
+    physx_PxVec3_Pod dir;
+    float length;
+    char structgen_pad0[4];
 };
 struct physx_PxControllerShapeHit_Pod {
     physx_PxController_Pod* controller;
@@ -1094,20 +1657,20 @@ struct physx_PxControllerObstacleHit_Pod {
     physx_PxVec3_Pod dir;
     float length;
     char structgen_pad0[4];
-    void* userData;
+    void const* userData;
+};
+struct physx_PxUserControllerHitReport_Pod {
+    void* vtable_;
 };
 struct physx_PxControllerFilterCallback_Pod {
     void* vtable_;
 };
 struct physx_PxControllerFilters_Pod {
-    physx_PxFilterData_Pod* mFilterData;
+    physx_PxFilterData_Pod const* mFilterData;
     physx_PxQueryFilterCallback_Pod* mFilterCallback;
-    physx_PxQueryFlags_Pod mFilterFlags;
+    uint16_t mFilterFlags;
     char structgen_pad0[6];
     physx_PxControllerFilterCallback_Pod* mCCTFilterCallback;
-};
-struct physx_PxControllerBehaviorCallback_Pod {
-    void* vtable_;
 };
 struct physx_PxControllerDesc_Pod {
     char structgen_pad0[8];
@@ -1124,35 +1687,17 @@ struct physx_PxControllerDesc_Pod {
     char structgen_pad1[4];
     physx_PxUserControllerHitReport_Pod* reportCallback;
     physx_PxControllerBehaviorCallback_Pod* behaviorCallback;
-    unsigned int nonWalkableMode;
+    int32_t nonWalkableMode;
     char structgen_pad2[4];
     physx_PxMaterial_Pod* material;
     bool registerDeletionListener;
-    char structgen_pad3[7];
+    uint8_t clientID;
+    char structgen_pad3[6];
     void* userData;
-    unsigned int mType;
-    char structgen_pad4[4];
+    char structgen_pad4[8];
 };
-struct physx_PxControllerCollisionFlags_Pod {
-    unsigned char mBits;
-};
-struct physx_PxControllerState_Pod {
-    physx_PxVec3_Pod deltaXP;
-    char structgen_pad0[4];
-    physx_PxShape_Pod* touchedShape;
-    physx_PxRigidActor_Pod* touchedActor;
-    uint32_t touchedObstacleHandle;
-    uint32_t collisionFlags;
-    bool standOnAnotherCCT;
-    bool standOnObstacle;
-    bool isMovingUp;
-    char structgen_pad1[5];
-};
-struct physx_PxControllerStats_Pod {
-    uint16_t nbIterations;
-    uint16_t nbFullUpdates;
-    uint16_t nbPartialUpdates;
-    uint16_t nbTessellation;
+struct physx_PxController_Pod {
+    void* vtable_;
 };
 struct physx_PxBoxControllerDesc_Pod {
     char structgen_pad0[8];
@@ -1169,13 +1714,14 @@ struct physx_PxBoxControllerDesc_Pod {
     char structgen_pad1[4];
     physx_PxUserControllerHitReport_Pod* reportCallback;
     physx_PxControllerBehaviorCallback_Pod* behaviorCallback;
-    unsigned int nonWalkableMode;
+    int32_t nonWalkableMode;
     char structgen_pad2[4];
     physx_PxMaterial_Pod* material;
     bool registerDeletionListener;
-    char structgen_pad3[7];
+    uint8_t clientID;
+    char structgen_pad3[6];
     void* userData;
-    unsigned int mType;
+    char structgen_pad4[4];
     float halfHeight;
     float halfSideExtent;
     float halfForwardExtent;
@@ -1198,83 +1744,106 @@ struct physx_PxCapsuleControllerDesc_Pod {
     char structgen_pad1[4];
     physx_PxUserControllerHitReport_Pod* reportCallback;
     physx_PxControllerBehaviorCallback_Pod* behaviorCallback;
-    unsigned int nonWalkableMode;
+    int32_t nonWalkableMode;
     char structgen_pad2[4];
     physx_PxMaterial_Pod* material;
     bool registerDeletionListener;
-    char structgen_pad3[7];
+    uint8_t clientID;
+    char structgen_pad3[6];
     void* userData;
-    unsigned int mType;
+    char structgen_pad4[4];
     float radius;
     float height;
-    unsigned int climbingMode;
+    int32_t climbingMode;
 };
 struct physx_PxCapsuleController_Pod {
     void* vtable_;
 };
-struct physx_PxControllerBehaviorFlags_Pod {
-    unsigned char mBits;
+struct physx_PxControllerBehaviorCallback_Pod {
+    void* vtable_;
 };
-struct physx_PxControllerDebugRenderFlags_Pod {
-    uint32_t mBits;
+struct physx_PxControllerManager_Pod {
+    void* vtable_;
 };
-struct physx_PxConvexFlags_Pod {
-    uint16_t mBits;
+struct physx_PxDim3_Pod {
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+};
+struct physx_PxSDFDesc_Pod {
+    physx_PxBoundedData_Pod sdf;
+    physx_PxDim3_Pod dims;
+    physx_PxVec3_Pod meshLower;
+    float spacing;
+    uint32_t subgridSize;
+    int32_t bitsPerSubgridPixel;
+    physx_PxDim3_Pod sdfSubgrids3DTexBlockDim;
+    physx_PxBoundedData_Pod sdfSubgrids;
+    physx_PxBoundedData_Pod sdfStartSlots;
+    float subgridsMinSdfValue;
+    float subgridsMaxSdfValue;
+    physx_PxBounds3_Pod sdfBounds;
+    float narrowBandThicknessRelativeToSdfBoundsDiagonal;
+    uint32_t numThreadsForSdfConstruction;
 };
 struct physx_PxConvexMeshDesc_Pod {
     physx_PxBoundedData_Pod points;
     physx_PxBoundedData_Pod polygons;
     physx_PxBoundedData_Pod indices;
-    physx_PxConvexFlags_Pod flags;
+    uint16_t flags;
     uint16_t vertexLimit;
+    uint16_t polygonLimit;
     uint16_t quantizedCount;
-    char structgen_pad0[2];
-};
-struct PxTypedStridedData_physx_PxMaterialTableIndex__Pod {
-    uint32_t stride;
-    uint16_t* data;
+    physx_PxSDFDesc_Pod* sdfDesc;
 };
 struct physx_PxTriangleMeshDesc_Pod {
     physx_PxBoundedData_Pod points;
     physx_PxBoundedData_Pod triangles;
-    physx_PxMeshFlags_Pod flags;
-    char structgen_pad0[6];
-    PxTypedStridedData_physx_PxMaterialTableIndex__Pod materialIndices;
+    uint16_t flags;
+    char structgen_pad0[22];
+    physx_PxSDFDesc_Pod* sdfDesc;
 };
-struct physx_PxBVH33MidphaseDesc_Pod {
-    float meshSizePerformanceTradeOff;
-    unsigned int meshCookingHint;
+struct physx_PxTetrahedronMeshDesc_Pod {
+    char structgen_pad0[16];
+    physx_PxBoundedData_Pod points;
+    physx_PxBoundedData_Pod tetrahedrons;
+    uint16_t flags;
+    uint16_t tetsPerElement;
+    char structgen_pad1[4];
+};
+struct physx_PxSoftBodySimulationDataDesc_Pod {
+    physx_PxBoundedData_Pod vertexToTet;
 };
 struct physx_PxBVH34MidphaseDesc_Pod {
     uint32_t numPrimsPerLeaf;
-};
-struct Anonymous217_Pod {
-    physx_PxBVH33MidphaseDesc_Pod mBVH33Desc;
-    physx_PxBVH34MidphaseDesc_Pod mBVH34Desc;
+    int32_t buildStrategy;
+    bool quantized;
+    char structgen_pad0[3];
 };
 struct physx_PxMidphaseDesc_Pod {
-    char structgen_pad0[8];
-    unsigned int mType;
+    char structgen_pad0[16];
 };
-struct physx_PxBVHStructureDesc_Pod {
+struct physx_PxBVHDesc_Pod {
     physx_PxBoundedData_Pod bounds;
-};
-struct physx_PxMeshPreprocessingFlags_Pod {
-    uint32_t mBits;
+    float enlargement;
+    uint32_t numPrimsPerLeaf;
+    int32_t buildStrategy;
+    char structgen_pad0[4];
 };
 struct physx_PxCookingParams_Pod {
     float areaTestEpsilon;
     float planeTolerance;
-    unsigned int convexMeshCookingType;
+    int32_t convexMeshCookingType;
     bool suppressTriangleMeshRemapTable;
     bool buildTriangleAdjacencies;
     bool buildGPUData;
     char structgen_pad0[1];
     physx_PxTolerancesScale_Pod scale;
-    physx_PxMeshPreprocessingFlags_Pod meshPreprocessParams;
+    uint32_t meshPreprocessParams;
     float meshWeldTolerance;
     physx_PxMidphaseDesc_Pod midphaseDesc;
     uint32_t gaussMapLimit;
+    float maxWeightRatioInTet;
 };
 struct physx_PxCooking_Pod {
     void* vtable_;
@@ -1291,28 +1860,29 @@ struct physx_PxDefaultFileOutputStream_Pod {
 struct physx_PxDefaultFileInputData_Pod {
     char structgen_pad0[24];
 };
+struct physx_PxDefaultAllocator_Pod {
+    void* vtable_;
+};
+struct physx_PxJoint_Pod;
+struct physx_PxRackAndPinionJoint_Pod;
+struct physx_PxGearJoint_Pod;
+struct physx_PxD6Joint_Pod;
+struct physx_PxDistanceJoint_Pod;
+struct physx_PxContactJoint_Pod;
+struct physx_PxFixedJoint_Pod;
+struct physx_PxPrismaticJoint_Pod;
+struct physx_PxRevoluteJoint_Pod;
+struct physx_PxSphericalJoint_Pod;
+struct physx_PxJoint_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
 struct physx_PxSpring_Pod {
     float stiffness;
     float damping;
 };
 struct physx_PxDistanceJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxDistanceJointFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxDefaultAllocator_Pod {
-    void* vtable_;
-};
-struct physx_PxContactJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
 };
 struct physx_PxJacobianRow_Pod {
@@ -1321,11 +1891,12 @@ struct physx_PxJacobianRow_Pod {
     physx_PxVec3_Pod angular0;
     physx_PxVec3_Pod angular1;
 };
+struct physx_PxContactJoint_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
 struct physx_PxFixedJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
 };
 struct physx_PxJointLimitParameters_Pod {
@@ -1333,14 +1904,14 @@ struct physx_PxJointLimitParameters_Pod {
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
 };
 struct physx_PxJointLinearLimit_Pod {
     float restitution;
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
     float value;
 };
 struct physx_PxJointLinearLimitPair_Pod {
@@ -1348,7 +1919,7 @@ struct physx_PxJointLinearLimitPair_Pod {
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
     float upper;
     float lower;
 };
@@ -1357,7 +1928,7 @@ struct physx_PxJointAngularLimitPair_Pod {
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
     float upper;
     float lower;
 };
@@ -1366,7 +1937,7 @@ struct physx_PxJointLimitCone_Pod {
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
     float yAngle;
     float zAngle;
 };
@@ -1375,57 +1946,41 @@ struct physx_PxJointLimitPyramid_Pod {
     float bounceThreshold;
     float stiffness;
     float damping;
-    float contactDistance;
+    float contactDistance_deprecated;
     float yAngleMin;
     float yAngleMax;
     float zAngleMin;
     float zAngleMax;
 };
 struct physx_PxPrismaticJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxPrismaticJointFlags_Pod {
-    uint16_t mBits;
 };
 struct physx_PxRevoluteJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxRevoluteJointFlags_Pod {
-    uint16_t mBits;
 };
 struct physx_PxSphericalJoint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
+    char structgen_pad0[16];
     void* userData;
-};
-struct physx_PxSphericalJointFlags_Pod {
-    uint16_t mBits;
-};
-struct physx_PxD6Joint_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    void* userData;
-};
-struct physx_PxD6JointDriveFlags_Pod {
-    uint32_t mBits;
 };
 struct physx_PxD6JointDrive_Pod {
     float stiffness;
     float damping;
     float forceLimit;
-    physx_PxD6JointDriveFlags_Pod flags;
+    uint32_t flags;
+};
+struct physx_PxD6Joint_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxGearJoint_Pod {
+    char structgen_pad0[16];
+    void* userData;
+};
+struct physx_PxRackAndPinionJoint_Pod {
+    char structgen_pad0[16];
+    void* userData;
 };
 struct physx_PxGroupsMask_Pod {
     uint16_t bits0;
@@ -1436,50 +1991,67 @@ struct physx_PxGroupsMask_Pod {
 struct physx_PxDefaultErrorCallback_Pod {
     void* vtable_;
 };
+struct physx_PxRigidActorExt_Pod {
+    char structgen_pad0[1];
+};
 struct physx_PxMassProperties_Pod {
     physx_PxMat33_Pod inertiaTensor;
     physx_PxVec3_Pod centerOfMass;
     float mass;
 };
+struct physx_PxRigidBodyExt_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxShapeExt_Pod {
+    char structgen_pad0[1];
+};
 struct physx_PxMeshOverlapUtil_Pod {
     char structgen_pad0[1040];
 };
-struct physx_PxSerialization_PxXmlMiscParameter_Pod {
+struct physx_PxBinaryConverter_Pod;
+struct physx_PxXmlMiscParameter_Pod {
     physx_PxVec3_Pod upVector;
     physx_PxTolerancesScale_Pod scale;
 };
-struct physx_PxBinaryConverter_Pod {
-    void* vtable_;
+struct physx_PxSerialization_Pod {
+    char structgen_pad0[1];
 };
 struct physx_PxDefaultCpuDispatcher_Pod {
     void* vtable_;
 };
-struct physx_PxSceneQueryHit_Pod {
-    physx_PxRigidActor_Pod* actor;
-    physx_PxShape_Pod* shape;
-    uint32_t faceIndex;
-    char structgen_pad0[4];
+struct physx_PxStringTableExt_Pod {
+    char structgen_pad0[1];
 };
-struct physx_PxSceneQueryFilterData_Pod {
-    physx_PxFilterData_Pod data;
-    physx_PxQueryFlags_Pod flags;
-    char structgen_pad0[2];
+struct physx_PxBroadPhaseExt_Pod {
+    char structgen_pad0[1];
 };
-struct physx_PxSceneQueryFilterCallback_Pod {
+struct physx_PxSceneQueryExt_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxBatchQueryExt_Pod {
     void* vtable_;
 };
-struct physx_PxSceneQueryCache_Pod {
-    physx_PxShape_Pod* shape;
-    physx_PxRigidActor_Pod* actor;
-    uint32_t faceIndex;
-    char structgen_pad0[4];
+struct physx_PxCustomSceneQuerySystem_Pod {
+    void* vtable_;
 };
-struct physx_PxSceneQueryFlags_Pod {
-    uint16_t mBits;
+struct physx_PxCustomSceneQuerySystemAdapter_Pod {
+    void* vtable_;
+};
+struct physx_PxSamplingExt_Pod {
+    char structgen_pad0[1];
+};
+struct physx_PxPoissonSampler_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxTriangleMeshPoissonSampler_Pod {
+    char structgen_pad0[8];
+};
+struct physx_PxTetrahedronMeshExt_Pod {
+    char structgen_pad0[1];
 };
 struct physx_PxRepXObject_Pod {
-    char* typeName;
-    void* serializable;
+    char const* typeName;
+    void const* serializable;
     uint64_t id;
 };
 struct physx_PxRepXInstantiationArgs_Pod {
@@ -1487,338 +2059,22 @@ struct physx_PxRepXInstantiationArgs_Pod {
     physx_PxCooking_Pod* cooker;
     physx_PxStringTable_Pod* stringTable;
 };
-struct physx_XmlWriter_Pod;
-struct physx_MemoryBuffer_Pod;
-struct physx_XmlReader_Pod;
 struct physx_XmlMemoryAllocator_Pod;
-struct physx_PxVehicleChassisData_Pod {
-    physx_PxVec3_Pod mMOI;
-    float mMass;
-    physx_PxVec3_Pod mCMOffset;
-    char structgen_pad0[4];
-};
-struct PxFixedSizeLookupTable_eMAX_NB_ENGINE_TORQUE_CURVE_ENTRIES__Pod {
-    float mDataPairs[16];
-    uint32_t mNbDataPairs;
-    uint32_t mPad[3];
-};
-struct physx_PxVehicleEngineData_Pod {
-    PxFixedSizeLookupTable_eMAX_NB_ENGINE_TORQUE_CURVE_ENTRIES__Pod mTorqueCurve;
-    float mMOI;
-    float mPeakTorque;
-    float mMaxOmega;
-    float mDampingRateFullThrottle;
-    float mDampingRateZeroThrottleClutchEngaged;
-    float mDampingRateZeroThrottleClutchDisengaged;
-    char structgen_pad0[8];
-};
-struct physx_PxVehicleGearsData_Pod {
-    float mRatios[32];
-    float mFinalRatio;
-    uint32_t mNbRatios;
-    float mSwitchTime;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleAutoBoxData_Pod {
-    float mUpRatios[32];
-    float mDownRatios[32];
-};
-struct physx_PxVehicleDifferential4WData_Pod {
-    float mFrontRearSplit;
-    float mFrontLeftRightSplit;
-    float mRearLeftRightSplit;
-    float mCentreBias;
-    float mFrontBias;
-    float mRearBias;
-    unsigned int mType;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleDifferentialNWData_Pod {
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleAckermannGeometryData_Pod {
-    float mAccuracy;
-    float mFrontWidth;
-    float mRearWidth;
-    float mAxleSeparation;
-};
-struct physx_PxVehicleClutchData_Pod {
-    float mStrength;
-    unsigned int mAccuracyMode;
-    uint32_t mEstimateIterations;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleTireLoadFilterData_Pod {
-    float mMinNormalisedLoad;
-    float mMinFilteredNormalisedLoad;
-    float mMaxNormalisedLoad;
-    float mMaxFilteredNormalisedLoad;
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleWheelData_Pod {
-    float mRadius;
-    float mWidth;
-    float mMass;
-    float mMOI;
-    float mDampingRate;
-    float mMaxBrakeTorque;
-    float mMaxHandBrakeTorque;
-    float mMaxSteer;
-    float mToeAngle;
-    char structgen_pad0[12];
-};
-struct physx_PxVehicleSuspensionData_Pod {
-    float mSpringStrength;
-    float mSpringDamperRate;
-    float mMaxCompression;
-    float mMaxDroop;
-    float mSprungMass;
-    float mCamberAtRest;
-    float mCamberAtMaxCompression;
-    float mCamberAtMaxDroop;
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleAntiRollBarData_Pod {
-    uint32_t mWheel0;
-    uint32_t mWheel1;
-    float mStiffness;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleTireData_Pod {
-    float mLatStiffX;
-    float mLatStiffY;
-    float mLongitudinalStiffnessPerUnitGravity;
-    float mCamberStiffnessPerUnitGravity;
-    float mFrictionVsSlipGraph[3][2];
-    uint32_t mType;
-    char structgen_pad0[20];
+struct physx_XmlWriter_Pod;
+struct physx_XmlReader_Pod;
+struct physx_MemoryBuffer_Pod;
+struct physx_PxRepXSerializer_Pod {
+    void* vtable_;
 };
 struct physx_PxVehicleWheels4SimData_Pod;
-struct physx_PxVehicleWheelsSimData_Pod {
-    char structgen_pad0[96];
-};
-struct physx_PxVehicleWheelsSimFlags_Pod {
-    uint32_t mBits;
-};
 struct physx_PxVehicleWheels4DynData_Pod;
 struct physx_PxVehicleTireForceCalculator_Pod;
-struct physx_PxVehicleWheelsDynData_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxVehicleWheels_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    char structgen_pad3[4];
-};
-struct physx_PxVehicleDriveSimData_Pod {
-    physx_PxVehicleEngineData_Pod mEngine;
-    physx_PxVehicleGearsData_Pod mGears;
-    physx_PxVehicleClutchData_Pod mClutch;
-    physx_PxVehicleAutoBoxData_Pod mAutoBox;
-};
-struct physx_PxVehicleDriveDynData_Pod {
-    float mControlAnalogVals[16];
-    bool mUseAutoGears;
-    bool mGearUpPressed;
-    bool mGearDownPressed;
-    char structgen_pad0[1];
-    uint32_t mCurrentGear;
-    uint32_t mTargetGear;
-    float mEnginespeed;
-    float mGearSwitchTime;
-    float mAutoBoxSwitchTime;
-    char structgen_pad1[8];
-};
-struct physx_PxVehicleDrive_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    char structgen_pad3[4];
-};
-struct physx_PxVehicleDriveSimData4W_Pod {
-    physx_PxVehicleEngineData_Pod mEngine;
-    physx_PxVehicleGearsData_Pod mGears;
-    physx_PxVehicleClutchData_Pod mClutch;
-    physx_PxVehicleAutoBoxData_Pod mAutoBox;
-    char structgen_pad0[48];
-};
-struct physx_PxVehicleDrive4W_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimData4W_Pod mDriveSimData;
-    char structgen_pad3[4];
-};
-struct physx_PxVehicleDriveTank_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimData_Pod mDriveSimData;
-    char structgen_pad3[20];
-};
-struct physx_PxVehicleDrivableSurfaceType_Pod {
-    uint32_t mType;
-};
-struct physx_PxVehicleDrivableSurfaceToTireFrictionPairs_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxWheelQueryResult_Pod {
-    physx_PxVec3_Pod suspLineStart;
-    physx_PxVec3_Pod suspLineDir;
-    float suspLineLength;
-    bool isInAir;
-    char structgen_pad0[3];
-    physx_PxActor_Pod* tireContactActor;
-    physx_PxShape_Pod* tireContactShape;
-    physx_PxMaterial_Pod* tireSurfaceMaterial;
-    uint32_t tireSurfaceType;
-    physx_PxVec3_Pod tireContactPoint;
-    physx_PxVec3_Pod tireContactNormal;
-    float tireFriction;
-    float suspJounce;
-    float suspSpringForce;
-    physx_PxVec3_Pod tireLongitudinalDir;
-    physx_PxVec3_Pod tireLateralDir;
-    float longitudinalSlip;
-    float lateralSlip;
-    float steerAngle;
-    physx_PxTransform_Pod localPose;
-};
-struct physx_PxVehicleWheelConcurrentUpdateData_Pod {
-    char structgen_pad0[64];
-};
-struct physx_PxVehicleConcurrentUpdateData_Pod {
-    physx_PxVehicleWheelConcurrentUpdateData_Pod* concurrentWheelUpdates;
-    uint32_t nbConcurrentWheelUpdates;
-    char structgen_pad0[28];
-};
-struct physx_PxVehicleWheelQueryResult_Pod {
-    physx_PxWheelQueryResult_Pod* wheelQueryResults;
-    uint32_t nbWheelQueryResults;
-    char structgen_pad0[4];
-};
-struct physx_PxVehicleGraph_Pod {
-    char structgen_pad0[15840];
-};
-struct physx_PxVehicleTelemetryData_Pod {
-    char structgen_pad0[48];
-};
-struct physx_PxVehicleDriveSimDataNW_Pod {
-    physx_PxVehicleEngineData_Pod mEngine;
-    physx_PxVehicleGearsData_Pod mGears;
-    physx_PxVehicleClutchData_Pod mClutch;
-    physx_PxVehicleAutoBoxData_Pod mAutoBox;
-    char structgen_pad0[16];
-};
-struct physx_PxVehicleDriveNW_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    physx_PxVehicleDriveDynData_Pod mDriveDynData;
-    physx_PxVehicleDriveSimDataNW_Pod mDriveSimData;
-    char structgen_pad3[4];
-};
-struct physx_PxVehicleDrive4WRawInputData_Pod {
-    char structgen_pad0[40];
-};
-struct physx_PxVehicleKeySmoothingData_Pod {
-    float mRiseRates[16];
-    float mFallRates[16];
-};
-struct PxFixedSizeLookupTable_8__Pod {
-    float mDataPairs[16];
-    uint32_t mNbDataPairs;
-    uint32_t mPad[3];
-};
-struct physx_PxVehiclePadSmoothingData_Pod {
-    float mRiseRates[16];
-    float mFallRates[16];
-};
-struct physx_PxVehicleDriveNWRawInputData_Pod {
-    char structgen_pad0[40];
-};
-struct physx_PxVehicleDriveTankRawInputData_Pod {
-    char structgen_pad0[32];
-};
-struct physx_PxVehicleCopyDynamicsMap_Pod {
-    unsigned char sourceWheelIds[20];
-    unsigned char targetWheelIds[20];
-};
-struct physx_PxVehicleGraphChannelDesc_Pod {
-    float mMinY;
-    float mMaxY;
-    float mMidY;
-    physx_PxVec3_Pod mColorLow;
-    physx_PxVec3_Pod mColorHigh;
-    char structgen_pad0[4];
-    char* mTitle;
-};
-struct physx_PxVehicleGraphDesc_Pod {
-    char structgen_pad0[32];
-};
-struct physx_PxVehicleNoDrive_Pod {
-    char structgen_pad0[8];
-    uint16_t mConcreteType;
-    physx_PxBaseFlags_Pod mBaseFlags;
-    char structgen_pad1[4];
-    physx_PxVehicleWheelsSimData_Pod mWheelsSimData;
-    physx_PxVehicleWheelsDynData_Pod mWheelsDynData;
-    physx_PxRigidDynamic_Pod* mActor;
-    char structgen_pad2[5];
-    unsigned char mType;
-    unsigned char mPad0[14];
-    char structgen_pad3[36];
-};
-struct physx_PxProfileScoped_Pod {
-    physx_PxProfilerCallback_Pod* mCallback;
-    char* mEventName;
-    void* mProfilerData;
-    uint64_t mContextId;
-    bool mDetached;
-    char structgen_pad0[7];
+struct physx_PxVehicleDrivableSurfaceToTireFrictionPairs_Pod;
+struct physx_PxVehicleTelemetryData_Pod;
+struct physx_PxPvdTransport_Pod;
+struct physx_PxPvd_Pod {
+    void* vtable_;
 };
 struct physx_PxPvdTransport_Pod {
     void* vtable_;
-};
-struct physx_PxPvdInstrumentationFlags_Pod {
-    unsigned char mBits;
 };

@@ -1,11 +1,53 @@
 #[derive(Clone, Copy)]
 #[repr(C)]
+pub struct PxAllocator {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRawAllocator {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVirtualAllocator {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxUserAllocated {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTempAllocator {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBitAndByte {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBitMap {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
 pub struct PxVec3 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
-#[test] fn check_size_PxVec3() { assert_eq!(std::mem::size_of::<PxVec3>(), 12); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVec3Padded {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub padding: u32,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxQuat {
@@ -14,7 +56,18 @@ pub struct PxQuat {
     pub z: f32,
     pub w: f32,
 }
-#[test] fn check_size_PxQuat() { assert_eq!(std::mem::size_of::<PxQuat>(), 16); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTransform {
+    pub q: PxQuat,
+    pub p: PxVec3,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTransformPadded {
+    pub transform: PxTransform,
+    pub padding: u32,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMat33 {
@@ -22,21 +75,32 @@ pub struct PxMat33 {
     pub column1: PxVec3,
     pub column2: PxVec3,
 }
-#[test] fn check_size_PxMat33() { assert_eq!(std::mem::size_of::<PxMat33>(), 36); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxPlane {
-    pub n: PxVec3,
-    pub d: f32,
+pub struct PxBounds3 {
+    pub minimum: PxVec3,
+    pub maximum: PxVec3,
 }
-#[test] fn check_size_PxPlane() { assert_eq!(std::mem::size_of::<PxPlane>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxTransform {
-    pub q: PxQuat,
-    pub p: PxVec3,
+pub struct PxBroadcastingAllocator {
+    pub structgen_pad0: [u8; 176],
 }
-#[test] fn check_size_PxTransform() { assert_eq!(std::mem::size_of::<PxTransform>(), 28); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadcastingErrorCallback {
+    pub structgen_pad0: [u8; 160],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxFPUGuard {
+    pub structgen_pad0: [u8; 32],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSIMDGuard {
+    pub structgen_pad0: [u8; 8],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxVec4 {
@@ -45,7 +109,6 @@ pub struct PxVec4 {
     pub z: f32,
     pub w: f32,
 }
-#[test] fn check_size_PxVec4() { assert_eq!(std::mem::size_of::<PxVec4>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMat44 {
@@ -54,21 +117,69 @@ pub struct PxMat44 {
     pub column2: PxVec4,
     pub column3: PxVec4,
 }
-#[test] fn check_size_PxMat44() { assert_eq!(std::mem::size_of::<PxMat44>(), 64); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxBounds3 {
-    pub minimum: PxVec3,
-    pub maximum: PxVec3,
+pub struct PxPlane {
+    pub n: PxVec3,
+    pub d: f32,
 }
-#[test] fn check_size_PxBounds3() { assert_eq!(std::mem::size_of::<PxBounds3>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct Interpolation {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxMutexImpl {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxReadWriteLock {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxProfileScoped {
+    pub mCallback: *mut PxProfilerCallback,
+    pub mEventName: *const std::ffi::c_char,
+    pub mProfilerData: *mut std::ffi::c_void,
+    pub mContextId: u64,
+    pub mDetached: bool,
+    pub structgen_pad0: [u8; 7],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSListEntry {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSListImpl {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSyncImpl {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCounterFrequencyToTensOfNanos {
+    pub mNumerator: u64,
+    pub mDenominator: u64,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTime {
+    pub structgen_pad0: [u8; 8],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxVec2 {
     pub x: f32,
     pub y: f32,
 }
-#[test] fn check_size_PxVec2() { assert_eq!(std::mem::size_of::<PxVec2>(), 8); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxStridedData {
@@ -76,7 +187,6 @@ pub struct PxStridedData {
     pub structgen_pad0: [u8; 4],
     pub data: *const std::ffi::c_void,
 }
-#[test] fn check_size_PxStridedData() { assert_eq!(std::mem::size_of::<PxStridedData>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBoundedData {
@@ -86,14 +196,12 @@ pub struct PxBoundedData {
     pub count: u32,
     pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxBoundedData() { assert_eq!(std::mem::size_of::<PxBoundedData>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugPoint {
     pub pos: PxVec3,
     pub color: u32,
 }
-#[test] fn check_size_PxDebugPoint() { assert_eq!(std::mem::size_of::<PxDebugPoint>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugLine {
@@ -102,7 +210,6 @@ pub struct PxDebugLine {
     pub pos1: PxVec3,
     pub color1: u32,
 }
-#[test] fn check_size_PxDebugLine() { assert_eq!(std::mem::size_of::<PxDebugLine>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugTriangle {
@@ -113,7 +220,6 @@ pub struct PxDebugTriangle {
     pub pos2: PxVec3,
     pub color2: u32,
 }
-#[test] fn check_size_PxDebugTriangle() { assert_eq!(std::mem::size_of::<PxDebugTriangle>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDebugText {
@@ -121,100 +227,82 @@ pub struct PxDebugText {
     pub size: f32,
     pub color: u32,
     pub structgen_pad0: [u8; 4],
-    pub string: *const i8,
+    pub string: *const std::ffi::c_char,
 }
-#[test] fn check_size_PxDebugText() { assert_eq!(std::mem::size_of::<PxDebugText>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBase {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxBase() { assert_eq!(std::mem::size_of::<PxBase>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDeserializationContext {
-    pub structgen_pad0: [u8; 8],
-    pub mExtraDataAddress: *mut u8,
+    pub structgen_pad0: [u8; 16],
 }
-#[test] fn check_size_PxDeserializationContext() { assert_eq!(std::mem::size_of::<PxDeserializationContext>(), 16); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBase {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRefCounted {
+    pub structgen_pad0: [u8; 16],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTolerancesScale {
     pub length: f32,
     pub speed: f32,
 }
-#[test] fn check_size_PxTolerancesScale() { assert_eq!(std::mem::size_of::<PxTolerancesScale>(), 8); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxTask {
-    pub structgen_pad0: [u8; 8],
-    pub mContextID: usize,
-    pub mTm: *mut PxTaskManager,
-    pub mTaskID: u32,
-    pub structgen_pad1: [u8; 4],
+pub struct PxMetaDataEntry {
+    pub type_: *const std::ffi::c_char,
+    pub name: *const std::ffi::c_char,
+    pub offset: u32,
+    pub size: u32,
+    pub count: u32,
+    pub offsetSize: u32,
+    pub flags: u32,
+    pub alignment: u32,
 }
-#[test] fn check_size_PxTask() { assert_eq!(std::mem::size_of::<PxTask>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBaseTask {
-    pub structgen_pad0: [u8; 8],
-    pub mContextID: usize,
-    pub mTm: *mut PxTaskManager,
+    pub structgen_pad0: [u8; 24],
 }
-#[test] fn check_size_PxBaseTask() { assert_eq!(std::mem::size_of::<PxBaseTask>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTask {
+    pub structgen_pad0: [u8; 32],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxLightCpuTask {
-    pub structgen_pad0: [u8; 8],
-    pub mContextID: usize,
-    pub mTm: *mut PxTaskManager,
-    pub mCont: *mut PxBaseTask,
-    pub mRefCount: i32,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 40],
 }
-#[test] fn check_size_PxLightCpuTask() { assert_eq!(std::mem::size_of::<PxLightCpuTask>(), 40); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
 }
-#[test] fn check_size_PxGeometry() { assert_eq!(std::mem::size_of::<PxGeometry>(), 4); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBoxGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub halfExtents: PxVec3,
 }
-#[test] fn check_size_PxBoxGeometry() { assert_eq!(std::mem::size_of::<PxBoxGeometry>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxBVHStructure {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+pub struct PxBVH {
+    pub structgen_pad0: [u8; 16],
 }
-#[test] fn check_size_PxBVHStructure() { assert_eq!(std::mem::size_of::<PxBVHStructure>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxCapsuleGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub radius: f32,
     pub halfHeight: f32,
 }
-#[test] fn check_size_PxCapsuleGeometry() { assert_eq!(std::mem::size_of::<PxCapsuleGeometry>(), 12); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxConvexMesh {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxConvexMesh() { assert_eq!(std::mem::size_of::<PxConvexMesh>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxHullPolygon {
@@ -222,141 +310,101 @@ pub struct PxHullPolygon {
     pub mNbVerts: u16,
     pub mIndexBase: u16,
 }
-#[test] fn check_size_PxHullPolygon() { assert_eq!(std::mem::size_of::<PxHullPolygon>(), 20); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConvexMesh {
+    pub structgen_pad0: [u8; 16],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMeshScale {
     pub scale: PxVec3,
     pub rotation: PxQuat,
 }
-#[test] fn check_size_PxMeshScale() { assert_eq!(std::mem::size_of::<PxMeshScale>(), 28); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConvexMeshGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub scale: PxMeshScale,
+    pub structgen_pad1: [u8; 4],
     pub convexMesh: *mut PxConvexMesh,
     pub meshFlags: PxConvexMeshGeometryFlags,
-    pub paddingFromFlags: PxPadding_3_,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad2: [u8; 7],
 }
-#[test] fn check_size_PxConvexMeshGeometry() { assert_eq!(std::mem::size_of::<PxConvexMeshGeometry>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSphereGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub radius: f32,
 }
-#[test] fn check_size_PxSphereGeometry() { assert_eq!(std::mem::size_of::<PxSphereGeometry>(), 8); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxPlaneGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
 }
-#[test] fn check_size_PxPlaneGeometry() { assert_eq!(std::mem::size_of::<PxPlaneGeometry>(), 4); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxTriangleMesh {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxTriangleMesh() { assert_eq!(std::mem::size_of::<PxTriangleMesh>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTriangleMeshGeometry {
-    pub mType: i32,
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub scale: PxMeshScale,
     pub meshFlags: PxMeshGeometryFlags,
-    pub paddingFromFlags: PxPadding_3_,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad1: [u8; 3],
     pub triangleMesh: *mut PxTriangleMesh,
 }
-#[test] fn check_size_PxTriangleMeshGeometry() { assert_eq!(std::mem::size_of::<PxTriangleMeshGeometry>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxHeightField {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxHeightField() { assert_eq!(std::mem::size_of::<PxHeightField>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxHeightFieldGeometry {
-    pub mType: i32,
     pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
     pub heightField: *mut PxHeightField,
     pub heightScale: f32,
     pub rowScale: f32,
     pub columnScale: f32,
     pub heightFieldFlags: PxMeshGeometryFlags,
-    pub paddingFromFlags: PxPadding_3_,
+    pub structgen_pad1: [u8; 3],
 }
-#[test] fn check_size_PxHeightFieldGeometry() { assert_eq!(std::mem::size_of::<PxHeightFieldGeometry>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxGeometryHolder {
-    pub structgen_pad0: [u8; 48],
+pub struct PxParticleSystemGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub mSolverType: PxParticleSolverType,
 }
-#[test] fn check_size_PxGeometryHolder() { assert_eq!(std::mem::size_of::<PxGeometryHolder>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxRigidActor {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
+pub struct PxHairSystemGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
 }
-#[test] fn check_size_PxRigidActor() { assert_eq!(std::mem::size_of::<PxRigidActor>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxShape {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
+pub struct PxTetrahedronMeshGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub tetrahedronMesh: *mut PxTetrahedronMesh,
 }
-#[test] fn check_size_PxShape() { assert_eq!(std::mem::size_of::<PxShape>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxActorShape {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
-}
-#[test] fn check_size_PxActorShape() { assert_eq!(std::mem::size_of::<PxActorShape>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxQueryHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
     pub faceIndex: u32,
-    pub structgen_pad0: [u8; 4],
 }
-#[test] fn check_size_PxQueryHit() { assert_eq!(std::mem::size_of::<PxQueryHit>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxLocationHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
     pub position: PxVec3,
     pub normal: PxVec3,
     pub distance: f32,
-    pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxLocationHit() { assert_eq!(std::mem::size_of::<PxLocationHit>(), 56); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxRaycastHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
+pub struct PxGeomRaycastHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
@@ -365,23 +413,55 @@ pub struct PxRaycastHit {
     pub distance: f32,
     pub u: f32,
     pub v: f32,
-    pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxRaycastHit() { assert_eq!(std::mem::size_of::<PxRaycastHit>(), 64); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxSweepHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
+pub struct PxGeomOverlapHit {
+    pub faceIndex: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomSweepHit {
     pub faceIndex: u32,
     pub flags: PxHitFlags,
     pub structgen_pad0: [u8; 2],
     pub position: PxVec3,
     pub normal: PxVec3,
     pub distance: f32,
-    pub padTo16Bytes: u32,
 }
-#[test] fn check_size_PxSweepHit() { assert_eq!(std::mem::size_of::<PxSweepHit>(), 56); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomIndexPair {
+    pub id0: u32,
+    pub id1: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQueryThreadContext {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCustomGeometryType {
+    pub structgen_pad0: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCustomGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub callbacks: *mut PxCustomGeometryCallbacks,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeometryHolder {
+    pub structgen_pad0: [u8; 56],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeometryQuery {
+    pub structgen_pad0: [u8; 1],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxHeightFieldSample {
@@ -389,26 +469,28 @@ pub struct PxHeightFieldSample {
     pub materialIndex0: PxBitAndByte,
     pub materialIndex1: PxBitAndByte,
 }
-#[test] fn check_size_PxHeightFieldSample() { assert_eq!(std::mem::size_of::<PxHeightFieldSample>(), 4); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxHeightField {
+    pub structgen_pad0: [u8; 16],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxHeightFieldDesc {
     pub nbRows: u32,
     pub nbColumns: u32,
-    pub format: u32,
+    pub format: PxHeightFieldFormat,
     pub structgen_pad0: [u8; 4],
     pub samples: PxStridedData,
     pub convexEdgeThreshold: f32,
     pub flags: PxHeightFieldFlags,
     pub structgen_pad1: [u8; 2],
 }
-#[test] fn check_size_PxHeightFieldDesc() { assert_eq!(std::mem::size_of::<PxHeightFieldDesc>(), 40); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxTriangle {
-    pub verts: [PxVec3; 3],
+pub struct PxMeshQuery {
+    pub structgen_pad0: [u8; 1],
 }
-#[test] fn check_size_PxTriangle() { assert_eq!(std::mem::size_of::<PxTriangle>(), 36); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSimpleTriangleMesh {
@@ -417,78 +499,120 @@ pub struct PxSimpleTriangleMesh {
     pub flags: PxMeshFlags,
     pub structgen_pad0: [u8; 6],
 }
-#[test] fn check_size_PxSimpleTriangleMesh() { assert_eq!(std::mem::size_of::<PxSimpleTriangleMesh>(), 56); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTriangle {
+    pub verts: [PxVec3; 3],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTrianglePadded {
+    pub verts: [PxVec3; 3],
+    pub padding: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTriangleMesh {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBVH34TriangleMesh {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTetrahedron {
+    pub verts: [PxVec3; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSoftBodyAuxData {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTetrahedronMesh {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSoftBodyMesh {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCollisionMeshMappingData {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSoftBodyCollisionData {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTetrahedronMeshData {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSoftBodySimulationData {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCollisionTetrahedronMeshData {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSimulationTetrahedronMeshData {
+    pub structgen_pad0: [u8; 8],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxActor {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxActor() { assert_eq!(std::mem::size_of::<PxActor>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxScene {
-    pub structgen_pad0: [u8; 8],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxScene() { assert_eq!(std::mem::size_of::<PxScene>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxAggregate {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxAggregate() { assert_eq!(std::mem::size_of::<PxAggregate>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxArticulationBase {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxArticulationBase() { assert_eq!(std::mem::size_of::<PxArticulationBase>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxArticulationLink {
+pub struct PxSpringModifiers {
+    pub stiffness: f32,
+    pub damping: f32,
     pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxArticulationLink() { assert_eq!(std::mem::size_of::<PxArticulationLink>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxArticulationJointBase {
+pub struct PxRestitutionModifiers {
+    pub restitution: f32,
+    pub velocityThreshold: f32,
     pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxArticulationJointBase() { assert_eq!(std::mem::size_of::<PxArticulationJointBase>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxArticulation {
+pub struct Px1DConstraint {
+    pub linear0: PxVec3,
+    pub geometricError: f32,
+    pub angular0: PxVec3,
+    pub velocityTarget: f32,
+    pub linear1: PxVec3,
+    pub minImpulse: f32,
+    pub angular1: PxVec3,
+    pub maxImpulse: f32,
+    pub mods: Px1DConstraintMods,
+    pub forInternalUse: f32,
+    pub flags: u16,
+    pub solveHint: u16,
     pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxArticulation() { assert_eq!(std::mem::size_of::<PxArticulation>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxArticulationDriveCache {
-    pub structgen_pad0: [u8; 1],
-}
-#[test] fn check_size_PxArticulationDriveCache() { assert_eq!(std::mem::size_of::<PxArticulationDriveCache>(), 1); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConstraintInvMassScale {
@@ -497,16 +621,23 @@ pub struct PxConstraintInvMassScale {
     pub linear1: f32,
     pub angular1: f32,
 }
-#[test] fn check_size_PxConstraintInvMassScale() { assert_eq!(std::mem::size_of::<PxConstraintInvMassScale>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxConstraint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+pub struct PxContactPoint {
+    pub normal: PxVec3,
+    pub separation: f32,
+    pub point: PxVec3,
+    pub maxImpulse: f32,
+    pub targetVel: PxVec3,
+    pub staticFriction: f32,
+    pub materialFlags: u8,
+    pub structgen_pad0: [u8; 3],
+    pub internalFaceIndex1: u32,
+    pub dynamicFriction: f32,
+    pub restitution: f32,
+    pub damping: f32,
+    pub structgen_pad1: [u8; 12],
 }
-#[test] fn check_size_PxConstraint() { assert_eq!(std::mem::size_of::<PxConstraint>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSolverBody {
@@ -516,7 +647,6 @@ pub struct PxSolverBody {
     pub angularState: PxVec3,
     pub solverProgress: u32,
 }
-#[test] fn check_size_PxSolverBody() { assert_eq!(std::mem::size_of::<PxSolverBody>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSolverBodyData {
@@ -529,10 +659,123 @@ pub struct PxSolverBodyData {
     pub nodeIndex: u32,
     pub maxContactImpulse: f32,
     pub body2World: PxTransform,
-    pub lockFlags: u16,
     pub pad: u16,
+    pub structgen_pad0: [u8; 2],
 }
-#[test] fn check_size_PxSolverBodyData() { assert_eq!(std::mem::size_of::<PxSolverBodyData>(), 112); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConstraintBatchHeader {
+    pub startIndex: u32,
+    pub stride: u16,
+    pub constraintType: u16,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSolverConstraintDesc {
+    pub structgen_pad0: [u8; 16],
+    pub bodyADataIndex: u32,
+    pub bodyBDataIndex: u32,
+    pub linkIndexA: u32,
+    pub linkIndexB: u32,
+    pub constraint: *mut u8,
+    pub writeBack: *mut std::ffi::c_void,
+    pub progressA: u16,
+    pub progressB: u16,
+    pub constraintLengthOver16: u16,
+    pub padding: [u8; 10],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSolverConstraintPrepDescBase {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxSolverBody,
+    pub body1: *const PxSolverBody,
+    pub data0: *const PxSolverBodyData,
+    pub data1: *const PxSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSolverConstraintPrepDesc {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxSolverBody,
+    pub body1: *const PxSolverBody,
+    pub data0: *const PxSolverBodyData,
+    pub data1: *const PxSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub structgen_pad0: [u8; 8],
+    pub rows: *mut Px1DConstraint,
+    pub numRows: u32,
+    pub linBreakForce: f32,
+    pub angBreakForce: f32,
+    pub minResponseThreshold: f32,
+    pub writeback: *mut std::ffi::c_void,
+    pub disablePreprocessing: bool,
+    pub improvedSlerp: bool,
+    pub driveLimitsAreForces: bool,
+    pub extendedLimits: bool,
+    pub disableConstraint: bool,
+    pub structgen_pad1: [u8; 3],
+    pub body0WorldOffset: PxVec3Padded,
+    pub structgen_pad2: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSolverContactDesc {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxSolverBody,
+    pub body1: *const PxSolverBody,
+    pub data0: *const PxSolverBodyData,
+    pub data1: *const PxSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub shapeInteraction: *mut std::ffi::c_void,
+    pub contacts: *mut PxContactPoint,
+    pub numContacts: u32,
+    pub hasMaxImpulse: bool,
+    pub disableStrongFriction: bool,
+    pub hasForceThresholds: bool,
+    pub structgen_pad0: [u8; 1],
+    pub restDistance: f32,
+    pub maxCCDSeparation: f32,
+    pub frictionPtr: *mut u8,
+    pub frictionCount: u8,
+    pub structgen_pad1: [u8; 7],
+    pub contactForces: *mut f32,
+    pub startFrictionPatchIndex: u32,
+    pub numFrictionPatches: u32,
+    pub startContactPatchIndex: u32,
+    pub numContactPatches: u16,
+    pub axisConstraintCount: u16,
+    pub offsetSlop: f32,
+    pub structgen_pad2: [u8; 12],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationLimit {
+    pub low: f32,
+    pub high: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationDrive {
+    pub stiffness: f32,
+    pub damping: f32,
+    pub maxForce: f32,
+    pub driveType: PxArticulationDriveType,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTGSSolverBodyVel {
@@ -548,7 +791,12 @@ pub struct PxTGSSolverBodyVel {
     pub isKinematic: bool,
     pub pad: u8,
 }
-#[test] fn check_size_PxTGSSolverBodyVel() { assert_eq!(std::mem::size_of::<PxTGSSolverBodyVel>(), 64); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTGSSolverBodyTxInertia {
+    pub deltaBody2World: PxTransform,
+    pub sqrtInvInertia: PxMat33,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTGSSolverBodyData {
@@ -561,7 +809,128 @@ pub struct PxTGSSolverBodyData {
     pub reportThreshold: f32,
     pub pad: u32,
 }
-#[test] fn check_size_PxTGSSolverBodyData() { assert_eq!(std::mem::size_of::<PxTGSSolverBodyData>(), 48); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTGSSolverConstraintPrepDescBase {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxTGSSolverBodyVel,
+    pub body1: *const PxTGSSolverBodyVel,
+    pub body0TxI: *const PxTGSSolverBodyTxInertia,
+    pub body1TxI: *const PxTGSSolverBodyTxInertia,
+    pub bodyData0: *const PxTGSSolverBodyData,
+    pub bodyData1: *const PxTGSSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTGSSolverConstraintPrepDesc {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxTGSSolverBodyVel,
+    pub body1: *const PxTGSSolverBodyVel,
+    pub body0TxI: *const PxTGSSolverBodyTxInertia,
+    pub body1TxI: *const PxTGSSolverBodyTxInertia,
+    pub bodyData0: *const PxTGSSolverBodyData,
+    pub bodyData1: *const PxTGSSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub rows: *mut Px1DConstraint,
+    pub numRows: u32,
+    pub linBreakForce: f32,
+    pub angBreakForce: f32,
+    pub minResponseThreshold: f32,
+    pub writeback: *mut std::ffi::c_void,
+    pub disablePreprocessing: bool,
+    pub improvedSlerp: bool,
+    pub driveLimitsAreForces: bool,
+    pub extendedLimits: bool,
+    pub disableConstraint: bool,
+    pub structgen_pad0: [u8; 3],
+    pub body0WorldOffset: PxVec3Padded,
+    pub cA2w: PxVec3Padded,
+    pub cB2w: PxVec3Padded,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTGSSolverContactDesc {
+    pub invMassScales: PxConstraintInvMassScale,
+    pub desc: *mut PxSolverConstraintDesc,
+    pub body0: *const PxTGSSolverBodyVel,
+    pub body1: *const PxTGSSolverBodyVel,
+    pub body0TxI: *const PxTGSSolverBodyTxInertia,
+    pub body1TxI: *const PxTGSSolverBodyTxInertia,
+    pub bodyData0: *const PxTGSSolverBodyData,
+    pub bodyData1: *const PxTGSSolverBodyData,
+    pub bodyFrame0: PxTransform,
+    pub bodyFrame1: PxTransform,
+    pub bodyState0: BodyState,
+    pub bodyState1: BodyState,
+    pub shapeInteraction: *mut std::ffi::c_void,
+    pub contacts: *mut PxContactPoint,
+    pub numContacts: u32,
+    pub hasMaxImpulse: bool,
+    pub disableStrongFriction: bool,
+    pub hasForceThresholds: bool,
+    pub structgen_pad0: [u8; 1],
+    pub restDistance: f32,
+    pub maxCCDSeparation: f32,
+    pub frictionPtr: *mut u8,
+    pub frictionCount: u8,
+    pub structgen_pad1: [u8; 7],
+    pub contactForces: *mut f32,
+    pub startFrictionPatchIndex: u32,
+    pub numFrictionPatches: u32,
+    pub startContactPatchIndex: u32,
+    pub numContactPatches: u16,
+    pub axisConstraintCount: u16,
+    pub maxImpulse: f32,
+    pub torsionalPatchRadius: f32,
+    pub minTorsionalPatchRadius: f32,
+    pub offsetSlop: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationTendonLimit {
+    pub lowLimit: f32,
+    pub highLimit: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationAttachment {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationTendonJoint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationTendon {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationSpatialTendon {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationFixedTendon {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSpatialForce {
@@ -570,7 +939,6 @@ pub struct PxSpatialForce {
     pub torque: PxVec3,
     pub pad1: f32,
 }
-#[test] fn check_size_PxSpatialForce() { assert_eq!(std::mem::size_of::<PxSpatialForce>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSpatialVelocity {
@@ -579,7 +947,6 @@ pub struct PxSpatialVelocity {
     pub angular: PxVec3,
     pub pad1: f32,
 }
-#[test] fn check_size_PxSpatialVelocity() { assert_eq!(std::mem::size_of::<PxSpatialVelocity>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxArticulationRootLinkData {
@@ -589,7 +956,6 @@ pub struct PxArticulationRootLinkData {
     pub worldLinAccel: PxVec3,
     pub worldAngAccel: PxVec3,
 }
-#[test] fn check_size_PxArticulationRootLinkData() { assert_eq!(std::mem::size_of::<PxArticulationRootLinkData>(), 76); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxArticulationCache {
@@ -600,9 +966,11 @@ pub struct PxArticulationCache {
     pub jointAcceleration: *mut f32,
     pub jointPosition: *mut f32,
     pub jointForce: *mut f32,
+    pub jointSolverForces: *mut f32,
     pub linkVelocity: *mut PxSpatialVelocity,
     pub linkAcceleration: *mut PxSpatialVelocity,
     pub rootLinkData: *mut PxArticulationRootLinkData,
+    pub sensorForces: *mut PxSpatialForce,
     pub coefficientMatrix: *mut f32,
     pub lambda: *mut f32,
     pub scratchMemory: *mut std::ffi::c_void,
@@ -610,138 +978,82 @@ pub struct PxArticulationCache {
     pub version: u32,
     pub structgen_pad0: [u8; 4],
 }
-#[test] fn check_size_PxArticulationCache() { assert_eq!(std::mem::size_of::<PxArticulationCache>(), 120); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxArticulationSensor {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxArticulationReducedCoordinate {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxArticulationReducedCoordinate() { assert_eq!(std::mem::size_of::<PxArticulationReducedCoordinate>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxJoint() { assert_eq!(std::mem::size_of::<PxJoint>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxArticulationJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxArticulationJoint() { assert_eq!(std::mem::size_of::<PxArticulationJoint>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxArticulationJointReducedCoordinate {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxArticulationJointReducedCoordinate() { assert_eq!(std::mem::size_of::<PxArticulationJointReducedCoordinate>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxFilterData {
-    pub word0: u32,
-    pub word1: u32,
-    pub word2: u32,
-    pub word3: u32,
-}
-#[test] fn check_size_PxFilterData() { assert_eq!(std::mem::size_of::<PxFilterData>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxMaterial {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxMaterial() { assert_eq!(std::mem::size_of::<PxMaterial>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxShape {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRigidActor {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxNodeIndex {
+    pub structgen_pad0: [u8; 8],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRigidBody {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxRigidBody() { assert_eq!(std::mem::size_of::<PxRigidBody>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxQueryFilterData {
-    pub data: PxFilterData,
-    pub flags: PxQueryFlags,
-    pub structgen_pad0: [u8; 2],
+pub struct PxArticulationLink {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxQueryFilterData() { assert_eq!(std::mem::size_of::<PxQueryFilterData>(), 20); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxOverlapHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
-    pub faceIndex: u32,
-    pub padTo16Bytes: u32,
+pub struct PxConeLimitedConstraint {
+    pub mAxis: PxVec3,
+    pub mAngle: f32,
+    pub mLowLimit: f32,
+    pub mHighLimit: f32,
 }
-#[test] fn check_size_PxOverlapHit() { assert_eq!(std::mem::size_of::<PxOverlapHit>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxBatchQueryMemory {
-    pub userRaycastResultBuffer: *mut PxRaycastQueryResult,
-    pub userRaycastTouchBuffer: *mut PxRaycastHit,
-    pub userSweepResultBuffer: *mut PxSweepQueryResult,
-    pub userSweepTouchBuffer: *mut PxSweepHit,
-    pub userOverlapResultBuffer: *mut PxOverlapQueryResult,
-    pub userOverlapTouchBuffer: *mut PxOverlapHit,
-    pub raycastTouchBufferSize: u32,
-    pub sweepTouchBufferSize: u32,
-    pub overlapTouchBufferSize: u32,
-    pub raycastResultBufferSize: u32,
-    pub sweepResultBufferSize: u32,
-    pub overlapResultBufferSize: u32,
+pub struct PxConeLimitParams {
+    pub lowHighLimits: PxVec4,
+    pub axisAngle: PxVec4,
 }
-#[test] fn check_size_PxBatchQueryMemory() { assert_eq!(std::mem::size_of::<PxBatchQueryMemory>(), 72); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBatchQueryDesc {
-    pub filterShaderData: *mut std::ffi::c_void,
-    pub filterShaderDataSize: u32,
-    pub structgen_pad0: [u8; 4],
-    pub preFilterShader: *mut std::ffi::c_void,
-    pub postFilterShader: *mut std::ffi::c_void,
-    pub queryMemory: PxBatchQueryMemory,
-}
-#[test] fn check_size_PxBatchQueryDesc() { assert_eq!(std::mem::size_of::<PxBatchQueryDesc>(), 104); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxQueryCache {
-    pub shape: *mut PxShape,
-    pub actor: *mut PxRigidActor,
-    pub faceIndex: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxQueryCache() { assert_eq!(std::mem::size_of::<PxQueryCache>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConstraintShaderTable {
     pub solverPrep: *mut std::ffi::c_void,
-    pub project: *mut std::ffi::c_void,
+    pub structgen_pad0: [u8; 8],
     pub visualize: *mut std::ffi::c_void,
-    pub flag: u32,
-    pub structgen_pad0: [u8; 4],
+    pub flag: PxConstraintFlag,
+    pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxConstraintShaderTable() { assert_eq!(std::mem::size_of::<PxConstraintShaderTable>(), 32); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConstraint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMassModificationProps {
@@ -750,7 +1062,6 @@ pub struct PxMassModificationProps {
     pub mInvMassScale1: f32,
     pub mInvInertiaScale1: f32,
 }
-#[test] fn check_size_PxMassModificationProps() { assert_eq!(std::mem::size_of::<PxMassModificationProps>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactPatch {
@@ -759,42 +1070,29 @@ pub struct PxContactPatch {
     pub restitution: f32,
     pub dynamicFriction: f32,
     pub staticFriction: f32,
-    pub startContactIndex: u8,
+    pub damping: f32,
+    pub startContactIndex: u16,
     pub nbContacts: u8,
     pub materialFlags: u8,
-    pub internalFlags: u8,
+    pub internalFlags: u16,
     pub materialIndex0: u16,
     pub materialIndex1: u16,
+    pub pad: [u16; 5],
 }
-#[test] fn check_size_PxContactPatch() { assert_eq!(std::mem::size_of::<PxContactPatch>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContact {
     pub contact: PxVec3,
     pub separation: f32,
 }
-#[test] fn check_size_PxContact() { assert_eq!(std::mem::size_of::<PxContact>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxContactStreamIterator {
-    pub zero: PxVec3,
-    pub structgen_pad0: [u8; 4],
-    pub patch: *const PxContactPatch,
-    pub contact: *const PxContact,
-    pub faceIndice: *const u32,
-    pub totalPatches: u32,
-    pub totalContacts: u32,
-    pub nextContactIndex: u32,
-    pub nextPatchIndex: u32,
-    pub contactPatchHeaderSize: u32,
-    pub contactPointSize: u32,
-    pub mStreamFormat: u32,
-    pub forceNoResponse: u32,
-    pub pointStepped: bool,
-    pub structgen_pad1: [u8; 3],
-    pub hasFaceIndices: u32,
+pub struct PxExtendedContact {
+    pub contact: PxVec3,
+    pub separation: f32,
+    pub targetVelocity: PxVec3,
+    pub maxImpulse: f32,
 }
-#[test] fn check_size_PxContactStreamIterator() { assert_eq!(std::mem::size_of::<PxContactStreamIterator>(), 80); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxModifiableContact {
@@ -810,15 +1108,47 @@ pub struct PxModifiableContact {
     pub staticFriction: f32,
     pub dynamicFriction: f32,
 }
-#[test] fn check_size_PxModifiableContact() { assert_eq!(std::mem::size_of::<PxModifiableContact>(), 64); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactStreamIterator {
+    pub zero: PxVec3,
+    pub structgen_pad0: [u8; 4],
+    pub patch: *const PxContactPatch,
+    pub contact: *const PxContact,
+    pub faceIndice: *const u32,
+    pub totalPatches: u32,
+    pub totalContacts: u32,
+    pub nextContactIndex: u32,
+    pub nextPatchIndex: u32,
+    pub contactPatchHeaderSize: u32,
+    pub contactPointSize: u32,
+    pub mStreamFormat: StreamFormat,
+    pub forceNoResponse: u32,
+    pub pointStepped: bool,
+    pub structgen_pad1: [u8; 3],
+    pub hasFaceIndices: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGpuContactPair {
+    pub contactPatches: *mut u8,
+    pub contactPoints: *mut u8,
+    pub contactForces: *mut f32,
+    pub transformCacheRef0: u32,
+    pub transformCacheRef1: u32,
+    pub nodeIndex0: PxNodeIndex,
+    pub nodeIndex1: PxNodeIndex,
+    pub actor0: *mut PxActor,
+    pub actor1: *mut PxActor,
+    pub nbContacts: u16,
+    pub nbPatches: u16,
+    pub structgen_pad0: [u8; 4],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactSet {
-    pub mCount: u32,
-    pub structgen_pad0: [u8; 4],
-    pub mContacts: *mut PxModifiableContact,
+    pub structgen_pad0: [u8; 16],
 }
-#[test] fn check_size_PxContactSet() { assert_eq!(std::mem::size_of::<PxContactSet>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactModifyPair {
@@ -827,7 +1157,297 @@ pub struct PxContactModifyPair {
     pub transform: [PxTransform; 2],
     pub contacts: PxContactSet,
 }
-#[test] fn check_size_PxContactModifyPair() { assert_eq!(std::mem::size_of::<PxContactModifyPair>(), 104); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBaseMaterial {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxFEMMaterial {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxFilterData {
+    pub word0: u32,
+    pub word1: u32,
+    pub word2: u32,
+    pub word3: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxParticleRigidFilterPair {
+    pub mID0: u64,
+    pub mID1: u64,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxMaterial {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGpuParticleBufferIndexPair {
+    pub systemIndex: u32,
+    pub bufferIndex: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxParticleVolume {
+    pub bound: PxBounds3,
+    pub particleIndicesOffset: u32,
+    pub numParticles: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxDiffuseParticleParams {
+    pub threshold: f32,
+    pub lifetime: f32,
+    pub airDrag: f32,
+    pub bubbleDrag: f32,
+    pub buoyancy: f32,
+    pub kineticEnergyWeight: f32,
+    pub pressureWeight: f32,
+    pub divergenceWeight: f32,
+    pub collisionDecay: f32,
+    pub useAccurateVelocity: bool,
+    pub structgen_pad0: [u8; 3],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxParticleSpring {
+    pub ind0: u32,
+    pub ind1: u32,
+    pub length: f32,
+    pub stiffness: f32,
+    pub damping: f32,
+    pub pad: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxParticleMaterial {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxActorShape {
+    pub actor: *mut PxRigidActor,
+    pub shape: *mut PxShape,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRaycastHit {
+    pub faceIndex: u32,
+    pub flags: PxHitFlags,
+    pub structgen_pad0: [u8; 2],
+    pub position: PxVec3,
+    pub normal: PxVec3,
+    pub distance: f32,
+    pub u: f32,
+    pub v: f32,
+    pub structgen_pad1: [u8; 4],
+    pub actor: *mut PxRigidActor,
+    pub shape: *mut PxShape,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxOverlapHit {
+    pub faceIndex: u32,
+    pub structgen_pad0: [u8; 4],
+    pub actor: *mut PxRigidActor,
+    pub shape: *mut PxShape,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSweepHit {
+    pub faceIndex: u32,
+    pub flags: PxHitFlags,
+    pub structgen_pad0: [u8; 2],
+    pub position: PxVec3,
+    pub normal: PxVec3,
+    pub distance: f32,
+    pub structgen_pad1: [u8; 4],
+    pub actor: *mut PxRigidActor,
+    pub shape: *mut PxShape,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRaycastCallback {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxRaycastHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxRaycastHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxOverlapCallback {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxOverlapHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxOverlapHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSweepCallback {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxSweepHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxSweepHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRaycastBuffer {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxRaycastHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxRaycastHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxOverlapBuffer {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxOverlapHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxOverlapHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSweepBuffer {
+    pub structgen_pad0: [u8; 8],
+    pub block: PxSweepHit,
+    pub hasBlock: bool,
+    pub structgen_pad1: [u8; 7],
+    pub touches: *mut PxSweepHit,
+    pub maxNbTouches: u32,
+    pub nbTouches: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQueryCache {
+    pub shape: *mut PxShape,
+    pub actor: *mut PxRigidActor,
+    pub faceIndex: u32,
+    pub structgen_pad0: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQueryFilterData {
+    pub data: PxFilterData,
+    pub flags: PxQueryFlags,
+    pub structgen_pad0: [u8; 2],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRigidDynamic {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRigidStatic {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSceneQueryDesc {
+    pub staticStructure: PxPruningStructureType,
+    pub dynamicStructure: PxPruningStructureType,
+    pub dynamicTreeRebuildRateHint: u32,
+    pub dynamicTreeSecondaryPruner: PxDynamicTreeSecondaryPruner,
+    pub staticBVHBuildStrategy: PxBVHBuildStrategy,
+    pub dynamicBVHBuildStrategy: PxBVHBuildStrategy,
+    pub staticNbObjectsPerNode: u32,
+    pub dynamicNbObjectsPerNode: u32,
+    pub sceneQueryUpdateMode: PxSceneQueryUpdateMode,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseRegion {
+    pub mBounds: PxBounds3,
+    pub mUserData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseRegionInfo {
+    pub mRegion: PxBroadPhaseRegion,
+    pub mNbStaticObjects: u32,
+    pub mNbDynamicObjects: u32,
+    pub mActive: bool,
+    pub mOverlap: bool,
+    pub structgen_pad0: [u8; 6],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseCaps {
+    pub mMaxNbRegions: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseDesc {
+    pub mType: PxBroadPhaseType,
+    pub structgen_pad0: [u8; 4],
+    pub mContextID: u64,
+    pub structgen_pad1: [u8; 8],
+    pub mFoundLostPairsCapacity: u32,
+    pub mDiscardStaticVsKinematic: bool,
+    pub mDiscardKinematicVsKinematic: bool,
+    pub structgen_pad2: [u8; 2],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseUpdateData {
+    pub mCreated: *const u32,
+    pub mNbCreated: u32,
+    pub structgen_pad0: [u8; 4],
+    pub mUpdated: *const u32,
+    pub mNbUpdated: u32,
+    pub structgen_pad1: [u8; 4],
+    pub mRemoved: *const u32,
+    pub mNbRemoved: u32,
+    pub structgen_pad2: [u8; 4],
+    pub mBounds: *const PxBounds3,
+    pub mGroups: *const u32,
+    pub mDistances: *const f32,
+    pub mCapacity: u32,
+    pub structgen_pad3: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhasePair {
+    pub mID0: u32,
+    pub mID1: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBroadPhaseResults {
+    pub mNbCreatedPairs: u32,
+    pub structgen_pad0: [u8; 4],
+    pub mCreatedPairs: *const PxBroadPhasePair,
+    pub mNbDeletedPairs: u32,
+    pub structgen_pad1: [u8; 4],
+    pub mDeletedPairs: *const PxBroadPhasePair,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSceneLimits {
@@ -840,53 +1460,57 @@ pub struct PxSceneLimits {
     pub maxNbRegions: u32,
     pub maxNbBroadPhaseOverlaps: u32,
 }
-#[test] fn check_size_PxSceneLimits() { assert_eq!(std::mem::size_of::<PxSceneLimits>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxgDynamicsMemoryConfig {
-    pub constraintBufferCapacity: u32,
-    pub contactBufferCapacity: u32,
     pub tempBufferCapacity: u32,
-    pub contactStreamSize: u32,
-    pub patchStreamSize: u32,
-    pub forceStreamCapacity: u32,
+    pub maxRigidContactCount: u32,
+    pub maxRigidPatchCount: u32,
     pub heapCapacity: u32,
     pub foundLostPairsCapacity: u32,
+    pub foundLostAggregatePairsCapacity: u32,
+    pub totalAggregatePairsCapacity: u32,
+    pub maxSoftBodyContacts: u32,
+    pub maxFemClothContacts: u32,
+    pub maxParticleContacts: u32,
+    pub collisionStackSize: u32,
+    pub maxHairContacts: u32,
 }
-#[test] fn check_size_PxgDynamicsMemoryConfig() { assert_eq!(std::mem::size_of::<PxgDynamicsMemoryConfig>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSceneDesc {
+    pub staticStructure: PxPruningStructureType,
+    pub dynamicStructure: PxPruningStructureType,
+    pub dynamicTreeRebuildRateHint: u32,
+    pub dynamicTreeSecondaryPruner: PxDynamicTreeSecondaryPruner,
+    pub staticBVHBuildStrategy: PxBVHBuildStrategy,
+    pub dynamicBVHBuildStrategy: PxBVHBuildStrategy,
+    pub staticNbObjectsPerNode: u32,
+    pub dynamicNbObjectsPerNode: u32,
+    pub sceneQueryUpdateMode: PxSceneQueryUpdateMode,
     pub gravity: PxVec3,
-    pub structgen_pad0: [u8; 4],
     pub simulationEventCallback: *mut PxSimulationEventCallback,
     pub contactModifyCallback: *mut PxContactModifyCallback,
     pub ccdContactModifyCallback: *mut PxCCDContactModifyCallback,
     pub filterShaderData: *const std::ffi::c_void,
     pub filterShaderDataSize: u32,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 4],
     pub filterShader: *mut std::ffi::c_void,
     pub filterCallback: *mut PxSimulationFilterCallback,
-    pub kineKineFilteringMode: u32,
-    pub staticKineFilteringMode: u32,
-    pub broadPhaseType: u32,
-    pub structgen_pad2: [u8; 4],
+    pub kineKineFilteringMode: PxPairFilteringMode,
+    pub staticKineFilteringMode: PxPairFilteringMode,
+    pub broadPhaseType: PxBroadPhaseType,
+    pub structgen_pad1: [u8; 4],
     pub broadPhaseCallback: *mut PxBroadPhaseCallback,
     pub limits: PxSceneLimits,
-    pub frictionType: u32,
-    pub solverType: u32,
+    pub frictionType: PxFrictionType,
+    pub solverType: PxSolverType,
     pub bounceThresholdVelocity: f32,
     pub frictionOffsetThreshold: f32,
-    pub ccdMaxSeparation: f32,
-    pub solverOffsetSlop: f32,
+    pub frictionCorrelationDistance: f32,
     pub flags: PxSceneFlags,
-    pub structgen_pad3: [u8; 4],
     pub cpuDispatcher: *mut PxCpuDispatcher,
-    pub cudaContextManager: *mut PxCudaContextManager,
-    pub staticStructure: u32,
-    pub dynamicStructure: u32,
-    pub dynamicTreeRebuildRateHint: u32,
-    pub sceneQueryUpdateMode: u32,
+    pub structgen_pad2: [u8; 8],
     pub userData: *mut std::ffi::c_void,
     pub solverBatchSize: u32,
     pub solverArticulationBatchSize: u32,
@@ -896,43 +1520,17 @@ pub struct PxSceneDesc {
     pub contactReportStreamBufferSize: u32,
     pub ccdMaxPasses: u32,
     pub ccdThreshold: f32,
+    pub ccdMaxSeparation: f32,
     pub wakeCounterResetValue: f32,
     pub sanityBounds: PxBounds3,
     pub gpuDynamicsConfig: PxgDynamicsMemoryConfig,
     pub gpuMaxNumPartitions: u32,
+    pub gpuMaxNumStaticPartitions: u32,
     pub gpuComputeVersion: u32,
-    pub structgen_pad4: [u8; 12],
+    pub contactPairSlabSize: u32,
+    pub sceneQuerySystem: *mut PxSceneQuerySystem,
+    pub structgen_pad3: [u8; 8],
 }
-#[test] fn check_size_PxSceneDesc() { assert_eq!(std::mem::size_of::<PxSceneDesc>(), 312); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxRigidStatic {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxRigidStatic() { assert_eq!(std::mem::size_of::<PxRigidStatic>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxRigidDynamic {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxRigidDynamic() { assert_eq!(std::mem::size_of::<PxRigidDynamic>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxPruningStructure {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxPruningStructure() { assert_eq!(std::mem::size_of::<PxPruningStructure>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSimulationStatistics {
@@ -942,7 +1540,7 @@ pub struct PxSimulationStatistics {
     pub nbStaticBodies: u32,
     pub nbDynamicBodies: u32,
     pub nbKinematicBodies: u32,
-    pub nbShapes: [u32; 7],
+    pub nbShapes: [u32; 11],
     pub nbAggregates: u32,
     pub nbArticulations: u32,
     pub nbAxisSolverConstraints: u32,
@@ -957,21 +1555,138 @@ pub struct PxSimulationStatistics {
     pub nbNewTouches: u32,
     pub nbLostTouches: u32,
     pub nbPartitions: u32,
+    pub structgen_pad0: [u8; 4],
+    pub gpuMemParticles: u64,
+    pub gpuMemSoftBodies: u64,
+    pub gpuMemFEMCloths: u64,
+    pub gpuMemHairSystems: u64,
+    pub gpuMemHeap: u64,
+    pub gpuMemHeapBroadPhase: u64,
+    pub gpuMemHeapNarrowPhase: u64,
+    pub gpuMemHeapSolver: u64,
+    pub gpuMemHeapArticulation: u64,
+    pub gpuMemHeapSimulation: u64,
+    pub gpuMemHeapSimulationArticulation: u64,
+    pub gpuMemHeapSimulationParticles: u64,
+    pub gpuMemHeapSimulationSoftBody: u64,
+    pub gpuMemHeapSimulationFEMCloth: u64,
+    pub gpuMemHeapSimulationHairSystem: u64,
+    pub gpuMemHeapParticles: u64,
+    pub gpuMemHeapSoftBodies: u64,
+    pub gpuMemHeapFEMCloths: u64,
+    pub gpuMemHeapHairSystems: u64,
+    pub gpuMemHeapOther: u64,
     pub nbBroadPhaseAdds: u32,
     pub nbBroadPhaseRemoves: u32,
-    pub nbDiscreteContactPairs: [[u32; 7]; 7],
-    pub nbCCDPairs: [[u32; 7]; 7],
-    pub nbModifiedContactPairs: [[u32; 7]; 7],
-    pub nbTriggerPairs: [[u32; 7]; 7],
+    pub nbDiscreteContactPairs: [[u32; 11]; 11],
+    pub nbCCDPairs: [[u32; 11]; 11],
+    pub nbModifiedContactPairs: [[u32; 11]; 11],
+    pub nbTriggerPairs: [[u32; 11]; 11],
 }
-#[test] fn check_size_PxSimulationStatistics() { assert_eq!(std::mem::size_of::<PxSimulationStatistics>(), 900); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGpuBodyData {
+    pub quat: PxQuat,
+    pub pos: PxVec4,
+    pub linVel: PxVec4,
+    pub angVel: PxVec4,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGpuActorPair {
+    pub srcIndex: u32,
+    pub structgen_pad0: [u8; 4],
+    pub nodeIndex: PxNodeIndex,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxIndexDataPair {
+    pub index: u32,
+    pub structgen_pad0: [u8; 4],
+    pub data: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDominanceGroupPair {
     pub dominance0: u8,
     pub dominance1: u8,
 }
-#[test] fn check_size_PxDominanceGroupPair() { assert_eq!(std::mem::size_of::<PxDominanceGroupPair>(), 2); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxScene {
+    pub structgen_pad0: [u8; 8],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSceneReadLock {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSceneWriteLock {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairExtraDataItem {
+    pub type_: u8,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairVelocity {
+    pub type_: u8,
+    pub structgen_pad0: [u8; 3],
+    pub linearVelocity: [PxVec3; 2],
+    pub angularVelocity: [PxVec3; 2],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairPose {
+    pub type_: u8,
+    pub structgen_pad0: [u8; 3],
+    pub globalPose: [PxTransform; 2],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairIndex {
+    pub type_: u8,
+    pub structgen_pad0: [u8; 1],
+    pub index: u16,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairExtraDataIterator {
+    pub currPtr: *const u8,
+    pub endPtr: *const u8,
+    pub preSolverVelocity: *const PxContactPairVelocity,
+    pub postSolverVelocity: *const PxContactPairVelocity,
+    pub eventPose: *const PxContactPairPose,
+    pub contactPairIndex: u32,
+    pub structgen_pad0: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairHeader {
+    pub actors: [*mut PxActor; 2],
+    pub extraDataStream: *const u8,
+    pub extraDataStreamSize: u16,
+    pub flags: PxContactPairHeaderFlags,
+    pub structgen_pad0: [u8; 4],
+    pub pairs: *const PxContactPair,
+    pub nbPairs: u32,
+    pub structgen_pad1: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactPairPoint {
+    pub position: PxVec3,
+    pub separation: f32,
+    pub normal: PxVec3,
+    pub internalFaceIndex0: u32,
+    pub impulse: PxVec3,
+    pub internalFaceIndex1: u32,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxContactPair {
@@ -988,134 +1703,40 @@ pub struct PxContactPair {
     pub internalData: [u32; 2],
     pub structgen_pad0: [u8; 4],
 }
-#[test] fn check_size_PxContactPair() { assert_eq!(std::mem::size_of::<PxContactPair>(), 64); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairHeader {
-    pub actors: [*mut PxRigidActor; 2],
-    pub extraDataStream: *const u8,
-    pub extraDataStreamSize: u16,
-    pub flags: PxContactPairHeaderFlags,
-    pub structgen_pad0: [u8; 4],
-    pub pairs: *const PxContactPair,
-    pub nbPairs: u32,
-    pub structgen_pad1: [u8; 4],
-}
-#[test] fn check_size_PxContactPairHeader() { assert_eq!(std::mem::size_of::<PxContactPairHeader>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBroadPhaseCaps {
-    pub maxNbRegions: u32,
-    pub maxNbObjects: u32,
-    pub needsPredefinedBounds: bool,
-    pub structgen_pad0: [u8; 3],
-}
-#[test] fn check_size_PxBroadPhaseCaps() { assert_eq!(std::mem::size_of::<PxBroadPhaseCaps>(), 12); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBroadPhaseRegion {
-    pub bounds: PxBounds3,
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxBroadPhaseRegion() { assert_eq!(std::mem::size_of::<PxBroadPhaseRegion>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxBroadPhaseRegionInfo {
-    pub region: PxBroadPhaseRegion,
-    pub nbStaticObjects: u32,
-    pub nbDynamicObjects: u32,
-    pub active: bool,
-    pub overlap: bool,
-    pub structgen_pad0: [u8; 6],
-}
-#[test] fn check_size_PxBroadPhaseRegionInfo() { assert_eq!(std::mem::size_of::<PxBroadPhaseRegionInfo>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxSceneReadLock {
-    pub structgen_pad0: [u8; 8],
-}
-#[test] fn check_size_PxSceneReadLock() { assert_eq!(std::mem::size_of::<PxSceneReadLock>(), 8); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxSceneWriteLock {
-    pub structgen_pad0: [u8; 8],
-}
-#[test] fn check_size_PxSceneWriteLock() { assert_eq!(std::mem::size_of::<PxSceneWriteLock>(), 8); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairExtraDataItem {
-    pub _type: u8,
-}
-#[test] fn check_size_PxContactPairExtraDataItem() { assert_eq!(std::mem::size_of::<PxContactPairExtraDataItem>(), 1); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairVelocity {
-    pub _type: u8,
-    pub structgen_pad0: [u8; 3],
-    pub linearVelocity: [PxVec3; 2],
-    pub angularVelocity: [PxVec3; 2],
-}
-#[test] fn check_size_PxContactPairVelocity() { assert_eq!(std::mem::size_of::<PxContactPairVelocity>(), 52); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairPose {
-    pub _type: u8,
-    pub structgen_pad0: [u8; 3],
-    pub globalPose: [PxTransform; 2],
-}
-#[test] fn check_size_PxContactPairPose() { assert_eq!(std::mem::size_of::<PxContactPairPose>(), 60); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairIndex {
-    pub _type: u8,
-    pub structgen_pad0: [u8; 1],
-    pub index: u16,
-}
-#[test] fn check_size_PxContactPairIndex() { assert_eq!(std::mem::size_of::<PxContactPairIndex>(), 4); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairExtraDataIterator {
-    pub currPtr: *const u8,
-    pub endPtr: *const u8,
-    pub preSolverVelocity: *const PxContactPairVelocity,
-    pub postSolverVelocity: *const PxContactPairVelocity,
-    pub eventPose: *const PxContactPairPose,
-    pub contactPairIndex: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxContactPairExtraDataIterator() { assert_eq!(std::mem::size_of::<PxContactPairExtraDataIterator>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactPairPoint {
-    pub position: PxVec3,
-    pub separation: f32,
-    pub normal: PxVec3,
-    pub internalFaceIndex0: u32,
-    pub impulse: PxVec3,
-    pub internalFaceIndex1: u32,
-}
-#[test] fn check_size_PxContactPairPoint() { assert_eq!(std::mem::size_of::<PxContactPairPoint>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTriggerPair {
     pub triggerShape: *mut PxShape,
-    pub triggerActor: *mut PxRigidActor,
+    pub triggerActor: *mut PxActor,
     pub otherShape: *mut PxShape,
-    pub otherActor: *mut PxRigidActor,
-    pub status: u32,
+    pub otherActor: *mut PxActor,
+    pub status: PxPairFlag,
     pub flags: PxTriggerPairFlags,
     pub structgen_pad0: [u8; 3],
 }
-#[test] fn check_size_PxTriggerPair() { assert_eq!(std::mem::size_of::<PxTriggerPair>(), 40); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConstraintInfo {
     pub constraint: *mut PxConstraint,
     pub externalReference: *mut std::ffi::c_void,
-    pub _type: u32,
+    pub type_: u32,
     pub structgen_pad0: [u8; 4],
 }
-#[test] fn check_size_PxConstraintInfo() { assert_eq!(std::mem::size_of::<PxConstraintInfo>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxFEMParameters {
+    pub velocityDamping: f32,
+    pub settlingThreshold: f32,
+    pub sleepThreshold: f32,
+    pub sleepDamping: f32,
+    pub selfCollisionFilterDistance: f32,
+    pub selfCollisionStressTolerance: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxPruningStructure {
+    pub structgen_pad0: [u8; 16],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxExtendedVec3 {
@@ -1123,41 +1744,66 @@ pub struct PxExtendedVec3 {
     pub y: f64,
     pub z: f64,
 }
-#[test] fn check_size_PxExtendedVec3() { assert_eq!(std::mem::size_of::<PxExtendedVec3>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxObstacle {
-    pub mType: i32,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad0: [u8; 8],
     pub mUserData: *mut std::ffi::c_void,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
 }
-#[test] fn check_size_PxObstacle() { assert_eq!(std::mem::size_of::<PxObstacle>(), 56); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBoxObstacle {
-    pub mType: i32,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad0: [u8; 8],
     pub mUserData: *mut std::ffi::c_void,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfExtents: PxVec3,
     pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxBoxObstacle() { assert_eq!(std::mem::size_of::<PxBoxObstacle>(), 72); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxCapsuleObstacle {
-    pub mType: i32,
-    pub structgen_pad0: [u8; 4],
+    pub structgen_pad0: [u8; 8],
     pub mUserData: *mut std::ffi::c_void,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfHeight: f32,
     pub mRadius: f32,
 }
-#[test] fn check_size_PxCapsuleObstacle() { assert_eq!(std::mem::size_of::<PxCapsuleObstacle>(), 64); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxControllerState {
+    pub deltaXP: PxVec3,
+    pub structgen_pad0: [u8; 4],
+    pub touchedShape: *mut PxShape,
+    pub touchedActor: *mut PxRigidActor,
+    pub touchedObstacleHandle: u32,
+    pub collisionFlags: u32,
+    pub standOnAnotherCCT: bool,
+    pub standOnObstacle: bool,
+    pub isMovingUp: bool,
+    pub structgen_pad1: [u8; 5],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxControllerStats {
+    pub nbIterations: u16,
+    pub nbFullUpdates: u16,
+    pub nbPartialUpdates: u16,
+    pub nbTessellation: u16,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxControllerHit {
+    pub controller: *mut PxController,
+    pub worldPos: PxExtendedVec3,
+    pub worldNormal: PxVec3,
+    pub dir: PxVec3,
+    pub length: f32,
+    pub structgen_pad0: [u8; 4],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllerShapeHit {
@@ -1172,7 +1818,6 @@ pub struct PxControllerShapeHit {
     pub triangleIndex: u32,
     pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxControllerShapeHit() { assert_eq!(std::mem::size_of::<PxControllerShapeHit>(), 88); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllersHit {
@@ -1184,7 +1829,6 @@ pub struct PxControllersHit {
     pub structgen_pad0: [u8; 4],
     pub other: *mut PxController,
 }
-#[test] fn check_size_PxControllersHit() { assert_eq!(std::mem::size_of::<PxControllersHit>(), 72); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllerObstacleHit {
@@ -1196,7 +1840,6 @@ pub struct PxControllerObstacleHit {
     pub structgen_pad0: [u8; 4],
     pub userData: *const std::ffi::c_void,
 }
-#[test] fn check_size_PxControllerObstacleHit() { assert_eq!(std::mem::size_of::<PxControllerObstacleHit>(), 72); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllerFilters {
@@ -1206,7 +1849,6 @@ pub struct PxControllerFilters {
     pub structgen_pad0: [u8; 6],
     pub mCCTFilterCallback: *mut PxControllerFilterCallback,
 }
-#[test] fn check_size_PxControllerFilters() { assert_eq!(std::mem::size_of::<PxControllerFilters>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxControllerDesc {
@@ -1224,40 +1866,15 @@ pub struct PxControllerDesc {
     pub structgen_pad1: [u8; 4],
     pub reportCallback: *mut PxUserControllerHitReport,
     pub behaviorCallback: *mut PxControllerBehaviorCallback,
-    pub nonWalkableMode: u32,
+    pub nonWalkableMode: PxControllerNonWalkableMode,
     pub structgen_pad2: [u8; 4],
     pub material: *mut PxMaterial,
     pub registerDeletionListener: bool,
-    pub structgen_pad3: [u8; 7],
+    pub clientID: u8,
+    pub structgen_pad3: [u8; 6],
     pub userData: *mut std::ffi::c_void,
-    pub mType: u32,
-    pub structgen_pad4: [u8; 4],
+    pub structgen_pad4: [u8; 8],
 }
-#[test] fn check_size_PxControllerDesc() { assert_eq!(std::mem::size_of::<PxControllerDesc>(), 136); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxControllerState {
-    pub deltaXP: PxVec3,
-    pub structgen_pad0: [u8; 4],
-    pub touchedShape: *mut PxShape,
-    pub touchedActor: *mut PxRigidActor,
-    pub touchedObstacleHandle: u32,
-    pub collisionFlags: u32,
-    pub standOnAnotherCCT: bool,
-    pub standOnObstacle: bool,
-    pub isMovingUp: bool,
-    pub structgen_pad1: [u8; 5],
-}
-#[test] fn check_size_PxControllerState() { assert_eq!(std::mem::size_of::<PxControllerState>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxControllerStats {
-    pub nbIterations: u16,
-    pub nbFullUpdates: u16,
-    pub nbPartialUpdates: u16,
-    pub nbTessellation: u16,
-}
-#[test] fn check_size_PxControllerStats() { assert_eq!(std::mem::size_of::<PxControllerStats>(), 8); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBoxControllerDesc {
@@ -1275,18 +1892,18 @@ pub struct PxBoxControllerDesc {
     pub structgen_pad1: [u8; 4],
     pub reportCallback: *mut PxUserControllerHitReport,
     pub behaviorCallback: *mut PxControllerBehaviorCallback,
-    pub nonWalkableMode: u32,
+    pub nonWalkableMode: PxControllerNonWalkableMode,
     pub structgen_pad2: [u8; 4],
     pub material: *mut PxMaterial,
     pub registerDeletionListener: bool,
-    pub structgen_pad3: [u8; 7],
+    pub clientID: u8,
+    pub structgen_pad3: [u8; 6],
     pub userData: *mut std::ffi::c_void,
-    pub mType: u32,
+    pub structgen_pad4: [u8; 4],
     pub halfHeight: f32,
     pub halfSideExtent: f32,
     pub halfForwardExtent: f32,
 }
-#[test] fn check_size_PxBoxControllerDesc() { assert_eq!(std::mem::size_of::<PxBoxControllerDesc>(), 144); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxCapsuleControllerDesc {
@@ -1304,18 +1921,43 @@ pub struct PxCapsuleControllerDesc {
     pub structgen_pad1: [u8; 4],
     pub reportCallback: *mut PxUserControllerHitReport,
     pub behaviorCallback: *mut PxControllerBehaviorCallback,
-    pub nonWalkableMode: u32,
+    pub nonWalkableMode: PxControllerNonWalkableMode,
     pub structgen_pad2: [u8; 4],
     pub material: *mut PxMaterial,
     pub registerDeletionListener: bool,
-    pub structgen_pad3: [u8; 7],
+    pub clientID: u8,
+    pub structgen_pad3: [u8; 6],
     pub userData: *mut std::ffi::c_void,
-    pub mType: u32,
+    pub structgen_pad4: [u8; 4],
     pub radius: f32,
     pub height: f32,
-    pub climbingMode: u32,
+    pub climbingMode: PxCapsuleClimbingMode,
 }
-#[test] fn check_size_PxCapsuleControllerDesc() { assert_eq!(std::mem::size_of::<PxCapsuleControllerDesc>(), 144); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxDim3 {
+    pub x: u32,
+    pub y: u32,
+    pub z: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSDFDesc {
+    pub sdf: PxBoundedData,
+    pub dims: PxDim3,
+    pub meshLower: PxVec3,
+    pub spacing: f32,
+    pub subgridSize: u32,
+    pub bitsPerSubgridPixel: PxSdfBitsPerSubgridPixel,
+    pub sdfSubgrids3DTexBlockDim: PxDim3,
+    pub sdfSubgrids: PxBoundedData,
+    pub sdfStartSlots: PxBoundedData,
+    pub subgridsMinSdfValue: f32,
+    pub subgridsMaxSdfValue: f32,
+    pub sdfBounds: PxBounds3,
+    pub narrowBandThicknessRelativeToSdfBoundsDiagonal: f32,
+    pub numThreadsForSdfConstruction: u32,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxConvexMeshDesc {
@@ -1324,52 +1966,62 @@ pub struct PxConvexMeshDesc {
     pub indices: PxBoundedData,
     pub flags: PxConvexFlags,
     pub vertexLimit: u16,
+    pub polygonLimit: u16,
     pub quantizedCount: u16,
-    pub structgen_pad0: [u8; 2],
+    pub sdfDesc: *mut PxSDFDesc,
 }
-#[test] fn check_size_PxConvexMeshDesc() { assert_eq!(std::mem::size_of::<PxConvexMeshDesc>(), 80); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxTriangleMeshDesc {
     pub points: PxBoundedData,
     pub triangles: PxBoundedData,
     pub flags: PxMeshFlags,
-    pub structgen_pad0: [u8; 6],
-    pub materialIndices: PxTypedStridedData_physx_PxMaterialTableIndex_,
+    pub structgen_pad0: [u8; 22],
+    pub sdfDesc: *mut PxSDFDesc,
 }
-#[test] fn check_size_PxTriangleMeshDesc() { assert_eq!(std::mem::size_of::<PxTriangleMeshDesc>(), 72); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxBVH33MidphaseDesc {
-    pub meshSizePerformanceTradeOff: f32,
-    pub meshCookingHint: u32,
+pub struct PxTetrahedronMeshDesc {
+    pub structgen_pad0: [u8; 16],
+    pub points: PxBoundedData,
+    pub tetrahedrons: PxBoundedData,
+    pub flags: PxMeshFlags,
+    pub tetsPerElement: u16,
+    pub structgen_pad1: [u8; 4],
 }
-#[test] fn check_size_PxBVH33MidphaseDesc() { assert_eq!(std::mem::size_of::<PxBVH33MidphaseDesc>(), 8); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSoftBodySimulationDataDesc {
+    pub vertexToTet: PxBoundedData,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxBVH34MidphaseDesc {
     pub numPrimsPerLeaf: u32,
+    pub buildStrategy: PxBVH34BuildStrategy,
+    pub quantized: bool,
+    pub structgen_pad0: [u8; 3],
 }
-#[test] fn check_size_PxBVH34MidphaseDesc() { assert_eq!(std::mem::size_of::<PxBVH34MidphaseDesc>(), 4); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMidphaseDesc {
-    pub structgen_pad0: [u8; 8],
-    pub mType: u32,
+    pub structgen_pad0: [u8; 16],
 }
-#[test] fn check_size_PxMidphaseDesc() { assert_eq!(std::mem::size_of::<PxMidphaseDesc>(), 12); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxBVHStructureDesc {
+pub struct PxBVHDesc {
     pub bounds: PxBoundedData,
+    pub enlargement: f32,
+    pub numPrimsPerLeaf: u32,
+    pub buildStrategy: PxBVHBuildStrategy,
+    pub structgen_pad0: [u8; 4],
 }
-#[test] fn check_size_PxBVHStructureDesc() { assert_eq!(std::mem::size_of::<PxBVHStructureDesc>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxCookingParams {
     pub areaTestEpsilon: f32,
     pub planeTolerance: f32,
-    pub convexMeshCookingType: u32,
+    pub convexMeshCookingType: PxConvexMeshCookingType,
     pub suppressTriangleMeshRemapTable: bool,
     pub buildTriangleAdjacencies: bool,
     pub buildGPUData: bool,
@@ -1379,59 +2031,46 @@ pub struct PxCookingParams {
     pub meshWeldTolerance: f32,
     pub midphaseDesc: PxMidphaseDesc,
     pub gaussMapLimit: u32,
+    pub maxWeightRatioInTet: f32,
 }
-#[test] fn check_size_PxCookingParams() { assert_eq!(std::mem::size_of::<PxCookingParams>(), 48); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDefaultMemoryOutputStream {
     pub structgen_pad0: [u8; 32],
 }
-#[test] fn check_size_PxDefaultMemoryOutputStream() { assert_eq!(std::mem::size_of::<PxDefaultMemoryOutputStream>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDefaultMemoryInputData {
     pub structgen_pad0: [u8; 32],
 }
-#[test] fn check_size_PxDefaultMemoryInputData() { assert_eq!(std::mem::size_of::<PxDefaultMemoryInputData>(), 32); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDefaultFileOutputStream {
     pub structgen_pad0: [u8; 16],
 }
-#[test] fn check_size_PxDefaultFileOutputStream() { assert_eq!(std::mem::size_of::<PxDefaultFileOutputStream>(), 16); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDefaultFileInputData {
     pub structgen_pad0: [u8; 24],
 }
-#[test] fn check_size_PxDefaultFileInputData() { assert_eq!(std::mem::size_of::<PxDefaultFileInputData>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxJoint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSpring {
     pub stiffness: f32,
     pub damping: f32,
 }
-#[test] fn check_size_PxSpring() { assert_eq!(std::mem::size_of::<PxSpring>(), 8); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxDistanceJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxDistanceJoint() { assert_eq!(std::mem::size_of::<PxDistanceJoint>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxContactJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxContactJoint() { assert_eq!(std::mem::size_of::<PxContactJoint>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJacobianRow {
@@ -1440,17 +2079,18 @@ pub struct PxJacobianRow {
     pub angular0: PxVec3,
     pub angular1: PxVec3,
 }
-#[test] fn check_size_PxJacobianRow() { assert_eq!(std::mem::size_of::<PxJacobianRow>(), 48); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxContactJoint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxFixedJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxFixedJoint() { assert_eq!(std::mem::size_of::<PxFixedJoint>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointLimitParameters {
@@ -1458,9 +2098,8 @@ pub struct PxJointLimitParameters {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
 }
-#[test] fn check_size_PxJointLimitParameters() { assert_eq!(std::mem::size_of::<PxJointLimitParameters>(), 20); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointLinearLimit {
@@ -1468,10 +2107,9 @@ pub struct PxJointLinearLimit {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
     pub value: f32,
 }
-#[test] fn check_size_PxJointLinearLimit() { assert_eq!(std::mem::size_of::<PxJointLinearLimit>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointLinearLimitPair {
@@ -1479,11 +2117,10 @@ pub struct PxJointLinearLimitPair {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
     pub upper: f32,
     pub lower: f32,
 }
-#[test] fn check_size_PxJointLinearLimitPair() { assert_eq!(std::mem::size_of::<PxJointLinearLimitPair>(), 28); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointAngularLimitPair {
@@ -1491,11 +2128,10 @@ pub struct PxJointAngularLimitPair {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
     pub upper: f32,
     pub lower: f32,
 }
-#[test] fn check_size_PxJointAngularLimitPair() { assert_eq!(std::mem::size_of::<PxJointAngularLimitPair>(), 28); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointLimitCone {
@@ -1503,11 +2139,10 @@ pub struct PxJointLimitCone {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
     pub yAngle: f32,
     pub zAngle: f32,
 }
-#[test] fn check_size_PxJointLimitCone() { assert_eq!(std::mem::size_of::<PxJointLimitCone>(), 28); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxJointLimitPyramid {
@@ -1515,53 +2150,30 @@ pub struct PxJointLimitPyramid {
     pub bounceThreshold: f32,
     pub stiffness: f32,
     pub damping: f32,
-    pub contactDistance: f32,
+    pub contactDistance_deprecated: f32,
     pub yAngleMin: f32,
     pub yAngleMax: f32,
     pub zAngleMin: f32,
     pub zAngleMax: f32,
 }
-#[test] fn check_size_PxJointLimitPyramid() { assert_eq!(std::mem::size_of::<PxJointLimitPyramid>(), 36); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxPrismaticJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxPrismaticJoint() { assert_eq!(std::mem::size_of::<PxPrismaticJoint>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRevoluteJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxRevoluteJoint() { assert_eq!(std::mem::size_of::<PxRevoluteJoint>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxSphericalJoint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
+    pub structgen_pad0: [u8; 16],
     pub userData: *mut std::ffi::c_void,
 }
-#[test] fn check_size_PxSphericalJoint() { assert_eq!(std::mem::size_of::<PxSphericalJoint>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxD6Joint {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub userData: *mut std::ffi::c_void,
-}
-#[test] fn check_size_PxD6Joint() { assert_eq!(std::mem::size_of::<PxD6Joint>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxD6JointDrive {
@@ -1570,7 +2182,24 @@ pub struct PxD6JointDrive {
     pub forceLimit: f32,
     pub flags: PxD6JointDriveFlags,
 }
-#[test] fn check_size_PxD6JointDrive() { assert_eq!(std::mem::size_of::<PxD6JointDrive>(), 16); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxD6Joint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGearJoint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRackAndPinionJoint {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxGroupsMask {
@@ -1579,7 +2208,11 @@ pub struct PxGroupsMask {
     pub bits2: u16,
     pub bits3: u16,
 }
-#[test] fn check_size_PxGroupsMask() { assert_eq!(std::mem::size_of::<PxGroupsMask>(), 8); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRigidActorExt {
+    pub structgen_pad0: [u8; 1],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMassProperties {
@@ -1587,54 +2220,74 @@ pub struct PxMassProperties {
     pub centerOfMass: PxVec3,
     pub mass: f32,
 }
-#[test] fn check_size_PxMassProperties() { assert_eq!(std::mem::size_of::<PxMassProperties>(), 52); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRigidBodyExt {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxShapeExt {
+    pub structgen_pad0: [u8; 1],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxMeshOverlapUtil {
     pub structgen_pad0: [u8; 1040],
 }
-#[test] fn check_size_PxMeshOverlapUtil() { assert_eq!(std::mem::size_of::<PxMeshOverlapUtil>(), 1040); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxSerialization_PxXmlMiscParameter {
+pub struct PxXmlMiscParameter {
     pub upVector: PxVec3,
     pub scale: PxTolerancesScale,
 }
-#[test] fn check_size_PxSerialization_PxXmlMiscParameter() { assert_eq!(std::mem::size_of::<PxSerialization_PxXmlMiscParameter>(), 20); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxSceneQueryHit {
-    pub actor: *mut PxRigidActor,
-    pub shape: *mut PxShape,
-    pub faceIndex: u32,
-    pub structgen_pad0: [u8; 4],
+pub struct PxSerialization {
+    pub structgen_pad0: [u8; 1],
 }
-#[test] fn check_size_PxSceneQueryHit() { assert_eq!(std::mem::size_of::<PxSceneQueryHit>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxSceneQueryFilterData {
-    pub data: PxFilterData,
-    pub flags: PxQueryFlags,
-    pub structgen_pad0: [u8; 2],
+pub struct PxStringTableExt {
+    pub structgen_pad0: [u8; 1],
 }
-#[test] fn check_size_PxSceneQueryFilterData() { assert_eq!(std::mem::size_of::<PxSceneQueryFilterData>(), 20); }
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct PxSceneQueryCache {
-    pub shape: *mut PxShape,
-    pub actor: *mut PxRigidActor,
-    pub faceIndex: u32,
-    pub structgen_pad0: [u8; 4],
+pub struct PxBroadPhaseExt {
+    pub structgen_pad0: [u8; 1],
 }
-#[test] fn check_size_PxSceneQueryCache() { assert_eq!(std::mem::size_of::<PxSceneQueryCache>(), 24); }
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSceneQueryExt {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSamplingExt {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxPoissonSampler {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTriangleMeshPoissonSampler {
+    pub structgen_pad0: [u8; 8],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTetrahedronMeshExt {
+    pub structgen_pad0: [u8; 1],
+}
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRepXObject {
-    pub typeName: *const i8,
+    pub typeName: *const std::ffi::c_char,
     pub serializable: *const std::ffi::c_void,
-    pub id: usize,
+    pub id: u64,
 }
-#[test] fn check_size_PxRepXObject() { assert_eq!(std::mem::size_of::<PxRepXObject>(), 24); }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxRepXInstantiationArgs {
@@ -1642,439 +2295,273 @@ pub struct PxRepXInstantiationArgs {
     pub cooker: *mut PxCooking,
     pub stringTable: *mut PxStringTable,
 }
-#[test] fn check_size_PxRepXInstantiationArgs() { assert_eq!(std::mem::size_of::<PxRepXInstantiationArgs>(), 24); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleChassisData {
-    pub mMOI: PxVec3,
-    pub mMass: f32,
-    pub mCMOffset: PxVec3,
-    pub structgen_pad0: [u8; 4],
+#[cfg(test)]
+mod sizes {
+    use super::*;
+    use std::mem::size_of;
+    #[test]
+    fn check_sizes() {
+        assert_eq!(size_of::<PxAllocator>(), 1);
+        assert_eq!(size_of::<PxRawAllocator>(), 1);
+        assert_eq!(size_of::<PxVirtualAllocator>(), 16);
+        assert_eq!(size_of::<PxUserAllocated>(), 1);
+        assert_eq!(size_of::<PxTempAllocator>(), 1);
+        assert_eq!(size_of::<PxBitAndByte>(), 1);
+        assert_eq!(size_of::<PxBitMap>(), 16);
+        assert_eq!(size_of::<PxVec3>(), 12);
+        assert_eq!(size_of::<PxVec3Padded>(), 16);
+        assert_eq!(size_of::<PxQuat>(), 16);
+        assert_eq!(size_of::<PxTransform>(), 28);
+        assert_eq!(size_of::<PxTransformPadded>(), 32);
+        assert_eq!(size_of::<PxMat33>(), 36);
+        assert_eq!(size_of::<PxBounds3>(), 24);
+        assert_eq!(size_of::<PxBroadcastingAllocator>(), 176);
+        assert_eq!(size_of::<PxBroadcastingErrorCallback>(), 160);
+        assert_eq!(size_of::<PxFPUGuard>(), 32);
+        assert_eq!(size_of::<PxSIMDGuard>(), 8);
+        assert_eq!(size_of::<PxVec4>(), 16);
+        assert_eq!(size_of::<PxMat44>(), 64);
+        assert_eq!(size_of::<PxPlane>(), 16);
+        assert_eq!(size_of::<Interpolation>(), 1);
+        assert_eq!(size_of::<PxMutexImpl>(), 1);
+        assert_eq!(size_of::<PxReadWriteLock>(), 8);
+        assert_eq!(size_of::<PxProfileScoped>(), 40);
+        assert_eq!(size_of::<PxSListEntry>(), 16);
+        assert_eq!(size_of::<PxSListImpl>(), 1);
+        assert_eq!(size_of::<PxSyncImpl>(), 1);
+        assert_eq!(size_of::<PxCounterFrequencyToTensOfNanos>(), 16);
+        assert_eq!(size_of::<PxTime>(), 8);
+        assert_eq!(size_of::<PxVec2>(), 8);
+        assert_eq!(size_of::<PxStridedData>(), 16);
+        assert_eq!(size_of::<PxBoundedData>(), 24);
+        assert_eq!(size_of::<PxDebugPoint>(), 16);
+        assert_eq!(size_of::<PxDebugLine>(), 32);
+        assert_eq!(size_of::<PxDebugTriangle>(), 48);
+        assert_eq!(size_of::<PxDebugText>(), 32);
+        assert_eq!(size_of::<PxDeserializationContext>(), 16);
+        assert_eq!(size_of::<PxBase>(), 16);
+        assert_eq!(size_of::<PxRefCounted>(), 16);
+        assert_eq!(size_of::<PxTolerancesScale>(), 8);
+        assert_eq!(size_of::<PxMetaDataEntry>(), 40);
+        assert_eq!(size_of::<PxBaseTask>(), 24);
+        assert_eq!(size_of::<PxTask>(), 32);
+        assert_eq!(size_of::<PxLightCpuTask>(), 40);
+        assert_eq!(size_of::<PxGeometry>(), 8);
+        assert_eq!(size_of::<PxBoxGeometry>(), 20);
+        assert_eq!(size_of::<PxBVH>(), 16);
+        assert_eq!(size_of::<PxCapsuleGeometry>(), 16);
+        assert_eq!(size_of::<PxHullPolygon>(), 20);
+        assert_eq!(size_of::<PxConvexMesh>(), 16);
+        assert_eq!(size_of::<PxMeshScale>(), 28);
+        assert_eq!(size_of::<PxConvexMeshGeometry>(), 56);
+        assert_eq!(size_of::<PxSphereGeometry>(), 12);
+        assert_eq!(size_of::<PxPlaneGeometry>(), 8);
+        assert_eq!(size_of::<PxTriangleMeshGeometry>(), 48);
+        assert_eq!(size_of::<PxHeightFieldGeometry>(), 32);
+        assert_eq!(size_of::<PxParticleSystemGeometry>(), 12);
+        assert_eq!(size_of::<PxHairSystemGeometry>(), 8);
+        assert_eq!(size_of::<PxTetrahedronMeshGeometry>(), 16);
+        assert_eq!(size_of::<PxQueryHit>(), 4);
+        assert_eq!(size_of::<PxLocationHit>(), 36);
+        assert_eq!(size_of::<PxGeomRaycastHit>(), 44);
+        assert_eq!(size_of::<PxGeomOverlapHit>(), 4);
+        assert_eq!(size_of::<PxGeomSweepHit>(), 36);
+        assert_eq!(size_of::<PxGeomIndexPair>(), 8);
+        assert_eq!(size_of::<PxQueryThreadContext>(), 1);
+        assert_eq!(size_of::<PxCustomGeometryType>(), 4);
+        assert_eq!(size_of::<PxCustomGeometry>(), 16);
+        assert_eq!(size_of::<PxGeometryHolder>(), 56);
+        assert_eq!(size_of::<PxGeometryQuery>(), 1);
+        assert_eq!(size_of::<PxHeightFieldSample>(), 4);
+        assert_eq!(size_of::<PxHeightField>(), 16);
+        assert_eq!(size_of::<PxHeightFieldDesc>(), 40);
+        assert_eq!(size_of::<PxMeshQuery>(), 1);
+        assert_eq!(size_of::<PxSimpleTriangleMesh>(), 56);
+        assert_eq!(size_of::<PxTriangle>(), 36);
+        assert_eq!(size_of::<PxTrianglePadded>(), 40);
+        assert_eq!(size_of::<PxTriangleMesh>(), 16);
+        assert_eq!(size_of::<PxBVH34TriangleMesh>(), 16);
+        assert_eq!(size_of::<PxTetrahedron>(), 48);
+        assert_eq!(size_of::<PxSoftBodyAuxData>(), 16);
+        assert_eq!(size_of::<PxTetrahedronMesh>(), 16);
+        assert_eq!(size_of::<PxSoftBodyMesh>(), 16);
+        assert_eq!(size_of::<PxCollisionMeshMappingData>(), 8);
+        assert_eq!(size_of::<PxSoftBodyCollisionData>(), 1);
+        assert_eq!(size_of::<PxTetrahedronMeshData>(), 1);
+        assert_eq!(size_of::<PxSoftBodySimulationData>(), 1);
+        assert_eq!(size_of::<PxCollisionTetrahedronMeshData>(), 8);
+        assert_eq!(size_of::<PxSimulationTetrahedronMeshData>(), 8);
+        assert_eq!(size_of::<PxActor>(), 24);
+        assert_eq!(size_of::<PxAggregate>(), 24);
+        assert_eq!(size_of::<PxSpringModifiers>(), 16);
+        assert_eq!(size_of::<PxRestitutionModifiers>(), 16);
+        assert_eq!(size_of::<Px1DConstraint>(), 96);
+        assert_eq!(size_of::<PxConstraintInvMassScale>(), 16);
+        assert_eq!(size_of::<PxContactPoint>(), 80);
+        assert_eq!(size_of::<PxSolverBody>(), 32);
+        assert_eq!(size_of::<PxSolverBodyData>(), 112);
+        assert_eq!(size_of::<PxConstraintBatchHeader>(), 8);
+        assert_eq!(size_of::<PxSolverConstraintDesc>(), 64);
+        assert_eq!(size_of::<PxSolverConstraintPrepDescBase>(), 128);
+        assert_eq!(size_of::<PxSolverConstraintPrepDesc>(), 192);
+        assert_eq!(size_of::<PxSolverContactDesc>(), 208);
+        assert_eq!(size_of::<PxArticulationLimit>(), 8);
+        assert_eq!(size_of::<PxArticulationDrive>(), 16);
+        assert_eq!(size_of::<PxTGSSolverBodyVel>(), 64);
+        assert_eq!(size_of::<PxTGSSolverBodyTxInertia>(), 64);
+        assert_eq!(size_of::<PxTGSSolverBodyData>(), 48);
+        assert_eq!(size_of::<PxTGSSolverConstraintPrepDescBase>(), 144);
+        assert_eq!(size_of::<PxTGSSolverConstraintPrepDesc>(), 224);
+        assert_eq!(size_of::<PxTGSSolverContactDesc>(), 224);
+        assert_eq!(size_of::<PxArticulationTendonLimit>(), 8);
+        assert_eq!(size_of::<PxArticulationAttachment>(), 24);
+        assert_eq!(size_of::<PxArticulationTendonJoint>(), 24);
+        assert_eq!(size_of::<PxArticulationTendon>(), 24);
+        assert_eq!(size_of::<PxArticulationSpatialTendon>(), 24);
+        assert_eq!(size_of::<PxArticulationFixedTendon>(), 24);
+        assert_eq!(size_of::<PxSpatialForce>(), 32);
+        assert_eq!(size_of::<PxSpatialVelocity>(), 32);
+        assert_eq!(size_of::<PxArticulationRootLinkData>(), 76);
+        assert_eq!(size_of::<PxArticulationCache>(), 136);
+        assert_eq!(size_of::<PxArticulationSensor>(), 24);
+        assert_eq!(size_of::<PxArticulationReducedCoordinate>(), 24);
+        assert_eq!(size_of::<PxArticulationJointReducedCoordinate>(), 24);
+        assert_eq!(size_of::<PxShape>(), 24);
+        assert_eq!(size_of::<PxRigidActor>(), 24);
+        assert_eq!(size_of::<PxNodeIndex>(), 8);
+        assert_eq!(size_of::<PxRigidBody>(), 24);
+        assert_eq!(size_of::<PxArticulationLink>(), 24);
+        assert_eq!(size_of::<PxConeLimitedConstraint>(), 24);
+        assert_eq!(size_of::<PxConeLimitParams>(), 32);
+        assert_eq!(size_of::<PxConstraintShaderTable>(), 32);
+        assert_eq!(size_of::<PxConstraint>(), 24);
+        assert_eq!(size_of::<PxMassModificationProps>(), 16);
+        assert_eq!(size_of::<PxContactPatch>(), 64);
+        assert_eq!(size_of::<PxContact>(), 16);
+        assert_eq!(size_of::<PxExtendedContact>(), 32);
+        assert_eq!(size_of::<PxModifiableContact>(), 64);
+        assert_eq!(size_of::<PxContactStreamIterator>(), 80);
+        assert_eq!(size_of::<PxGpuContactPair>(), 72);
+        assert_eq!(size_of::<PxContactSet>(), 16);
+        assert_eq!(size_of::<PxContactModifyPair>(), 104);
+        assert_eq!(size_of::<PxBaseMaterial>(), 24);
+        assert_eq!(size_of::<PxFEMMaterial>(), 24);
+        assert_eq!(size_of::<PxFilterData>(), 16);
+        assert_eq!(size_of::<PxParticleRigidFilterPair>(), 16);
+        assert_eq!(size_of::<PxMaterial>(), 24);
+        assert_eq!(size_of::<PxGpuParticleBufferIndexPair>(), 8);
+        assert_eq!(size_of::<PxParticleVolume>(), 32);
+        assert_eq!(size_of::<PxDiffuseParticleParams>(), 40);
+        assert_eq!(size_of::<PxParticleSpring>(), 24);
+        assert_eq!(size_of::<PxParticleMaterial>(), 24);
+        assert_eq!(size_of::<PxActorShape>(), 16);
+        assert_eq!(size_of::<PxRaycastHit>(), 64);
+        assert_eq!(size_of::<PxOverlapHit>(), 24);
+        assert_eq!(size_of::<PxSweepHit>(), 56);
+        assert_eq!(size_of::<PxRaycastCallback>(), 96);
+        assert_eq!(size_of::<PxOverlapCallback>(), 56);
+        assert_eq!(size_of::<PxSweepCallback>(), 88);
+        assert_eq!(size_of::<PxRaycastBuffer>(), 96);
+        assert_eq!(size_of::<PxOverlapBuffer>(), 56);
+        assert_eq!(size_of::<PxSweepBuffer>(), 88);
+        assert_eq!(size_of::<PxQueryCache>(), 24);
+        assert_eq!(size_of::<PxQueryFilterData>(), 20);
+        assert_eq!(size_of::<PxRigidDynamic>(), 24);
+        assert_eq!(size_of::<PxRigidStatic>(), 24);
+        assert_eq!(size_of::<PxSceneQueryDesc>(), 36);
+        assert_eq!(size_of::<PxBroadPhaseRegion>(), 32);
+        assert_eq!(size_of::<PxBroadPhaseRegionInfo>(), 48);
+        assert_eq!(size_of::<PxBroadPhaseCaps>(), 4);
+        assert_eq!(size_of::<PxBroadPhaseDesc>(), 32);
+        assert_eq!(size_of::<PxBroadPhaseUpdateData>(), 80);
+        assert_eq!(size_of::<PxBroadPhasePair>(), 8);
+        assert_eq!(size_of::<PxBroadPhaseResults>(), 32);
+        assert_eq!(size_of::<PxSceneLimits>(), 32);
+        assert_eq!(size_of::<PxgDynamicsMemoryConfig>(), 48);
+        assert_eq!(size_of::<PxSceneDesc>(), 352);
+        assert_eq!(size_of::<PxSimulationStatistics>(), 2232);
+        assert_eq!(size_of::<PxGpuBodyData>(), 64);
+        assert_eq!(size_of::<PxGpuActorPair>(), 16);
+        assert_eq!(size_of::<PxIndexDataPair>(), 16);
+        assert_eq!(size_of::<PxDominanceGroupPair>(), 2);
+        assert_eq!(size_of::<PxScene>(), 16);
+        assert_eq!(size_of::<PxSceneReadLock>(), 8);
+        assert_eq!(size_of::<PxSceneWriteLock>(), 8);
+        assert_eq!(size_of::<PxContactPairExtraDataItem>(), 1);
+        assert_eq!(size_of::<PxContactPairVelocity>(), 52);
+        assert_eq!(size_of::<PxContactPairPose>(), 60);
+        assert_eq!(size_of::<PxContactPairIndex>(), 4);
+        assert_eq!(size_of::<PxContactPairExtraDataIterator>(), 48);
+        assert_eq!(size_of::<PxContactPairHeader>(), 48);
+        assert_eq!(size_of::<PxContactPairPoint>(), 48);
+        assert_eq!(size_of::<PxContactPair>(), 64);
+        assert_eq!(size_of::<PxTriggerPair>(), 40);
+        assert_eq!(size_of::<PxConstraintInfo>(), 24);
+        assert_eq!(size_of::<PxFEMParameters>(), 24);
+        assert_eq!(size_of::<PxPruningStructure>(), 16);
+        assert_eq!(size_of::<PxExtendedVec3>(), 24);
+        assert_eq!(size_of::<PxObstacle>(), 56);
+        assert_eq!(size_of::<PxBoxObstacle>(), 72);
+        assert_eq!(size_of::<PxCapsuleObstacle>(), 64);
+        assert_eq!(size_of::<PxControllerState>(), 48);
+        assert_eq!(size_of::<PxControllerStats>(), 8);
+        assert_eq!(size_of::<PxControllerHit>(), 64);
+        assert_eq!(size_of::<PxControllerShapeHit>(), 88);
+        assert_eq!(size_of::<PxControllersHit>(), 72);
+        assert_eq!(size_of::<PxControllerObstacleHit>(), 72);
+        assert_eq!(size_of::<PxControllerFilters>(), 32);
+        assert_eq!(size_of::<PxControllerDesc>(), 136);
+        assert_eq!(size_of::<PxBoxControllerDesc>(), 144);
+        assert_eq!(size_of::<PxCapsuleControllerDesc>(), 144);
+        assert_eq!(size_of::<PxDim3>(), 12);
+        assert_eq!(size_of::<PxSDFDesc>(), 160);
+        assert_eq!(size_of::<PxConvexMeshDesc>(), 88);
+        assert_eq!(size_of::<PxTriangleMeshDesc>(), 80);
+        assert_eq!(size_of::<PxTetrahedronMeshDesc>(), 72);
+        assert_eq!(size_of::<PxSoftBodySimulationDataDesc>(), 24);
+        assert_eq!(size_of::<PxBVH34MidphaseDesc>(), 12);
+        assert_eq!(size_of::<PxMidphaseDesc>(), 16);
+        assert_eq!(size_of::<PxBVHDesc>(), 40);
+        assert_eq!(size_of::<PxCookingParams>(), 56);
+        assert_eq!(size_of::<PxDefaultMemoryOutputStream>(), 32);
+        assert_eq!(size_of::<PxDefaultMemoryInputData>(), 32);
+        assert_eq!(size_of::<PxDefaultFileOutputStream>(), 16);
+        assert_eq!(size_of::<PxDefaultFileInputData>(), 24);
+        assert_eq!(size_of::<PxJoint>(), 24);
+        assert_eq!(size_of::<PxSpring>(), 8);
+        assert_eq!(size_of::<PxDistanceJoint>(), 24);
+        assert_eq!(size_of::<PxJacobianRow>(), 48);
+        assert_eq!(size_of::<PxContactJoint>(), 24);
+        assert_eq!(size_of::<PxFixedJoint>(), 24);
+        assert_eq!(size_of::<PxJointLimitParameters>(), 20);
+        assert_eq!(size_of::<PxJointLinearLimit>(), 24);
+        assert_eq!(size_of::<PxJointLinearLimitPair>(), 28);
+        assert_eq!(size_of::<PxJointAngularLimitPair>(), 28);
+        assert_eq!(size_of::<PxJointLimitCone>(), 28);
+        assert_eq!(size_of::<PxJointLimitPyramid>(), 36);
+        assert_eq!(size_of::<PxPrismaticJoint>(), 24);
+        assert_eq!(size_of::<PxRevoluteJoint>(), 24);
+        assert_eq!(size_of::<PxSphericalJoint>(), 24);
+        assert_eq!(size_of::<PxD6JointDrive>(), 16);
+        assert_eq!(size_of::<PxD6Joint>(), 24);
+        assert_eq!(size_of::<PxGearJoint>(), 24);
+        assert_eq!(size_of::<PxRackAndPinionJoint>(), 24);
+        assert_eq!(size_of::<PxGroupsMask>(), 8);
+        assert_eq!(size_of::<PxRigidActorExt>(), 1);
+        assert_eq!(size_of::<PxMassProperties>(), 52);
+        assert_eq!(size_of::<PxRigidBodyExt>(), 1);
+        assert_eq!(size_of::<PxShapeExt>(), 1);
+        assert_eq!(size_of::<PxMeshOverlapUtil>(), 1040);
+        assert_eq!(size_of::<PxXmlMiscParameter>(), 20);
+        assert_eq!(size_of::<PxSerialization>(), 1);
+        assert_eq!(size_of::<PxStringTableExt>(), 1);
+        assert_eq!(size_of::<PxBroadPhaseExt>(), 1);
+        assert_eq!(size_of::<PxSceneQueryExt>(), 1);
+        assert_eq!(size_of::<PxSamplingExt>(), 1);
+        assert_eq!(size_of::<PxPoissonSampler>(), 8);
+        assert_eq!(size_of::<PxTriangleMeshPoissonSampler>(), 8);
+        assert_eq!(size_of::<PxTetrahedronMeshExt>(), 1);
+        assert_eq!(size_of::<PxRepXObject>(), 24);
+        assert_eq!(size_of::<PxRepXInstantiationArgs>(), 24);
+    }
 }
-#[test] fn check_size_PxVehicleChassisData() { assert_eq!(std::mem::size_of::<PxVehicleChassisData>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleEngineData {
-    pub mTorqueCurve: PxFixedSizeLookupTable_eMAX_NB_ENGINE_TORQUE_CURVE_ENTRIES_,
-    pub mMOI: f32,
-    pub mPeakTorque: f32,
-    pub mMaxOmega: f32,
-    pub mDampingRateFullThrottle: f32,
-    pub mDampingRateZeroThrottleClutchEngaged: f32,
-    pub mDampingRateZeroThrottleClutchDisengaged: f32,
-    pub structgen_pad0: [u8; 8],
-}
-#[test] fn check_size_PxVehicleEngineData() { assert_eq!(std::mem::size_of::<PxVehicleEngineData>(), 112); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGearsData {
-    pub mRatios: [f32; 32],
-    pub mFinalRatio: f32,
-    pub mNbRatios: u32,
-    pub mSwitchTime: f32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxVehicleGearsData() { assert_eq!(std::mem::size_of::<PxVehicleGearsData>(), 144); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAutoBoxData {
-    pub mUpRatios: [f32; 32],
-    pub mDownRatios: [f32; 32],
-}
-#[test] fn check_size_PxVehicleAutoBoxData() { assert_eq!(std::mem::size_of::<PxVehicleAutoBoxData>(), 256); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDifferential4WData {
-    pub mFrontRearSplit: f32,
-    pub mFrontLeftRightSplit: f32,
-    pub mRearLeftRightSplit: f32,
-    pub mCentreBias: f32,
-    pub mFrontBias: f32,
-    pub mRearBias: f32,
-    pub mType: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxVehicleDifferential4WData() { assert_eq!(std::mem::size_of::<PxVehicleDifferential4WData>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDifferentialNWData {
-    pub structgen_pad0: [u8; 16],
-}
-#[test] fn check_size_PxVehicleDifferentialNWData() { assert_eq!(std::mem::size_of::<PxVehicleDifferentialNWData>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAckermannGeometryData {
-    pub mAccuracy: f32,
-    pub mFrontWidth: f32,
-    pub mRearWidth: f32,
-    pub mAxleSeparation: f32,
-}
-#[test] fn check_size_PxVehicleAckermannGeometryData() { assert_eq!(std::mem::size_of::<PxVehicleAckermannGeometryData>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleClutchData {
-    pub mStrength: f32,
-    pub mAccuracyMode: u32,
-    pub mEstimateIterations: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxVehicleClutchData() { assert_eq!(std::mem::size_of::<PxVehicleClutchData>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTireLoadFilterData {
-    pub mMinNormalisedLoad: f32,
-    pub mMinFilteredNormalisedLoad: f32,
-    pub mMaxNormalisedLoad: f32,
-    pub mMaxFilteredNormalisedLoad: f32,
-    pub structgen_pad0: [u8; 16],
-}
-#[test] fn check_size_PxVehicleTireLoadFilterData() { assert_eq!(std::mem::size_of::<PxVehicleTireLoadFilterData>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelData {
-    pub mRadius: f32,
-    pub mWidth: f32,
-    pub mMass: f32,
-    pub mMOI: f32,
-    pub mDampingRate: f32,
-    pub mMaxBrakeTorque: f32,
-    pub mMaxHandBrakeTorque: f32,
-    pub mMaxSteer: f32,
-    pub mToeAngle: f32,
-    pub structgen_pad0: [u8; 12],
-}
-#[test] fn check_size_PxVehicleWheelData() { assert_eq!(std::mem::size_of::<PxVehicleWheelData>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleSuspensionData {
-    pub mSpringStrength: f32,
-    pub mSpringDamperRate: f32,
-    pub mMaxCompression: f32,
-    pub mMaxDroop: f32,
-    pub mSprungMass: f32,
-    pub mCamberAtRest: f32,
-    pub mCamberAtMaxCompression: f32,
-    pub mCamberAtMaxDroop: f32,
-    pub structgen_pad0: [u8; 16],
-}
-#[test] fn check_size_PxVehicleSuspensionData() { assert_eq!(std::mem::size_of::<PxVehicleSuspensionData>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleAntiRollBarData {
-    pub mWheel0: u32,
-    pub mWheel1: u32,
-    pub mStiffness: f32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxVehicleAntiRollBarData() { assert_eq!(std::mem::size_of::<PxVehicleAntiRollBarData>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTireData {
-    pub mLatStiffX: f32,
-    pub mLatStiffY: f32,
-    pub mLongitudinalStiffnessPerUnitGravity: f32,
-    pub mCamberStiffnessPerUnitGravity: f32,
-    pub mFrictionVsSlipGraph: [[f32; 2]; 3],
-    pub mType: u32,
-    pub structgen_pad0: [u8; 20],
-}
-#[test] fn check_size_PxVehicleTireData() { assert_eq!(std::mem::size_of::<PxVehicleTireData>(), 64); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelsSimData {
-    pub structgen_pad0: [u8; 96],
-}
-#[test] fn check_size_PxVehicleWheelsSimData() { assert_eq!(std::mem::size_of::<PxVehicleWheelsSimData>(), 96); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelsDynData {
-    pub structgen_pad0: [u8; 48],
-}
-#[test] fn check_size_PxVehicleWheelsDynData() { assert_eq!(std::mem::size_of::<PxVehicleWheelsDynData>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheels {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub structgen_pad3: [u8; 4],
-}
-#[test] fn check_size_PxVehicleWheels() { assert_eq!(std::mem::size_of::<PxVehicleWheels>(), 192); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimData {
-    pub mEngine: PxVehicleEngineData,
-    pub mGears: PxVehicleGearsData,
-    pub mClutch: PxVehicleClutchData,
-    pub mAutoBox: PxVehicleAutoBoxData,
-}
-#[test] fn check_size_PxVehicleDriveSimData() { assert_eq!(std::mem::size_of::<PxVehicleDriveSimData>(), 528); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveDynData {
-    pub mControlAnalogVals: [f32; 16],
-    pub mUseAutoGears: bool,
-    pub mGearUpPressed: bool,
-    pub mGearDownPressed: bool,
-    pub structgen_pad0: [u8; 1],
-    pub mCurrentGear: u32,
-    pub mTargetGear: u32,
-    pub mEnginespeed: f32,
-    pub mGearSwitchTime: f32,
-    pub mAutoBoxSwitchTime: f32,
-    pub structgen_pad1: [u8; 8],
-}
-#[test] fn check_size_PxVehicleDriveDynData() { assert_eq!(std::mem::size_of::<PxVehicleDriveDynData>(), 96); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrive {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub structgen_pad3: [u8; 4],
-}
-#[test] fn check_size_PxVehicleDrive() { assert_eq!(std::mem::size_of::<PxVehicleDrive>(), 288); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimData4W {
-    pub mEngine: PxVehicleEngineData,
-    pub mGears: PxVehicleGearsData,
-    pub mClutch: PxVehicleClutchData,
-    pub mAutoBox: PxVehicleAutoBoxData,
-    pub structgen_pad0: [u8; 48],
-}
-#[test] fn check_size_PxVehicleDriveSimData4W() { assert_eq!(std::mem::size_of::<PxVehicleDriveSimData4W>(), 576); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrive4W {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimData4W,
-    pub structgen_pad3: [u8; 4],
-}
-#[test] fn check_size_PxVehicleDrive4W() { assert_eq!(std::mem::size_of::<PxVehicleDrive4W>(), 864); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveTank {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimData,
-    pub structgen_pad3: [u8; 20],
-}
-#[test] fn check_size_PxVehicleDriveTank() { assert_eq!(std::mem::size_of::<PxVehicleDriveTank>(), 832); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrivableSurfaceType {
-    pub mType: u32,
-}
-#[test] fn check_size_PxVehicleDrivableSurfaceType() { assert_eq!(std::mem::size_of::<PxVehicleDrivableSurfaceType>(), 4); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrivableSurfaceToTireFrictionPairs {
-    pub structgen_pad0: [u8; 48],
-}
-#[test] fn check_size_PxVehicleDrivableSurfaceToTireFrictionPairs() { assert_eq!(std::mem::size_of::<PxVehicleDrivableSurfaceToTireFrictionPairs>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxWheelQueryResult {
-    pub suspLineStart: PxVec3,
-    pub suspLineDir: PxVec3,
-    pub suspLineLength: f32,
-    pub isInAir: bool,
-    pub structgen_pad0: [u8; 3],
-    pub tireContactActor: *mut PxActor,
-    pub tireContactShape: *mut PxShape,
-    pub tireSurfaceMaterial: *const PxMaterial,
-    pub tireSurfaceType: u32,
-    pub tireContactPoint: PxVec3,
-    pub tireContactNormal: PxVec3,
-    pub tireFriction: f32,
-    pub suspJounce: f32,
-    pub suspSpringForce: f32,
-    pub tireLongitudinalDir: PxVec3,
-    pub tireLateralDir: PxVec3,
-    pub longitudinalSlip: f32,
-    pub lateralSlip: f32,
-    pub steerAngle: f32,
-    pub localPose: PxTransform,
-}
-#[test] fn check_size_PxWheelQueryResult() { assert_eq!(std::mem::size_of::<PxWheelQueryResult>(), 160); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelConcurrentUpdateData {
-    pub structgen_pad0: [u8; 64],
-}
-#[test] fn check_size_PxVehicleWheelConcurrentUpdateData() { assert_eq!(std::mem::size_of::<PxVehicleWheelConcurrentUpdateData>(), 64); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleConcurrentUpdateData {
-    pub concurrentWheelUpdates: *mut PxVehicleWheelConcurrentUpdateData,
-    pub nbConcurrentWheelUpdates: u32,
-    pub structgen_pad0: [u8; 28],
-}
-#[test] fn check_size_PxVehicleConcurrentUpdateData() { assert_eq!(std::mem::size_of::<PxVehicleConcurrentUpdateData>(), 40); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleWheelQueryResult {
-    pub wheelQueryResults: *mut PxWheelQueryResult,
-    pub nbWheelQueryResults: u32,
-    pub structgen_pad0: [u8; 4],
-}
-#[test] fn check_size_PxVehicleWheelQueryResult() { assert_eq!(std::mem::size_of::<PxVehicleWheelQueryResult>(), 16); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraph {
-    pub structgen_pad0: [u8; 15840],
-}
-#[test] fn check_size_PxVehicleGraph() { assert_eq!(std::mem::size_of::<PxVehicleGraph>(), 15840); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleTelemetryData {
-    pub structgen_pad0: [u8; 48],
-}
-#[test] fn check_size_PxVehicleTelemetryData() { assert_eq!(std::mem::size_of::<PxVehicleTelemetryData>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveSimDataNW {
-    pub mEngine: PxVehicleEngineData,
-    pub mGears: PxVehicleGearsData,
-    pub mClutch: PxVehicleClutchData,
-    pub mAutoBox: PxVehicleAutoBoxData,
-    pub structgen_pad0: [u8; 16],
-}
-#[test] fn check_size_PxVehicleDriveSimDataNW() { assert_eq!(std::mem::size_of::<PxVehicleDriveSimDataNW>(), 544); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveNW {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub mDriveDynData: PxVehicleDriveDynData,
-    pub mDriveSimData: PxVehicleDriveSimDataNW,
-    pub structgen_pad3: [u8; 4],
-}
-#[test] fn check_size_PxVehicleDriveNW() { assert_eq!(std::mem::size_of::<PxVehicleDriveNW>(), 832); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDrive4WRawInputData {
-    pub structgen_pad0: [u8; 40],
-}
-#[test] fn check_size_PxVehicleDrive4WRawInputData() { assert_eq!(std::mem::size_of::<PxVehicleDrive4WRawInputData>(), 40); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleKeySmoothingData {
-    pub mRiseRates: [f32; 16],
-    pub mFallRates: [f32; 16],
-}
-#[test] fn check_size_PxVehicleKeySmoothingData() { assert_eq!(std::mem::size_of::<PxVehicleKeySmoothingData>(), 128); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehiclePadSmoothingData {
-    pub mRiseRates: [f32; 16],
-    pub mFallRates: [f32; 16],
-}
-#[test] fn check_size_PxVehiclePadSmoothingData() { assert_eq!(std::mem::size_of::<PxVehiclePadSmoothingData>(), 128); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveNWRawInputData {
-    pub structgen_pad0: [u8; 40],
-}
-#[test] fn check_size_PxVehicleDriveNWRawInputData() { assert_eq!(std::mem::size_of::<PxVehicleDriveNWRawInputData>(), 40); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleDriveTankRawInputData {
-    pub structgen_pad0: [u8; 32],
-}
-#[test] fn check_size_PxVehicleDriveTankRawInputData() { assert_eq!(std::mem::size_of::<PxVehicleDriveTankRawInputData>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleCopyDynamicsMap {
-    pub sourceWheelIds: [u8; 20],
-    pub targetWheelIds: [u8; 20],
-}
-#[test] fn check_size_PxVehicleCopyDynamicsMap() { assert_eq!(std::mem::size_of::<PxVehicleCopyDynamicsMap>(), 40); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraphChannelDesc {
-    pub mMinY: f32,
-    pub mMaxY: f32,
-    pub mMidY: f32,
-    pub mColorLow: PxVec3,
-    pub mColorHigh: PxVec3,
-    pub structgen_pad0: [u8; 4],
-    pub mTitle: *mut i8,
-}
-#[test] fn check_size_PxVehicleGraphChannelDesc() { assert_eq!(std::mem::size_of::<PxVehicleGraphChannelDesc>(), 48); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleGraphDesc {
-    pub structgen_pad0: [u8; 32],
-}
-#[test] fn check_size_PxVehicleGraphDesc() { assert_eq!(std::mem::size_of::<PxVehicleGraphDesc>(), 32); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxVehicleNoDrive {
-    pub structgen_pad0: [u8; 8],
-    pub mConcreteType: u16,
-    pub mBaseFlags: PxBaseFlags,
-    pub structgen_pad1: [u8; 4],
-    pub mWheelsSimData: PxVehicleWheelsSimData,
-    pub mWheelsDynData: PxVehicleWheelsDynData,
-    pub mActor: *mut PxRigidDynamic,
-    pub structgen_pad2: [u8; 5],
-    pub mType: u8,
-    pub mPad0: [u8; 14],
-    pub structgen_pad3: [u8; 36],
-}
-#[test] fn check_size_PxVehicleNoDrive() { assert_eq!(std::mem::size_of::<PxVehicleNoDrive>(), 224); }
-#[derive(Clone, Copy)]
-#[repr(C)]
-pub struct PxProfileScoped {
-    pub mCallback: *mut PxProfilerCallback,
-    pub mEventName: *const i8,
-    pub mProfilerData: *mut std::ffi::c_void,
-    pub mContextId: usize,
-    pub mDetached: bool,
-    pub structgen_pad0: [u8; 7],
-}
-#[test] fn check_size_PxProfileScoped() { assert_eq!(std::mem::size_of::<PxProfileScoped>(), 40); }

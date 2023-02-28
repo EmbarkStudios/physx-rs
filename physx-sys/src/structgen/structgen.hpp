@@ -17,11 +17,11 @@ struct PodStructGen {
     void finish() {
         fclose(cfile);
 
-        fputs("#[cfg(test)]\nmod sizes {\n    #[test]\n    fn check_sizes() {\n", rfile);
+        fputs("#[cfg(test)]\nmod sizes {\n    use super::*;\n    use std::mem::size_of;\n    #[test]\n    fn check_sizes() {\n", rfile);
         for (const auto& rc : rust_checks) {
             fprintf(
                 rfile,
-                "        assert_eq!(std::mem::size_of::<%s>(), %u);\n",
+                "        assert_eq!(size_of::<%s>(), %u);\n",
                 rc.rname,
                 rc.size
             );

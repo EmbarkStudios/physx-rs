@@ -6,6 +6,7 @@
     "GuContactCapsuleMesh",
     "GuContactConvexConvex",
     "GuContactConvexMesh",
+    "GuContactCustomGeometry",
     "GuContactPlaneBox",
     "GuContactPlaneCapsule",
     "GuContactPlaneConvex",

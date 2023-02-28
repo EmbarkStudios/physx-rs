@@ -482,10 +482,10 @@ fn main() {
     // Acquire the user-specified c++ compiler if one has been set, in the same
     // order and manner that cc-rs will do it
     let compiler = {
-        env::var(format!("CXX_{}", target))
+        env::var(format!("CXX_{target}"))
             .or_else(|_| {
                 let target_under = target.replace('-', "_");
-                env::var(format!("CXX_{}", target_under))
+                env::var(format!("CXX_{target_under}"))
             })
             .or_else(|_| env::var("TARGET_CXX"))
             .or_else(|_| env::var("CXX"))

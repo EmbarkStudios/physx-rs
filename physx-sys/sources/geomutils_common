@@ -1,4 +1,10 @@
 [
+    "GuAdjacencies",
     "GuBarycentricCoordinates",
+    "GuEdgeList",
+    "GuMeshAnalysis",
+    "GuMeshCleaner",
+    "GuQuantizer",
     "GuSeparatingAxes",
+    "GuVertexReducer",
 ]
