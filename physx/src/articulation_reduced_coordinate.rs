@@ -2,15 +2,8 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 10 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-PxArticulationReducedCoordinate wrapper for PhysX.
- */
-
 use super::{
-    articulation_base::ArticulationBase,
-    articulation_cache::{ArticulationCache, ArticulationCacheFlag},
+    articulation_cache::{ArticulationCache, ArticulationCacheFlags},
     articulation_link::ArticulationLink,
     math::PxTransform,
     math::*,
@@ -120,19 +113,19 @@ unsafe impl<U: Sync, Link: ArticulationLink + Send> Sync
 {
 }
 
-impl<U, Link: ArticulationLink> ArticulationBase for PxArticulationReducedCoordinate<U, Link> {
-    type ArticulationLink = Link;
-}
-
 impl<U, L: ArticulationLink> ArticulationReducedCoordinate
     for PxArticulationReducedCoordinate<U, L>
 {
+    type ArticulationLink = L;
 }
 
 pub trait ArticulationReducedCoordinate:
-    Class<physx_sys::PxArticulationReducedCoordinate> + ArticulationBase + UserData
+    Class<physx_sys::PxArticulationReducedCoordinate> + UserData
 {
+    type ArticulationLink: ArticulationLink;
+
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -464,36 +457,63 @@ pub trait ArticulationReducedCoordinate:
             link.set_query_filter(this_layer);
         }
     }
-}
 
-/*******************************************************************************
- * Section FLAGS                                                               *
- ******************************************************************************/
-
-pub type ArticulationFlags = BitFlags<ArticulationFlag>;
-
-impl PxFlags for ArticulationFlags {
-    type Target = PxArticulationFlags;
-
-    fn into_px(self) -> Self::Target {
-        PxArticulationFlags { mBits: self.bits() }
+    /// Sets the number of iterations the solver should perform.  If the articulation is behaving
+    /// erratically, increasing the iteration counts may improve stability.
+    fn set_solver_iteration_counts(&mut self, min_position_iters: u32, min_velocity_iters: u32) {
+        unsafe {
+            PxArticulationReducedCoordinate_setSolverIterationCounts_mut(
+                self.as_mut_ptr(),
+                min_position_iters,
+                min_velocity_iters,
+            );
+        }
     }
 
-    fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
+    /// Get the number of (position, velocity) iterations the solver will perform.
+    fn get_solver_iteration_counts(&self) -> (u32, u32) {
+        unsafe {
+            let mut min_position_iters: u32 = 0;
+            let mut min_velocity_iters: u32 = 0;
+            PxArticulationReducedCoordinate_getSolverIterationCounts(
+                self.as_ptr(),
+                &mut min_position_iters as *mut u32,
+                &mut min_velocity_iters as *mut u32,
+            );
+            (min_position_iters, min_velocity_iters)
+        }
     }
-}
 
-#[bitflags]
-#[derive(Copy, Clone, Debug)]
-#[repr(u8)]
-pub enum ArticulationFlag {
-    FixBase = 1 << 0,
-    DriveLimitsAreForces = 1 << 1,
-}
+    /// Get a vec of all the links
+    fn get_links(&self) -> Vec<&Self::ArticulationLink> {
+        unsafe {
+            let capacity = self.get_nb_links();
+            let mut buffer: Vec<&Self::ArticulationLink> = Vec::with_capacity(capacity as usize);
+            let len = PxArticulationReducedCoordinate_getLinks(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
+    }
 
-impl From<ArticulationFlag> for PxArticulationFlag::Enum {
-    fn from(value: ArticulationFlag) -> Self {
-        value as _
+    /// Get a mutable vec of all the links
+    fn get_links_mut(&mut self) -> Vec<&mut Self::ArticulationLink> {
+        unsafe {
+            let capacity = self.get_nb_links();
+            let mut buffer: Vec<&mut Self::ArticulationLink> =
+                Vec::with_capacity(capacity as usize);
+            let len = PxArticulationReducedCoordinate_getLinks(
+                self.as_ptr(),
+                buffer.as_mut_ptr() as *mut *mut _,
+                capacity,
+                0,
+            );
+            buffer.set_len(len as usize);
+            buffer
+        }
     }
 }

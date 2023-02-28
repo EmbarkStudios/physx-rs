@@ -288,15 +288,14 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
 
     /// Create a new scene with from a descriptor.
     #[allow(clippy::type_complexity)]
-    fn create_scene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>(
+    fn create_scene<U, L, S, D, C, OC, OT, OCB, OWS, OA>(
         &mut self,
-        scene_descriptor: SceneDescriptor<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>,
-    ) -> Option<Owner<PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>>>
+        scene_descriptor: SceneDescriptor<U, L, S, D, C, OC, OT, OCB, OWS, OA>,
+    ) -> Option<Owner<PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>>>
     where
         L: ArticulationLink,
         S: RigidStatic,
         D: RigidDynamic,
-        T: Articulation,
         C: ArticulationReducedCoordinate,
         OC: CollisionCallback,
         OT: TriggerCallback,
@@ -307,39 +306,29 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         scene_descriptor.create(self)
     }
 
-    /// Create a new aggregate.  Must be added to a scene with the same actor user data types.
+    /// Create a new aggregate.
+    ///
+    /// Must be added to a scene with the same actor user data types.
     #[allow(clippy::type_complexity)]
-    fn create_aggregate<L, S, D, T, C>(
+    fn create_aggregate<L, S, D, C>(
         &mut self,
-        max_size: u32,
-        self_collision: bool,
-    ) -> Option<Owner<PxAggregate<L, S, D, T, C>>>
+        max_actors: u32,
+        max_shapes: u32,
+        filter_hint: AggregateFilterHint,
+    ) -> Option<Owner<PxAggregate<L, S, D, C>>>
     where
         L: ArticulationLink,
         S: RigidStatic,
         D: RigidDynamic,
-        T: Articulation,
         C: ArticulationReducedCoordinate,
     {
         unsafe {
             Aggregate::from_raw(PxPhysics_createAggregate_mut(
                 self.as_mut_ptr(),
-                max_size,
-                self_collision,
+                max_actors,
+                max_shapes,
+                filter_hint.bits(),
             ))
-        }
-    }
-
-    /// Create a new articulation.  Must be added to a scene with the same user data types.
-    fn create_articulation<U, L: ArticulationLink>(
-        &mut self,
-        user_data: U,
-    ) -> Option<Owner<PxArticulation<U, L>>> {
-        unsafe {
-            PxArticulation::from_raw(
-                PxPhysics_createArticulation_mut(self.as_mut_ptr()),
-                user_data,
-            )
         }
     }
 

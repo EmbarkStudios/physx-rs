@@ -183,7 +183,6 @@ pub struct ArticulationJointReducedCoordinate {
 
 crate::DeriveClassForNewType!(
     ArticulationJointReducedCoordinate: PxArticulationJointReducedCoordinate,
-    PxArticulationBase,
     PxBase
 );
 

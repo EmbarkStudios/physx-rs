@@ -109,11 +109,7 @@ pub mod math;
 // Wrappers
 pub mod actor;
 pub mod aggregate;
-pub mod articulation;
-pub mod articulation_base;
 pub mod articulation_cache;
-pub mod articulation_joint;
-pub mod articulation_joint_base;
 pub mod articulation_joint_reduced_coordinate;
 pub mod articulation_link;
 pub mod articulation_reduced_coordinate;

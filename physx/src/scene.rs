@@ -216,12 +216,11 @@ pub enum ActorTypeFlag {
 /// creating a type alias is recommended.
 #[repr(transparent)]
 #[allow(clippy::type_complexity)]
-pub struct PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+pub struct PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -230,16 +229,15 @@ where
     OA: AdvanceCallback<L, D>,
 {
     pub(crate) obj: physx_sys::PxScene,
-    phantom_user_data: PhantomData<(U, L, S, D, T, C, OC, OT, OCB, OWS, OA)>,
+    phantom_user_data: PhantomData<(U, L, S, D, C, OC, OT, OCB, OWS, OA)>,
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> UserData
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> UserData
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -258,13 +256,11 @@ where
     }
 }
 
-impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Drop
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Drop for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -281,10 +277,7 @@ where
                 drop_in_place(ptr as *mut _)
             }
             for ptr in self.get_articulations() {
-                ptr.cast_map(
-                    |ptr| drop_in_place(ptr as *mut _),
-                    |ptr| drop_in_place(ptr as *mut _),
-                )
+                drop_in_place(ptr as *mut _);
             }
             for ptr in self.get_actors(ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic) {
                 ptr.cast_map(
@@ -301,14 +294,13 @@ where
     }
 }
 
-unsafe impl<P, U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Class<P>
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<P, U, L, S, D, C, OC, OT, OCB, OWS, OA> Class<P>
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     physx_sys::PxScene: Class<P>,
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -325,13 +317,12 @@ where
     }
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Send
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Send
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink + Send,
     S: RigidStatic + Send,
     D: RigidDynamic + Send,
-    T: Articulation + Send,
     C: ArticulationReducedCoordinate + Send,
     OC: CollisionCallback + Send,
     OT: TriggerCallback + Send,
@@ -341,13 +332,12 @@ where
 {
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Sync
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Sync
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink + Sync,
     S: RigidStatic + Sync,
     D: RigidDynamic + Sync,
-    T: Articulation + Sync,
     C: ArticulationReducedCoordinate + Sync,
     OC: CollisionCallback + Sync,
     OT: TriggerCallback + Sync,
@@ -357,13 +347,11 @@ where
 {
 }
 
-impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Scene
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Scene for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -374,21 +362,17 @@ where
     type ArticulationLink = L;
     type RigidStatic = S;
     type RigidDynamic = D;
-    type Articulation = T;
     type ArticulationReducedCoordinate = C;
     type ActorMap = ActorMap<L, S, D>;
-    type ArticulationMap = ArticulationMap<T, C>;
-    type Aggregate = PxAggregate<L, S, D, T, C>;
+    type Aggregate = PxAggregate<L, S, D, C>;
 }
 
 pub trait Scene: Class<physx_sys::PxScene> + UserData {
     type ArticulationLink: ArticulationLink;
     type RigidStatic: RigidStatic;
     type RigidDynamic: RigidDynamic;
-    type Articulation: Articulation;
     type ArticulationReducedCoordinate: ArticulationReducedCoordinate;
     type ActorMap: RigidActor;
-    type ArticulationMap: ArticulationBase;
     type Aggregate: Aggregate;
 
     /// # Safety
@@ -518,7 +502,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     }
 
     /// Add an articulation to the scene.
-    fn add_articulation(&mut self, articulation: Owner<impl ArticulationBase>) {
+    fn add_articulation(&mut self, articulation: Owner<Self::ArticulationReducedCoordinate>) {
         unsafe {
             PxScene_addArticulation_mut(self.as_mut_ptr(), articulation.into_ptr());
         };
@@ -527,7 +511,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// Remove an articulation from the scene.
     fn remove_articulation(
         &mut self,
-        articulation: &mut impl ArticulationBase,
+        articulation: &mut Self::ArticulationReducedCoordinate,
         wake_touching: bool,
     ) {
         unsafe {
@@ -642,10 +626,11 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     // Bulk Getters
 
     /// Get a Vec of the articulations in the scene.
-    fn get_articulations(&mut self) -> Vec<&mut Self::ArticulationMap> {
+    fn get_articulations(&mut self) -> Vec<&mut Self::ArticulationReducedCoordinate> {
         unsafe {
             let capacity = PxScene_getNbArticulations(self.as_ptr());
-            let mut buffer: Vec<&mut Self::ArticulationMap> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&mut Self::ArticulationReducedCoordinate> =
+                Vec::with_capacity(capacity as usize);
             let len = PxScene_getArticulations(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,

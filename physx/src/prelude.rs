@@ -11,11 +11,7 @@ Prelude for commonly useful types
 
 pub use crate::actor::{Actor, ActorFlag, ActorFlags};
 pub use crate::aggregate::Aggregate;
-pub use crate::articulation::Articulation;
-pub use crate::articulation_base::ArticulationBase;
 pub use crate::articulation_cache::*;
-pub use crate::articulation_joint::{ArticulationJoint, ArticulationJointDriveType};
-pub use crate::articulation_joint_base::ArticulationJointBase;
 pub use crate::articulation_joint_reduced_coordinate::*;
 pub use crate::articulation_link::{ArticulationDriveType, ArticulationLink};
 pub use crate::articulation_reduced_coordinate::{

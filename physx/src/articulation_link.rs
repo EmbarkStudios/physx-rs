@@ -2,14 +2,7 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created:  2 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-A link of a reduced coordinate multibody.
- */
-
 use crate::{
-    articulation_joint_base::JointMap,
     owner::Owner,
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
