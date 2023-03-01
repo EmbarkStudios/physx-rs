@@ -5,3 +5,6 @@ physx-sys/pxbind_old/build
 
 # exclude `insta` snapshot new files
 *.snap.new
+
+# we use this while iterating
+ast-dump.json
