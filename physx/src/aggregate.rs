@@ -14,21 +14,14 @@ use crate::{
 use std::{marker::PhantomData, ptr::null};
 
 use physx_sys::{
-    PxAggregate_addActor_mut,
-    PxAggregate_addArticulation_mut,
-    PxAggregate_getActors,
-    PxAggregate_getMaxNbActors,
-    PxAggregate_getNbActors,
-    PxAggregate_getSelfCollision,
-    PxAggregate_release_mut,
-    PxAggregate_removeActor_mut,
-    PxAggregate_removeArticulation_mut,
-    //PxAggregate_getScene_mut,
-    //PxAggregate_getConcreteTypeName,
+    PxAggregate_addActor_mut, PxAggregate_addArticulation_mut, PxAggregate_getActors,
+    PxAggregate_getNbActors, PxAggregate_getSelfCollision, PxAggregate_release_mut,
+    PxAggregate_removeActor_mut, PxAggregate_removeArticulation_mut,
 };
 
 /// A collection of actors sharing a broad-phase entry.
-/// Parametrized by the ArticulationLink, RigidStatic, RigidDynamic, Articulation and
+///
+/// Parametrized by the ArticulationLink, RigidStatic, RigidDynamic, and
 /// ArticulationReducedCoordinate types that it may contain.
 #[repr(transparent)]
 pub struct PxAggregate<L, S, D, C>
@@ -138,11 +131,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     }
 
     /// Add an actor to the aggregate.
-    fn add_rigid_static(
-        &mut self,
-        actor: &mut Self::RigidStatic,
-        bvh: Option<&BvhStructure>,
-    ) -> bool {
+    fn add_rigid_static(&mut self, actor: &mut Self::RigidStatic, bvh: Option<&Bvh>) -> bool {
         unsafe {
             PxAggregate_addActor_mut(
                 self.as_mut_ptr(),
@@ -153,11 +142,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     }
 
     /// Add an actor to the aggregate.
-    fn add_rigid_dynamic(
-        &mut self,
-        actor: &mut Self::RigidDynamic,
-        bvh: Option<&BvhStructure>,
-    ) -> bool {
+    fn add_rigid_dynamic(&mut self, actor: &mut Self::RigidDynamic, bvh: Option<&Bvh>) -> bool {
         unsafe {
             PxAggregate_addActor_mut(
                 self.as_mut_ptr(),
@@ -194,11 +179,6 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
             buffer.set_len(len as usize);
         }
         buffer
-    }
-
-    /// Return the maximum possible number of actors in the aggregate.
-    fn get_max_nb_actors(&self) -> u32 {
-        unsafe { PxAggregate_getMaxNbActors(self.as_ptr()) }
     }
 
     /// Returns the number of actors in the aggregate.
