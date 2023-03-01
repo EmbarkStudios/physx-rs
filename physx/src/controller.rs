@@ -12,32 +12,20 @@ use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
 use thiserror::Error;
 
 use physx_sys::{
-    PxBoxControllerDesc_delete,
-    PxBoxControllerDesc_isValid,
-    PxBoxControllerDesc_new_alloc,
-    PxBoxController_getHalfForwardExtent,
-    PxBoxController_getHalfHeight,
-    PxBoxController_getHalfSideExtent,
-    PxBoxController_setHalfForwardExtent_mut,
-    PxBoxController_setHalfHeight_mut,
-    PxBoxController_setHalfSideExtent_mut,
-    PxCapsuleControllerDesc_delete,
-    PxCapsuleControllerDesc_isValid,
-    PxCapsuleControllerDesc_new_alloc,
-    //PxController_getActor,
-    PxCapsuleController_getClimbingMode,
-    PxCapsuleController_getHeight,
-    PxCapsuleController_getRadius,
-    PxCapsuleController_setClimbingMode_mut,
-    PxCapsuleController_setHeight_mut,
-    PxCapsuleController_setRadius_mut,
-    PxController,
-    PxController_getPosition,
-    PxController_getUserData,
-    PxController_release_mut,
-    PxController_setPosition_mut,
+    PxBoxControllerDesc_delete, PxBoxControllerDesc_isValid, PxBoxControllerDesc_new_alloc,
+    PxBoxController_getHalfForwardExtent, PxBoxController_getHalfHeight,
+    PxBoxController_getHalfSideExtent, PxBoxController_setHalfForwardExtent_mut,
+    PxBoxController_setHalfHeight_mut, PxBoxController_setHalfSideExtent_mut,
+    PxCapsuleControllerDesc_delete, PxCapsuleControllerDesc_isValid,
+    PxCapsuleControllerDesc_new_alloc, PxCapsuleController_getClimbingMode,
+    PxCapsuleController_getHeight, PxCapsuleController_getRadius,
+    PxCapsuleController_setClimbingMode_mut, PxCapsuleController_setHeight_mut,
+    PxCapsuleController_setRadius_mut, PxController, PxController_getPosition,
+    PxController_getUserData, PxController_release_mut, PxController_setPosition_mut,
     PxController_setUserData_mut,
 };
+
+pub use physx_sys::PxCapsuleClimbingMode as CapsuleClimbingMode;
 
 pub trait Controller: Class<PxController> + Sized {
     type UserData;
@@ -141,7 +129,7 @@ impl<U> CapsuleController for PxCapsuleController<U> {}
 pub trait CapsuleController: Class<physx_sys::PxCapsuleController> + Controller {
     /// Get the climbing mode of the capsule controller.
     fn get_climbing_mode(&self) -> CapsuleClimbingMode {
-        unsafe { PxCapsuleController_getClimbingMode(self.as_ptr()).into() }
+        unsafe { PxCapsuleController_getClimbingMode(self.as_ptr()) }
     }
 
     /// Get the height of the capsule.
@@ -156,7 +144,7 @@ pub trait CapsuleController: Class<physx_sys::PxCapsuleController> + Controller 
 
     /// Set the climbing mode of the capsule controller.
     fn set_climbing_mode(&mut self, mode: CapsuleClimbingMode) -> bool {
-        unsafe { PxCapsuleController_setClimbingMode_mut(self.as_mut_ptr(), mode.into()) }
+        unsafe { PxCapsuleController_setClimbingMode_mut(self.as_mut_ptr(), mode) }
     }
 
     /// Set the height of the capsule.
@@ -426,29 +414,4 @@ pub enum ControllerError {
 
     #[error("No controller manager present")]
     NoControllerManager,
-}
-
-#[derive(Copy, Clone)]
-pub enum CapsuleClimbingMode {
-    Easy,
-    Constrained,
-}
-
-impl From<CapsuleClimbingMode> for physx_sys::PxCapsuleClimbingMode::Enum {
-    fn from(value: CapsuleClimbingMode) -> Self {
-        match value {
-            CapsuleClimbingMode::Easy => physx_sys::PxCapsuleClimbingMode::eEASY,
-            CapsuleClimbingMode::Constrained => physx_sys::PxCapsuleClimbingMode::eCONSTRAINED,
-        }
-    }
-}
-
-impl From<physx_sys::PxCapsuleClimbingMode::Enum> for CapsuleClimbingMode {
-    fn from(mode: physx_sys::PxCapsuleClimbingMode::Enum) -> Self {
-        match mode {
-            physx_sys::PxCapsuleClimbingMode::eEASY => CapsuleClimbingMode::Easy,
-            physx_sys::PxCapsuleClimbingMode::eCONSTRAINED => CapsuleClimbingMode::Constrained,
-            _ => unreachable!("invalid PxCapsuleClimbingMode: {:?}", mode),
-        }
-    }
 }
