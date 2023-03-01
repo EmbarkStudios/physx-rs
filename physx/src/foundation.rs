@@ -2,18 +2,14 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 10 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-Wrapper for PxFoundation class
-*/
+#![allow(non_upper_case_globals)]
 
 use crate::{owner::Owner, traits::Class};
-use enumflags2::{bitflags, BitFlags};
+
 use physx_sys::{
     create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
     get_default_error_callback, phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
-    PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
+    PxErrorCode, PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
     PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
     PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
 };
@@ -25,21 +21,33 @@ use std::{
     sync::atomic::{AtomicUsize, Ordering::SeqCst},
 };
 
-#[bitflags]
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[repr(u32)]
-pub enum ErrorCode {
-    DebugInfo = 1u32,
-    DebugWarning = 2u32,
-    InvalidParameter = 4u32,
-    InvalidOperation = 8u32,
-    OutOfMemory = 16u32,
-    InternalError = 32u32,
-    Abort = 64u32,
-    PerfWarning = 128u32,
+bitflags::bitflags! {
+    #[repr(transparent)]
+    pub struct ErrorCodes: u32 {
+        /// An informational message.
+        const DebugInfo = PxErrorCode::DebugInfo as u32;
+        /// A warning message for the user to help with debugging
+        const DebugWarning = PxErrorCode::DebugWarning as u32;
+        /// Method called with invalid parameter(s)
+        const InvalidParameter = PxErrorCode::InvalidParameter as u32;
+        /// Method was called at a time when an operation is not possible
+        const InvalidOperation = PxErrorCode::InvalidOperation as u32;
+        /// Method failed to allocate some memory
+        const OutOfMemory = PxErrorCode::OutOfMemory as u32;
+        /// The library failed for some reason.
+        ///
+        /// Possibly you have passed invalid values like NaNs, which are not checked for.
+        const InternalError = PxErrorCode::InternalError as u32;
+        /// An unrecoverable error, execution should be halted and log output flushed
+        const Abort = PxErrorCode::Abort as u32;
+        /// The SDK has determined that an operation may result in poor performance.
+        const PerfWarning = PxErrorCode::PerfWarning as u32;
+    }
 }
 
-/// A new type wrapper for PxFoundation.  Parametrized by it's Allocator type.
+/// A new type wrapper for PxFoundation.
+///
+/// Parametrized by its Allocator type.
 #[repr(transparent)]
 pub struct PxFoundation<Allocator: AllocatorCallback> {
     obj: physx_sys::PxFoundation,
@@ -115,14 +123,14 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
     }
 
     /// Set the error level.
-    fn set_error_level(&mut self, mask: BitFlags<ErrorCode>) {
-        unsafe { PxFoundation_setErrorLevel_mut(self.as_mut_ptr(), mask.bits() as i32) }
+    fn set_error_level(&mut self, mask: ErrorCodes) {
+        unsafe { PxFoundation_setErrorLevel_mut(self.as_mut_ptr(), mask.bits()) }
     }
 
     /// Get the error level.
-    fn get_error_level(&self) -> BitFlags<ErrorCode> {
+    fn get_error_level(&self) -> ErrorCodes {
         unsafe {
-            BitFlags::from_bits(PxFoundation_getErrorLevel(self.as_ptr()) as u32)
+            ErrorCodes::from_bits(PxFoundation_getErrorLevel(self.as_ptr()))
                 .expect("got invalid bits for error flags")
         }
     }
@@ -148,7 +156,7 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
 }
 
 #[repr(align(16))]
-struct ScratchBufferBlock([u8; 16384]);
+struct ScratchBufferBlock([u8; 16 * 1024]);
 
 pub struct ScratchBuffer {
     ptr: *mut c_void,
@@ -156,6 +164,7 @@ pub struct ScratchBuffer {
 }
 
 impl ScratchBuffer {
+    #[inline]
     pub(crate) fn as_ptr_and_size(&mut self) -> (*mut c_void, u32) {
         (self.ptr, self.size as u32)
     }
