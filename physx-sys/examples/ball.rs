@@ -47,12 +47,41 @@ fn main() {
         PxRigidBody_setAngularDamping_mut(sphere.cast(), 0.5);
         PxScene_addActor_mut(scene, sphere.cast(), null_mut());
 
+        let filter_data = PxQueryFilterData_new();
+        let mut raycast_hits = Vec::new();
+
         let heights_over_time = (0..100)
             .map(|_| {
                 PxScene_simulate_mut(scene, 0.1, null_mut(), null_mut(), 0, true);
                 let mut error: u32 = 0;
                 PxScene_fetchResults_mut(scene, true, &mut error);
                 assert!(error == 0, "fetchResults has failed");
+
+                let mut hit = std::mem::MaybeUninit::uninit();
+
+                if physx_sys::PxSceneQueryExt_raycastSingle_mut(
+                    scene,
+                    &PxVec3 {
+                        x: 0.0,
+                        y: 100.0,
+                        z: 100.0,
+                    }, // origin
+                    &PxVec3 {
+                        x: 0.0,
+                        y: -1.0,
+                        z: 0.0,
+                    }, // dir
+                    1000.0, // max distance
+                    PxHitFlags::Default,
+                    hit.as_mut_ptr(),
+                    &filter_data,
+                    null_mut(),
+                    null_mut(),
+                ) {
+                    let hit = hit.assume_init();
+                    raycast_hits.push(hit);
+                }
+
                 let pose = PxRigidActor_getGlobalPose(sphere.cast());
                 (pose.p.y) as i32 - 10
             })
@@ -73,5 +102,9 @@ fn main() {
         PxScene_release_mut(scene);
         PxDefaultCpuDispatcher_release_mut(dispatcher);
         PxPhysics_release_mut(physics);
+
+        for hit in raycast_hits {
+            eprintln!("Raycast hit object {:.02}m away", hit.distance);
+        }
     }
 }
