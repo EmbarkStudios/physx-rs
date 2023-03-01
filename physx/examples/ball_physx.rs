@@ -19,7 +19,6 @@ type PxShape = physx::shape::PxShape<(), PxMaterial>;
 type PxArticulationLink = physx::articulation_link::PxArticulationLink<(), PxShape>;
 type PxRigidStatic = physx::rigid_static::PxRigidStatic<(), PxShape>;
 type PxRigidDynamic = physx::rigid_dynamic::PxRigidDynamic<(), PxShape>;
-type PxArticulation = physx::articulation::PxArticulation<(), PxArticulationLink>;
 type PxArticulationReducedCoordinate =
     physx::articulation_reduced_coordinate::PxArticulationReducedCoordinate<(), PxArticulationLink>;
 type PxScene = physx::scene::PxScene<
@@ -27,7 +26,6 @@ type PxScene = physx::scene::PxScene<
     PxArticulationLink,
     PxRigidStatic,
     PxRigidDynamic,
-    PxArticulation,
     PxArticulationReducedCoordinate,
     OnCollision,
     OnTrigger,
@@ -117,6 +115,10 @@ fn main() {
     sphere_actor.set_rigid_body_flag(RigidBodyFlag::EnablePoseIntegrationPreview, true);
     scene.add_dynamic_actor(sphere_actor);
 
+    // SAFETY: scratch buffer creation
+    #[allow(unsafe_code)]
+    let mut scratch = unsafe { ScratchBuffer::new(4) };
+
     // Updating
     let heights_over_time = (0..100)
         .map(|_| {
@@ -126,7 +128,7 @@ fn main() {
                 .step(
                     0.1,
                     None::<&mut physx_sys::PxBaseTask>,
-                    Some(unsafe { &mut ScratchBuffer::new(4) }),
+                    Some(&mut scratch),
                     true,
                 )
                 .expect("error occured during simulation");
