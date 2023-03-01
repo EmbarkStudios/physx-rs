@@ -248,7 +248,7 @@ pub type RaycastHitCallback = unsafe extern "C" fn(
     *const PxShape,
     hit_flags: u32,
     *const c_void,
-) -> u32;
+) -> PxQueryHitType;
 
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
@@ -261,7 +261,8 @@ pub struct FilterShaderCallbackInfo {
     pub constantBlockSize: u32,
 }
 
-pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
+pub type SimulationFilterShader =
+    unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> PxFilterFlags;
 
 pub type RaycastProcessTouchesCallback =
     unsafe extern "C" fn(*const PxRaycastHit, u32, *mut c_void) -> bool;
