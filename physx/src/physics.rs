@@ -2,10 +2,6 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created:  2 April 2019
 
-/*!
-Wrapper interface for PxPhysics
- */
-
 #![allow(clippy::missing_safety_doc)]
 
 mod assert_handler;
@@ -14,7 +10,6 @@ mod profiler;
 
 use crate::{
     aggregate::{Aggregate, PxAggregate},
-    articulation::{Articulation, PxArticulation},
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::{
         ArticulationReducedCoordinate, PxArticulationReducedCoordinate,
@@ -35,7 +30,7 @@ use crate::{
     scene::PxScene,
     shape::{Shape, ShapeFlags},
     simulation_event_callback::*,
-    traits::{Class, Descriptor, PxFlags, SceneDescriptor, UserData},
+    traits::{Class, Descriptor, SceneDescriptor, UserData},
     triangle_mesh::TriangleMesh,
     visual_debugger::VisualDebugger,
 };
@@ -45,20 +40,17 @@ use std::{marker::PhantomData, ptr::null_mut};
 use physx_sys::{
     phys_PxCloseExtensions,
     phys_PxCreatePhysics,
-    // TODO implement the extensions interface, move these there isntead of here?
+    // TODO implement the extensions interface, move these there instead of here?
     //phys_PxCreateBasePhysics,  used with extentions
     phys_PxInitExtensions,
     phys_PxSetAssertHandler,
     phys_PxSetProfilerCallback,
     physx_create_physics,
-    //FilterShaderCallbackInfo,
     PxConstraintConnector,
     PxConstraintShaderTable,
     PxErrorCallback,
-    //PxFilterFlag,
     PxInputStream,
-    //PxPairFlag,
-    PxPhysicsInsertionCallback,
+    PxInsertionCallback,
     PxPhysics_createAggregate_mut,
     PxPhysics_createArticulationReducedCoordinate_mut,
     PxPhysics_createBVH_mut,
@@ -86,14 +78,6 @@ use physx_sys::{
     PxPhysics_getTolerancesScale,
     PxPhysics_getTriangleMeshes,
     PxPhysics_release_mut,
-    //PxPhysics_getNbScenes,
-    //PxPhysics_getScenes,
-    //PxPhysics_registerDeletionListener_mut,
-    //PxPhysics_registerDeletionListenerObjects_mut,
-    //PxPhysics_unregisterDeletionListener_mut,
-    //PxPhysics_unregisterDeletionListenerObjects_mut,
-    //PxPhysics_getFoundation_mut, // probably not necessary? also sketch wrt obrm
-    //PxPhysics_createShape_mut, PxPhysics_createShape_mut_1 is the same but more
     PxTolerancesScale,
     PxTolerancesScale_new,
 };
@@ -102,7 +86,7 @@ pub use self::assert_handler::AssertHandler;
 pub use self::error_callback::ErrorCallback;
 pub use self::profiler::ProfilerCallback;
 
-pub const PX_PHYSICS_VERSION: u32 = crate::version(4, 1, 1);
+pub const PX_PHYSICS_VERSION: u32 = crate::version(5, 1, 3);
 
 /// A PxPhysics, PxFoundation and optional PxPvd combined into one struct for ease of use.
 /// Parametrized by the Foundation's Allocator and the Physics' Shape type.
@@ -226,7 +210,28 @@ impl<Allocator: AllocatorCallback, Geom: Shape> Drop for PhysicsFoundation<Alloc
     }
 }
 
-/// A new type wrapper for PxPhysics.  Parametrized by the type of the Shapes it can create.
+bitflags::bitflags! {
+    /// Used for more efficient filtering of aggregates outside of the broadphase
+    ///
+    /// If neither the [`AggregateFilterHint::STATIC`] or
+    /// [`AggregateFilterHint::KINEMATIC`] bits are set the hint applies to all
+    /// actor types. It is recommended to set either of them if the aggregate
+    /// only contains static or kinematic actors as this provides faster
+    /// filtering when used in combination with [`physx_sys::PxPairFilteringMode`]
+    #[repr(transparent)]
+    pub struct AggregateFilterHint: u32 {
+        /// If set enables self collision for the aggregate
+        const SELF_COLLISION = 1 << 0;
+        /// If set, filters static actors
+        const STATIC = 1 << 1;
+        /// If set, filters kinematic actors
+        const KINEMATIC = 1 << 2;
+    }
+}
+
+/// A new type wrapper for PxPhysics.
+///
+/// Parametrized by the type of the Shapes it can create.
 #[repr(transparent)]
 pub struct PxPhysics<Geom: Shape> {
     obj: physx_sys::PxPhysics,
@@ -462,7 +467,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
                     materials.as_ptr() as *const *mut _,
                     materials.len() as u16,
                     is_exclusive,
-                    shape_flags.into_px(),
+                    shape_flags,
                 ),
                 user_data,
             )
@@ -639,7 +644,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
     }
 
     /// Get the physics insertion callback, used for real-time cooking of physics meshes.
-    fn get_physics_insertion_callback(&mut self) -> Option<&mut PxPhysicsInsertionCallback> {
+    fn get_physics_insertion_callback(&mut self) -> Option<&mut PxInsertionCallback> {
         unsafe { PxPhysics_getPhysicsInsertionCallback_mut(self.as_mut_ptr()).as_mut() }
     }
 }
@@ -656,8 +661,7 @@ pub struct PhysicsFoundationBuilder<Allocator: AllocatorCallback> {
 
 impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
     fn default() -> Self {
-        let mut tolerances = unsafe { PxTolerancesScale_new() };
-        tolerances.length = 1.0;
+        let tolerances = unsafe { PxTolerancesScale_new(1.0, 10.0) };
 
         Self {
             tolerances,
@@ -673,8 +677,7 @@ impl Default for PhysicsFoundationBuilder<DefaultAllocator> {
 
 impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
     pub fn new(allocator: Allocator) -> Self {
-        let mut tolerances = unsafe { PxTolerancesScale_new() };
-        tolerances.length = 1.0;
+        let tolerances = unsafe { PxTolerancesScale_new(1.0, 10.0) };
 
         Self {
             tolerances,
@@ -759,6 +762,7 @@ impl<Allocator: AllocatorCallback> PhysicsFoundationBuilder<Allocator> {
                     &self.tolerances as *const _,
                     true,
                     pvd.as_mut_ptr(),
+                    std::ptr::null_mut(), // PxOmniPvd, not supported yet
                 ))?;
 
                 (Some(pvd), physics)
