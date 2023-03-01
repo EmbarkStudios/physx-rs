@@ -1,11 +1,29 @@
 use crate::{math::PxVec3, traits::Class};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxQuat_dot, PxQuat_getAngle, PxQuat_getAngle_1, PxQuat_getBasisVector0, PxQuat_getBasisVector1,
-    PxQuat_getBasisVector2, PxQuat_getConjugate, PxQuat_getImaginaryPart, PxQuat_getNormalized,
-    PxQuat_isFinite, PxQuat_isIdentity, PxQuat_isSane, PxQuat_isUnit, PxQuat_magnitude,
-    PxQuat_magnitudeSquared, PxQuat_new_1, PxQuat_new_3, PxQuat_new_4, PxQuat_normalize_mut,
-    PxQuat_rotate, PxQuat_rotateInv, PxQuat_toRadiansAndUnitAxis,
+    PxQuat_dot,
+    PxQuat_getAngle,
+    PxQuat_getAngle_1,
+    PxQuat_getBasisVector0,
+    PxQuat_getBasisVector1,
+    PxQuat_getBasisVector2,
+    PxQuat_getConjugate,
+    PxQuat_getImaginaryPart,
+    PxQuat_getNormalized,
+    PxQuat_isFinite,
+    PxQuat_isIdentity,
+    PxQuat_isSane,
+    PxQuat_isUnit,
+    PxQuat_magnitude,
+    PxQuat_magnitudeSquared,
+    PxQuat_new_1,
+    PxQuat_new_3,
+    PxQuat_new_4,
+    PxQuat_normalize_mut,
+    PxQuat_rotate,
+    PxQuat_rotateInv,
+    PxQuat_toRadiansAndUnitAxis,
 };
 
 #[derive(Copy, Clone)]

@@ -15,8 +15,10 @@ use super::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxArticulationReducedCoordinate_applyCache_mut, PxArticulationReducedCoordinate_commonInit,
+    PxArticulationReducedCoordinate_applyCache_mut,
+    PxArticulationReducedCoordinate_commonInit,
     PxArticulationReducedCoordinate_computeCoefficientMatrix,
     PxArticulationReducedCoordinate_computeCoriolisAndCentrifugalForce,
     PxArticulationReducedCoordinate_computeDenseJacobian,
@@ -29,17 +31,21 @@ use physx_sys::{
     PxArticulationReducedCoordinate_copyInternalStateToCache,
     PxArticulationReducedCoordinate_createCache,
     PxArticulationReducedCoordinate_getArticulationFlags,
-    PxArticulationReducedCoordinate_getCacheDataSize, PxArticulationReducedCoordinate_getDofs,
-    PxArticulationReducedCoordinate_getLinks, PxArticulationReducedCoordinate_getNbLinks,
+    PxArticulationReducedCoordinate_getCacheDataSize,
+    PxArticulationReducedCoordinate_getDofs,
+    PxArticulationReducedCoordinate_getLinks,
+    PxArticulationReducedCoordinate_getNbLinks,
     PxArticulationReducedCoordinate_getRootGlobalPose,
     PxArticulationReducedCoordinate_getSolverIterationCounts,
-    PxArticulationReducedCoordinate_packJointData, PxArticulationReducedCoordinate_release_mut,
+    PxArticulationReducedCoordinate_packJointData,
+    PxArticulationReducedCoordinate_release_mut,
     PxArticulationReducedCoordinate_setArticulationFlag_mut,
     PxArticulationReducedCoordinate_setArticulationFlags_mut,
     PxArticulationReducedCoordinate_setRootGlobalPose_mut,
     PxArticulationReducedCoordinate_setSolverIterationCounts_mut,
     PxArticulationReducedCoordinate_unpackJointData,
-    PxRigidBodyExt_computeMassPropertiesFromShapes_mut, PxRigidBodyExt_getVelocityAtPos_mut,
+    PxRigidBodyExt_computeMassPropertiesFromShapes_mut,
+    PxRigidBodyExt_getVelocityAtPos_mut,
 };
 
 pub use physx_sys::{
@@ -127,8 +133,10 @@ pub trait ArticulationReducedCoordinate:
         ptr: *mut physx_sys::PxArticulationReducedCoordinate,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let articulation = (ptr as *mut Self).as_mut();
-        Owner::from_raw(articulation?.init_user_data(user_data))
+        unsafe {
+            let articulation = (ptr as *mut Self).as_mut();
+            Owner::from_raw(articulation?.init_user_data(user_data))
+        }
     }
 
     /// Get a reference to the user data.

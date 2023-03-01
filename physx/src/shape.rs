@@ -12,10 +12,18 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxFilterData, PxFilterData_new_1, PxShape_getMaterials, PxShape_getNbMaterials,
-    PxShape_getQueryFilterData, PxShape_getSimulationFilterData, PxShape_setFlag_mut,
-    PxShape_setFlags_mut, PxShape_setQueryFilterData_mut, PxShape_setSimulationFilterData_mut,
+    PxFilterData,
+    PxFilterData_new_1,
+    PxShape_getMaterials,
+    PxShape_getNbMaterials,
+    PxShape_getQueryFilterData,
+    PxShape_getSimulationFilterData,
+    PxShape_setFlag_mut,
+    PxShape_setFlags_mut,
+    PxShape_setQueryFilterData_mut,
+    PxShape_setSimulationFilterData_mut,
 };
 
 bitflags::bitflags! {

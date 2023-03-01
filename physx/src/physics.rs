@@ -37,6 +37,7 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::null_mut};
 
+#[rustfmt::skip]
 use physx_sys::{
     phys_PxCloseExtensions,
     phys_PxCreatePhysics,

@@ -11,17 +11,31 @@ use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
 
 use thiserror::Error;
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxControllerDesc_delete, PxBoxControllerDesc_isValid, PxBoxControllerDesc_new_alloc,
-    PxBoxController_getHalfForwardExtent, PxBoxController_getHalfHeight,
-    PxBoxController_getHalfSideExtent, PxBoxController_setHalfForwardExtent_mut,
-    PxBoxController_setHalfHeight_mut, PxBoxController_setHalfSideExtent_mut,
-    PxCapsuleControllerDesc_delete, PxCapsuleControllerDesc_isValid,
-    PxCapsuleControllerDesc_new_alloc, PxCapsuleController_getClimbingMode,
-    PxCapsuleController_getHeight, PxCapsuleController_getRadius,
-    PxCapsuleController_setClimbingMode_mut, PxCapsuleController_setHeight_mut,
-    PxCapsuleController_setRadius_mut, PxController, PxController_getPosition,
-    PxController_getUserData, PxController_release_mut, PxController_setPosition_mut,
+    PxBoxControllerDesc_delete,
+    PxBoxControllerDesc_isValid,
+    PxBoxControllerDesc_new_alloc,
+    PxBoxController_getHalfForwardExtent,
+    PxBoxController_getHalfHeight,
+    PxBoxController_getHalfSideExtent,
+    PxBoxController_setHalfForwardExtent_mut,
+    PxBoxController_setHalfHeight_mut,
+    PxBoxController_setHalfSideExtent_mut,
+    PxCapsuleControllerDesc_delete,
+    PxCapsuleControllerDesc_isValid,
+    PxCapsuleControllerDesc_new_alloc,
+    PxCapsuleController_getClimbingMode,
+    PxCapsuleController_getHeight,
+    PxCapsuleController_getRadius,
+    PxCapsuleController_setClimbingMode_mut,
+    PxCapsuleController_setHeight_mut,
+    PxCapsuleController_setRadius_mut,
+    PxController,
+    PxController_getPosition,
+    PxController_getUserData,
+    PxController_release_mut,
+    PxController_setPosition_mut,
     PxController_setUserData_mut,
 };
 

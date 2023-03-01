@@ -13,10 +13,16 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::null};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxAggregate_addActor_mut, PxAggregate_addArticulation_mut, PxAggregate_getActors,
-    PxAggregate_getNbActors, PxAggregate_getSelfCollision, PxAggregate_release_mut,
-    PxAggregate_removeActor_mut, PxAggregate_removeArticulation_mut,
+    PxAggregate_addActor_mut,
+    PxAggregate_addArticulation_mut,
+    PxAggregate_getActors,
+    PxAggregate_getNbActors,
+    PxAggregate_getSelfCollision,
+    PxAggregate_release_mut,
+    PxAggregate_removeActor_mut,
+    PxAggregate_removeArticulation_mut,
 };
 
 /// A collection of actors sharing a broad-phase entry.
@@ -112,7 +118,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(ptr: *mut physx_sys::PxAggregate) -> Option<Owner<Self>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Add an actor to the aggregate.

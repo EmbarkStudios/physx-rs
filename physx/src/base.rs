@@ -1,10 +1,17 @@
 use crate::traits::Class;
 pub(crate) use physx_sys::{PxBase, PxRefCounted};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxBase_getBaseFlags, PxBase_getConcreteType, PxBase_getConcreteTypeName, PxBase_isReleasable,
-    PxBase_setBaseFlag_mut, PxBase_setBaseFlags_mut, PxRefCounted_acquireReference_mut,
-    PxRefCounted_getReferenceCount, PxRefCounted_release_mut,
+    PxBase_getBaseFlags,
+    PxBase_getConcreteType,
+    PxBase_getConcreteTypeName,
+    PxBase_isReleasable,
+    PxBase_setBaseFlag_mut,
+    PxBase_setBaseFlags_mut,
+    PxRefCounted_acquireReference_mut,
+    PxRefCounted_getReferenceCount,
+    PxRefCounted_release_mut,
 };
 
 pub use physx_sys::{

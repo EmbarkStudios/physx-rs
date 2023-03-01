@@ -1,10 +1,24 @@
 use crate::traits::Class;
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxVec3_abs, PxVec3_cross, PxVec3_dot, PxVec3_getNormalized, PxVec3_isFinite,
-    PxVec3_isNormalized, PxVec3_isZero, PxVec3_magnitude, PxVec3_magnitudeSquared,
-    PxVec3_maxElement, PxVec3_maximum, PxVec3_minElement, PxVec3_minimum, PxVec3_multiply,
-    PxVec3_new_1, PxVec3_new_3, PxVec3_normalize_mut,
+    PxVec3_abs,
+    PxVec3_cross,
+    PxVec3_dot,
+    PxVec3_getNormalized,
+    PxVec3_isFinite,
+    PxVec3_isNormalized,
+    PxVec3_isZero,
+    PxVec3_magnitude,
+    PxVec3_magnitudeSquared,
+    PxVec3_maxElement,
+    PxVec3_maximum,
+    PxVec3_minElement,
+    PxVec3_minimum,
+    PxVec3_multiply,
+    PxVec3_new_1,
+    PxVec3_new_3,
+    PxVec3_normalize_mut,
 };
 
 #[derive(Copy, Clone)]

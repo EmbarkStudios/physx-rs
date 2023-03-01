@@ -6,14 +6,29 @@ use crate::{
     owner::Owner, physics::Physics, traits::Class, triangle_mesh::TriangleMesh,
 };
 
+#[rustfmt::skip]
 use physx_sys::{
-    phys_PxCreateCooking, PxBVHDesc_isValid, PxBVHDesc_new, PxBVHDesc_setToDefault_mut,
-    PxConvexMeshDesc_isValid, PxConvexMeshDesc_new, PxConvexMeshDesc_setToDefault_mut,
-    PxCookingParams_new, PxCooking_createBVH, PxCooking_createConvexMesh,
-    PxCooking_createHeightField, PxCooking_createTriangleMesh, PxCooking_release_mut,
-    PxCooking_validateConvexMesh, PxCooking_validateTriangleMesh, PxHeightFieldDesc_isValid,
-    PxHeightFieldDesc_new, PxHeightFieldDesc_setToDefault_mut, PxTriangleMeshDesc_isValid,
-    PxTriangleMeshDesc_new, PxTriangleMeshDesc_setToDefault_mut,
+    phys_PxCreateCooking,
+    PxBVHDesc_isValid,
+    PxBVHDesc_new,
+    PxBVHDesc_setToDefault_mut,
+    PxConvexMeshDesc_isValid,
+    PxConvexMeshDesc_new,
+    PxConvexMeshDesc_setToDefault_mut,
+    PxCookingParams_new,
+    PxCooking_createBVH,
+    PxCooking_createConvexMesh,
+    PxCooking_createHeightField,
+    PxCooking_createTriangleMesh,
+    PxCooking_release_mut,
+    PxCooking_validateConvexMesh,
+    PxCooking_validateTriangleMesh,
+    PxHeightFieldDesc_isValid,
+    PxHeightFieldDesc_new,
+    PxHeightFieldDesc_setToDefault_mut,
+    PxTriangleMeshDesc_isValid,
+    PxTriangleMeshDesc_new,
+    PxTriangleMeshDesc_setToDefault_mut,
 };
 
 /// A new-type wrapper around `physx_sys::PxCooking`.

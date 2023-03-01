@@ -9,21 +9,41 @@ use crate::{
     convex_mesh::ConvexMesh, height_field::HeightField, traits::Class, triangle_mesh::TriangleMesh,
 };
 
+#[rustfmt::skip]
 pub use physx_sys::{
-    PxBoxGeometry, PxCapsuleGeometry, PxConvexMeshGeometry,
+    PxBoxGeometry,
+    PxCapsuleGeometry,
+    PxConvexMeshGeometry,
     PxConvexMeshGeometryFlag as ConvexMeshGeometryFlag,
-    PxConvexMeshGeometryFlags as ConvexMeshGeometryFlags, PxGeometry,
-    PxGeometryType as GeometryType, PxHeightFieldGeometry, PxMeshGeometryFlag as MeshGeometryFlag,
-    PxMeshGeometryFlags as MeshGeometryFlags, PxPlaneGeometry, PxSphereGeometry,
+    PxConvexMeshGeometryFlags as ConvexMeshGeometryFlags,
+    PxGeometry,
+    PxGeometryType as GeometryType,
+    PxHeightFieldGeometry,
+    PxMeshGeometryFlag as MeshGeometryFlag,
+    PxMeshGeometryFlags as MeshGeometryFlags,
+    PxPlaneGeometry,
+    PxSphereGeometry,
     PxTriangleMeshGeometry,
 };
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxGeometry_isValid, PxBoxGeometry_new, PxCapsuleGeometry_isValid, PxCapsuleGeometry_new,
-    PxConvexMeshGeometry_isValid, PxConvexMeshGeometry_new, PxGeometry_getType,
-    PxHeightFieldGeometry_isValid, PxHeightFieldGeometry_new, PxMeshScale, PxPlaneGeometry_isValid,
-    PxPlaneGeometry_new, PxSphereGeometry_isValid, PxSphereGeometry_new,
-    PxTriangleMeshGeometry_isValid, PxTriangleMeshGeometry_new,
+    PxBoxGeometry_isValid,
+    PxBoxGeometry_new,
+    PxCapsuleGeometry_isValid,
+    PxCapsuleGeometry_new,
+    PxConvexMeshGeometry_isValid,
+    PxConvexMeshGeometry_new,
+    PxGeometry_getType,
+    PxHeightFieldGeometry_isValid,
+    PxHeightFieldGeometry_new,
+    PxMeshScale,
+    PxPlaneGeometry_isValid,
+    PxPlaneGeometry_new,
+    PxSphereGeometry_isValid,
+    PxSphereGeometry_new,
+    PxTriangleMeshGeometry_isValid,
+    PxTriangleMeshGeometry_new,
 };
 
 use std::ptr;

@@ -14,7 +14,12 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use physx_sys::{phys_PxCreateStatic, PxRigidActor_release_mut, PxRigidStatic_getConcreteTypeName};
+#[rustfmt::skip]
+use physx_sys::{
+    phys_PxCreateStatic,
+    PxRigidActor_release_mut,
+    PxRigidStatic_getConcreteTypeName,
+};
 
 /// A new type wrapper for PxArticulation.  Parametrized by it's user data type,
 /// and the type of it's Shapes.

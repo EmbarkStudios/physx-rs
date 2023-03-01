@@ -3,13 +3,26 @@ use crate::{
     traits::Class,
 };
 
-//pub use physx_sys::PxTransform;
+#[rustfmt::skip]
 use physx_sys::{
-    PxPlane, PxPlane_inverseTransform, PxPlane_transform, PxTransform_getInverse,
-    PxTransform_getNormalized, PxTransform_isFinite, PxTransform_isSane, PxTransform_isValid,
-    PxTransform_new_1, PxTransform_new_2, PxTransform_new_3, PxTransform_new_5, PxTransform_rotate,
-    PxTransform_rotateInv, PxTransform_transform, PxTransform_transformInv,
-    PxTransform_transformInv_1, PxTransform_transform_1,
+    PxPlane,
+    PxPlane_inverseTransform,
+    PxPlane_transform,
+    PxTransform_getInverse,
+    PxTransform_getNormalized,
+    PxTransform_isFinite,
+    PxTransform_isSane,
+    PxTransform_isValid,
+    PxTransform_new_1,
+    PxTransform_new_2,
+    PxTransform_new_3,
+    PxTransform_new_5,
+    PxTransform_rotate,
+    PxTransform_rotateInv,
+    PxTransform_transform,
+    PxTransform_transformInv,
+    PxTransform_transformInv_1,
+    PxTransform_transform_1,
 };
 
 #[derive(Copy, Clone)]

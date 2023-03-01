@@ -5,16 +5,28 @@ use crate::{
 
 use std::marker::PhantomData;
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxMaterial_getDynamicFriction, PxMaterial_getFlags, PxMaterial_getFrictionCombineMode,
-    PxMaterial_getRestitution, PxMaterial_getRestitutionCombineMode, PxMaterial_getStaticFriction,
-    PxMaterial_setDynamicFriction_mut, PxMaterial_setFlag_mut, PxMaterial_setFlags_mut,
-    PxMaterial_setFrictionCombineMode_mut, PxMaterial_setRestitutionCombineMode_mut,
-    PxMaterial_setRestitution_mut, PxMaterial_setStaticFriction_mut,
+    PxMaterial_getDynamicFriction,
+    PxMaterial_getFlags,
+    PxMaterial_getFrictionCombineMode,
+    PxMaterial_getRestitution,
+    PxMaterial_getRestitutionCombineMode,
+    PxMaterial_getStaticFriction,
+    PxMaterial_setDynamicFriction_mut,
+    PxMaterial_setFlag_mut,
+    PxMaterial_setFlags_mut,
+    PxMaterial_setFrictionCombineMode_mut,
+    PxMaterial_setRestitutionCombineMode_mut,
+    PxMaterial_setRestitution_mut,
+    PxMaterial_setStaticFriction_mut,
 };
 
+#[rustfmt::skip]
 pub use physx_sys::{
-    PxCombineMode as CombineMode, PxMaterialFlag as MaterialFlag, PxMaterialFlags as MaterialFlags,
+    PxCombineMode as CombineMode,
+    PxMaterialFlag as MaterialFlag,
+    PxMaterialFlags as MaterialFlags,
 };
 
 /// A new type wrapper for PxMaterial.  Parametrized by its user data type.

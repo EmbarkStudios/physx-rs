@@ -15,17 +15,29 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    phys_PxCreateDynamic, PxRigidActor_release_mut, PxRigidDynamic_getContactReportThreshold,
-    PxRigidDynamic_getKinematicTarget, PxRigidDynamic_getRigidDynamicLockFlags,
-    PxRigidDynamic_getSleepThreshold, PxRigidDynamic_getSolverIterationCounts,
-    PxRigidDynamic_getStabilizationThreshold, PxRigidDynamic_getWakeCounter,
-    PxRigidDynamic_isSleeping, PxRigidDynamic_putToSleep_mut,
-    PxRigidDynamic_setAngularVelocity_mut, PxRigidDynamic_setContactReportThreshold_mut,
-    PxRigidDynamic_setKinematicTarget_mut, PxRigidDynamic_setLinearVelocity_mut,
-    PxRigidDynamic_setRigidDynamicLockFlag_mut, PxRigidDynamic_setRigidDynamicLockFlags_mut,
-    PxRigidDynamic_setSleepThreshold_mut, PxRigidDynamic_setSolverIterationCounts_mut,
-    PxRigidDynamic_setStabilizationThreshold_mut, PxRigidDynamic_setWakeCounter_mut,
+    phys_PxCreateDynamic,
+    PxRigidActor_release_mut,
+    PxRigidDynamic_getContactReportThreshold,
+    PxRigidDynamic_getKinematicTarget,
+    PxRigidDynamic_getRigidDynamicLockFlags,
+    PxRigidDynamic_getSleepThreshold,
+    PxRigidDynamic_getSolverIterationCounts,
+    PxRigidDynamic_getStabilizationThreshold,
+    PxRigidDynamic_getWakeCounter,
+    PxRigidDynamic_isSleeping,
+    PxRigidDynamic_putToSleep_mut,
+    PxRigidDynamic_setAngularVelocity_mut,
+    PxRigidDynamic_setContactReportThreshold_mut,
+    PxRigidDynamic_setKinematicTarget_mut,
+    PxRigidDynamic_setLinearVelocity_mut,
+    PxRigidDynamic_setRigidDynamicLockFlag_mut,
+    PxRigidDynamic_setRigidDynamicLockFlags_mut,
+    PxRigidDynamic_setSleepThreshold_mut,
+    PxRigidDynamic_setSolverIterationCounts_mut,
+    PxRigidDynamic_setStabilizationThreshold_mut,
+    PxRigidDynamic_setWakeCounter_mut,
     PxRigidDynamic_wakeUp_mut,
 };
 

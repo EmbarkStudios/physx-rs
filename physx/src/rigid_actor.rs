@@ -10,10 +10,17 @@ use super::{
     traits::Class,
 };
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxRigidActor, PxRigidActor_attachShape_mut, PxRigidActor_detachShape_mut,
-    PxRigidActor_getConstraints, PxRigidActor_getGlobalPose, PxRigidActor_getNbConstraints,
-    PxRigidActor_getNbShapes, PxRigidActor_getShapes, PxRigidActor_setGlobalPose_mut,
+    PxRigidActor,
+    PxRigidActor_attachShape_mut,
+    PxRigidActor_detachShape_mut,
+    PxRigidActor_getConstraints,
+    PxRigidActor_getGlobalPose,
+    PxRigidActor_getNbConstraints,
+    PxRigidActor_getNbShapes,
+    PxRigidActor_getShapes,
+    PxRigidActor_setGlobalPose_mut,
 };
 
 pub trait RigidActor: Class<PxRigidActor> + Actor {

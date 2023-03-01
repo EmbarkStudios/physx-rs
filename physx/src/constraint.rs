@@ -16,7 +16,7 @@ impl Constraint {
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     #[allow(dead_code)]
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxConstraint) -> Option<Owner<Self>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 }
 

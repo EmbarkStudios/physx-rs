@@ -1,30 +1,81 @@
 // PxBase hierarchy
+#[rustfmt::skip]
 use physx_sys::{
-    PxActor, PxAggregate, PxArticulationJointReducedCoordinate, PxArticulationLink,
-    PxArticulationReducedCoordinate, PxBVH, PxBase, PxConstraint, PxContactJoint, PxConvexMesh,
-    PxD6Joint, PxDistanceJoint, PxFixedJoint, PxHeightField, PxJoint, PxMaterial, PxPrismaticJoint,
-    PxPruningStructure, PxRefCounted, PxRevoluteJoint, PxRigidActor, PxRigidBody, PxRigidDynamic,
-    PxRigidStatic, PxShape, PxSphericalJoint, PxTriangleMesh,
+    PxActor,
+    PxAggregate,
+    PxArticulationJointReducedCoordinate,
+    PxArticulationLink,
+    PxArticulationReducedCoordinate,
+    PxBVH,
+    PxBase,
+    PxConstraint,
+    PxContactJoint,
+    PxConvexMesh,
+    PxD6Joint,
+    PxDistanceJoint,
+    PxFixedJoint,
+    PxHeightField,
+    PxJoint,
+    PxMaterial,
+    PxPrismaticJoint,
+    PxPruningStructure,
+    PxRefCounted,
+    PxRevoluteJoint,
+    PxRigidActor,
+    PxRigidBody,
+    PxRigidDynamic,
+    PxRigidStatic,
+    PxShape,
+    PxSphericalJoint,
+    PxTriangleMesh,
 };
 
 // Main classes
+#[rustfmt::skip]
 use physx_sys::{
-    PxCooking, PxFoundation, PxPhysics, PxPvd, PxPvdSceneClient, PxPvdTransport, PxScene,
+    PxCooking,
+    PxFoundation,
+    PxPhysics,
+    PxPvd,
+    PxPvdSceneClient,
+    PxPvdTransport,
+    PxScene,
 };
 
 // Controller stuff
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxController, PxBoxControllerDesc, PxCapsuleController, PxCapsuleControllerDesc,
-    PxController, PxControllerDesc, PxControllerManager,
+    PxBoxController,
+    PxBoxControllerDesc,
+    PxCapsuleController,
+    PxCapsuleControllerDesc,
+    PxController,
+    PxControllerDesc,
+    PxControllerManager,
 };
 
 // Math
-use physx_sys::{PxBounds3, PxExtendedVec3, PxMeshScale, PxQuat, PxTransform, PxVec3};
+#[rustfmt::skip]
+use physx_sys::{
+    PxBounds3,
+    PxExtendedVec3,
+    PxMeshScale,
+    PxQuat,
+    PxTransform,
+    PxVec3,
+};
 
 // Geometries
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxGeometry, PxCapsuleGeometry, PxConvexMeshGeometry, PxGeometry, PxHeightFieldGeometry,
-    PxPlaneGeometry, PxSphereGeometry, PxTriangleMeshGeometry,
+    PxBoxGeometry,
+    PxCapsuleGeometry,
+    PxConvexMeshGeometry,
+    PxGeometry,
+    PxHeightFieldGeometry,
+    PxPlaneGeometry,
+    PxSphereGeometry,
+    PxTriangleMeshGeometry,
 };
 
 // Misc

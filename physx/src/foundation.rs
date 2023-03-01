@@ -6,12 +6,23 @@
 
 use crate::{owner::Owner, traits::Class};
 
+#[rustfmt::skip]
 use physx_sys::{
-    create_alloc_callback, get_alloc_callback_user_data, get_default_allocator,
-    get_default_error_callback, phys_PxCreateFoundation, PxAllocatorCallback, PxErrorCallback,
-    PxErrorCode, PxFoundation_getAllocatorCallback_mut, PxFoundation_getErrorCallback_mut,
-    PxFoundation_getErrorLevel, PxFoundation_getReportAllocationNames, PxFoundation_release_mut,
-    PxFoundation_setErrorLevel_mut, PxFoundation_setReportAllocationNames_mut,
+    create_alloc_callback,
+    get_alloc_callback_user_data,
+    get_default_allocator,
+    get_default_error_callback,
+    phys_PxCreateFoundation,
+    PxAllocatorCallback,
+    PxErrorCallback,
+    PxErrorCode,
+    PxFoundation_getAllocatorCallback_mut,
+    PxFoundation_getErrorCallback_mut,
+    PxFoundation_getErrorLevel,
+    PxFoundation_getReportAllocationNames,
+    PxFoundation_release_mut,
+    PxFoundation_setErrorLevel_mut,
+    PxFoundation_setReportAllocationNames_mut,
 };
 use std::{
     alloc::{alloc, dealloc, Layout},

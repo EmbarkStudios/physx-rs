@@ -8,10 +8,18 @@ use crate::{
 };
 use std::marker::PhantomData;
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxActor, PxActor_getActorFlags, PxActor_getDominanceGroup, PxActor_getOwnerClient,
-    PxActor_getType, PxActor_getWorldBounds, PxActor_setActorFlag_mut, PxActor_setActorFlags_mut,
-    PxActor_setDominanceGroup_mut, PxActor_setOwnerClient_mut,
+    PxActor,
+    PxActor_getActorFlags,
+    PxActor_getDominanceGroup,
+    PxActor_getOwnerClient,
+    PxActor_getType,
+    PxActor_getWorldBounds,
+    PxActor_setActorFlag_mut,
+    PxActor_setActorFlags_mut,
+    PxActor_setDominanceGroup_mut,
+    PxActor_setOwnerClient_mut,
 };
 
 pub use physx_sys::{

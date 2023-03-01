@@ -4,13 +4,16 @@
 
 use super::traits::Class;
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxArticulationDrive, PxArticulationJointReducedCoordinate_getJointType,
+    PxArticulationDrive,
+    PxArticulationJointReducedCoordinate_getJointType,
     PxArticulationJointReducedCoordinate_setDriveParams_mut,
     PxArticulationJointReducedCoordinate_setDriveTarget_mut,
     PxArticulationJointReducedCoordinate_setJointType_mut,
     PxArticulationJointReducedCoordinate_setLimitParams_mut,
-    PxArticulationJointReducedCoordinate_setMotion_mut, PxArticulationLimit,
+    PxArticulationJointReducedCoordinate_setMotion_mut,
+    PxArticulationLimit,
 };
 
 pub use physx_sys::{

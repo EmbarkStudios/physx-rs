@@ -4,14 +4,23 @@
 
 use super::{foundation::Foundation, owner::Owner, traits::Class};
 
+#[rustfmt::skip]
 use physx_sys::{
-    phys_PxCreatePvd, phys_PxDefaultPvdSocketTransportCreate,
-    PxPvdSceneClient_setScenePvdFlags_mut, PxPvdTransport_release_mut, PxPvd_connect_mut,
-    PxPvd_disconnect_mut, PxPvd_getTransport_mut, PxPvd_isConnected_mut, PxPvd_release_mut,
+    phys_PxCreatePvd,
+    phys_PxDefaultPvdSocketTransportCreate,
+    PxPvdSceneClient_setScenePvdFlags_mut,
+    PxPvdTransport_release_mut,
+    PxPvd_connect_mut,
+    PxPvd_disconnect_mut,
+    PxPvd_getTransport_mut,
+    PxPvd_isConnected_mut,
+    PxPvd_release_mut,
 };
 
+#[rustfmt::skip]
 pub use physx_sys::{
-    PxPvdInstrumentationFlags as InstrumentationFlags, PxPvdSceneFlags as VisualDebuggerSceneFlags,
+    PxPvdInstrumentationFlags as InstrumentationFlags,
+    PxPvdSceneFlags as VisualDebuggerSceneFlags,
 };
 
 /// Combines the Pvd and it's current `PvdTransport`, if there is one.

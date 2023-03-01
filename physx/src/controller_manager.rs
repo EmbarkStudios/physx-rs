@@ -2,9 +2,12 @@ use crate::{controller::Controller, owner::Owner, traits::Class};
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxControllerManager_createController_mut, PxControllerManager_getController_mut,
-    PxControllerManager_getNbControllers, PxControllerManager_purgeControllers_mut,
+    PxControllerManager_createController_mut,
+    PxControllerManager_getController_mut,
+    PxControllerManager_getNbControllers,
+    PxControllerManager_purgeControllers_mut,
     PxControllerManager_release_mut,
 };
 

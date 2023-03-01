@@ -12,9 +12,12 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxArticulationLink_getChildren, PxArticulationLink_getInboundJointDof,
-    PxArticulationLink_getLinkIndex, PxArticulationLink_getNbChildren,
+    PxArticulationLink_getChildren,
+    PxArticulationLink_getInboundJointDof,
+    PxArticulationLink_getLinkIndex,
+    PxArticulationLink_getNbChildren,
     PxArticulationLink_release_mut,
 };
 
@@ -85,7 +88,7 @@ pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + U
         ptr: *mut physx_sys::PxArticulationLink,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 
     /// Get the user data.
