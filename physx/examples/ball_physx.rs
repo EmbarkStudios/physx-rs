@@ -8,10 +8,10 @@ use physx::prelude::*;
 /// amount of unsafe in your code, and make it clearer where we cannot abstract
 /// away the underlying dangers.
 ///
-/// The overall goal is to maintain a close mapping to the underlying PhysX API
+/// The overall goal is to maintain a close mapping to the underlying `PhysX` API
 /// while improving safety and reliability of the code.
 
-/// Many of the main types in PhysX have a userData *mut c_void field.
+/// Many of the main types in `PhysX` have a userData `*mut c_void` field.
 /// Representing this safely in Rust requires generics everywhere,
 /// and pre-defining all the generic parameters makes things more usable.
 type PxMaterial = physx::material::PxMaterial<()>;

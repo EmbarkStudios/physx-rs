@@ -11,19 +11,12 @@ fn gen_functions(which: &str) -> anyhow::Result<Functions> {
 
     let record_filter = |_rb: &pxbind::consumer::RecBinding<'_>| false;
     let enum_filter = |_eb: &pxbind::consumer::EnumBinding<'_>| false;
-    let func_filter = |fb: &pxbind::consumer::FuncBinding<'_>| {
-        if fb.owning_class().is_some() {
-            false
-        } else {
-            true
-        }
-    };
+    let func_filter = |fb: &pxbind::consumer::FuncBinding<'_>| fb.owning_class().is_none();
 
     let generator = pxbind::generator::Generator {
         record_filter: Box::new(record_filter),
         enum_filter: Box::new(enum_filter),
         func_filter: Box::new(func_filter),
-        ..Default::default()
     };
 
     let cpp = {

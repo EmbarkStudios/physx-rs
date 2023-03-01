@@ -23,7 +23,6 @@ fn gen_functions(which: &str, to_emit: &'static [&str]) -> anyhow::Result<Functi
         record_filter: Box::new(record_filter),
         enum_filter: Box::new(enum_filter),
         func_filter: Box::new(func_filter),
-        ..Default::default()
     };
 
     let cpp = {
