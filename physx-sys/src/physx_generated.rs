@@ -4401,10 +4401,10 @@ extern "C" {
     pub fn PxMat33_new_6(q: *const PxQuat) -> PxMat33;
 
     /// Construct from diagonal, off-diagonals are zero.
-    pub fn PxMat33_createDiagonal_mut(d: *const PxVec3) -> PxMat33;
+    pub fn PxMat33_createDiagonal(d: *const PxVec3) -> PxMat33;
 
     /// Computes the outer product of two vectors
-    pub fn PxMat33_outer_mut(a: *const PxVec3, b: *const PxVec3) -> PxMat33;
+    pub fn PxMat33_outer(a: *const PxVec3, b: *const PxVec3) -> PxMat33;
 
     /// Get transposed matrix
     pub fn PxMat33_getTranspose(self_: *const PxMat33) -> PxMat33;
@@ -4432,39 +4432,39 @@ extern "C" {
     pub fn PxBounds3_new_1(minimum: *const PxVec3, maximum: *const PxVec3) -> PxBounds3;
 
     /// Return empty bounds.
-    pub fn PxBounds3_empty_mut() -> PxBounds3;
+    pub fn PxBounds3_empty() -> PxBounds3;
 
     /// returns the AABB containing v0 and v1.
-    pub fn PxBounds3_boundsOfPoints_mut(v0: *const PxVec3, v1: *const PxVec3) -> PxBounds3;
+    pub fn PxBounds3_boundsOfPoints(v0: *const PxVec3, v1: *const PxVec3) -> PxBounds3;
 
     /// returns the AABB from center and extents vectors.
-    pub fn PxBounds3_centerExtents_mut(center: *const PxVec3, extent: *const PxVec3) -> PxBounds3;
+    pub fn PxBounds3_centerExtents(center: *const PxVec3, extent: *const PxVec3) -> PxBounds3;
 
     /// Construct from center, extent, and (not necessarily orthogonal) basis
-    pub fn PxBounds3_basisExtent_mut(center: *const PxVec3, basis: *const PxMat33, extent: *const PxVec3) -> PxBounds3;
+    pub fn PxBounds3_basisExtent(center: *const PxVec3, basis: *const PxMat33, extent: *const PxVec3) -> PxBounds3;
 
     /// Construct from pose and extent
-    pub fn PxBounds3_poseExtent_mut(pose: *const PxTransform, extent: *const PxVec3) -> PxBounds3;
+    pub fn PxBounds3_poseExtent(pose: *const PxTransform, extent: *const PxVec3) -> PxBounds3;
 
     /// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
     ///
     /// This version is safe to call for empty bounds.
-    pub fn PxBounds3_transformSafe_mut(matrix: *const PxMat33, bounds: *const PxBounds3) -> PxBounds3;
+    pub fn PxBounds3_transformSafe(matrix: *const PxMat33, bounds: *const PxBounds3) -> PxBounds3;
 
     /// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
     ///
     /// Calling this method for empty bounds leads to undefined behavior. Use [`transformSafe`]() instead.
-    pub fn PxBounds3_transformFast_mut(matrix: *const PxMat33, bounds: *const PxBounds3) -> PxBounds3;
+    pub fn PxBounds3_transformFast(matrix: *const PxMat33, bounds: *const PxBounds3) -> PxBounds3;
 
     /// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
     ///
     /// This version is safe to call for empty bounds.
-    pub fn PxBounds3_transformSafe_mut_1(transform: *const PxTransform, bounds: *const PxBounds3) -> PxBounds3;
+    pub fn PxBounds3_transformSafe_1(transform: *const PxTransform, bounds: *const PxBounds3) -> PxBounds3;
 
     /// gets the transformed bounds of the passed AABB (resulting in a bigger AABB).
     ///
     /// Calling this method for empty bounds leads to undefined behavior. Use [`transformSafe`]() instead.
-    pub fn PxBounds3_transformFast_mut_1(transform: *const PxTransform, bounds: *const PxBounds3) -> PxBounds3;
+    pub fn PxBounds3_transformFast_1(transform: *const PxTransform, bounds: *const PxBounds3) -> PxBounds3;
 
     /// Sets empty to true
     pub fn PxBounds3_setEmpty_mut(self_: *mut PxBounds3);
@@ -4860,15 +4860,15 @@ extern "C" {
 
     pub fn phys_computeBarycentric_1(a: *const PxVec3, b: *const PxVec3, c: *const PxVec3, p: *const PxVec3, bary: *mut PxVec4);
 
-    pub fn Interpolation_PxLerp_mut(a: f32, b: f32, t: f32) -> f32;
+    pub fn Interpolation_PxLerp(a: f32, b: f32, t: f32) -> f32;
 
-    pub fn Interpolation_PxBiLerp_mut(f00: f32, f10: f32, f01: f32, f11: f32, tx: f32, ty: f32) -> f32;
+    pub fn Interpolation_PxBiLerp(f00: f32, f10: f32, f01: f32, f11: f32, tx: f32, ty: f32) -> f32;
 
-    pub fn Interpolation_PxTriLerp_mut(f000: f32, f100: f32, f010: f32, f110: f32, f001: f32, f101: f32, f011: f32, f111: f32, tx: f32, ty: f32, tz: f32) -> f32;
+    pub fn Interpolation_PxTriLerp(f000: f32, f100: f32, f010: f32, f110: f32, f001: f32, f101: f32, f011: f32, f111: f32, tx: f32, ty: f32, tz: f32) -> f32;
 
-    pub fn Interpolation_PxSDFIdx_mut(i: u32, j: u32, k: u32, nbX: u32, nbY: u32) -> u32;
+    pub fn Interpolation_PxSDFIdx(i: u32, j: u32, k: u32, nbX: u32, nbY: u32) -> u32;
 
-    pub fn Interpolation_PxSDFSampleImpl_mut(sdf: *const f32, localPos: *const PxVec3, sdfBoxLower: *const PxVec3, sdfBoxHigher: *const PxVec3, sdfDx: f32, invSdfDx: f32, dimX: u32, dimY: u32, dimZ: u32, tolerance: f32) -> f32;
+    pub fn Interpolation_PxSDFSampleImpl(sdf: *const f32, localPos: *const PxVec3, sdfBoxLower: *const PxVec3, sdfBoxHigher: *const PxVec3, sdfDx: f32, invSdfDx: f32, dimX: u32, dimY: u32, dimZ: u32, tolerance: f32) -> f32;
 
     pub fn phys_PxSdfSample(sdf: *const f32, localPos: *const PxVec3, sdfBoxLower: *const PxVec3, sdfBoxHigher: *const PxVec3, sdfDx: f32, invSdfDx: f32, dimX: u32, dimY: u32, dimZ: u32, gradient: *mut PxVec3, tolerance: f32) -> f32;
 
@@ -4891,7 +4891,7 @@ extern "C" {
     pub fn PxMutexImpl_unlock_mut(self_: *mut PxMutexImpl);
 
     /// Size of this class.
-    pub fn PxMutexImpl_getSize_mut() -> u32;
+    pub fn PxMutexImpl_getSize() -> u32;
 
     pub fn PxReadWriteLock_new_alloc() -> *mut PxReadWriteLock;
 
@@ -4933,7 +4933,7 @@ extern "C" {
 
     pub fn PxSListImpl_flush_mut(self_: *mut PxSListImpl) -> *mut PxSListEntry;
 
-    pub fn PxSListImpl_getSize_mut() -> u32;
+    pub fn PxSListImpl_getSize() -> u32;
 
     pub fn PxSyncImpl_new_alloc() -> *mut PxSyncImpl;
 
@@ -4951,7 +4951,7 @@ extern "C" {
     pub fn PxSyncImpl_reset_mut(self_: *mut PxSyncImpl);
 
     /// Size of this class.
-    pub fn PxSyncImpl_getSize_mut() -> u32;
+    pub fn PxSyncImpl_getSize() -> u32;
 
     pub fn PxRunnable_new_alloc() -> *mut PxRunnable;
 
@@ -4975,13 +4975,13 @@ extern "C" {
 
     pub fn PxCounterFrequencyToTensOfNanos_toTensOfNanos(self_: *const PxCounterFrequencyToTensOfNanos, inCounter: u64) -> u64;
 
-    pub fn PxTime_getBootCounterFrequency_mut() -> *const PxCounterFrequencyToTensOfNanos;
+    pub fn PxTime_getBootCounterFrequency() -> *const PxCounterFrequencyToTensOfNanos;
 
-    pub fn PxTime_getCounterFrequency_mut() -> PxCounterFrequencyToTensOfNanos;
+    pub fn PxTime_getCounterFrequency() -> PxCounterFrequencyToTensOfNanos;
 
-    pub fn PxTime_getCurrentCounterValue_mut() -> u64;
+    pub fn PxTime_getCurrentCounterValue() -> u64;
 
-    pub fn PxTime_getCurrentTimeInTensOfNanoSeconds_mut() -> u64;
+    pub fn PxTime_getCurrentTimeInTensOfNanoSeconds() -> u64;
 
     pub fn PxTime_new() -> PxTime;
 
@@ -5437,7 +5437,7 @@ extern "C" {
     pub fn PxTaskManager_release_mut(self_: *mut PxTaskManager);
 
     /// Construct a new PxTaskManager instance with the given [optional] dispatchers
-    pub fn PxTaskManager_createTaskManager_mut(errorCallback: *mut PxErrorCallback, anon_param1: *mut PxCpuDispatcher) -> *mut PxTaskManager;
+    pub fn PxTaskManager_createTaskManager(errorCallback: *mut PxErrorCallback, anon_param1: *mut PxCpuDispatcher) -> *mut PxTaskManager;
 
     /// Called by the TaskManager when a task is to be queued for execution.
     ///
@@ -5884,7 +5884,7 @@ extern "C" {
     pub fn PxCustomGeometryType_new() -> PxCustomGeometryType;
 
     /// Invalid type
-    pub fn PxCustomGeometryType_INVALID_mut() -> PxCustomGeometryType;
+    pub fn PxCustomGeometryType_INVALID() -> PxCustomGeometryType;
 
     /// Return custom type. The type purpose is for user to differentiate custom geometries. Not used by PhysX.
     ///
@@ -5998,7 +5998,7 @@ extern "C" {
     /// All geometry types are supported except PxParticleSystemGeometry, PxTetrahedronMeshGeometry and PxHairSystemGeometry.
     ///
     /// Number of hits between the ray and the geometry object
-    pub fn PxGeometryQuery_raycast_mut(origin: *const PxVec3, unitDir: *const PxVec3, geom: *const PxGeometry, pose: *const PxTransform, maxDist: f32, hitFlags: PxHitFlags, maxHits: u32, rayHits: *mut PxGeomRaycastHit, stride: u32, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> u32;
+    pub fn PxGeometryQuery_raycast(origin: *const PxVec3, unitDir: *const PxVec3, geom: *const PxGeometry, pose: *const PxTransform, maxDist: f32, hitFlags: PxHitFlags, maxHits: u32, rayHits: *mut PxGeomRaycastHit, stride: u32, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> u32;
 
     /// Overlap test for two geometry objects.
     ///
@@ -6013,7 +6013,7 @@ extern "C" {
     /// Anything involving PxParticleSystemGeometry, PxTetrahedronMeshGeometry or PxHairSystemGeometry.
     ///
     /// True if the two geometry objects overlap
-    pub fn PxGeometryQuery_overlap_mut(geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> bool;
+    pub fn PxGeometryQuery_overlap(geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> bool;
 
     /// Sweep a specified geometry object in space and test for collision with a given object.
     ///
@@ -6028,7 +6028,7 @@ extern "C" {
     /// PxConvexMeshGeometry vs. {PxSphereGeometry, PxPlaneGeometry, PxCapsuleGeometry, PxBoxGeometry, PxConvexMeshGeometry, PxTriangleMeshGeometry, PxHeightFieldGeometry}
     ///
     /// True if the swept geometry object geom0 hits the object geom1
-    pub fn PxGeometryQuery_sweep_mut(unitDir: *const PxVec3, maxDist: f32, geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, sweepHit: *mut PxGeomSweepHit, hitFlags: PxHitFlags, inflation: f32, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> bool;
+    pub fn PxGeometryQuery_sweep(unitDir: *const PxVec3, maxDist: f32, geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, sweepHit: *mut PxGeomSweepHit, hitFlags: PxHitFlags, inflation: f32, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> bool;
 
     /// Compute minimum translational distance (MTD) between two geometry objects.
     ///
@@ -6051,7 +6051,7 @@ extern "C" {
     /// If objects do not overlap, the function can not compute the MTD and returns false.
     ///
     /// True if the MTD has successfully been computed, i.e. if objects do overlap.
-    pub fn PxGeometryQuery_computePenetration_mut(direction: *mut PxVec3, depth: *mut f32, geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, queryFlags: PxGeometryQueryFlags) -> bool;
+    pub fn PxGeometryQuery_computePenetration(direction: *mut PxVec3, depth: *mut f32, geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, queryFlags: PxGeometryQueryFlags) -> bool;
 
     /// Computes distance between a point and a geometry object.
     ///
@@ -6060,15 +6060,15 @@ extern "C" {
     /// For meshes, only the BVH34 midphase data-structure is supported.
     ///
     /// Square distance between the point and the geom object, or 0.0 if the point is inside the object, or -1.0 if an error occured (geometry type is not supported, or invalid pose)
-    pub fn PxGeometryQuery_pointDistance_mut(point: *const PxVec3, geom: *const PxGeometry, pose: *const PxTransform, closestPoint: *mut PxVec3, closestIndex: *mut u32, queryFlags: PxGeometryQueryFlags) -> f32;
+    pub fn PxGeometryQuery_pointDistance(point: *const PxVec3, geom: *const PxGeometry, pose: *const PxTransform, closestPoint: *mut PxVec3, closestIndex: *mut u32, queryFlags: PxGeometryQueryFlags) -> f32;
 
     /// computes the bounds for a geometry object
-    pub fn PxGeometryQuery_computeGeomBounds_mut(bounds: *mut PxBounds3, geom: *const PxGeometry, pose: *const PxTransform, offset: f32, inflation: f32, queryFlags: PxGeometryQueryFlags);
+    pub fn PxGeometryQuery_computeGeomBounds(bounds: *mut PxBounds3, geom: *const PxGeometry, pose: *const PxTransform, offset: f32, inflation: f32, queryFlags: PxGeometryQueryFlags);
 
     /// Checks if provided geometry is valid.
     ///
     /// True if geometry is valid.
-    pub fn PxGeometryQuery_isValid_mut(geom: *const PxGeometry) -> bool;
+    pub fn PxGeometryQuery_isValid(geom: *const PxGeometry) -> bool;
 
     pub fn PxHeightFieldSample_tessFlag(self_: *const PxHeightFieldSample) -> u8;
 
@@ -6181,7 +6181,7 @@ extern "C" {
     /// This function can be used together with [`findOverlapTriangleMesh`]() to retrieve triangle properties.
     ///
     /// This function will flip the triangle normal whenever triGeom.scale.hasNegativeDeterminant() is true.
-    pub fn PxMeshQuery_getTriangle_mut(triGeom: *const PxTriangleMeshGeometry, transform: *const PxTransform, triangleIndex: u32, triangle: *mut PxTriangle, vertexIndices: *mut u32, adjacencyIndices: *mut u32);
+    pub fn PxMeshQuery_getTriangle(triGeom: *const PxTriangleMeshGeometry, transform: *const PxTransform, triangleIndex: u32, triangle: *mut PxTriangle, vertexIndices: *mut u32, adjacencyIndices: *mut u32);
 
     /// Retrieves triangle data from a triangle ID.
     ///
@@ -6208,7 +6208,7 @@ extern "C" {
     /// }
     /// }
     /// }
-    pub fn PxMeshQuery_getTriangle_mut_1(hfGeom: *const PxHeightFieldGeometry, transform: *const PxTransform, triangleIndex: u32, triangle: *mut PxTriangle, vertexIndices: *mut u32, adjacencyIndices: *mut u32);
+    pub fn PxMeshQuery_getTriangle_1(hfGeom: *const PxHeightFieldGeometry, transform: *const PxTransform, triangleIndex: u32, triangle: *mut PxTriangle, vertexIndices: *mut u32, adjacencyIndices: *mut u32);
 
     /// Find the mesh triangles which touch the specified geometry object.
     ///
@@ -6217,14 +6217,14 @@ extern "C" {
     /// Returned triangle indices can be used with [`getTriangle`]() to retrieve the triangle properties.
     ///
     /// Number of overlaps found, i.e. number of elements written to the results buffer
-    pub fn PxMeshQuery_findOverlapTriangleMesh_mut(geom: *const PxGeometry, geomPose: *const PxTransform, meshGeom: *const PxTriangleMeshGeometry, meshPose: *const PxTransform, results: *mut u32, maxResults: u32, startIndex: u32, overflow: *mut bool, queryFlags: PxGeometryQueryFlags) -> u32;
+    pub fn PxMeshQuery_findOverlapTriangleMesh(geom: *const PxGeometry, geomPose: *const PxTransform, meshGeom: *const PxTriangleMeshGeometry, meshPose: *const PxTransform, results: *mut u32, maxResults: u32, startIndex: u32, overflow: *mut bool, queryFlags: PxGeometryQueryFlags) -> u32;
 
     /// Find the height field triangles which touch the specified geometry object.
     ///
     /// Returned triangle indices can be used with [`getTriangle`]() to retrieve the triangle properties.
     ///
     /// Number of overlaps found, i.e. number of elements written to the results buffer
-    pub fn PxMeshQuery_findOverlapHeightField_mut(geom: *const PxGeometry, geomPose: *const PxTransform, hfGeom: *const PxHeightFieldGeometry, hfPose: *const PxTransform, results: *mut u32, maxResults: u32, startIndex: u32, overflow: *mut bool, queryFlags: PxGeometryQueryFlags) -> u32;
+    pub fn PxMeshQuery_findOverlapHeightField(geom: *const PxGeometry, geomPose: *const PxTransform, hfGeom: *const PxHeightFieldGeometry, hfPose: *const PxTransform, results: *mut u32, maxResults: u32, startIndex: u32, overflow: *mut bool, queryFlags: PxGeometryQueryFlags) -> u32;
 
     /// Sweep a specified geometry object in space and test for collision with a set of given triangles.
     ///
@@ -6250,7 +6250,7 @@ extern "C" {
     /// The returned PxGeomSweepHit::faceIndex parameter will hold the index of the hit triangle in input array, i.e. the range is [0; triangleCount). For initially overlapping sweeps, this is the index of overlapping triangle.
     ///
     /// The inflation parameter is not compatible with PxHitFlag::ePRECISE_SWEEP.
-    pub fn PxMeshQuery_sweep_mut(unitDir: *const PxVec3, distance: f32, geom: *const PxGeometry, pose: *const PxTransform, triangleCount: u32, triangles: *const PxTriangle, sweepHit: *mut PxGeomSweepHit, hitFlags: PxHitFlags, cachedIndex: *const u32, inflation: f32, doubleSided: bool, queryFlags: PxGeometryQueryFlags) -> bool;
+    pub fn PxMeshQuery_sweep(unitDir: *const PxVec3, distance: f32, geom: *const PxGeometry, pose: *const PxTransform, triangleCount: u32, triangles: *const PxTriangle, sweepHit: *mut PxGeomSweepHit, hitFlags: PxHitFlags, cachedIndex: *const u32, inflation: f32, doubleSided: bool, queryFlags: PxGeometryQueryFlags) -> bool;
 
     /// constructor sets to default.
     pub fn PxSimpleTriangleMesh_new() -> PxSimpleTriangleMesh;
@@ -12689,7 +12689,7 @@ extern "C" {
     pub fn PxJoint_getScene(self_: *const PxJoint) -> *mut PxScene;
 
     /// Put class meta data in stream, used for serialization
-    pub fn PxJoint_getBinaryMetaData_mut(stream: *mut PxOutputStream);
+    pub fn PxJoint_getBinaryMetaData(stream: *mut PxOutputStream);
 
     pub fn PxSpring_new(stiffness_: f32, damping_: f32) -> PxSpring;
 
@@ -13483,7 +13483,7 @@ extern "C" {
     /// wake the actor up automatically.
     ///
     /// The newly created shape.
-    pub fn PxRigidActorExt_createExclusiveShape_mut(actor: *mut PxRigidActor, geometry: *const PxGeometry, materials: *const *mut PxMaterial, materialCount: u16, shapeFlags: PxShapeFlags) -> *mut PxShape;
+    pub fn PxRigidActorExt_createExclusiveShape(actor: *mut PxRigidActor, geometry: *const PxGeometry, materials: *const *mut PxMaterial, materialCount: u16, shapeFlags: PxShapeFlags) -> *mut PxShape;
 
     /// Creates a new shape with default properties and a single material adds it to the list of shapes of this actor.
     ///
@@ -13512,11 +13512,11 @@ extern "C" {
     /// wake the actor up automatically.
     ///
     /// The newly created shape.
-    pub fn PxRigidActorExt_createExclusiveShape_mut_1(actor: *mut PxRigidActor, geometry: *const PxGeometry, material: *const PxMaterial, shapeFlags: PxShapeFlags) -> *mut PxShape;
+    pub fn PxRigidActorExt_createExclusiveShape_1(actor: *mut PxRigidActor, geometry: *const PxGeometry, material: *const PxMaterial, shapeFlags: PxShapeFlags) -> *mut PxShape;
 
     /// Gets a list of bounds based on shapes in rigid actor. This list can be used to cook/create
     /// bounding volume hierarchy though PxCooking API.
-    pub fn PxRigidActorExt_getRigidActorShapeLocalBoundsList_mut(actor: *const PxRigidActor, numBounds: *mut u32) -> *mut PxBounds3;
+    pub fn PxRigidActorExt_getRigidActorShapeLocalBoundsList(actor: *const PxRigidActor, numBounds: *mut u32) -> *mut PxBounds3;
 
     /// Convenience function to create a PxBVH object from a PxRigidActor.
     ///
@@ -13526,7 +13526,7 @@ extern "C" {
     /// BVH to the scene/aggregate, release the PxBVH object by calling PxBVH::release().
     ///
     /// The PxBVH for this actor.
-    pub fn PxRigidActorExt_createBVHFromActor_mut(physics: *mut PxPhysics, actor: *const PxRigidActor) -> *mut PxBVH;
+    pub fn PxRigidActorExt_createBVHFromActor(physics: *mut PxPhysics, actor: *const PxRigidActor) -> *mut PxBVH;
 
     /// Default constructor.
     pub fn PxMassProperties_new() -> PxMassProperties;
@@ -13545,27 +13545,27 @@ extern "C" {
     /// Get the entries of the diagonalized inertia tensor and the corresponding reference rotation.
     ///
     /// The entries of the diagonalized inertia tensor.
-    pub fn PxMassProperties_getMassSpaceInertia_mut(inertia: *const PxMat33, massFrame: *mut PxQuat) -> PxVec3;
+    pub fn PxMassProperties_getMassSpaceInertia(inertia: *const PxMat33, massFrame: *mut PxQuat) -> PxVec3;
 
     /// Translate an inertia tensor using the parallel axis theorem
     ///
     /// The translated inertia tensor.
-    pub fn PxMassProperties_translateInertia_mut(inertia: *const PxMat33, mass: f32, t: *const PxVec3) -> PxMat33;
+    pub fn PxMassProperties_translateInertia(inertia: *const PxMat33, mass: f32, t: *const PxVec3) -> PxMat33;
 
     /// Rotate an inertia tensor around the center of mass
     ///
     /// The rotated inertia tensor.
-    pub fn PxMassProperties_rotateInertia_mut(inertia: *const PxMat33, q: *const PxQuat) -> PxMat33;
+    pub fn PxMassProperties_rotateInertia(inertia: *const PxMat33, q: *const PxQuat) -> PxMat33;
 
     /// Non-uniform scaling of the inertia tensor
     ///
     /// The scaled inertia tensor.
-    pub fn PxMassProperties_scaleInertia_mut(inertia: *const PxMat33, scaleRotation: *const PxQuat, scale: *const PxVec3) -> PxMat33;
+    pub fn PxMassProperties_scaleInertia(inertia: *const PxMat33, scaleRotation: *const PxQuat, scale: *const PxVec3) -> PxMat33;
 
     /// Sum up individual mass properties.
     ///
     /// The summed up mass properties.
-    pub fn PxMassProperties_sum_mut(props: *const PxMassProperties, transforms: *const PxTransform, count: u32) -> PxMassProperties;
+    pub fn PxMassProperties_sum(props: *const PxMassProperties, transforms: *const PxTransform, count: u32) -> PxMassProperties;
 
     /// Computation of mass properties for a rigid body actor
     ///
@@ -13589,14 +13589,14 @@ extern "C" {
     /// If all shapes of the actor have the same density then the overloaded method updateMassAndInertia() with a single density parameter can be used instead.
     ///
     /// Boolean. True on success else false.
-    pub fn PxRigidBodyExt_updateMassAndInertia_mut(body: *mut PxRigidBody, shapeDensities: *const f32, shapeDensityCount: u32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
+    pub fn PxRigidBodyExt_updateMassAndInertia(body: *mut PxRigidBody, shapeDensities: *const f32, shapeDensityCount: u32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
 
     /// Computation of mass properties for a rigid body actor
     ///
     /// See previous method for details.
     ///
     /// Boolean. True on success else false.
-    pub fn PxRigidBodyExt_updateMassAndInertia_mut_1(body: *mut PxRigidBody, density: f32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
+    pub fn PxRigidBodyExt_updateMassAndInertia_1(body: *mut PxRigidBody, density: f32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
 
     /// Computation of mass properties for a rigid body actor
     ///
@@ -13608,7 +13608,7 @@ extern "C" {
     /// If a single mass value should be used for the actor as a whole then the overloaded method setMassAndUpdateInertia() with a single mass parameter can be used instead.
     ///
     /// Boolean. True on success else false.
-    pub fn PxRigidBodyExt_setMassAndUpdateInertia_mut(body: *mut PxRigidBody, shapeMasses: *const f32, shapeMassCount: u32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
+    pub fn PxRigidBodyExt_setMassAndUpdateInertia(body: *mut PxRigidBody, shapeMasses: *const f32, shapeMassCount: u32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
 
     /// Computation of mass properties for a rigid body actor
     ///
@@ -13618,12 +13618,12 @@ extern "C" {
     /// If no collision shapes are found, the inertia tensor is set to (1,1,1)
     ///
     /// Boolean. True on success else false.
-    pub fn PxRigidBodyExt_setMassAndUpdateInertia_mut_1(body: *mut PxRigidBody, mass: f32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
+    pub fn PxRigidBodyExt_setMassAndUpdateInertia_1(body: *mut PxRigidBody, mass: f32, massLocalPose: *const PxVec3, includeNonSimShapes: bool) -> bool;
 
     /// Compute the mass, inertia tensor and center of mass from a list of shapes.
     ///
     /// The mass properties from the combined shapes.
-    pub fn PxRigidBodyExt_computeMassPropertiesFromShapes_mut(shapes: *const *const PxShape, shapeCount: u32) -> PxMassProperties;
+    pub fn PxRigidBodyExt_computeMassPropertiesFromShapes(shapes: *const *const PxShape, shapeCount: u32) -> PxMassProperties;
 
     /// Applies a force (or impulse) defined in the global coordinate frame, acting at a particular
     /// point in global coordinates, to the actor.
@@ -13641,7 +13641,7 @@ extern "C" {
     ///
     /// Sleeping:
     /// This call wakes the actor if it is sleeping and the wakeup parameter is true (default).
-    pub fn PxRigidBodyExt_addForceAtPos_mut(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
+    pub fn PxRigidBodyExt_addForceAtPos(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
 
     /// Applies a force (or impulse) defined in the global coordinate frame, acting at a particular
     /// point in local coordinates, to the actor.
@@ -13659,7 +13659,7 @@ extern "C" {
     ///
     /// Sleeping:
     /// This call wakes the actor if it is sleeping and the wakeup parameter is true (default).
-    pub fn PxRigidBodyExt_addForceAtLocalPos_mut(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
+    pub fn PxRigidBodyExt_addForceAtLocalPos(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
 
     /// Applies a force (or impulse) defined in the actor local coordinate frame, acting at a
     /// particular point in global coordinates, to the actor.
@@ -13677,7 +13677,7 @@ extern "C" {
     ///
     /// Sleeping:
     /// This call wakes the actor if it is sleeping and the wakeup parameter is true (default).
-    pub fn PxRigidBodyExt_addLocalForceAtPos_mut(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
+    pub fn PxRigidBodyExt_addLocalForceAtPos(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
 
     /// Applies a force (or impulse) defined in the actor local coordinate frame, acting at a
     /// particular point in local coordinates, to the actor.
@@ -13695,44 +13695,44 @@ extern "C" {
     ///
     /// Sleeping:
     /// This call wakes the actor if it is sleeping and the wakeup parameter is true (default).
-    pub fn PxRigidBodyExt_addLocalForceAtLocalPos_mut(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
+    pub fn PxRigidBodyExt_addLocalForceAtLocalPos(body: *mut PxRigidBody, force: *const PxVec3, pos: *const PxVec3, mode: PxForceMode, wakeup: bool);
 
     /// Computes the velocity of a point given in world coordinates if it were attached to the
     /// specified body and moving with it.
     ///
     /// The velocity of point in the global frame.
-    pub fn PxRigidBodyExt_getVelocityAtPos_mut(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
+    pub fn PxRigidBodyExt_getVelocityAtPos(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
 
     /// Computes the velocity of a point given in local coordinates if it were attached to the
     /// specified body and moving with it.
     ///
     /// The velocity of point in the local frame.
-    pub fn PxRigidBodyExt_getLocalVelocityAtLocalPos_mut(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
+    pub fn PxRigidBodyExt_getLocalVelocityAtLocalPos(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
 
     /// Computes the velocity of a point (offset from the origin of the body) given in world coordinates if it were attached to the
     /// specified body and moving with it.
     ///
     /// The velocity of point (offset from the origin of the body) in the global frame.
-    pub fn PxRigidBodyExt_getVelocityAtOffset_mut(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
+    pub fn PxRigidBodyExt_getVelocityAtOffset(body: *const PxRigidBody, pos: *const PxVec3) -> PxVec3;
 
     /// Compute the change to linear and angular velocity that would occur if an impulsive force and torque were to be applied to a specified rigid body.
     ///
     /// The rigid body is left unaffected unless a subsequent independent call is executed that actually applies the computed changes to velocity and angular velocity.
     ///
     /// if this call is used to determine the velocity delta for an articulation link, only the mass properties of the link are taken into account.
-    pub fn PxRigidBodyExt_computeVelocityDeltaFromImpulse_mut(body: *const PxRigidBody, impulsiveForce: *const PxVec3, impulsiveTorque: *const PxVec3, deltaLinearVelocity: *mut PxVec3, deltaAngularVelocity: *mut PxVec3);
+    pub fn PxRigidBodyExt_computeVelocityDeltaFromImpulse(body: *const PxRigidBody, impulsiveForce: *const PxVec3, impulsiveTorque: *const PxVec3, deltaLinearVelocity: *mut PxVec3, deltaAngularVelocity: *mut PxVec3);
 
     /// Computes the linear and angular velocity change vectors for a given impulse at a world space position taking a mass and inertia scale into account
     ///
     /// This function is useful for extracting the respective linear and angular velocity changes from a contact or joint when the mass/inertia ratios have been adjusted.
     ///
     /// if this call is used to determine the velocity delta for an articulation link, only the mass properties of the link are taken into account.
-    pub fn PxRigidBodyExt_computeVelocityDeltaFromImpulse_mut_1(body: *const PxRigidBody, globalPose: *const PxTransform, point: *const PxVec3, impulse: *const PxVec3, invMassScale: f32, invInertiaScale: f32, deltaLinearVelocity: *mut PxVec3, deltaAngularVelocity: *mut PxVec3);
+    pub fn PxRigidBodyExt_computeVelocityDeltaFromImpulse_1(body: *const PxRigidBody, globalPose: *const PxTransform, point: *const PxVec3, impulse: *const PxVec3, invMassScale: f32, invInertiaScale: f32, deltaLinearVelocity: *mut PxVec3, deltaAngularVelocity: *mut PxVec3);
 
     /// Computes the linear and angular impulse vectors for a given impulse at a world space position taking a mass and inertia scale into account
     ///
     /// This function is useful for extracting the respective linear and angular impulses from a contact or joint when the mass/inertia ratios have been adjusted.
-    pub fn PxRigidBodyExt_computeLinearAngularImpulse_mut(body: *const PxRigidBody, globalPose: *const PxTransform, point: *const PxVec3, impulse: *const PxVec3, invMassScale: f32, invInertiaScale: f32, linearImpulse: *mut PxVec3, angularImpulse: *mut PxVec3);
+    pub fn PxRigidBodyExt_computeLinearAngularImpulse(body: *const PxRigidBody, globalPose: *const PxTransform, point: *const PxVec3, impulse: *const PxVec3, invMassScale: f32, invInertiaScale: f32, linearImpulse: *mut PxVec3, angularImpulse: *mut PxVec3);
 
     /// Performs a linear sweep through space with the body's geometry objects.
     ///
@@ -13745,7 +13745,7 @@ extern "C" {
     /// Information about the closest intersection is written to a [`PxSweepHit`] structure.
     ///
     /// True if a blocking hit was found.
-    pub fn PxRigidBodyExt_linearSweepSingle_mut(body: *mut PxRigidBody, scene: *mut PxScene, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, closestHit: *mut PxSweepHit, shapeIndex: *mut u32, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
+    pub fn PxRigidBodyExt_linearSweepSingle(body: *mut PxRigidBody, scene: *mut PxScene, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, closestHit: *mut PxSweepHit, shapeIndex: *mut u32, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
 
     /// Performs a linear sweep through space with the body's geometry objects, returning all overlaps.
     ///
@@ -13756,34 +13756,34 @@ extern "C" {
     /// or a blocking hit is encountered.
     ///
     /// the number of touching hits. If overflow is set to true, the results are incomplete. In case of overflow there are also no guarantees that all touching hits returned are closer than the blocking hit.
-    pub fn PxRigidBodyExt_linearSweepMultiple_mut(body: *mut PxRigidBody, scene: *mut PxScene, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, touchHitBuffer: *mut PxSweepHit, touchHitShapeIndices: *mut u32, touchHitBufferSize: u32, block: *mut PxSweepHit, blockingShapeIndex: *mut i32, overflow: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> u32;
+    pub fn PxRigidBodyExt_linearSweepMultiple(body: *mut PxRigidBody, scene: *mut PxScene, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, touchHitBuffer: *mut PxSweepHit, touchHitShapeIndices: *mut u32, touchHitBufferSize: u32, block: *mut PxSweepHit, blockingShapeIndex: *mut i32, overflow: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> u32;
 
     /// Retrieves the world space pose of the shape.
     ///
     /// Global pose of shape.
-    pub fn PxShapeExt_getGlobalPose_mut(shape: *const PxShape, actor: *const PxRigidActor) -> PxTransform;
+    pub fn PxShapeExt_getGlobalPose(shape: *const PxShape, actor: *const PxRigidActor) -> PxTransform;
 
     /// Raycast test against the shape.
     ///
     /// Number of hits between the ray and the shape
-    pub fn PxShapeExt_raycast_mut(shape: *const PxShape, actor: *const PxRigidActor, rayOrigin: *const PxVec3, rayDir: *const PxVec3, maxDist: f32, hitFlags: PxHitFlags, maxHits: u32, rayHits: *mut PxRaycastHit) -> u32;
+    pub fn PxShapeExt_raycast(shape: *const PxShape, actor: *const PxRigidActor, rayOrigin: *const PxVec3, rayDir: *const PxVec3, maxDist: f32, hitFlags: PxHitFlags, maxHits: u32, rayHits: *mut PxRaycastHit) -> u32;
 
     /// Test overlap between the shape and a geometry object
     ///
     /// True if the shape overlaps the geometry object
-    pub fn PxShapeExt_overlap_mut(shape: *const PxShape, actor: *const PxRigidActor, otherGeom: *const PxGeometry, otherGeomPose: *const PxTransform) -> bool;
+    pub fn PxShapeExt_overlap(shape: *const PxShape, actor: *const PxRigidActor, otherGeom: *const PxGeometry, otherGeomPose: *const PxTransform) -> bool;
 
     /// Sweep a geometry object against the shape.
     ///
     /// Currently only box, sphere, capsule and convex mesh shapes are supported, i.e. the swept geometry object must be one of those types.
     ///
     /// True if the swept geometry object hits the shape
-    pub fn PxShapeExt_sweep_mut(shape: *const PxShape, actor: *const PxRigidActor, unitDir: *const PxVec3, distance: f32, otherGeom: *const PxGeometry, otherGeomPose: *const PxTransform, sweepHit: *mut PxSweepHit, hitFlags: PxHitFlags) -> bool;
+    pub fn PxShapeExt_sweep(shape: *const PxShape, actor: *const PxRigidActor, unitDir: *const PxVec3, distance: f32, otherGeom: *const PxGeometry, otherGeomPose: *const PxTransform, sweepHit: *mut PxSweepHit, hitFlags: PxHitFlags) -> bool;
 
     /// Retrieves the axis aligned bounding box enclosing the shape.
     ///
     /// The shape's bounding box.
-    pub fn PxShapeExt_getWorldBounds_mut(shape: *const PxShape, actor: *const PxRigidActor, inflation: f32) -> PxBounds3;
+    pub fn PxShapeExt_getWorldBounds(shape: *const PxShape, actor: *const PxRigidActor, inflation: f32) -> PxBounds3;
 
     pub fn PxMeshOverlapUtil_new_alloc() -> *mut PxMeshOverlapUtil;
 
@@ -13869,7 +13869,7 @@ extern "C" {
     /// - Every subordinate object in C is required by another object in C (no orphans)
     ///
     /// Whether the collection is serializable
-    pub fn PxSerialization_isSerializable_mut(collection: *mut PxCollection, sr: *mut PxSerializationRegistry, externalReferences: *const PxCollection) -> bool;
+    pub fn PxSerialization_isSerializable(collection: *mut PxCollection, sr: *mut PxSerializationRegistry, externalReferences: *const PxCollection) -> bool;
 
     /// Adds to a collection all objects such that it can be successfully serialized.
     ///
@@ -13890,18 +13890,18 @@ extern "C" {
     ///
     /// Specifying followJoints will make whole jointed actor chains being added to the collection. Following chains
     /// is interrupted whenever a object in exceptFor is encountered.
-    pub fn PxSerialization_complete_mut(collection: *mut PxCollection, sr: *mut PxSerializationRegistry, exceptFor: *const PxCollection, followJoints: bool);
+    pub fn PxSerialization_complete(collection: *mut PxCollection, sr: *mut PxSerializationRegistry, exceptFor: *const PxCollection, followJoints: bool);
 
     /// Creates PxSerialObjectId values for unnamed objects in a collection.
     ///
     /// Creates PxSerialObjectId names for unnamed objects in a collection starting at a base value and incrementing,
     /// skipping values that are already assigned to objects in the collection.
-    pub fn PxSerialization_createSerialObjectIds_mut(collection: *mut PxCollection, base: u64);
+    pub fn PxSerialization_createSerialObjectIds(collection: *mut PxCollection, base: u64);
 
     /// Creates a PxCollection from XML data.
     ///
     /// a pointer to a PxCollection if successful or NULL if it failed.
-    pub fn PxSerialization_createCollectionFromXml_mut(inputData: *mut PxInputData, cooking: *mut PxCooking, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection, stringTable: *mut PxStringTable, outArgs: *mut PxXmlMiscParameter) -> *mut PxCollection;
+    pub fn PxSerialization_createCollectionFromXml(inputData: *mut PxInputData, cooking: *mut PxCooking, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection, stringTable: *mut PxStringTable, outArgs: *mut PxXmlMiscParameter) -> *mut PxCollection;
 
     /// Deserializes a PxCollection from memory.
     ///
@@ -13912,7 +13912,7 @@ extern "C" {
     /// by PxSerialization::serializeCollectionToBinary. The contained binary data needs to be compatible with the current binary format version
     /// which is defined by "PX_PHYSICS_VERSION_MAJOR.PX_PHYSICS_VERSION_MINOR.PX_PHYSICS_VERSION_BUGFIX-PX_BINARY_SERIAL_VERSION".
     /// For a list of compatible sdk releases refer to the documentation of PX_BINARY_SERIAL_VERSION.
-    pub fn PxSerialization_createCollectionFromBinary_mut(memBlock: *mut std::ffi::c_void, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection) -> *mut PxCollection;
+    pub fn PxSerialization_createCollectionFromBinary(memBlock: *mut std::ffi::c_void, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection) -> *mut PxCollection;
 
     /// Serializes a physics collection to an XML output stream.
     ///
@@ -13921,7 +13921,7 @@ extern "C" {
     /// Serialization of objects in a scene that is simultaneously being simulated is not supported and leads to undefined behavior.
     ///
     /// true if the collection is successfully serialized.
-    pub fn PxSerialization_serializeCollectionToXml_mut(outputStream: *mut PxOutputStream, collection: *mut PxCollection, sr: *mut PxSerializationRegistry, cooking: *mut PxCooking, externalRefs: *const PxCollection, inArgs: *mut PxXmlMiscParameter) -> bool;
+    pub fn PxSerialization_serializeCollectionToXml(outputStream: *mut PxOutputStream, collection: *mut PxCollection, sr: *mut PxSerializationRegistry, cooking: *mut PxCooking, externalRefs: *const PxCollection, inArgs: *mut PxXmlMiscParameter) -> bool;
 
     /// Serializes a collection to a binary stream.
     ///
@@ -13936,12 +13936,12 @@ extern "C" {
     /// Serialization of objects in a scene that is simultaneously being simulated is not supported and leads to undefined behavior.
     ///
     /// Whether serialization was successful
-    pub fn PxSerialization_serializeCollectionToBinary_mut(outputStream: *mut PxOutputStream, collection: *mut PxCollection, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection, exportNames: bool) -> bool;
+    pub fn PxSerialization_serializeCollectionToBinary(outputStream: *mut PxOutputStream, collection: *mut PxCollection, sr: *mut PxSerializationRegistry, externalRefs: *const PxCollection, exportNames: bool) -> bool;
 
     /// Creates an application managed registry for serialization.
     ///
     /// PxSerializationRegistry instance.
-    pub fn PxSerialization_createSerializationRegistry_mut(physics: *mut PxPhysics) -> *mut PxSerializationRegistry;
+    pub fn PxSerialization_createSerializationRegistry(physics: *mut PxPhysics) -> *mut PxSerializationRegistry;
 
     /// Deletes the dispatcher.
     ///
@@ -14107,7 +14107,7 @@ extern "C" {
     /// center of mass is linearly scaled, the mass is multiplied by the cube of the scale, and the inertia tensor by the fifth power of the scale.
     pub fn phys_PxScaleRigidActor(actor: *mut PxRigidActor, scale: f32, scaleMassProps: bool);
 
-    pub fn PxStringTableExt_createStringTable_mut(inAllocator: *mut PxAllocatorCallback) -> *mut PxStringTable;
+    pub fn PxStringTableExt_createStringTable(inAllocator: *mut PxAllocatorCallback) -> *mut PxStringTable;
 
     /// Creates regions for PxSceneDesc, from a global box.
     ///
@@ -14119,7 +14119,7 @@ extern "C" {
     /// the game world with a non-uniform set of regions (i.e. not just a grid).
     ///
     /// number of regions written out to the 'regions' array
-    pub fn PxBroadPhaseExt_createRegionsFromWorldBounds_mut(regions: *mut PxBounds3, globalBounds: *const PxBounds3, nbSubdiv: u32, upAxis: u32) -> u32;
+    pub fn PxBroadPhaseExt_createRegionsFromWorldBounds(regions: *mut PxBounds3, globalBounds: *const PxBounds3, nbSubdiv: u32, upAxis: u32) -> u32;
 
     /// Raycast returning any blocking hit, not necessarily the closest.
     ///
@@ -14128,7 +14128,7 @@ extern "C" {
     /// Shooting a ray from within an object leads to different results depending on the shape type. Please check the details in article SceneQuery. User can ignore such objects by using one of the provided filter mechanisms.
     ///
     /// True if a blocking hit was found.
-    pub fn PxSceneQueryExt_raycastAny_mut(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, hit: *mut PxQueryHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> bool;
+    pub fn PxSceneQueryExt_raycastAny(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, hit: *mut PxQueryHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> bool;
 
     /// Raycast returning a single result.
     ///
@@ -14137,7 +14137,7 @@ extern "C" {
     /// Shooting a ray from within an object leads to different results depending on the shape type. Please check the details in article SceneQuery. User can ignore such objects by using one of the provided filter mechanisms.
     ///
     /// True if a blocking hit was found.
-    pub fn PxSceneQueryExt_raycastSingle_mut(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hit: *mut PxRaycastHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> bool;
+    pub fn PxSceneQueryExt_raycastSingle(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hit: *mut PxRaycastHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> bool;
 
     /// Raycast returning multiple results.
     ///
@@ -14148,7 +14148,7 @@ extern "C" {
     /// Shooting a ray from within an object leads to different results depending on the shape type. Please check the details in article SceneQuery. User can ignore such objects by using one of the provided filter mechanisms.
     ///
     /// Number of hits in the buffer, or -1 if the buffer overflowed.
-    pub fn PxSceneQueryExt_raycastMultiple_mut(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hitBuffer: *mut PxRaycastHit, hitBufferSize: u32, blockingHit: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> i32;
+    pub fn PxSceneQueryExt_raycastMultiple(scene: *const PxScene, origin: *const PxVec3, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hitBuffer: *mut PxRaycastHit, hitBufferSize: u32, blockingHit: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache) -> i32;
 
     /// Sweep returning any blocking hit, not necessarily the closest.
     ///
@@ -14157,7 +14157,7 @@ extern "C" {
     /// If a shape from the scene is already overlapping with the query shape in its starting position, behavior is controlled by the PxSceneQueryFlag::eINITIAL_OVERLAP flag.
     ///
     /// True if a blocking hit was found.
-    pub fn PxSceneQueryExt_sweepAny_mut(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, queryFlags: PxHitFlags, hit: *mut PxQueryHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
+    pub fn PxSceneQueryExt_sweepAny(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, queryFlags: PxHitFlags, hit: *mut PxQueryHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
 
     /// Sweep returning a single result.
     ///
@@ -14166,7 +14166,7 @@ extern "C" {
     /// If a shape from the scene is already overlapping with the query shape in its starting position, behavior is controlled by the PxSceneQueryFlag::eINITIAL_OVERLAP flag.
     ///
     /// True if a blocking hit was found.
-    pub fn PxSceneQueryExt_sweepSingle_mut(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hit: *mut PxSweepHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
+    pub fn PxSceneQueryExt_sweepSingle(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hit: *mut PxSweepHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> bool;
 
     /// Sweep returning multiple results.
     ///
@@ -14177,7 +14177,7 @@ extern "C" {
     /// If a shape from the scene is already overlapping with the query shape in its starting position, behavior is controlled by the PxSceneQueryFlag::eINITIAL_OVERLAP flag.
     ///
     /// Number of hits in the buffer, or -1 if the buffer overflowed.
-    pub fn PxSceneQueryExt_sweepMultiple_mut(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hitBuffer: *mut PxSweepHit, hitBufferSize: u32, blockingHit: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> i32;
+    pub fn PxSceneQueryExt_sweepMultiple(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, unitDir: *const PxVec3, distance: f32, outputFlags: PxHitFlags, hitBuffer: *mut PxSweepHit, hitBufferSize: u32, blockingHit: *mut bool, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback, cache: *const PxQueryCache, inflation: f32) -> i32;
 
     /// Test overlap between a geometry and objects in the scene.
     ///
@@ -14186,7 +14186,7 @@ extern "C" {
     /// PxHitFlag::eMESH_MULTIPLE and PxHitFlag::eMESH_BOTH_SIDES have no effect in this case
     ///
     /// Number of hits in the buffer, or -1 if the buffer overflowed.
-    pub fn PxSceneQueryExt_overlapMultiple_mut(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, hitBuffer: *mut PxOverlapHit, hitBufferSize: u32, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback) -> i32;
+    pub fn PxSceneQueryExt_overlapMultiple(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, hitBuffer: *mut PxOverlapHit, hitBufferSize: u32, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback) -> i32;
 
     /// Test returning, for a given geometry, any overlapping object in the scene.
     ///
@@ -14195,7 +14195,7 @@ extern "C" {
     /// PxHitFlag::eMESH_MULTIPLE and PxHitFlag::eMESH_BOTH_SIDES have no effect in this case
     ///
     /// True if an overlap was found.
-    pub fn PxSceneQueryExt_overlapAny_mut(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, hit: *mut PxOverlapHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback) -> bool;
+    pub fn PxSceneQueryExt_overlapAny(scene: *const PxScene, geometry: *const PxGeometry, pose: *const PxTransform, hit: *mut PxOverlapHit, filterData: *const PxQueryFilterData, filterCall: *mut PxQueryFilterCallback) -> bool;
 
     pub fn PxBatchQueryExt_release_mut(self_: *mut PxBatchQueryExt);
 
@@ -14381,12 +14381,12 @@ extern "C" {
     /// Returns the index of the tetrahedron that contains a point
     ///
     /// The index of the tetrahedon containing the point, -1 if not tetrahedron contains the opoint
-    pub fn PxTetrahedronMeshExt_findTetrahedronContainingPoint_mut(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4, tolerance: f32) -> i32;
+    pub fn PxTetrahedronMeshExt_findTetrahedronContainingPoint(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4, tolerance: f32) -> i32;
 
     /// Returns the index of the tetrahedron closest to a point
     ///
     /// The index of the tetrahedon closest to the point
-    pub fn PxTetrahedronMeshExt_findTetrahedronClosestToPoint_mut(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4) -> i32;
+    pub fn PxTetrahedronMeshExt_findTetrahedronClosestToPoint(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4) -> i32;
 
     /// Initialize the PhysXExtensions library.
     ///

@@ -36,7 +36,7 @@ pub struct Method {
 impl Method {
     #[inline]
     fn is_const(&self) -> bool {
-        self.kind.qual_type.ends_with(") const")
+        self.is_static || self.kind.qual_type.ends_with(") const")
     }
 }
 

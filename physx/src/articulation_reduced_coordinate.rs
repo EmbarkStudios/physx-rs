@@ -44,8 +44,8 @@ use physx_sys::{
     PxArticulationReducedCoordinate_setRootGlobalPose_mut,
     PxArticulationReducedCoordinate_setSolverIterationCounts_mut,
     PxArticulationReducedCoordinate_unpackJointData,
-    PxRigidBodyExt_computeMassPropertiesFromShapes_mut,
-    PxRigidBodyExt_getVelocityAtPos_mut,
+    PxRigidBodyExt_computeMassPropertiesFromShapes,
+    PxRigidBodyExt_getVelocityAtPos,
 };
 
 pub use physx_sys::{
@@ -415,7 +415,7 @@ pub trait ArticulationReducedCoordinate:
             }
         }
         let props = unsafe {
-            PxRigidBodyExt_computeMassPropertiesFromShapes_mut(shape_ptrs.as_ptr(), nb_shapes)
+            PxRigidBodyExt_computeMassPropertiesFromShapes(shape_ptrs.as_ptr(), nb_shapes)
         };
         PxVec3::new(
             props.centerOfMass.x,
@@ -429,7 +429,7 @@ pub trait ArticulationReducedCoordinate:
         let center_of_mass = self.get_center_of_mass();
         if let Some(body) = self.root_link() {
             let com_vel = unsafe {
-                PxRigidBodyExt_getVelocityAtPos_mut(
+                PxRigidBodyExt_getVelocityAtPos(
                     Class::<physx_sys::PxRigidBody>::as_ptr(body),
                     &center_of_mass.into(),
                 )

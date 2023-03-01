@@ -59,7 +59,7 @@ fn main() {
 
                 let mut hit = std::mem::MaybeUninit::uninit();
 
-                if physx_sys::PxSceneQueryExt_raycastSingle_mut(
+                if physx_sys::PxSceneQueryExt_raycastSingle(
                     scene,
                     &PxVec3 {
                         x: 0.0,
