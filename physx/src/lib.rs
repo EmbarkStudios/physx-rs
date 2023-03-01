@@ -114,7 +114,7 @@ pub mod articulation_joint_reduced_coordinate;
 pub mod articulation_link;
 pub mod articulation_reduced_coordinate;
 pub mod base;
-pub mod bvh_structure;
+pub mod bvh;
 pub mod constraint;
 pub mod controller;
 pub mod controller_manager;

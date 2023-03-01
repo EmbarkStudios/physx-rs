@@ -3,7 +3,7 @@ use crate::{
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     base::Base,
-    bvh_structure::BvhStructure,
+    bvh::Bvh,
     owner::Owner,
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
@@ -126,7 +126,7 @@ pub trait Aggregate: Class<physx_sys::PxAggregate> + Base {
     fn add_articulation_link(
         &mut self,
         actor: &mut Self::ArticulationLink,
-        bvh: Option<&BvhStructure>,
+        bvh: Option<&Bvh>,
     ) -> bool {
         unsafe {
             PxAggregate_addActor_mut(

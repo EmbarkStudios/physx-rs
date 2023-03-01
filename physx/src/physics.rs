@@ -19,7 +19,7 @@ use crate::{
     articulation_reduced_coordinate::{
         ArticulationReducedCoordinate, PxArticulationReducedCoordinate,
     },
-    bvh_structure::BvhStructure,
+    bvh::Bvh,
     constraint::Constraint,
     convex_mesh::ConvexMesh,
     foundation::{AllocatorCallback, DefaultAllocator, Foundation, PxFoundation},
@@ -61,8 +61,7 @@ use physx_sys::{
     PxPhysicsInsertionCallback,
     PxPhysics_createAggregate_mut,
     PxPhysics_createArticulationReducedCoordinate_mut,
-    PxPhysics_createArticulation_mut,
-    PxPhysics_createBVHStructure_mut,
+    PxPhysics_createBVH_mut,
     PxPhysics_createConstraint_mut,
     PxPhysics_createConvexMesh_mut,
     PxPhysics_createHeightField_mut,
@@ -72,11 +71,11 @@ use physx_sys::{
     PxPhysics_createRigidStatic_mut,
     PxPhysics_createShape_mut_1,
     PxPhysics_createTriangleMesh_mut,
-    PxPhysics_getBVHStructures,
+    PxPhysics_getBVHs,
     PxPhysics_getConvexMeshes,
     PxPhysics_getHeightFields,
     PxPhysics_getMaterials,
-    PxPhysics_getNbBVHStructures,
+    PxPhysics_getNbBVHs,
     PxPhysics_getNbConvexMeshes,
     PxPhysics_getNbHeightFields,
     PxPhysics_getNbMaterials,
@@ -345,11 +344,9 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         }
     }
 
-    /// Create a new BVH structure.  The BVH structure class-trait is not implemented yet.
-    fn create_bvh_structure(&mut self, stream: &mut PxInputStream) -> Option<Owner<BvhStructure>> {
-        unsafe {
-            BvhStructure::from_raw(PxPhysics_createBVHStructure_mut(self.as_mut_ptr(), stream))
-        }
+    /// Create a new BVH.
+    fn create_bvh(&mut self, stream: &mut PxInputStream) -> Option<Owner<Bvh>> {
+        unsafe { Bvh::from_raw(PxPhysics_createBVH_mut(self.as_mut_ptr(), stream)) }
     }
 
     /// Create a new constraint.  The constraint class-trait is not implemented yet.
@@ -539,12 +536,12 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         }
     }
 
-    /// Get the BVH structures created by this physics object.
-    fn get_bvh_structures(&self) -> Vec<&BvhStructure> {
+    /// Get the BVHs created by this physics object.
+    fn get_bvhs(&self) -> Vec<&Bvh> {
         unsafe {
-            let capacity = PxPhysics_getNbBVHStructures(self.as_ptr());
-            let mut buffer: Vec<&BvhStructure> = Vec::with_capacity(capacity as usize);
-            let len = PxPhysics_getBVHStructures(
+            let capacity = PxPhysics_getNbBVHs(self.as_ptr());
+            let mut buffer: Vec<&Bvh> = Vec::with_capacity(capacity as usize);
+            let len = PxPhysics_getBVHs(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,

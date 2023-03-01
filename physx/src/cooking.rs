@@ -1,39 +1,16 @@
 use crate::{
-    bvh_structure::BvhStructure, convex_mesh::ConvexMesh, foundation::Foundation,
-    height_field::HeightField, owner::Owner, physics::Physics, traits::Class,
-    triangle_mesh::TriangleMesh,
+    bvh::Bvh, convex_mesh::ConvexMesh, foundation::Foundation, height_field::HeightField,
+    owner::Owner, physics::Physics, traits::Class, triangle_mesh::TriangleMesh,
 };
 
 use physx_sys::{
-    phys_PxCreateCooking,
-    PxBVHStructureDesc_isValid,
-    PxBVHStructureDesc_new,
-    PxBVHStructureDesc_setToDefault_mut,
-    PxConvexMeshDesc_isValid,
-    PxConvexMeshDesc_new,
-    PxConvexMeshDesc_setToDefault_mut,
-    PxCookingParams_new,
-    //PxCooking_getParams,
-    //PxCooking_setParams_mut,
-    //PxCooking_platformMismatch,
-    //PxCooking_computeHullPolygons,
-    //PxCooking_cookBVHStructure,
-    //PxCooking_cookConvexMesh,
-    //PxCooking_cookHeightField,
-    //PxCooking_cookTriangleMesh,
-    PxCooking_createBVHStructure,
-    PxCooking_createConvexMesh,
-    PxCooking_createHeightField,
-    PxCooking_createTriangleMesh,
-    PxCooking_release_mut,
-    PxCooking_validateConvexMesh,
-    PxCooking_validateTriangleMesh,
-    PxHeightFieldDesc_isValid,
-    PxHeightFieldDesc_new,
-    PxHeightFieldDesc_setToDefault_mut,
-    PxTriangleMeshDesc_isValid,
-    PxTriangleMeshDesc_new,
-    PxTriangleMeshDesc_setToDefault_mut,
+    phys_PxCreateCooking, PxBVHDesc_isValid, PxBVHDesc_new, PxBVHDesc_setToDefault_mut,
+    PxConvexMeshDesc_isValid, PxConvexMeshDesc_new, PxConvexMeshDesc_setToDefault_mut,
+    PxCookingParams_new, PxCooking_createBVH, PxCooking_createConvexMesh,
+    PxCooking_createHeightField, PxCooking_createTriangleMesh, PxCooking_release_mut,
+    PxCooking_validateConvexMesh, PxCooking_validateTriangleMesh, PxHeightFieldDesc_isValid,
+    PxHeightFieldDesc_new, PxHeightFieldDesc_setToDefault_mut, PxTriangleMeshDesc_isValid,
+    PxTriangleMeshDesc_new, PxTriangleMeshDesc_setToDefault_mut,
 };
 
 /// A new-type wrapper around `physx_sys::PxCooking`.
@@ -72,14 +49,10 @@ impl PxCooking {
         }
     }
 
-    /// Cook a new BVH structure.
-    pub fn create_bvh_structure(
-        &self,
-        physics: &mut impl Physics,
-        desc: &PxBvhStructureDesc,
-    ) -> Option<Owner<BvhStructure>> {
+    /// Cook a new BVH
+    pub fn create_bvh(&self, physics: &mut impl Physics, desc: &PxBVHDesc) -> Option<Owner<Bvh>> {
         unsafe {
-            BvhStructure::from_raw(PxCooking_createBVHStructure(
+            Bvh::from_raw(PxCooking_createBVH(
                 self.as_ptr(),
                 desc.as_ptr(),
                 physics.get_physics_insertion_callback()?,
@@ -367,7 +340,7 @@ impl PxHeightFieldDesc {
     }
 }
 
-pub struct PxBvhStructureDesc {
+pub struct PxBVHDesc {
     pub obj: physx_sys::PxBVHStructureDesc,
 }
 
