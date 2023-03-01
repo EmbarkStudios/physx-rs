@@ -18,12 +18,7 @@ use std::{marker::PhantomData, ptr::drop_in_place};
 use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
-    PxArticulationCacheFlags,
-    PxArticulationFlag,
-    PxArticulationFlags,
-    //PxArticulationReducedCoordinate_addLoopJoint_mut,
-    PxArticulationReducedCoordinate_applyCache_mut,
-    PxArticulationReducedCoordinate_commonInit,
+    PxArticulationReducedCoordinate_applyCache_mut, PxArticulationReducedCoordinate_commonInit,
     PxArticulationReducedCoordinate_computeCoefficientMatrix,
     PxArticulationReducedCoordinate_computeCoriolisAndCentrifugalForce,
     PxArticulationReducedCoordinate_computeDenseJacobian,
@@ -49,9 +44,10 @@ use physx_sys::{
     PxArticulationReducedCoordinate_setArticulationFlags_mut,
     PxArticulationReducedCoordinate_teleportRootLink_mut,
     PxArticulationReducedCoordinate_unpackJointData,
-    PxArticulationReducedCoordinate_zeroCache_mut,
-    PxRigidBodyExt_computeMassPropertiesFromShapes_mut,
-    PxRigidBodyExt_getVelocityAtPos_mut,
+};
+
+pub use physx_sys::{
+    PxArticulationFlag as ArticulationFlag, PxArticulationFlags as ArticulationFlags,
 };
 
 /*******************************************************************************
@@ -165,28 +161,29 @@ pub trait ArticulationReducedCoordinate:
     #[inline]
     fn set_articulation_flag(&mut self, flag: ArticulationFlag, value: bool) {
         unsafe {
-            PxArticulationReducedCoordinate_setArticulationFlag_mut(
-                self.as_mut_ptr(),
-                flag.into(),
-                value,
-            )
+            PxArticulationReducedCoordinate_setArticulationFlag_mut(self.as_mut_ptr(), flag, value)
         }
     }
 
     /// Set the articulation flags
     #[inline]
-    fn set_articulation_flags(&mut self, flag: ArticulationFlag) {
+    fn set_articulation_flags(&mut self, flags: ArticulationFlags) {
         unsafe {
-            PxArticulationReducedCoordinate_setArticulationFlags_mut(
-                self.as_mut_ptr(),
-                PxArticulationFlags { mBits: flag as u8 },
-            )
+            PxArticulationReducedCoordinate_setArticulationFlags_mut(self.as_mut_ptr(), flags)
         }
     }
 
     /// Get the articulation flags
     #[inline]
     fn get_articulation_flags(&self) -> ArticulationFlags {
+        unsafe { PxArticulationReducedCoordinate_getArticulationFlags(self.as_ptr()) }
+    }
+
+    /// Get the total number of links on this articulation
+    #[inline]
+    fn get_nb_links(&self) -> u32 {
+        unsafe { PxArticulationReducedCoordinate_getNbLinks(self.as_ptr()) }
+    }
         unsafe {
             ArticulationFlags::from_px(PxArticulationReducedCoordinate_getArticulationFlags(
                 self.as_ptr(),
@@ -222,35 +219,23 @@ pub trait ArticulationReducedCoordinate:
         }
     }
 
-    /// Release the cache and free the memory
-    fn release_cache(&self, mut cache: ArticulationCache) {
-        unsafe { PxArticulationReducedCoordinate_releaseCache(self.as_ptr(), cache.as_mut_ptr()) }
-    }
-
     /// Get the memory size of this cache
     fn get_cache_data_size(&self) -> u32 {
         unsafe { PxArticulationReducedCoordinate_getCacheDataSize(self.as_ptr()) }
-    }
-
-    /// Zero everything in the cache
-    fn zero_cache(&mut self, cache: &mut ArticulationCache) {
-        unsafe {
-            PxArticulationReducedCoordinate_zeroCache_mut(self.as_mut_ptr(), cache.as_mut_ptr())
-        }
     }
 
     /// Apply the cache to the articulation
     fn apply_cache(
         &mut self,
         cache: &mut ArticulationCache,
-        flag: BitFlags<ArticulationCacheFlag>,
+        flags: ArticulationCacheFlags,
         autowake: bool,
     ) {
         unsafe {
             PxArticulationReducedCoordinate_applyCache_mut(
                 self.as_mut_ptr(),
                 cache.as_mut_ptr(),
-                PxArticulationCacheFlags { mBits: flag.bits() },
+                flags,
                 autowake,
             )
         }
@@ -260,13 +245,13 @@ pub trait ArticulationReducedCoordinate:
     fn copy_internal_state_to_cache(
         &self,
         cache: &mut ArticulationCache,
-        flag: BitFlags<ArticulationCacheFlag>,
+        flags: ArticulationCacheFlags,
     ) {
         unsafe {
             PxArticulationReducedCoordinate_copyInternalStateToCache(
                 self.as_ptr(),
                 cache.as_mut_ptr(),
-                PxArticulationCacheFlags { mBits: flag.bits() },
+                flags,
             )
         }
     }

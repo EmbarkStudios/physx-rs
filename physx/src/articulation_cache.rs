@@ -2,37 +2,24 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 16 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
 use crate::{
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     math::{PxTransform, PxVec3},
     traits::Class,
 };
-
-use enumflags2::bitflags;
 use std::ptr::NonNull;
 
 use physx_sys::{PxArticulationCache, PxArticulationRootLinkData};
 
+pub use physx_sys::{
+    PxArticulationCacheFlag as ArticulationCacheFlag,
+    PxArticulationCacheFlags as ArticulationCacheFlags,
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 // Section ENUMS
 ////////////////////////////////////////////////////////////////////////////////
-
-#[bitflags]
-#[derive(Debug, Clone, Copy)]
-#[repr(u8)]
-pub enum ArticulationCacheFlag {
-    Velocity = 1,
-    Acceleration = 2,
-    Position = 4,
-    Force = 8,
-    Root = 16,
-}
 
 macro_rules! ptr_to_slice_mut {
     ($ptr: ident, $me: ident) => {
@@ -91,24 +78,6 @@ impl From<ArticulationRootLinkData> for PxArticulationRootLinkData {
 ////////////////////////////////////////////////////////////////////////////////
 // Section STRUCT
 ////////////////////////////////////////////////////////////////////////////////
-
-/*
-Definition of PxArticulationCache:
-    pub externalForces: *mut PxSpatialForce,
-    pub denseJacobian: *mut f32,
-    pub massMatrix: *mut f32,
-    pub jointVelocity: *mut f32,
-    pub jointAcceleration: *mut f32,
-    pub jointPosition: *mut f32,
-    pub jointForce: *mut f32,
-    pub rootLinkData: *mut PxArticulationRootLinkData,
-    pub coefficientMatrix: *mut f32,
-    pub lambda: *mut f32,
-    pub scratchMemory: *mut std::ffi::c_void,
-    pub scratchAllocator: *mut std::ffi::c_void,
-    pub version: u32,
-    pub structgen_pad0: [u8; 4],
- */
 
 pub struct ArticulationCache {
     px_articulation_cache: NonNull<PxArticulationCache>,
@@ -183,7 +152,11 @@ impl ArticulationCache {
         }
 
         let mut count = 0;
-        for offset in offsets.iter_mut().take(articulation.get_nb_links()).skip(1) {
+        for offset in offsets
+            .iter_mut()
+            .take(articulation.get_nb_links() as usize)
+            .skip(1)
+        {
             let link_dofs = *offset;
             *offset = count;
             count += link_dofs;
@@ -269,7 +242,7 @@ impl ArticulationCache {
 
     pub fn set_root_link_data(&mut self, data: ArticulationRootLinkData) {
         unsafe {
-            *(self.px_articulation_cache.as_mut().rootLinkData) = data.into();
+            *(self.px_articulation_cache.as_mut()).rootLinkData = data.into();
         }
     }
 }
