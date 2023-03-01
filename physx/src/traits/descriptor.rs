@@ -1,5 +1,4 @@
 use crate::{
-    articulation::Articulation,
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     constraint::Constraint,
@@ -13,18 +12,17 @@ use crate::{
     rigid_static::{PxRigidStatic, RigidStatic},
     scene::{
         BroadPhaseType, FilterShaderDescriptor, FrictionType, PairFilteringMode,
-        PruningStructureType, PxScene, Scene, SceneFlag, SceneLimits, SceneQueryUpdateMode,
-        SolverType,
+        PruningStructureType, PxScene, Scene, SceneLimits, SceneQueryUpdateMode, SolverType,
     },
     shape::{Shape, ShapeFlags},
     simulation_event_callback::{
         AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
         TriggerCallback, WakeSleepCallback,
     },
-    traits::{PxFlags, UserData},
+    traits::UserData,
 };
 
-use enumflags2::BitFlags;
+pub use physx_sys::PxSceneFlags as SceneFlags;
 
 use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::null_mut};
 
@@ -38,7 +36,6 @@ pub struct SceneDescriptor<
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -46,7 +43,7 @@ pub struct SceneDescriptor<
     OWS: WakeSleepCallback<L, S, D>,
     OA: AdvanceCallback<L, D>,
 > {
-    pub phantom_marker: PhantomData<(L, S, D, T, C)>,
+    pub phantom_marker: PhantomData<(L, S, D, C)>,
     pub user_data: U,
     pub on_collide: Option<OC>,
     pub on_trigger: Option<OT>,
@@ -63,8 +60,7 @@ pub struct SceneDescriptor<
     pub bounce_threshold_velocity: f32,
     pub friction_offset_threshold: f32,
     pub ccd_max_separation: f32,
-    pub solver_offset_slop: f32,
-    pub flags: BitFlags<SceneFlag>,
+    pub flags: SceneFlags,
     pub static_structure: PruningStructureType,
     pub dynamic_structure: PruningStructureType,
     pub dynamic_tree_rebuild_rate_hint: u32,
@@ -87,7 +83,6 @@ pub struct SceneDescriptor<
     pub contact_modify_callback: *mut physx_sys::PxContactModifyCallback,
     pub ccd_contact_modify_callback: *mut physx_sys::PxCCDContactModifyCallback,
 
-    pub cuda_context_manager: *mut physx_sys::PxCudaContextManager,
     pub gpu_dynamics_config: physx_sys::PxgDynamicsMemoryConfig,
     pub gpu_max_num_partitions: u32,
     pub gpu_compute_version: u32,
@@ -98,14 +93,13 @@ impl<
         L: ArticulationLink,
         S: RigidStatic,
         D: RigidDynamic,
-        T: Articulation,
         C: ArticulationReducedCoordinate,
         OC: CollisionCallback,
         OT: TriggerCallback,
         OCB: ConstraintBreakCallback,
         OWS: WakeSleepCallback<L, S, D>,
         OA: AdvanceCallback<L, D>,
-    > SceneDescriptor<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+    > SceneDescriptor<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 {
     pub fn new(user_data: U) -> Self {
         Self {
@@ -119,7 +113,7 @@ impl<
             gravity: PxVec3::new(0.0, 0.0, 0.0),
             kine_kine_filtering_mode: PairFilteringMode::Suppress,
             static_kine_filtering_mode: PairFilteringMode::Suppress,
-            broad_phase_type: BroadPhaseType::AutomaticBoxPruning,
+            broad_phase_type: BroadPhaseType::Abp,
             limits: SceneLimits {
                 max_nb_actors: 0,
                 max_nb_bodies: 0,
@@ -135,8 +129,7 @@ impl<
             bounce_threshold_velocity: 2.0,
             friction_offset_threshold: 0.04,
             ccd_max_separation: 0.04,
-            solver_offset_slop: 0.0,
-            flags: SceneFlag::EnablePcm.into(),
+            flags: SceneFlags::EnablePcm,
             static_structure: PruningStructureType::DynamicAabbTree,
             dynamic_structure: PruningStructureType::DynamicAabbTree,
             dynamic_tree_rebuild_rate_hint: 100,
@@ -156,7 +149,6 @@ impl<
             broad_phase_callback: null_mut(),
             contact_modify_callback: null_mut(),
             ccd_contact_modify_callback: null_mut(),
-            cuda_context_manager: null_mut(),
             gpu_dynamics_config: unsafe { physx_sys::PxgDynamicsMemoryConfig_new() },
             gpu_max_num_partitions: 8,
             gpu_compute_version: 0,
@@ -170,17 +162,16 @@ impl<
         L: ArticulationLink,
         S: RigidStatic,
         D: RigidDynamic,
-        T: Articulation,
         C: ArticulationReducedCoordinate,
         OC: CollisionCallback,
         OT: TriggerCallback,
         OCB: ConstraintBreakCallback,
         OWS: WakeSleepCallback<L, S, D>,
         OA: AdvanceCallback<L, D>,
-    > Descriptor<P> for SceneDescriptor<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+    > Descriptor<P> for SceneDescriptor<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 {
     #[allow(clippy::type_complexity)]
-    type Target = Option<Owner<PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>>>;
+    type Target = Option<Owner<PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>>>;
 
     fn create(self, creator: &mut P) -> Self::Target {
         let mut desc = unsafe {
@@ -190,8 +181,7 @@ impl<
                 bounceThresholdVelocity: self.bounce_threshold_velocity,
                 frictionOffsetThreshold: self.friction_offset_threshold,
                 ccdMaxSeparation: self.ccd_max_separation,
-                solverOffsetSlop: self.solver_offset_slop,
-                flags: self.flags.into_px(),
+                flags: self.flags,
                 userData: if size_of::<U>() > size_of::<*mut c_void>() {
                     // Too big to pack into a *mut c_void, kick it to the heap.
                     Box::into_raw(Box::new(self.user_data)) as *mut c_void
@@ -214,26 +204,27 @@ impl<
                     self.on_advance,
                 )?
                 .into_ptr(),
-                kineKineFilteringMode: self.kine_kine_filtering_mode.into(),
-                staticKineFilteringMode: self.static_kine_filtering_mode.into(),
-                frictionType: self.friction_type.into(),
-                solverType: self.solver_type.into(),
-                broadPhaseType: self.broad_phase_type.into(),
-                dynamicStructure: self.dynamic_structure.into(),
-                staticStructure: self.static_structure.into(),
+                kineKineFilteringMode: self.kine_kine_filtering_mode,
+                staticKineFilteringMode: self.static_kine_filtering_mode,
+                frictionType: self.friction_type,
+                solverType: self.solver_type,
+                broadPhaseType: self.broad_phase_type,
+                dynamicStructure: self.dynamic_structure,
+                staticStructure: self.static_structure,
                 dynamicTreeRebuildRateHint: self.dynamic_tree_rebuild_rate_hint,
-                sceneQueryUpdateMode: self.scene_query_update_mode.into(),
+                sceneQueryUpdateMode: self.scene_query_update_mode,
                 nbContactDataBlocks: self.nb_contact_data_blocks,
                 maxNbContactDataBlocks: self.max_nb_contact_data_blocks,
                 contactReportStreamBufferSize: self.contact_report_stream_buffer_size,
                 cpuDispatcher: physx_sys::phys_PxDefaultCpuDispatcherCreate(
                     self.thread_count,
                     null_mut(),
+                    physx_sys::PxDefaultCpuDispatcherWaitForWorkMode::WaitForWork,
+                    0,
                 ) as *mut physx_sys::PxCpuDispatcher,
                 contactModifyCallback: self.contact_modify_callback,
                 ccdContactModifyCallback: self.ccd_contact_modify_callback,
                 broadPhaseCallback: self.broad_phase_callback,
-                cudaContextManager: self.cuda_context_manager,
                 gpuDynamicsConfig: self.gpu_dynamics_config,
                 gpuMaxNumPartitions: self.gpu_max_num_partitions,
                 gpuComputeVersion: self.gpu_compute_version,
