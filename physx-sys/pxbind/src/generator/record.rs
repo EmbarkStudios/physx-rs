@@ -115,16 +115,21 @@ impl<'ast> crate::consumer::RecBindingDef<'ast> {
         let indent = Indent(level);
         let indent1 = Indent(level + 1);
 
+        let is_union = matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union));
+
         writesln!(w, "{indent}#[derive(Clone, Copy)]");
+
+        if !is_union {
+            writesln!(
+                w,
+                "{indent}#[cfg_attr(feature = \"debug-structs\", derive(Debug))]"
+            );
+        }
         writesln!(w, "{indent}#[repr(C)]");
         writesln!(
             w,
             "{indent}pub {} {} {{",
-            if matches!(self.ast.tag_used, Some(crate::consumer::Tag::Union)) {
-                "union"
-            } else {
-                "struct"
-            },
+            if is_union { "union" } else { "struct" },
             self.name
         );
 
@@ -141,6 +146,21 @@ impl<'ast> crate::consumer::RecBindingDef<'ast> {
         }
 
         writesln!(w, "{indent}}}");
+
+        // Unions can't have derived Debug impls so we make our own
+        if is_union {
+            let indent2 = Indent(level + 2);
+            writesln!(w, "{indent}#[cfg(feature = \"debug-structs\")]");
+            writesln!(w, "{indent}impl std::fmt::Debug for {} {{", self.name);
+            writesln!(
+                w,
+                "{indent1}fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {{"
+            );
+            writesln!(w, "{indent2}f.write_str(\"{}\")", self.name);
+            writesln!(w, "{indent1}}}");
+            writesln!(w, "{indent}}}");
+        }
+
         true
     }
 }
@@ -158,11 +178,12 @@ impl<'ast> crate::consumer::RecBindingForward<'ast> {
 
     pub fn emit_rust(&self, w: &mut String, level: u32) {
         let indent = Indent(level);
+        let indent1 = Indent(level + 1);
 
         writesln!(w, "{indent}#[derive(Copy, Clone)]");
         writesln!(w, "{indent}#[repr(C)]");
         writesln!(w, "{indent}pub struct {} {{", self.name);
-        writesln!(w, "{indent}{indent}_unused: [u8; 0],");
-        writes!(w, "}}");
+        writesln!(w, "{indent1}_unused: [u8; 0],");
+        writesln!(w, "}}");
     }
 }

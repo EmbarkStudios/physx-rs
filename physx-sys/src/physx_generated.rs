@@ -3143,6 +3143,22 @@ pub enum PxD6Drive {
     Count = 6,
 }
 
+impl From<usize> for PxD6Drive {
+    fn from(val: usize) -> Self {
+        #[allow(clippy::match_same_arms)]
+        match val {
+            0 => Self::X,
+            1 => Self::Y,
+            2 => Self::Z,
+            3 => Self::Swing,
+            4 => Self::Twist,
+            5 => Self::Slerp,
+            6 => Self::Count,
+            _ => Self::Count,
+        }
+    }
+}
+
 /// flags for configuring the drive model of a PxD6Joint
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
@@ -3273,27 +3289,32 @@ bitflags::bitflags! {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxMat34 {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxAllocatorCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxAssertHandler {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxFoundation {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxVirtualAllocatorCallback {
     vtable_: *const std::ffi::c_void,
@@ -3306,24 +3327,34 @@ pub union PxTempAllocatorChunk {
     pub mIndex: u32,
     pub mPad: [u8; 16],
 }
+#[cfg(feature = "debug-structs")]
+impl std::fmt::Debug for PxTempAllocatorChunk {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("PxTempAllocatorChunk")
+    }
+}
 
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxLogTwo {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxUnConst {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxErrorCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxAllocationListener {
     vtable_: *const std::ffi::c_void,
@@ -3332,63 +3363,74 @@ pub struct PxAllocationListener {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxHash {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxInputStream {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxInputData {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxOutputStream {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxProfilerCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRunnable {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRenderBuffer {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxProcessPxBaseCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSerializationContext {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSerializationRegistry {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCollection {
     vtable_: *const std::ffi::c_void,
@@ -3397,146 +3439,174 @@ pub struct PxCollection {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxTypeInfo {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFEMSoftBodyMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFEMClothMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxPBDMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFLIPMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxMPMMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxCustomMaterial {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxBVH33TriangleMesh {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxPBDParticleSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFLIPParticleSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxMPMParticleSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxCustomParticleSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxSoftBody {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFEMCloth {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxHairSystem {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleAndDiffuseBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleClothBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleRigidBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxStringTable {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSerializer {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxInsertionCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxTaskManager {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCpuDispatcher {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBVHRaycastCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBVHOverlapCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBVHTraversalCallback {
     vtable_: *const std::ffi::c_void,
@@ -3545,14 +3615,17 @@ pub struct PxBVHTraversalCallback {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxContactBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxRenderOutput {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCustomGeometryCallbacks {
     vtable_: *const std::ffi::c_void,
@@ -3564,50 +3637,64 @@ pub union Px1DConstraintMods {
     pub spring: PxSpringModifiers,
     pub bounce: PxRestitutionModifiers,
 }
+#[cfg(feature = "debug-structs")]
+impl std::fmt::Debug for Px1DConstraintMods {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Px1DConstraintMods")
+    }
+}
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxConstraintVisualizer {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxConstraintConnector {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxConstraintAllocator {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxContactModifyCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCCDContactModifyCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxDeletionListener {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSimulationFilterCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxLockedData {
     vtable_: *const std::ffi::c_void,
@@ -3616,145 +3703,170 @@ pub struct PxLockedData {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxCudaContextManager {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxParticleRigidAttachment {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxOmniPvd {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxPhysics {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxQueryFilterCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSceneQuerySystemBase {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSceneSQSystem {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSceneQuerySystem {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBroadPhaseRegions {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBroadPhase {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxAABBManager {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxPvdSceneClient {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBroadPhaseCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSimulationEventCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxObstacleContext {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxUserControllerHitReport {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxControllerFilterCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxController {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBoxController {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCapsuleController {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxControllerBehaviorCallback {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxControllerManager {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCooking {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxDefaultAllocator {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxDefaultErrorCallback {
     vtable_: *const std::ffi::c_void,
@@ -3763,27 +3875,32 @@ pub struct PxDefaultErrorCallback {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxBinaryConverter {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxDefaultCpuDispatcher {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxBatchQueryExt {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCustomSceneQuerySystem {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxCustomSceneQuerySystemAdapter {
     vtable_: *const std::ffi::c_void,
@@ -3792,24 +3909,29 @@ pub struct PxCustomSceneQuerySystemAdapter {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct XmlMemoryAllocator {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct XmlWriter {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct XmlReader {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct MemoryBuffer {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRepXSerializer {
     vtable_: *const std::ffi::c_void,
@@ -3818,35 +3940,42 @@ pub struct PxRepXSerializer {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxVehicleWheels4SimData {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxVehicleWheels4DynData {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxVehicleTireForceCalculator {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxVehicleDrivableSurfaceToTireFrictionPairs {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxVehicleTelemetryData {
-_unused: [u8; 0],
+    _unused: [u8; 0],
 }
+
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxPvd {
     vtable_: *const std::ffi::c_void,
 }
 
 #[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxPvdTransport {
     vtable_: *const std::ffi::c_void,
@@ -13112,6 +13241,50 @@ extern "C" {
 
     /// Get the target goal velocity for joint drive.
     pub fn PxD6Joint_getDriveVelocity(self_: *const PxD6Joint, linear: *mut PxVec3, angular: *mut PxVec3);
+
+    /// Set the linear tolerance threshold for projection. Projection is enabled if PxConstraintFlag::ePROJECTION
+    /// is set for the joint.
+    ///
+    /// If the joint separates by more than this distance along its locked degrees of freedom, the solver
+    /// will move the bodies to close the distance.
+    ///
+    /// Setting a very small tolerance may result in simulation jitter or other artifacts.
+    ///
+    /// Sometimes it is not possible to project (for example when the joints form a cycle).
+    ///
+    /// Range:
+    /// [0, PX_MAX_F32)
+    /// Default:
+    /// 1e10f
+    pub fn PxD6Joint_setProjectionLinearTolerance_mut(self_: *mut PxD6Joint, tolerance: f32);
+
+    /// Get the linear tolerance threshold for projection.
+    ///
+    /// the linear tolerance threshold
+    pub fn PxD6Joint_getProjectionLinearTolerance(self_: *const PxD6Joint) -> f32;
+
+    /// Set the angular tolerance threshold for projection. Projection is enabled if
+    /// PxConstraintFlag::ePROJECTION is set for the joint.
+    ///
+    /// If the joint deviates by more than this angle around its locked angular degrees of freedom,
+    /// the solver will move the bodies to close the angle.
+    ///
+    /// Setting a very small tolerance may result in simulation jitter or other artifacts.
+    ///
+    /// Sometimes it is not possible to project (for example when the joints form a cycle).
+    ///
+    /// Range:
+    /// [0,Pi]
+    /// Default:
+    /// Pi
+    ///
+    /// Angular projection is implemented only for the case of two or three locked angular degrees of freedom.
+    pub fn PxD6Joint_setProjectionAngularTolerance_mut(self_: *mut PxD6Joint, tolerance: f32);
+
+    /// Get the angular tolerance threshold for projection.
+    ///
+    /// tolerance the angular tolerance threshold in radians
+    pub fn PxD6Joint_getProjectionAngularTolerance(self_: *const PxD6Joint) -> f32;
 
     /// Returns string name of PxD6Joint, used for serialization
     pub fn PxD6Joint_getConcreteTypeName(self_: *const PxD6Joint) -> *const std::ffi::c_char;

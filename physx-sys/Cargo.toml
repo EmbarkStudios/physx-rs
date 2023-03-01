@@ -36,16 +36,23 @@ exclude = [
 [lib]
 doctest = false
 
+[features]
+# This feature will build and run the structgen program, generating C++ and Rust
+# code to ensure the record types used in FFI match exactly and can be transparently
+# memcopied. This feature is not normally needed for tier 1 platforms and Android
+# as the crate includes pre-generated ones
+structgen = []
+profile = []
+# Enables `Debug` derivations for the FFI structures, which can be useful for
+# print debugging
+debug-structs = []
+
 [dependencies]
 # The PhysX API exposes several enums used as flags
 bitflags = "1.3"
 # Glam's vector types match the alignment, layout, and size of the core scalar
 # types present in Physx's public API
-glam = "0.22"
+glam = "0.23"
 
 [build-dependencies]
 cc = { version = "1.0", features = ["parallel"] }
-
-[features]
-structgen = []
-profile = []

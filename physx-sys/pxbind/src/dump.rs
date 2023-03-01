@@ -55,6 +55,8 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
     ]);
     cmd.arg(header.as_ref());
 
+    // note that this is _terribly_ slow but hopefully fixed in 1.69?
+    // https://github.com/rust-lang/rust/issues/108223
     cmd.stdout(std::process::Stdio::piped());
     cmd.stderr(std::process::Stdio::piped());
 

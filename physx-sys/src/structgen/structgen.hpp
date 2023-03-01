@@ -36,6 +36,7 @@ struct PodStructGen {
         fprintf(cfile, "struct %s {\n", cname);
 
         fprintf(rfile, "#[derive(Clone, Copy)]\n");
+        fprintf(rfile, "#[cfg_attr(feature = \"debug-structs\", derive(Debug))]\n");
         fprintf(rfile, "#[repr(C)]\n");
         fprintf(rfile, "pub struct %s {\n", rname);
 

@@ -207,8 +207,10 @@ impl Generator {
         let mut fiter = ast.flags.iter().peekable();
         let mut acc = String::new();
 
-        const INT_ENUMS: &[(&str, Builtin, &str)] =
-            &[("PxConcreteType", Builtin::UShort, "Undefined")];
+        const INT_ENUMS: &[(&str, Builtin, &str)] = &[
+            ("PxConcreteType", Builtin::UShort, "Undefined"),
+            ("PxD6Drive", Builtin::USize, "Count"),
+        ];
 
         for (enum_binding, flags_binding) in ast.enums.iter().enumerate().filter_map(|(i, eb)| {
             let fb = if fiter.peek().map_or(false, |f| f.enums_index == i) {

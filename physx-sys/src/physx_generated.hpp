@@ -12098,6 +12098,28 @@ extern "C" {
         self_->getDriveVelocity(linear, angular);
     }
 
+    void PxD6Joint_setProjectionLinearTolerance_mut(physx_PxD6Joint_Pod* self__pod, float tolerance) {
+        physx::PxD6Joint* self_ = reinterpret_cast<physx::PxD6Joint*>(self__pod);
+        self_->setProjectionLinearTolerance(tolerance);
+    }
+
+    float PxD6Joint_getProjectionLinearTolerance(physx_PxD6Joint_Pod const* self__pod) {
+        physx::PxD6Joint const* self_ = reinterpret_cast<physx::PxD6Joint const*>(self__pod);
+        float return_val = self_->getProjectionLinearTolerance();
+        return return_val;
+    }
+
+    void PxD6Joint_setProjectionAngularTolerance_mut(physx_PxD6Joint_Pod* self__pod, float tolerance) {
+        physx::PxD6Joint* self_ = reinterpret_cast<physx::PxD6Joint*>(self__pod);
+        self_->setProjectionAngularTolerance(tolerance);
+    }
+
+    float PxD6Joint_getProjectionAngularTolerance(physx_PxD6Joint_Pod const* self__pod) {
+        physx::PxD6Joint const* self_ = reinterpret_cast<physx::PxD6Joint const*>(self__pod);
+        float return_val = self_->getProjectionAngularTolerance();
+        return return_val;
+    }
+
     char const* PxD6Joint_getConcreteTypeName(physx_PxD6Joint_Pod const* self__pod) {
         physx::PxD6Joint const* self_ = reinterpret_cast<physx::PxD6Joint const*>(self__pod);
         char const* return_val = self_->getConcreteTypeName();
