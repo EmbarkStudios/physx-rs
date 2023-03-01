@@ -3272,17 +3272,18 @@ bitflags::bitflags! {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct PxAssertHandler {
-_unused: [u8; 0],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct PxMat34 {
 _unused: [u8; 0],
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PxAllocatorCallback {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxAssertHandler {
     vtable_: *const std::ffi::c_void,
 }
 
@@ -3871,6 +3872,12 @@ extern "C" {
     /// This function should be thread safe as it can be called in the context of the user thread
     /// and physics processing thread(s).
     pub fn PxAllocatorCallback_deallocate_mut(self_: *mut PxAllocatorCallback, ptr: *mut std::ffi::c_void);
+
+    pub fn PxAssertHandler_delete(self_: *mut PxAssertHandler);
+
+    pub fn phys_PxGetAssertHandler() -> *mut PxAssertHandler;
+
+    pub fn phys_PxSetAssertHandler(handler: *mut PxAssertHandler);
 
     /// Destroys the instance it is called on.
     ///
@@ -14169,7 +14176,9 @@ extern "C" {
     pub fn phys_PxFindFaceIndex(convexGeom: *const PxConvexMeshGeometry, geomPose: *const PxTransform, impactPos: *const PxVec3, unitDir: *const PxVec3) -> u32;
 
     /// Sets the sampling radius
-    pub fn PxPoissonSampler_setSamplingRadius_mut(self_: *mut PxPoissonSampler, samplingRadius: f32);
+    ///
+    /// Returns true if the sampling was successful and false if there was a problem. Usually an internal overflow is the problem for very big meshes or very small sampling radii.
+    pub fn PxPoissonSampler_setSamplingRadius_mut(self_: *mut PxPoissonSampler, samplingRadius: f32) -> bool;
 
     /// Adds new Poisson Samples inside the sphere specified
     pub fn PxPoissonSampler_addSamplesInSphere_mut(self_: *mut PxPoissonSampler, sphereCenter: *const PxVec3, sphereRadius: f32, createVolumeSamples: bool);

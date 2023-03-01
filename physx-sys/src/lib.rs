@@ -283,7 +283,7 @@ pub type ZoneStartCallback =
 pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
 
 pub type ErrorCallback =
-    unsafe extern "C" fn(PxErrorCode::Enum, *const i8, *const i8, u32, *const c_void);
+    unsafe extern "C" fn(PxErrorCode, *const i8, *const i8, u32, *const c_void);
 
 pub type AssertHandler = unsafe extern "C" fn(*const i8, *const i8, u32, *mut bool, *const c_void);
 

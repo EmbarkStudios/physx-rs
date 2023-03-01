@@ -2,6 +2,7 @@ using namespace physx;
 #include "structgen_out.hpp"
 
 static_assert(sizeof(physx::PxAllocatorCallback) == sizeof(physx_PxAllocatorCallback_Pod), "POD wrapper for `physx::PxAllocatorCallback` has incorrect size");
+static_assert(sizeof(physx::PxAssertHandler) == sizeof(physx_PxAssertHandler_Pod), "POD wrapper for `physx::PxAssertHandler` has incorrect size");
 static_assert(sizeof(physx::PxFoundation) == sizeof(physx_PxFoundation_Pod), "POD wrapper for `physx::PxFoundation` has incorrect size");
 static_assert(sizeof(physx::PxAllocator) == sizeof(physx_PxAllocator_Pod), "POD wrapper for `physx::PxAllocator` has incorrect size");
 static_assert(sizeof(physx::PxRawAllocator) == sizeof(physx_PxRawAllocator_Pod), "POD wrapper for `physx::PxRawAllocator` has incorrect size");
@@ -344,6 +345,22 @@ extern "C" {
     void PxAllocatorCallback_deallocate_mut(physx_PxAllocatorCallback_Pod* self__pod, void* ptr) {
         physx::PxAllocatorCallback* self_ = reinterpret_cast<physx::PxAllocatorCallback*>(self__pod);
         self_->deallocate(ptr);
+    }
+
+    void PxAssertHandler_delete(physx_PxAssertHandler_Pod* self__pod) {
+        physx::PxAssertHandler* self_ = reinterpret_cast<physx::PxAssertHandler*>(self__pod);
+        delete self_;
+    }
+
+    physx_PxAssertHandler_Pod* phys_PxGetAssertHandler() {
+        physx::PxAssertHandler& return_val = PxGetAssertHandler();
+        auto return_val_pod = reinterpret_cast<physx_PxAssertHandler_Pod*>(&return_val);
+        return return_val_pod;
+    }
+
+    void phys_PxSetAssertHandler(physx_PxAssertHandler_Pod* handler_pod) {
+        physx::PxAssertHandler& handler = reinterpret_cast<physx::PxAssertHandler&>(*handler_pod);
+        PxSetAssertHandler(handler);
     }
 
     void PxFoundation_release_mut(physx_PxFoundation_Pod* self__pod) {
@@ -13125,9 +13142,10 @@ extern "C" {
         return return_val;
     }
 
-    void PxPoissonSampler_setSamplingRadius_mut(physx_PxPoissonSampler_Pod* self__pod, float samplingRadius) {
+    bool PxPoissonSampler_setSamplingRadius_mut(physx_PxPoissonSampler_Pod* self__pod, float samplingRadius) {
         physx::PxPoissonSampler* self_ = reinterpret_cast<physx::PxPoissonSampler*>(self__pod);
-        self_->setSamplingRadius(samplingRadius);
+        bool return_val = self_->setSamplingRadius(samplingRadius);
+        return return_val;
     }
 
     void PxPoissonSampler_addSamplesInSphere_mut(physx_PxPoissonSampler_Pod* self__pod, physx_PxVec3_Pod const* sphereCenter_pod, float sphereRadius, bool createVolumeSamples) {

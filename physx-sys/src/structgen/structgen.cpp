@@ -25,6 +25,7 @@ int main() {
     sg.pass_thru("struct physx_PxPlane_Pod;\n");
     sg.pass_thru("struct physx_PxBounds3_Pod;\n");
     sg.pass_thru("struct physx_PxAllocatorCallback_Pod {\n    void* vtable_;\n};\n");
+    sg.pass_thru("struct physx_PxAssertHandler_Pod {\n    void* vtable_;\n};\n");
     sg.pass_thru("struct physx_PxAllocationListener_Pod;\n");
     sg.pass_thru("struct physx_PxFoundation_Pod {\n    void* vtable_;\n};\n");
     sg.pass_thru("struct physx_PxProfilerCallback_Pod;\n");

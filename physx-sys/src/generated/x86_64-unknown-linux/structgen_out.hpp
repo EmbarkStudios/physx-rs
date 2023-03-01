@@ -17,6 +17,9 @@ struct physx_PxBounds3_Pod;
 struct physx_PxAllocatorCallback_Pod {
     void* vtable_;
 };
+struct physx_PxAssertHandler_Pod {
+    void* vtable_;
+};
 struct physx_PxAllocationListener_Pod;
 struct physx_PxFoundation_Pod {
     void* vtable_;
