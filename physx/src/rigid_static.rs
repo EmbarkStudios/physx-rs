@@ -2,12 +2,6 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 15 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
-
 use std::{marker::PhantomData, ptr::drop_in_place};
 
 use crate::{
