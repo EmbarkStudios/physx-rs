@@ -137,8 +137,10 @@ pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData 
         ptr: *mut physx_sys::PxRigidDynamic,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let actor = (ptr as *mut Self).as_mut();
-        Owner::from_raw(actor?.init_user_data(user_data))
+        unsafe {
+            let actor = (ptr as *mut Self).as_mut();
+            Owner::from_raw(actor?.init_user_data(user_data))
+        }
     }
 
     /// Get the user data.

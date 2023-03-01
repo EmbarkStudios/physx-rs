@@ -103,8 +103,10 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
         ptr: *mut physx_sys::PxShape,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let shape = (ptr as *mut Self).as_mut();
-        Owner::from_raw(shape?.init_user_data(user_data))
+        unsafe {
+            let shape = (ptr as *mut Self).as_mut();
+            Owner::from_raw(shape?.init_user_data(user_data))
+        }
     }
 
     /// Get a reference to the user data.

@@ -32,10 +32,12 @@ pub unsafe trait ProfilerCallback: Sized {
     ///
     /// Do not override this method.
     unsafe fn into_px(self) -> *mut PxProfilerCallback {
-        create_profiler_callback(
-            Self::zone_start,
-            Self::zone_end,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+        unsafe {
+            create_profiler_callback(
+                Self::zone_start,
+                Self::zone_end,
+                Box::into_raw(Box::new(self)) as *mut c_void,
+            )
+        }
     }
 }

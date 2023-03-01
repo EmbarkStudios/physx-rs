@@ -14,19 +14,23 @@ pub trait ErrorCallback: Sized {
             line: u32,
             this: *const c_void,
         ) {
-            let this = &*this.cast::<L>();
-            let msg = CStr::from_ptr(message.cast());
-            let msg = msg.to_string_lossy();
+            unsafe {
+                let this = &*this.cast::<L>();
+                let msg = CStr::from_ptr(message.cast());
+                let msg = msg.to_string_lossy();
 
-            let file = CStr::from_ptr(file.cast());
-            let file = file.to_string_lossy();
+                let file = CStr::from_ptr(file.cast());
+                let file = file.to_string_lossy();
 
-            this.report_error(code, &msg, &file, line);
+                this.report_error(code, &msg, &file, line);
+            }
         }
 
-        create_error_callback(
-            on_message_shim::<Self>,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+        unsafe {
+            create_error_callback(
+                on_message_shim::<Self>,
+                Box::into_raw(Box::new(self)) as *mut c_void,
+            )
+        }
     }
 }

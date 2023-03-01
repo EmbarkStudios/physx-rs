@@ -313,7 +313,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(ptr: *mut physx_sys::PxScene) -> Option<Owner<Self>> {
         // userData is initialized by the descriptor.
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Get the user data.
@@ -653,13 +653,15 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// # Safety
     /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
-        PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_contact_modify_callback(&self) -> &PxContactModifyCallback {
-        &*PxScene_getContactModifyCallback(self.as_ptr())
+        unsafe { &*PxScene_getContactModifyCallback(self.as_ptr()) }
     }
 
     /// # Safety
@@ -668,25 +670,29 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         &mut self,
         callback: &mut PxCCDContactModifyCallback,
     ) {
-        PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_ccd_contact_callback(&self) -> &PxCCDContactModifyCallback {
-        &*PxScene_getCCDContactModifyCallback(self.as_ptr())
+        unsafe { &*PxScene_getCCDContactModifyCallback(self.as_ptr()) }
     }
 
     /// # Safety
     /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_broad_phase_callback(&mut self, callback: &mut PxBroadPhaseCallback) {
-        PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_broad_phase_callback(&self) -> &PxBroadPhaseCallback {
-        &*PxScene_getBroadPhaseCallback(self.as_ptr())
+        unsafe { &*PxScene_getBroadPhaseCallback(self.as_ptr()) }
     }
 
     //////////////////////////////////////////////////////////////////////////

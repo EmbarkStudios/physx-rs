@@ -97,8 +97,10 @@ pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + Us
         ptr: *mut physx_sys::PxArticulation,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let articulation = (ptr as *mut Self).as_mut();
-        Owner::from_raw(articulation?.init_user_data(user_data))
+        unsafe {
+            let articulation = (ptr as *mut Self).as_mut();
+            Owner::from_raw(articulation?.init_user_data(user_data))
+        }
     }
 
     /// Get a reference to the user data.

@@ -149,8 +149,10 @@ impl<Allocator: AllocatorCallback, Geom: Shape> PhysicsFoundation<Allocator, Geo
         allocator: Allocator,
         error_callback: *mut PxErrorCallback,
     ) -> PhysicsFoundation<Allocator, Geom> {
-        let mut foundation = PxFoundation::with_allocator_error_callback(allocator, error_callback)
-            .expect("Create Foundation returned a null pointer");
+        let mut foundation = unsafe {
+            PxFoundation::with_allocator_error_callback(allocator, error_callback)
+                .expect("Create Foundation returned a null pointer")
+        };
         let physics =
             PxPhysics::new(foundation.as_mut()).expect("Create PxPhysics returned a null pointer.");
         Self {
@@ -251,7 +253,7 @@ impl<Geom: Shape> PxPhysics<Geom> {
     pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPhysics,
     ) -> Option<Owner<PxPhysics<Geom>>> {
-        Owner::from_raw(ptr as *mut PxPhysics<Geom>)
+        unsafe { Owner::from_raw(ptr as *mut PxPhysics<Geom>) }
     }
 }
 

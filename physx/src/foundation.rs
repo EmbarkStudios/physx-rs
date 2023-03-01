@@ -112,20 +112,24 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
 
     /// Tries to create a PxFoundation with the provided allocator and error callbacks.
     /// Returns `None` if `phys_PxCreateFoundation` returns a null pointer.
+    ///
     /// # Safety
+    ///
     /// `error_callback` must live as long as the returned `Foundation`
     unsafe fn with_allocator_error_callback(
         allocator: Self::Allocator,
         error_callback: *mut PxErrorCallback,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw(
-            phys_PxCreateFoundation(
-                crate::physics::PX_PHYSICS_VERSION,
-                allocator.into_px(),
-                error_callback,
+        unsafe {
+            Owner::from_raw(
+                phys_PxCreateFoundation(
+                    crate::physics::PX_PHYSICS_VERSION,
+                    allocator.into_px(),
+                    error_callback,
+                )
+                .cast::<Self>(),
             )
-            .cast::<Self>(),
-        )
+        }
     }
 
     /// Get the error callback.
@@ -186,7 +190,7 @@ impl ScratchBuffer {
     pub unsafe fn new(nb_blocks: usize) -> Self {
         let size = size_of::<ScratchBufferBlock>() * nb_blocks;
         let align = align_of::<ScratchBufferBlock>();
-        let ptr = alloc(Layout::from_size_align(size, align).unwrap()) as *mut c_void;
+        let ptr = unsafe { alloc(Layout::from_size_align(size, align).unwrap()) as *mut c_void };
         Self { ptr, size }
     }
 }
@@ -218,11 +222,13 @@ pub unsafe trait AllocatorCallback: Sized {
     ///
     /// Do not override this method.
     unsafe fn into_px(self) -> *mut PxAllocatorCallback {
-        create_alloc_callback(
-            Self::allocate,
-            Self::deallocate,
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+        unsafe {
+            create_alloc_callback(
+                Self::allocate,
+                Self::deallocate,
+                Box::into_raw(Box::new(self)) as *mut c_void,
+            )
+        }
     }
 }
 
@@ -239,16 +245,20 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
     ) -> *mut c_void {
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
-        let allocation = alloc(layout) as *mut u64;
-        *allocation = alloc_size as u64;
-        (allocation as usize + 16) as *mut c_void
+        unsafe {
+            let allocation = alloc(layout) as *mut u64;
+            *allocation = alloc_size as u64;
+            (allocation as usize + 16) as *mut c_void
+        }
     }
 
     unsafe extern "C" fn deallocate(ptr: *const c_void, _user_data: *const c_void) {
         let ptr = (ptr as usize - 16) as *mut u64;
-        let size = *ptr;
-        let layout = Layout::from_size_align(size as usize, 16).unwrap();
-        dealloc(ptr as *mut u8, layout)
+        unsafe {
+            let size = *ptr;
+            let layout = Layout::from_size_align(size as usize, 16).unwrap();
+            dealloc(ptr as *mut u8, layout)
+        }
     }
 }
 
@@ -277,22 +287,24 @@ unsafe impl AllocatorCallback for TrackingAllocator {
         _line: u32,
         user_data: *const c_void,
     ) -> *mut c_void {
-        let user_data = &*(user_data as *const Self);
+        let user_data = unsafe { &*(user_data as *const Self) };
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
         user_data.allocated.fetch_add(layout.size(), SeqCst);
-        let allocation = alloc(layout) as *mut u64;
-        *allocation = alloc_size as u64;
-        (allocation as usize + 16) as *mut c_void
+        unsafe {
+            let allocation = alloc(layout) as *mut u64;
+            *allocation = alloc_size as u64;
+            (allocation as usize + 16) as *mut c_void
+        }
     }
 
     unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void) {
-        let user_data = &*(user_data as *const Self);
+        let user_data = unsafe { &*(user_data as *const Self) };
         let ptr = (ptr as usize - 16) as *mut u64;
-        let size = *ptr;
+        let size = unsafe { *ptr };
         let layout = Layout::from_size_align(size as usize, 16).unwrap();
         user_data.deallocated.fetch_add(layout.size(), SeqCst);
-        dealloc(ptr as *mut u8, layout)
+        unsafe { dealloc(ptr as *mut u8, layout) }
     }
 }
 
@@ -301,7 +313,7 @@ pub struct DefaultAllocator;
 
 unsafe impl AllocatorCallback for DefaultAllocator {
     unsafe fn into_px(self) -> *mut PxAllocatorCallback {
-        get_default_allocator() as *mut PxAllocatorCallback
+        unsafe { get_default_allocator() as *mut PxAllocatorCallback }
     }
 
     unsafe extern "C" fn allocate(

@@ -17,7 +17,7 @@ impl PruningStructure {
     pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPruningStructure,
     ) -> Option<Owner<PruningStructure>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 }
 

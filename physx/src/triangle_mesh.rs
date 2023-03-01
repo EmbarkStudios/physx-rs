@@ -15,7 +15,7 @@ impl TriangleMesh {
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub unsafe fn from_raw(ptr: *mut physx_sys::PxTriangleMesh) -> Option<Owner<TriangleMesh>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 }
 

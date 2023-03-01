@@ -75,6 +75,7 @@ impl<M> Material for PxMaterial<M> {}
 
 pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -82,7 +83,7 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
         ptr: *mut physx_sys::PxMaterial,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 
     /// Get a reference to the user data.

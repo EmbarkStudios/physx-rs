@@ -221,6 +221,7 @@ impl<U> PxCapsuleControllerDesc<U> {
     }
 
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -228,7 +229,7 @@ impl<U> PxCapsuleControllerDesc<U> {
         ptr: *mut physx_sys::PxCapsuleControllerDesc,
         user_data: U,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 }
 
@@ -380,6 +381,7 @@ impl<U> PxBoxControllerDesc<U> {
     }
 
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -387,7 +389,7 @@ impl<U> PxBoxControllerDesc<U> {
         ptr: *mut physx_sys::PxBoxControllerDesc,
         user_data: U,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 }
 
