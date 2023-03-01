@@ -9,13 +9,11 @@ use super::{
     math::*,
     owner::Owner,
     rigid_actor::RigidActor,
-    shape::CollisionLayer,
-    traits::{Class, PxFlags, UserData},
+    shape::CollisionLayers,
+    traits::{Class, UserData},
 };
 
 use std::{marker::PhantomData, ptr::drop_in_place};
-
-use enumflags2::{bitflags, BitFlags};
 
 use physx_sys::{
     PxArticulationReducedCoordinate_applyCache_mut, PxArticulationReducedCoordinate_commonInit,
@@ -31,19 +29,17 @@ use physx_sys::{
     PxArticulationReducedCoordinate_copyInternalStateToCache,
     PxArticulationReducedCoordinate_createCache,
     PxArticulationReducedCoordinate_getArticulationFlags,
-    PxArticulationReducedCoordinate_getCacheDataSize,
-    //PxArticulationReducedCoordinate_getCoefficientMatrixSize,
-    PxArticulationReducedCoordinate_getDofs,
-    //PxArticulationReducedCoordinate_getLoopJoints,
-    //PxArticulationReducedCoordinate_getNbLoopJoints,
-    PxArticulationReducedCoordinate_packJointData,
-    PxArticulationReducedCoordinate_releaseCache,
-    PxArticulationReducedCoordinate_release_mut,
-    //PxArticulationReducedCoordinate_removeLoopJoint_mut,
+    PxArticulationReducedCoordinate_getCacheDataSize, PxArticulationReducedCoordinate_getDofs,
+    PxArticulationReducedCoordinate_getLinks, PxArticulationReducedCoordinate_getNbLinks,
+    PxArticulationReducedCoordinate_getRootGlobalPose,
+    PxArticulationReducedCoordinate_getSolverIterationCounts,
+    PxArticulationReducedCoordinate_packJointData, PxArticulationReducedCoordinate_release_mut,
     PxArticulationReducedCoordinate_setArticulationFlag_mut,
     PxArticulationReducedCoordinate_setArticulationFlags_mut,
-    PxArticulationReducedCoordinate_teleportRootLink_mut,
+    PxArticulationReducedCoordinate_setRootGlobalPose_mut,
+    PxArticulationReducedCoordinate_setSolverIterationCounts_mut,
     PxArticulationReducedCoordinate_unpackJointData,
+    PxRigidBodyExt_computeMassPropertiesFromShapes_mut, PxRigidBodyExt_getVelocityAtPos_mut,
 };
 
 pub use physx_sys::{
@@ -54,8 +50,9 @@ pub use physx_sys::{
  * Section ARTICULATION                                                        *
 *******************************************************************************/
 
-/// A new type wrapper for PxArticulationReducedCoordinate.  Parametrized by it's user data type,
-/// and the type of it's ArticulationLinks.
+/// A new type wrapper for PxArticulationReducedCoordinate.
+///
+/// Parametrized by its user data type, and the type of its ArticulationLinks.
 #[repr(transparent)]
 pub struct PxArticulationReducedCoordinate<U, Link: ArticulationLink> {
     pub(crate) obj: physx_sys::PxArticulationReducedCoordinate,
@@ -184,24 +181,40 @@ pub trait ArticulationReducedCoordinate:
     fn get_nb_links(&self) -> u32 {
         unsafe { PxArticulationReducedCoordinate_getNbLinks(self.as_ptr()) }
     }
+
+    /// Get a reference the root link of this articulation if it has one
+    #[inline]
+    fn root_link(&self) -> Option<&Self::ArticulationLink> {
         unsafe {
-            ArticulationFlags::from_px(PxArticulationReducedCoordinate_getArticulationFlags(
+            let mut root: *mut Self::ArticulationLink = std::ptr::null_mut();
+            PxArticulationReducedCoordinate_getLinks(
                 self.as_ptr(),
-            ))
+                &mut root as *mut *mut Self::ArticulationLink
+                    as *mut *mut physx_sys::PxArticulationLink,
+                1,
+                0,
+            );
+            root.as_ref()
         }
     }
 
-    /// Teleport the whole body to the transform and and orientation given by `Pose`
-    fn teleport_to(&mut self, pose: &PxTransform) {
+    /// See [`physx_sys::PxArticulationReducedCoordinate_setRootGlobalPose_mut`], prefer using [`ArticulationCache::set_root_link_data`]
+    fn set_root_global_pose(&mut self, pose: &PxTransform) {
         // self.links[0].set_transform(pose);
         self.common_init();
         unsafe {
-            PxArticulationReducedCoordinate_teleportRootLink_mut(
+            PxArticulationReducedCoordinate_setRootGlobalPose_mut(
                 self.as_mut_ptr(),
                 pose.as_ptr(),
                 true,
             );
         }
+    }
+
+    /// See [`physx_sys::PxArticulationReducedCoordinate_getRootGlobalPose`], prefer using [`ArticulationCache::get_root_link_data`]
+    #[inline]
+    fn get_root_global_pose(&self) -> PxTransform {
+        unsafe { PxArticulationReducedCoordinate_getRootGlobalPose(self.as_ptr()).into() }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -422,11 +435,7 @@ pub trait ArticulationReducedCoordinate:
     }
 
     /// Set the collision layer on all links and shapes of this body
-    fn set_collision_filter(
-        &mut self,
-        this_layer: BitFlags<CollisionLayer>,  // word1
-        other_layer: BitFlags<CollisionLayer>, // word2
-    ) {
+    fn set_collision_filter(&mut self, this_layer: CollisionLayers, other_layer: CollisionLayers) {
         let (a, b) = (
             (self as *const _ as usize >> 32) as u32,
             self as *const _ as usize as u32,
@@ -437,7 +446,7 @@ pub trait ArticulationReducedCoordinate:
     }
 
     /// Set the collision layer on all links and shapes of this body
-    fn set_query_filter(&mut self, this_layer: BitFlags<CollisionLayer>) {
+    fn set_query_filter(&mut self, this_layer: CollisionLayers) {
         for link in self.get_links_mut() {
             link.set_query_filter(this_layer);
         }
