@@ -53,6 +53,8 @@ jobs:
             target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
+    env:
+      TARGET_CXX: "${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'g++' || 'clang++' }}"
     steps:
       - uses: actions/checkout@v3
         with:
@@ -63,9 +65,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo fetch --target ${{ matrix.target }}
       - name: test - no features
-        run: cargo test --exclude pxbind
+        run: cargo test --workspace --exclude pxbind
       - name: test - all features
-        run: cargo test --all-features --exclude pxbind
+        run: cargo test --all-features --workspace --exclude pxbind
       - name: ball all features
         run: cargo run --example ball --all-features
       - name: ball no features
@@ -95,10 +97,7 @@ jobs:
 
   package:
     name: Package
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-2022, macOS-12]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -118,7 +117,15 @@ jobs:
         with:
           target: aarch64-linux-android
       - uses: Swatinem/rust-cache@v2
-      - run: cargo install xbuild
+      - name: Install xbuild
+        env:
+          X_VERSION: "0.2.0"
+        run: |
+          bin="$(dirname $(which cargo))/x"
+          curl -o "$bin" -L https://github.com/rust-mobile/xbuild/releases/download/v${X_VERSION}/xbuild-linux-x64
+          chmod +x "$bin"
+          # Need to have llvm-ar, but I'm to lazy to see if I can just create a symlink instead
+          sudo apt-get update && sudo apt-get install llvm -y
       - run: cargo fetch
       - name: build - no features
         run: x build --platform android --arch arm64 --release -p physx
