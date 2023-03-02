@@ -24,8 +24,6 @@ static_assert(sizeof(physx::PxErrorCallback) == sizeof(physx_PxErrorCallback_Pod
 static_assert(sizeof(physx::PxAllocationListener) == sizeof(physx_PxAllocationListener_Pod), "POD wrapper for `physx::PxAllocationListener` has incorrect size");
 static_assert(sizeof(physx::PxBroadcastingAllocator) == sizeof(physx_PxBroadcastingAllocator_Pod), "POD wrapper for `physx::PxBroadcastingAllocator` has incorrect size");
 static_assert(sizeof(physx::PxBroadcastingErrorCallback) == sizeof(physx_PxBroadcastingErrorCallback_Pod), "POD wrapper for `physx::PxBroadcastingErrorCallback` has incorrect size");
-static_assert(sizeof(physx::PxFPUGuard) == sizeof(physx_PxFPUGuard_Pod), "POD wrapper for `physx::PxFPUGuard` has incorrect size");
-static_assert(sizeof(physx::PxSIMDGuard) == sizeof(physx_PxSIMDGuard_Pod), "POD wrapper for `physx::PxSIMDGuard` has incorrect size");
 static_assert(sizeof(physx::PxInputStream) == sizeof(physx_PxInputStream_Pod), "POD wrapper for `physx::PxInputStream` has incorrect size");
 static_assert(sizeof(physx::PxInputData) == sizeof(physx_PxInputData_Pod), "POD wrapper for `physx::PxInputData` has incorrect size");
 static_assert(sizeof(physx::PxOutputStream) == sizeof(physx_PxOutputStream_Pod), "POD wrapper for `physx::PxOutputStream` has incorrect size");
@@ -1591,28 +1589,6 @@ extern "C" {
         physx::PxBroadcastingErrorCallback* self_ = reinterpret_cast<physx::PxBroadcastingErrorCallback*>(self__pod);
         auto code = static_cast<physx::PxErrorCode::Enum>(code_pod);
         self_->reportError(code, message, file, line);
-    }
-
-    physx_PxFPUGuard_Pod* PxFPUGuard_new_alloc() {
-        auto return_val = new physx::PxFPUGuard();
-        auto return_val_pod = reinterpret_cast<physx_PxFPUGuard_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxFPUGuard_delete(physx_PxFPUGuard_Pod* self__pod) {
-        physx::PxFPUGuard* self_ = reinterpret_cast<physx::PxFPUGuard*>(self__pod);
-        delete self_;
-    }
-
-    physx_PxSIMDGuard_Pod* PxSIMDGuard_new_alloc(bool enable) {
-        auto return_val = new physx::PxSIMDGuard(enable);
-        auto return_val_pod = reinterpret_cast<physx_PxSIMDGuard_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxSIMDGuard_delete(physx_PxSIMDGuard_Pod* self__pod) {
-        physx::PxSIMDGuard* self_ = reinterpret_cast<physx::PxSIMDGuard*>(self__pod);
-        delete self_;
     }
 
     void phys_PxEnableFPExceptions() {

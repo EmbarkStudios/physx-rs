@@ -4582,14 +4582,6 @@ extern "C" {
     /// Reports an error code.
     pub fn PxBroadcastingErrorCallback_reportError_mut(self_: *mut PxBroadcastingErrorCallback, code: PxErrorCode, message: *const std::ffi::c_char, file: *const std::ffi::c_char, line: i32);
 
-    pub fn PxFPUGuard_new_alloc() -> *mut PxFPUGuard;
-
-    pub fn PxFPUGuard_delete(self_: *mut PxFPUGuard);
-
-    pub fn PxSIMDGuard_new_alloc(enable: bool) -> *mut PxSIMDGuard;
-
-    pub fn PxSIMDGuard_delete(self_: *mut PxSIMDGuard);
-
     /// Enables floating point exceptions for the scalar and SIMD unit
     pub fn phys_PxEnableFPExceptions();
 

@@ -558,6 +558,21 @@ fn main() {
 
         let structgen_compiler = physx_cc.get_compiler();
         let mut cmd = structgen_compiler.to_command();
+
+        if env::var("CARGO_FEATURE_CPP_WARNINGS").is_err() {
+            let dw = if physx_cc.get_compiler().is_like_clang()
+                || physx_cc.get_compiler().is_like_gnu()
+            {
+                "-w"
+            } else if physx_cc.get_compiler().is_like_msvc() {
+                "/w"
+            } else {
+                panic!("unknown compiler");
+            };
+
+            cmd.arg(dw);
+        }
+
         if structgen_compiler.is_like_msvc() {
             let mut s = OsString::from("/Fe");
             s.push(&structgen_path);
@@ -622,13 +637,20 @@ fn main() {
         include
     };
 
-    // gcc gives this:
-    // warning: src/physx_generated.hpp:6777:7: warning:
-    // ‘void* memcpy(void*, const void*, size_t)’ reading 2 bytes from a region of size 1 [-Wstringop-overflow=]
-    // which from cursory glance seems to be an erroneous warning as the type it is talking
-    // about is inside a struct containing a single u16, so....
-    if physx_cc.get_compiler().is_like_gnu() {
-        physx_cc.flag("-Wno-stringop-overflow");
+    // Disable all warnings. The rationale for this is that end users don't care
+    // and the physx code is incredibly sloppy with warnings since it's mostly
+    // developed on windows
+    if env::var("CARGO_FEATURE_CPP_WARNINGS").is_err() {
+        let dw = if physx_cc.get_compiler().is_like_clang() || physx_cc.get_compiler().is_like_gnu()
+        {
+            "-w"
+        } else if physx_cc.get_compiler().is_like_msvc() {
+            "/w"
+        } else {
+            panic!("unknown compiler");
+        };
+
+        physx_cc.flag(dw);
     }
 
     physx_cc

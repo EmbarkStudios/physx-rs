@@ -110,18 +110,6 @@ pub struct PxBroadcastingErrorCallback {
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
-pub struct PxFPUGuard {
-    pub structgen_pad0: [u8; 32],
-}
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "debug-structs", derive(Debug))]
-#[repr(C)]
-pub struct PxSIMDGuard {
-    pub structgen_pad0: [u8; 8],
-}
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "debug-structs", derive(Debug))]
-#[repr(C)]
 pub struct PxVec4 {
     pub x: f32,
     pub y: f32,
@@ -2579,8 +2567,6 @@ mod sizes {
         assert_eq!(size_of::<PxBounds3>(), 24);
         assert_eq!(size_of::<PxBroadcastingAllocator>(), 176);
         assert_eq!(size_of::<PxBroadcastingErrorCallback>(), 160);
-        assert_eq!(size_of::<PxFPUGuard>(), 32);
-        assert_eq!(size_of::<PxSIMDGuard>(), 8);
         assert_eq!(size_of::<PxVec4>(), 16);
         assert_eq!(size_of::<PxMat44>(), 64);
         assert_eq!(size_of::<PxPlane>(), 16);

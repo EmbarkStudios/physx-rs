@@ -46,6 +46,8 @@ profile = []
 # Enables `Debug` derivations for the FFI structures, which can be useful for
 # print debugging
 debug-structs = []
+# Enables warnings in when compiling the C++ code. This is not something you should care about
+cpp-warnings = []
 
 [dependencies]
 # The PhysX API exposes several enums used as flags

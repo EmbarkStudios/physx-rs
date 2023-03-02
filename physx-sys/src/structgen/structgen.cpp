@@ -183,22 +183,6 @@ int main() {
     };
     physx_PxBroadcastingErrorCallback_Pod::dump_layout(sg);
 
-    struct physx_PxFPUGuard_Pod: public physx::PxFPUGuard {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxFPUGuard_Pod", "PxFPUGuard");
-            sg.end_struct(sizeof(physx::PxFPUGuard));
-        }
-    };
-    physx_PxFPUGuard_Pod::dump_layout(sg);
-
-    struct physx_PxSIMDGuard_Pod: public physx::PxSIMDGuard {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxSIMDGuard_Pod", "PxSIMDGuard");
-            sg.end_struct(sizeof(physx::PxSIMDGuard));
-        }
-    };
-    physx_PxSIMDGuard_Pod::dump_layout(sg);
-
     sg.pass_thru("struct physx_PxHash_Pod;\n");
     sg.pass_thru("struct physx_PxInputStream_Pod {\n    void* vtable_;\n};\n");
     sg.pass_thru("struct physx_PxInputData_Pod {\n    void* vtable_;\n};\n");
