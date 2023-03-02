@@ -129,7 +129,7 @@ jobs:
         with:
           target: aarch64-linux-android
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fetch --target aarch64-linux-android -p physx
+      - run: cargo fetch --target aarch64-linux-android --manifest-path physx/Cargo.toml
       - name: build - no features
         env:
           LD_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
