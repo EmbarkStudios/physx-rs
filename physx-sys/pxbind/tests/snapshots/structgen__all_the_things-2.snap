@@ -106,12 +106,6 @@ struct physx_PxBroadcastingAllocator_Pod {
 struct physx_PxBroadcastingErrorCallback_Pod {
     char structgen_pad0[160];
 };
-struct physx_PxFPUGuard_Pod {
-    char structgen_pad0[32];
-};
-struct physx_PxSIMDGuard_Pod {
-    char structgen_pad0[8];
-};
 struct physx_PxHash_Pod;
 struct physx_PxInputStream_Pod {
     void* vtable_;
