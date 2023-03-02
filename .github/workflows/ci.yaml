@@ -14,243 +14,111 @@ name: CI
 jobs:
   lint:
     name: Lint
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-
+          components: "clippy, rustfmt"
+      - uses: Swatinem/rust-cache@v2
       # make sure all code has been formatted with rustfmt
-      - run: rustup component add rustfmt
       - run: cargo fmt -- --check --color always
 
       # run clippy to verify we have no warnings
-      - run: rustup component add clippy
       - run: cargo clippy --all-features --all-targets -- -D warnings
 
   cargo-deny:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: EmbarkStudios/cargo-deny-action@v1
 
   test_debug:
     name: Test (Debug)
     strategy:
       matrix:
-        os: [ubuntu-20.04, macOS-latest]
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_14.2.app
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            container: ghcr.io/cross-rs/aarch64-unknown-linux-gnu:edge
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+          - os: macOS-12
+            target: x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-      - run: cargo fetch
+          target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fetch --target ${{ matrix.target }}
       - name: test - no features
-        run: cargo test
+        run: cargo test --exclude pxbind
       - name: test - all features
-        run: cargo test --all-features
+        run: cargo test --all-features --exclude pxbind
       - name: ball all features
         run: cargo run --example ball --all-features
       - name: ball no features
         run: cargo run --example ball
       - name: ball just structgen
-        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen
+        run: cargo run -p physx --example ball_physx --features structgen
 
-  # Doesn't seem possible to integrate this in the other matrix jobs
-  build_debug_aarch64_linux:
-    name: Build (Debug) (aarch64-unknown-linux-gnu)
-    runs-on: ubuntu-20.04
+  build_debug_aarch64_apple_darwin:
+    name: Build aarch64-apple-darwin
     strategy:
       matrix:
-        feature:
-          - --features structgen
-          - --all-features
-          # Default features
-          - --
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-unknown-linux-gnu
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
-
-  build_release_aarch64_linux:
-    name: Build (Release) (aarch64-unknown-linux-gnu)
-    runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        feature:
-          - --features structgen
-          - --all-features
-          # Default features
-          - --
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-unknown-linux-gnu
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target aarch64-unknown-linux-gnu ${{ matrix.feature }}
-
-  test_release:
-    name: Test (Release)
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, macOS-latest]
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_14.2.app
+        include:
+          - os: macOS-12
+            target: aarch64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-      - run: cargo fetch
-      - name: test - no features
-        run: cargo test --release
-      - name: test - all features
-        run: cargo test --all-features --release
-      - name: ball all features
-        run: cargo run --example ball --all-features --release
-      - name: ball no features
-        run: cargo run --example ball --release
-      - name: ball just structgen
-        run: cargo run --manifest-path physx/Cargo.toml --example ball_physx --features structgen --release
+          target: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fetch --target ${{ matrix.target }}
+      - name: build
+        run: cargo build -p physx
 
   package:
     name: Package
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-latest]
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_14.2.app
+        os: [ubuntu-22.04, windows-2022, macOS-12]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - run: cargo package --manifest-path ./physx-sys/Cargo.toml
 
-  structgen:
-    name: Structgen
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-latest]
-    env:
-      DEVELOPER_DIR: /Applications/Xcode_14.2.app
-    runs-on: ${{ matrix.os }}
+  build_android:
+    name: Build aarch64-linux-android
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: true
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
-      - run: cargo build --manifest-path ./physx-sys/Cargo.toml --features structgen
-      - name: Upload
-        shell: bash
-        run: |
-          # Copy the structgen output to a deterministic location
-          rs=$(find target/ -name structgen_out.rs)
-          hpp=$(find target/ -name structgen_out.hpp)
-
-          mkdir ./structgen
-          cp $rs ./structgen/structgen.rs
-          cp $hpp ./structgen/structgen_out.hpp
-      - uses: actions/upload-artifact@v1
-        with:
-          name: structgen-${{ matrix.os }}
-          path: structgen
-
-  build_android_debug:
-    name: Build (Debug) (aarch64-linux-android)
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Set up NDK 21.4.7075529
-        run: |
-          ANDROID_ROOT=/usr/local/lib/android
-          ANDROID_SDK_ROOT=${ANDROID_ROOT}/sdk
-          ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk-bundle
-          SDKMANAGER=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager
-          echo "y" | $SDKMANAGER "ndk;21.4.7075529"
-          ln -sfn ${ANDROID_SDK_ROOT}/ndk/21.4.7075529 ${ANDROID_NDK_ROOT}
-          echo "ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}" >> $GITHUB_ENV
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - run: rustup target add aarch64-linux-android
+          target: aarch64-linux-android
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install xbuild
       - run: cargo fetch
       - name: build - no features
-        env:
-          LD_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
-          CC_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
-          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
-          AR_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
-        run: cargo build --target aarch64-linux-android
-
-  build_android_release:
-    name: Build (Release) (aarch64-linux-android)
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Set up NDK 21.4.7075529
-        run: |
-          ANDROID_ROOT=/usr/local/lib/android
-          ANDROID_SDK_ROOT=${ANDROID_ROOT}/sdk
-          ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk-bundle
-          SDKMANAGER=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager
-          echo "y" | $SDKMANAGER "ndk;21.4.7075529"
-          ln -sfn ${ANDROID_SDK_ROOT}/ndk/21.4.7075529 ${ANDROID_NDK_ROOT}
-          echo "ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}" >> $GITHUB_ENV
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - run: rustup target add aarch64-linux-android
-      - run: cargo fetch
-      - name: build - no features
-        env:
-          LD_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
-          CC_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
-          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
-          AR_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
-        run: cargo build --target aarch64-linux-android --release
+        run: x build --platform android --arch arm64 --release -p physx
