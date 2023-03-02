@@ -142,35 +142,35 @@ include!(concat!(env!("OUT_DIR"), "/structgen_out.rs"));
     target_os = "linux",
     target_arch = "x86_64",
 ))]
-include!("generated/x86_64-unknown-linux/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "linux",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-unknown-linux-gnu/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "android",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-linux-android/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "macos",
     target_arch = "x86_64",
 ))]
-include!("generated/x86_64-apple-darwin/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "macos",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-apple-darwin/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),

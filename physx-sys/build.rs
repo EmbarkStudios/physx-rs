@@ -618,20 +618,14 @@ fn main() {
     } else {
         let mut include = PathBuf::from("src/generated");
 
-        match target.as_str() {
-            "x86_64-apple-darwin"
-            | "x86_64-pc-windows-msvc"
-            | "aarch64-linux-android"
-            | "aarch64-apple-darwin" => {
-                include.push(target);
-            }
-            nix_x86 if nix_x86.starts_with("x86_64-unknown-linux") => {
-                include.push("x86_64-unknown-linux");
-            }
-            nix_aarch64 if nix_aarch64.starts_with("aarch64-unknown-linux") => {
-                include.push("aarch64-unknown-linux");
-            }
-            _ => panic!("unknown TARGET triple '{}'", target),
+        if target == "x86_64-pc-windows-msvc" {
+            include.push(target);
+        } else if target.contains("-linux-") || target.ends_with("apple-darwin") {
+            // Note that (currently) the x86_64 and aarch64 structures we bind
+            // are the exact same for linux/android and MacOS (unsure about iOS, but also don't care)
+            include.push("unix")
+        } else {
+            panic!("unknown TARGET triple '{}'", target)
         }
 
         include
