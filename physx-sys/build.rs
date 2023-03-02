@@ -623,9 +623,9 @@ fn main() {
         } else if target.contains("-linux-") || target.ends_with("apple-darwin") {
             // Note that (currently) the x86_64 and aarch64 structures we bind
             // are the exact same for linux/android and MacOS (unsure about iOS, but also don't care)
-            include.push("unix")
+            include.push("unix");
         } else {
-            panic!("unknown TARGET triple '{}'", target)
+            panic!("unknown TARGET triple '{}'", target);
         }
 
         include
