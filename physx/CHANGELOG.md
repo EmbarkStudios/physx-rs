@@ -1,9 +1,12 @@
 # `physx-rs` Changelog
 
-<!-- markdownlint-disable MD024 -->
+<!-- markdownlint-disable no-duplicate-header blanks-around-headers blanks-around-lists -->
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- [PR#183](https://github.com/EmbarkStudios/physx-rs/pull/183) resolved [#175](https://github.com/EmbarkStudios/physx-rs/issues/175) by upgrading from PhysX 4.1 to PhysX 5.1.3. See the [physx](migration-4-5.md) migration guide for more information for updating your code to work with this big breaking change.
+
 ## [0.16.1] - 2023-02-17
 ### Fixed
 - [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
@@ -18,14 +21,13 @@
 - Add new `PhysicsFoundationBuilder::with_error_callback` API with corresponding trait. This allows plugging in
   a Rust-side logging framework to consume PhysX errors.
 
-
 ## [0.14.1] - 2022-10-03
 
 - Fixed a bug where the Pvd host string would get deallocated and fail to connect.
 
 ## [0.14.0] - 2022-10-03
 
-- Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: https://github.com/NVIDIAGameWorks/PhysX/issues/306
+- Warn when enabling PVD without extensions enabled to help diagnose PVD crashes: <https://github.com/NVIDIAGameWorks/PhysX/issues/306>
 - Allow overriding PVD host with `PhysicsFoundationBuilder::set_pvd_host`
 - Add new `PhysicsFoundation::set_profiler` API with corresponding types. This allows plugging in a Rust-side scope
   tracing tool like Puffin and consuming PhysX profiling information.
