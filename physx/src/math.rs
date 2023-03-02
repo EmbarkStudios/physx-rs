@@ -8,6 +8,7 @@ mod quat;
 pub use quat::PxQuat;
 mod vec3;
 pub use vec3::PxVec3;
+#[cfg(feature = "glam")]
 mod glam;
 
 #[derive(Copy, Clone)]

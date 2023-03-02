@@ -13,16 +13,19 @@ categories = ["api-bindings", "simulation", "game-engines"]
 [lib]
 doctest = false
 
-[dependencies]
-physx-sys = { version = "0.8.1", path = "../physx-sys" }
-
-bitflags = "1.3"
-log = "0.4"
-glam = "0.23"
-thiserror = "1.0"
-
 [features]
 # During building of the sys crate, this additional program can be built which
 # is used to autogenerate Rust code from the physx headers. Normal use of the
 # physx crate would never need to use this feature.
 structgen = ["physx-sys/structgen"]
+# Enables `Debug` derivations for the FFI structures, which can be useful for
+# print debugging
+debug-structs = ["physx-sys/debug-structs"]
+
+[dependencies]
+physx-sys = { version = "0.8.1", path = "../physx-sys" }
+
+bitflags = "1.3"
+log = "0.4"
+glam = { version = "0.23", optional = true }
+thiserror = "1.0"
