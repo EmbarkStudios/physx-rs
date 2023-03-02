@@ -607,12 +607,14 @@ fn main() {
             "x86_64-apple-darwin"
             | "x86_64-pc-windows-msvc"
             | "aarch64-linux-android"
-            | "aarch64-unknown-linux-gnu"
             | "aarch64-apple-darwin" => {
                 include.push(target);
             }
-            nix if nix.starts_with("x86_64-unknown-linux") => {
+            nix_x86 if nix_x86.starts_with("x86_64-unknown-linux") => {
                 include.push("x86_64-unknown-linux");
+            }
+            nix_aarch64 if nix_aarch64.starts_with("aarch64-unknown-linux") => {
+                include.push("aarch64-unknown-linux");
             }
             _ => panic!("unknown TARGET triple '{}'", target),
         }
