@@ -106,10 +106,22 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo package --manifest-path ./physx-sys/Cargo.toml
 
-  build_android:
-    name: Build aarch64-linux-android
-    runs-on: ubuntu-22.04
+  build_android_release:
+    name: Build (Release) (aarch64-linux-android)
+    runs-on: ubuntu-20.04
     steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Set up NDK 21.4.7075529
+        run: |
+          ANDROID_ROOT=/usr/local/lib/android
+          ANDROID_SDK_ROOT=${ANDROID_ROOT}/sdk
+          ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk-bundle
+          SDKMANAGER=${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager
+          echo "y" | $SDKMANAGER "ndk;21.4.7075529"
+          ln -sfn ${ANDROID_SDK_ROOT}/ndk/21.4.7075529 ${ANDROID_NDK_ROOT}
+          echo "ANDROID_NDK_HOME=${ANDROID_NDK_ROOT}" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           submodules: true
@@ -117,15 +129,11 @@ jobs:
         with:
           target: aarch64-linux-android
       - uses: Swatinem/rust-cache@v2
-      - name: Install xbuild
-        env:
-          X_VERSION: "0.2.0"
-        run: |
-          bin="$(dirname $(which cargo))/x"
-          curl -o "$bin" -L https://github.com/rust-mobile/xbuild/releases/download/v${X_VERSION}/xbuild-linux-x64
-          chmod +x "$bin"
-          # Need to have llvm-ar, but I'm to lazy to see if I can just create a symlink instead
-          sudo apt-get update && sudo apt-get install llvm -y
-      - run: cargo fetch
+      - run: cargo fetch --target aarch64-linux-android -p physx
       - name: build - no features
-        run: x build --platform android --arch arm64 --release -p physx
+        env:
+          LD_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-ld
+          CC_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
+          CXX_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang++
+          AR_aarch64_linux_android: ${{env.ANDROID_NDK_HOME }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar
+        run: cargo build --target aarch64-linux-android --release -p physx
