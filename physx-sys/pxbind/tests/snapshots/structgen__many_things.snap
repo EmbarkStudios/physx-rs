@@ -84,6 +84,7 @@ int main() {
     sg.pass_thru("struct physx_PxParticleAndDiffuseBuffer_Pod;\n");
     sg.pass_thru("struct physx_PxParticleClothBuffer_Pod;\n");
     sg.pass_thru("struct physx_PxParticleRigidBuffer_Pod;\n");
+    sg.pass_thru("struct physx_PxAssertHandler_Pod {\n    void* vtable_;\n};\n");
     struct physx_PxBase_Pod: public physx::PxBase {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxBase_Pod", "PxBase");

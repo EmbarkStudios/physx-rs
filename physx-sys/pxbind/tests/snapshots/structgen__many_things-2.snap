@@ -77,6 +77,9 @@ struct physx_PxParticleBuffer_Pod;
 struct physx_PxParticleAndDiffuseBuffer_Pod;
 struct physx_PxParticleClothBuffer_Pod;
 struct physx_PxParticleRigidBuffer_Pod;
+struct physx_PxAssertHandler_Pod {
+    void* vtable_;
+};
 struct physx_PxBase_Pod {
     char structgen_pad0[16];
 };

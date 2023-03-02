@@ -5,6 +5,7 @@ expression: ro.size_asserts
 using namespace physx;
 #include "structgen_out.hpp"
 
+static_assert(sizeof(physx::PxAssertHandler) == sizeof(physx_PxAssertHandler_Pod), "POD wrapper for `physx::PxAssertHandler` has incorrect size");
 static_assert(sizeof(physx::PxVec3) == sizeof(physx_PxVec3_Pod), "POD wrapper for `physx::PxVec3` has incorrect size");
 static_assert(sizeof(physx::PxVec3Padded) == sizeof(physx_PxVec3Padded_Pod), "POD wrapper for `physx::PxVec3Padded` has incorrect size");
 static_assert(sizeof(physx::PxQuat) == sizeof(physx_PxQuat_Pod), "POD wrapper for `physx::PxQuat` has incorrect size");

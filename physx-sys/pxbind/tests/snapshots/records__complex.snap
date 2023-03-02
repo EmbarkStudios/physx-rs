@@ -28,6 +28,7 @@ int main() {
     sg.pass_thru("struct physx_PxTransform_Pod;\n");
     sg.pass_thru("struct physx_PxPlane_Pod;\n");
     sg.pass_thru("struct physx_PxBounds3_Pod;\n");
+    sg.pass_thru("struct physx_PxAssertHandler_Pod {\n    void* vtable_;\n};\n");
     struct physx_PxVec3_Pod: public physx::PxVec3 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxVec3_Pod", "PxVec3");
