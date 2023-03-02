@@ -337,21 +337,10 @@ fn add_common(ctx: &mut Context) {
         builder.compiler("clang++");
     }
 
-    let flags = if builder.get_compiler().is_like_clang() {
+    let flags = if builder.get_compiler().is_like_clang() || builder.get_compiler().is_like_gnu() {
         vec![
-            "-std=c++11",
-            "-ferror-limit=0",
-            "-Wall",
-            "-Wextra",
-            "-Wstrict-aliasing=2",
-            "-Wno-everything",
-        ]
-    } else if builder.get_compiler().is_like_gnu() {
-        vec![
-            "-std=c++11",
-            "-Wall",
-            "-Wextra",
-            "-Wstrict-aliasing=2",
+            "-std=c++14",
+            // Disable all warnings
             "-w",
         ]
     } else if builder.get_compiler().is_like_msvc() {
@@ -378,18 +367,7 @@ fn add_common(ctx: &mut Context) {
             flags.push("/O2");
         }
 
-        flags.push("/std:c++11");
-
-        flags.extend(["/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
-
-        // Disable some warnings
-        flags.extend(
-            [
-                "/wd4514", "/wd4820", "/wd4127", "/wd4710", "/wd4711", "/wd4577", "/wd4996",
-                "/wd4723", // potential divide by zero, only found when building in release
-            ]
-            .iter(),
-        );
+        flags.push("/std:c++14");
 
         flags
     } else {
