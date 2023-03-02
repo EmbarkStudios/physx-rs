@@ -1,7 +1,6 @@
 **/target
 Cargo.lock
 .vscode/settings.json
-physx-sys/pxbind_old/build
 
 # exclude `insta` snapshot new files
 *.snap.new
