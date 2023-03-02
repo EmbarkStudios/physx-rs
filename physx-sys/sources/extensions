@@ -19,8 +19,6 @@
     "ExtGjkQueryExt",
     "ExtJoint",
     "ExtMetaData",
-    "ExtParticleClothCooker",
-    "ExtParticleExt",
     "ExtPrismaticJoint",
     "ExtPvd",
     "ExtPxStringTable",
