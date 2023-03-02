@@ -538,9 +538,9 @@ fn main() {
     }
 
     physx_cc.flag(if physx_cc.get_compiler().is_like_msvc() {
-        "/std:c++11"
+        "/std:c++14"
     } else {
-        "-std=c++11"
+        "-std=c++14"
     });
 
     use std::ffi::OsString;
