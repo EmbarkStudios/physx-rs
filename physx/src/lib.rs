@@ -139,3 +139,5 @@ pub mod visual_debugger;
 
 pub mod prelude;
 pub use physx_sys::version;
+
+pub(crate) use traits::DeriveClassForNewType;

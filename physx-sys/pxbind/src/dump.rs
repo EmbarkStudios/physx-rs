@@ -40,9 +40,8 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
         "-xc++-header",
         // Define PX_DEPRECATED so that the attribute is emitted into the AST
         "-DPX_DEPRECATED=__attribute__((deprecated()))",
-        // Ignore the actual warning about deprecation, we don't care about
-        // warnings
-        "-Wno-deprecated-declarations",
+        // Ignore all warnings, we don't care about C++ shenanigans
+        "-w",
         // We don't want this
         "-DDISABLE_CUDA_PHYSX",
         "-fcolor-diagnostics",

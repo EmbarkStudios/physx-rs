@@ -3854,13 +3854,6 @@ pub struct PxControllerManager {
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
-pub struct PxCooking {
-    vtable_: *const std::ffi::c_void,
-}
-
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "debug-structs", derive(Debug))]
-#[repr(C)]
 pub struct PxDefaultAllocator {
     vtable_: *const std::ffi::c_void,
 }
@@ -3904,6 +3897,12 @@ pub struct PxCustomSceneQuerySystem {
 #[repr(C)]
 pub struct PxCustomSceneQuerySystemAdapter {
     vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxCooking {
+    _unused: [u8; 0],
 }
 
 #[derive(Copy, Clone)]
@@ -12178,174 +12177,42 @@ extern "C" {
 
     pub fn PxCookingParams_new(sc: *const PxTolerancesScale) -> PxCookingParams;
 
-    /// Closes this instance of the interface.
-    ///
-    /// This function should be called to cleanly shut down the Cooking library before application exit.
-    ///
-    /// This function is required to be called to release foundation usage.
-    pub fn PxCooking_release_mut(self_: *mut PxCooking);
+    pub fn phys_PxGetStandaloneInsertionCallback() -> *mut PxInsertionCallback;
 
-    /// Sets cooking parameters
-    pub fn PxCooking_setParams_mut(self_: *mut PxCooking, params: *const PxCookingParams);
+    /// Cooks a bounding volume hierarchy. The results are written to the stream.
+    ///
+    /// PxCookBVH() allows a BVH description to be cooked into a binary stream
+    /// suitable for loading and performing BVH detection at runtime.
+    ///
+    /// true on success.
+    pub fn phys_PxCookBVH(desc: *const PxBVHDesc, stream: *mut PxOutputStream) -> bool;
 
-    /// Gets cooking parameters
+    /// Cooks and creates a bounding volume hierarchy without going through a stream.
     ///
-    /// Current cooking parameters.
-    pub fn PxCooking_getParams(self_: *const PxCooking) -> *const PxCookingParams;
-
-    /// Checks endianness is the same between cooking
-    /// &
-    /// target platforms
-    ///
-    /// True if there is and endian mismatch.
-    pub fn PxCooking_platformMismatch(self_: *const PxCooking) -> bool;
-
-    /// Cooks a triangle mesh. The results are written to the stream.
-    ///
-    /// To create a triangle mesh object it is necessary to first 'cook' the mesh data into
-    /// a form which allows the SDK to perform efficient collision detection.
-    ///
-    /// cookTriangleMesh() allows a mesh description to be cooked into a binary stream
-    /// suitable for loading and performing collision detection at runtime.
-    ///
-    /// true on success
-    pub fn PxCooking_cookTriangleMesh(self_: *const PxCooking, desc: *const PxTriangleMeshDesc, stream: *mut PxOutputStream, condition: *mut PxTriangleMeshCookingResult) -> bool;
-
-    /// Cooks and creates a triangle mesh without going through a stream.
-    ///
-    /// This method does the same as cookTriangleMesh, but the produced mesh is not stored
+    /// This method does the same as cookBVH, but the produced BVH is not stored
     /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
     /// object. Use this method if you are unable to cook offline.
     ///
     /// PxInsertionCallback can be obtained through PxPhysics::getPhysicsInsertionCallback()
     /// or PxCooking::getStandaloneInsertionCallback().
     ///
-    /// PxTriangleMesh pointer on success.
-    pub fn PxCooking_createTriangleMesh(self_: *const PxCooking, desc: *const PxTriangleMeshDesc, insertionCallback: *mut PxInsertionCallback, condition: *mut PxTriangleMeshCookingResult) -> *mut PxTriangleMesh;
+    /// PxBVH pointer on success
+    pub fn phys_PxCreateBVH(desc: *const PxBVHDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxBVH;
 
-    /// Cooks and creates a triangle mesh without going through a stream. Convenience function for standalone objects.
+    /// Cooks a heightfield. The results are written to the stream.
     ///
-    /// This method does the same as cookTriangleMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
+    /// To create a heightfield object there is an option to precompute some of calculations done while loading the heightfield data.
     ///
-    /// PxTriangleMesh pointer on success.
-    pub fn PxCooking_createTriangleMesh_1(self_: *const PxCooking, desc: *const PxTriangleMeshDesc) -> *mut PxTriangleMesh;
-
-    /// Verifies if the triangle mesh is valid. Prints an error message for each inconsistency found.
-    ///
-    /// The following conditions are true for a valid triangle mesh:
-    /// 1. There are no duplicate vertices (within specified vertexWeldTolerance. See PxCookingParams::meshWeldTolerance)
-    /// 2. There are no large triangles (within specified PxTolerancesScale.)
-    ///
-    /// true if all the validity conditions hold, false otherwise.
-    pub fn PxCooking_validateTriangleMesh(self_: *const PxCooking, desc: *const PxTriangleMeshDesc) -> bool;
-
-    /// Cooks a softbody mesh. The results are written to the stream.
-    ///
-    /// To create a softbody mesh object it is necessary to first 'cook' the mesh data into
-    /// a form which allows the SDK to perform efficient collision detection and to store data
-    /// used during the FEM calculations.
-    ///
-    /// cookSoftBodyMesh() allows a mesh description to be cooked into a binary stream
+    /// cookHeightField() allows a heightfield description to be cooked into a binary stream
     /// suitable for loading and performing collision detection at runtime.
     ///
-    /// Example
-    ///
     /// true on success
-    pub fn PxCooking_cookSoftBodyMesh(self_: *const PxCooking, simulationMeshDesc: *const PxTetrahedronMeshDesc, collisionMeshDesc: *const PxTetrahedronMeshDesc, softbodyDataDesc: *const PxSoftBodySimulationDataDesc, stream: *mut PxOutputStream) -> bool;
+    pub fn phys_PxCookHeightField(desc: *const PxHeightFieldDesc, stream: *mut PxOutputStream) -> bool;
 
-    /// Cooks and creates a softbody mesh without going through a stream.
+    /// Cooks and creates a heightfield mesh and inserts it into PxPhysics.
     ///
-    /// This method does the same as cookSoftBodyMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxInsertionCallback can be obtained through PxPhysics::getPhysicsInsertionCallback()
-    /// or PxCooking::getStandaloneInsertionCallback().
-    ///
-    /// PxSoftBodyMesh pointer on success.
-    pub fn PxCooking_createSoftBodyMesh(self_: *const PxCooking, simulationMeshDesc: *const PxTetrahedronMeshDesc, collisionMeshDesc: *const PxTetrahedronMeshDesc, softbodyDataDesc: *const PxSoftBodySimulationDataDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
-
-    /// Cooks and creates a softbody mesh without going through a stream. Convenience function for standalone objects.
-    ///
-    /// This method does the same as cookSoftBodyMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxSoftBodyMesh pointer on success.
-    pub fn PxCooking_createSoftBodyMesh_1(self_: *const PxCooking, simulationMeshDesc: *const PxTetrahedronMeshDesc, collisionMeshDesc: *const PxTetrahedronMeshDesc, softbodyDataDesc: *const PxSoftBodySimulationDataDesc) -> *mut PxSoftBodyMesh;
-
-    /// Cooks a tetrahedron mesh. The results are written to the stream.
-    ///
-    /// To create a tetrahedron mesh object it is necessary to first 'cook' the mesh data into
-    /// a form which allows the SDK to perform efficient collision detection.
-    ///
-    /// cookTriangleMesh() allows a mesh description to be cooked into a binary stream
-    /// suitable for loading and performing collision detection at runtime.
-    ///
-    /// Example
-    ///
-    /// true on success
-    pub fn PxCooking_cookTetrahedronMesh(self_: *const PxCooking, meshDesc: *const PxTetrahedronMeshDesc, stream: *mut PxOutputStream) -> bool;
-
-    /// Cooks and creates a tetrahedron mesh without going through a stream.
-    ///
-    /// This method does the same as cookTetrahedronMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxInsertionCallback can be obtained through PxPhysics::getPhysicsInsertionCallback()
-    /// or PxCooking::getStandaloneInsertionCallback().
-    ///
-    /// PxTetrahedronMesh pointer on success.
-    pub fn PxCooking_createTetrahedronMesh(self_: *const PxCooking, meshDesc: *const PxTetrahedronMeshDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxTetrahedronMesh;
-
-    /// Cooks and creates a tetrahedron mesh without going through a stream. Convenience function for standalone objects.
-    ///
-    /// This method does the same as cookTetrahedronMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxTetrahedronMesh pointer on success.
-    pub fn PxCooking_createTetrahedronMesh_1(self_: *const PxCooking, meshDesc: *const PxTetrahedronMeshDesc) -> *mut PxTetrahedronMesh;
-
-    /// Computes the mapping between collision and simulation mesh
-    ///
-    /// The softbody deformation is computed on the simulation mesh. To deform the collision mesh accordingly
-    /// it needs to be specified how its vertices need to be placed and updated inside the deformation mesh.
-    /// This method computes that embedding information.
-    ///
-    /// PxCollisionMeshMappingData pointer that describes how the collision mesh is embedded into the simulation mesh
-    pub fn PxCooking_computeModelsMapping(self_: *const PxCooking, simulationMesh: *mut PxTetrahedronMeshData, collisionMesh: *const PxTetrahedronMeshData, collisionData: *const PxSoftBodyCollisionData, vertexToTet: *const PxBoundedData) -> *mut PxCollisionMeshMappingData;
-
-    /// Computes data to accelerate collision detection of tetrahedral meshes
-    ///
-    /// Computes data structures to speed up collision detection with tetrahedral meshes.
-    ///
-    /// PxCollisionTetrahedronMeshData pointer that describes the collision mesh
-    pub fn PxCooking_computeCollisionData(self_: *const PxCooking, collisionMeshDesc: *const PxTetrahedronMeshDesc) -> *mut PxCollisionTetrahedronMeshData;
-
-    /// Computes data to accelerate collision detection of tetrahedral meshes
-    ///
-    /// Computes data to compute and store a softbody's deformation using FEM.
-    ///
-    /// PxSimulationTetrahedronMeshData pointer that describes the simulation mesh
-    pub fn PxCooking_computeSimulationData(self_: *const PxCooking, simulationMeshDesc: *const PxTetrahedronMeshDesc) -> *mut PxSimulationTetrahedronMeshData;
-
-    /// Bundles all data required for softbody simulation
-    ///
-    /// Creates a container that provides everything to create a PxSoftBody
-    ///
-    /// PxSoftBodyMesh pointer that represents a softbody mesh bundling all data (simulation mesh, collision mesh etc.)
-    pub fn PxCooking_assembleSoftBodyMesh(self_: *const PxCooking, simulationMesh: *mut PxTetrahedronMeshData, simulationData: *mut PxSoftBodySimulationData, collisionMesh: *mut PxTetrahedronMeshData, collisionData: *mut PxSoftBodyCollisionData, mappingData: *mut PxCollisionMeshMappingData, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
-
-    /// Bundles all data required for softbody simulation
-    ///
-    /// Creates a container that provides everything to create a PxSoftBody
-    ///
-    /// PxSoftBodyMesh pointer that represents a softbody mesh bundling all data (simulation mesh, collision mesh etc.)
-    pub fn PxCooking_assembleSoftBodyMesh_1(self_: *const PxCooking, simulationMesh: *mut PxSimulationTetrahedronMeshData, collisionMesh: *mut PxCollisionTetrahedronMeshData, mappingData: *mut PxCollisionMeshMappingData, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
+    /// PxHeightField pointer on success
+    pub fn phys_PxCreateHeightField(desc: *const PxHeightFieldDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxHeightField;
 
     /// Cooks a convex mesh. The results are written to the stream.
     ///
@@ -12360,7 +12227,7 @@ extern "C" {
     /// If those limits are exceeded in either the user-provided data or the final cooked mesh, an error is reported.
     ///
     /// true on success.
-    pub fn PxCooking_cookConvexMesh(self_: *const PxCooking, desc: *const PxConvexMeshDesc, stream: *mut PxOutputStream, condition: *mut PxConvexMeshCookingResult) -> bool;
+    pub fn phys_PxCookConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc, stream: *mut PxOutputStream, condition: *mut PxConvexMeshCookingResult) -> bool;
 
     /// Cooks and creates a convex mesh without going through a stream.
     ///
@@ -12372,16 +12239,7 @@ extern "C" {
     /// or PxCooking::getStandaloneInsertionCallback().
     ///
     /// PxConvexMesh pointer on success
-    pub fn PxCooking_createConvexMesh(self_: *const PxCooking, desc: *const PxConvexMeshDesc, insertionCallback: *mut PxInsertionCallback, condition: *mut PxConvexMeshCookingResult) -> *mut PxConvexMesh;
-
-    /// Cooks and creates a convex mesh without going through a stream. Convenience function for standalone objects.
-    ///
-    /// This method does the same as cookConvexMesh, but the produced mesh is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxConvexMesh pointer on success
-    pub fn PxCooking_createConvexMesh_1(self_: *const PxCooking, desc: *const PxConvexMeshDesc) -> *mut PxConvexMesh;
+    pub fn phys_PxCreateConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc, insertionCallback: *mut PxInsertionCallback, condition: *mut PxConvexMeshCookingResult) -> *mut PxConvexMesh;
 
     /// Verifies if the convex mesh is valid. Prints an error message for each inconsistency found.
     ///
@@ -12390,7 +12248,7 @@ extern "C" {
     /// This function should be used if PxConvexFlag::eDISABLE_MESH_VALIDATION is planned to be used in release builds.
     ///
     /// true if all the validity conditions hold, false otherwise.
-    pub fn PxCooking_validateConvexMesh(self_: *const PxCooking, desc: *const PxConvexMeshDesc) -> bool;
+    pub fn phys_PxValidateConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc) -> bool;
 
     /// Computed hull polygons from given vertices and triangles. Polygons are needed for PxConvexMeshDesc rather than triangles.
     ///
@@ -12401,117 +12259,39 @@ extern "C" {
     /// array's.
     ///
     /// true on success
-    pub fn PxCooking_computeHullPolygons(self_: *const PxCooking, mesh: *const PxSimpleTriangleMesh, inCallback: *mut PxAllocatorCallback, nbVerts: *mut u32, vertices: *mut *mut PxVec3, nbIndices: *mut u32, indices: *mut *mut u32, nbPolygons: *mut u32, hullPolygons: *mut *mut PxHullPolygon) -> bool;
+    pub fn phys_PxComputeHullPolygons(params: *const PxCookingParams, mesh: *const PxSimpleTriangleMesh, inCallback: *mut PxAllocatorCallback, nbVerts: *mut u32, vertices: *mut *mut PxVec3, nbIndices: *mut u32, indices: *mut *mut u32, nbPolygons: *mut u32, hullPolygons: *mut *mut PxHullPolygon) -> bool;
 
-    /// Cooks a heightfield. The results are written to the stream.
+    /// Verifies if the triangle mesh is valid. Prints an error message for each inconsistency found.
     ///
-    /// To create a heightfield object there is an option to precompute some of calculations done while loading the heightfield data.
+    /// The following conditions are true for a valid triangle mesh:
+    /// 1. There are no duplicate vertices (within specified vertexWeldTolerance. See PxCookingParams::meshWeldTolerance)
+    /// 2. There are no large triangles (within specified PxTolerancesScale.)
     ///
-    /// cookHeightField() allows a heightfield description to be cooked into a binary stream
-    /// suitable for loading and performing collision detection at runtime.
-    ///
-    /// true on success
-    pub fn PxCooking_cookHeightField(self_: *const PxCooking, desc: *const PxHeightFieldDesc, stream: *mut PxOutputStream) -> bool;
+    /// true if all the validity conditions hold, false otherwise.
+    pub fn phys_PxValidateTriangleMesh(params: *const PxCookingParams, desc: *const PxTriangleMeshDesc) -> bool;
 
-    /// Cooks and creates a heightfield mesh and inserts it into PxPhysics.
+    /// Cooks and creates a triangle mesh without going through a stream.
     ///
-    /// PxHeightField pointer on success
-    pub fn PxCooking_createHeightField(self_: *const PxCooking, desc: *const PxHeightFieldDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxHeightField;
-
-    /// Cooks and creates a heightfield mesh and inserts it into PxPhysics. Convenience function for standalone objects.
-    ///
-    /// PxHeightField pointer on success
-    pub fn PxCooking_createHeightField_1(self_: *const PxCooking, desc: *const PxHeightFieldDesc) -> *mut PxHeightField;
-
-    /// Cooks a bounding volume hierarchy. The results are written to the stream.
-    ///
-    /// cookBVH() allows a BVH description to be cooked into a binary stream
-    /// suitable for loading and performing BVH detection at runtime.
-    ///
-    /// true on success.
-    pub fn PxCooking_cookBVH(self_: *const PxCooking, desc: *const PxBVHDesc, stream: *mut PxOutputStream) -> bool;
-
-    /// Cooks and creates a bounding volume hierarchy without going through a stream.
-    ///
-    /// This method does the same as cookBVH, but the produced BVH is not stored
+    /// This method does the same as cookTriangleMesh, but the produced mesh is not stored
     /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
     /// object. Use this method if you are unable to cook offline.
     ///
     /// PxInsertionCallback can be obtained through PxPhysics::getPhysicsInsertionCallback()
     /// or PxCooking::getStandaloneInsertionCallback().
     ///
-    /// PxBVH pointer on success
-    pub fn PxCooking_createBVH(self_: *const PxCooking, desc: *const PxBVHDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxBVH;
-
-    /// Cooks and creates a bounding volume hierarchy without going through a stream. Convenience function for standalone objects.
-    ///
-    /// This method does the same as cookBVH, but the produced BVH is not stored
-    /// into a stream but is either directly inserted in PxPhysics, or created as a standalone
-    /// object. Use this method if you are unable to cook offline.
-    ///
-    /// PxBVH pointer on success
-    pub fn PxCooking_createBVH_1(self_: *const PxCooking, desc: *const PxBVHDesc) -> *mut PxBVH;
-
-    /// Gets standalone object insertion interface.
-    ///
-    /// This interface allows the creation of standalone objects that can exist without a PxPhysics or PxScene object.
-    pub fn PxCooking_getStandaloneInsertionCallback_mut(self_: *mut PxCooking) -> *mut PxInsertionCallback;
-
-    /// Create an instance of the cooking interface.
-    ///
-    /// Note that the foundation object is handled as an application-wide singleton in statically linked executables
-    /// and a DLL-wide singleton in dynamically linked executables. Therefore, if you are using the runtime SDK in the
-    /// same executable as cooking, you should pass the Physics's copy of foundation (acquired with
-    /// PxPhysics::getFoundation()) to the cooker. This will also ensure correct handling of memory for objects
-    /// passed from the cooker to the SDK.
-    ///
-    /// To use cooking in standalone mode, create an instance of the Foundation object with PxCreateFoundation.
-    /// You should pass the same foundation object to all instances of the cooking interface.
-    ///
-    /// true on success.
-    pub fn phys_PxCreateCooking(version: u32, foundation: *mut PxFoundation, params: *const PxCookingParams) -> *mut PxCooking;
-
-    pub fn phys_PxGetStandaloneInsertionCallback() -> *mut PxInsertionCallback;
-
-    pub fn phys_PxCookBVH(desc: *const PxBVHDesc, stream: *mut PxOutputStream) -> bool;
-
-    pub fn phys_PxCreateBVH(desc: *const PxBVHDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxBVH;
-
-    pub fn phys_PxCookHeightField(desc: *const PxHeightFieldDesc, stream: *mut PxOutputStream) -> bool;
-
-    pub fn phys_PxCreateHeightField(desc: *const PxHeightFieldDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxHeightField;
-
-    pub fn phys_PxCookConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc, stream: *mut PxOutputStream, condition: *mut PxConvexMeshCookingResult) -> bool;
-
-    pub fn phys_PxCreateConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc, insertionCallback: *mut PxInsertionCallback, condition: *mut PxConvexMeshCookingResult) -> *mut PxConvexMesh;
-
-    pub fn phys_PxValidateConvexMesh(params: *const PxCookingParams, desc: *const PxConvexMeshDesc) -> bool;
-
-    pub fn phys_PxComputeHullPolygons(params: *const PxCookingParams, mesh: *const PxSimpleTriangleMesh, inCallback: *mut PxAllocatorCallback, nbVerts: *mut u32, vertices: *mut *mut PxVec3, nbIndices: *mut u32, indices: *mut *mut u32, nbPolygons: *mut u32, hullPolygons: *mut *mut PxHullPolygon) -> bool;
-
-    pub fn phys_PxValidateTriangleMesh(params: *const PxCookingParams, desc: *const PxTriangleMeshDesc) -> bool;
-
+    /// PxTriangleMesh pointer on success.
     pub fn phys_PxCreateTriangleMesh(params: *const PxCookingParams, desc: *const PxTriangleMeshDesc, insertionCallback: *mut PxInsertionCallback, condition: *mut PxTriangleMeshCookingResult) -> *mut PxTriangleMesh;
 
+    /// Cooks a triangle mesh. The results are written to the stream.
+    ///
+    /// To create a triangle mesh object it is necessary to first 'cook' the mesh data into
+    /// a form which allows the SDK to perform efficient collision detection.
+    ///
+    /// PxCookTriangleMesh() allows a mesh description to be cooked into a binary stream
+    /// suitable for loading and performing collision detection at runtime.
+    ///
+    /// true on success
     pub fn phys_PxCookTriangleMesh(params: *const PxCookingParams, desc: *const PxTriangleMeshDesc, stream: *mut PxOutputStream, condition: *mut PxTriangleMeshCookingResult) -> bool;
-
-    pub fn phys_PxCookTetrahedronMesh(params: *const PxCookingParams, meshDesc: *const PxTetrahedronMeshDesc, stream: *mut PxOutputStream) -> bool;
-
-    pub fn phys_PxCreateTetrahedronMesh(params: *const PxCookingParams, meshDesc: *const PxTetrahedronMeshDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxTetrahedronMesh;
-
-    pub fn phys_PxCookSoftBodyMesh(params: *const PxCookingParams, simulationMeshDesc: *const PxTetrahedronMeshDesc, collisionMeshDesc: *const PxTetrahedronMeshDesc, softbodyDataDesc: *const PxSoftBodySimulationDataDesc, stream: *mut PxOutputStream) -> bool;
-
-    pub fn phys_PxCreateSoftBodyMesh(params: *const PxCookingParams, simulationMeshDesc: *const PxTetrahedronMeshDesc, collisionMeshDesc: *const PxTetrahedronMeshDesc, softbodyDataDesc: *const PxSoftBodySimulationDataDesc, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
-
-    pub fn phys_PxComputeModelsMapping(params: *const PxCookingParams, simulationMesh: *mut PxTetrahedronMeshData, collisionMesh: *const PxTetrahedronMeshData, collisionData: *const PxSoftBodyCollisionData, vertexToTet: *const PxBoundedData) -> *mut PxCollisionMeshMappingData;
-
-    pub fn phys_PxComputeCollisionData(params: *const PxCookingParams, collisionMeshDesc: *const PxTetrahedronMeshDesc) -> *mut PxCollisionTetrahedronMeshData;
-
-    pub fn phys_PxComputeSimulationData(params: *const PxCookingParams, simulationMeshDesc: *const PxTetrahedronMeshDesc) -> *mut PxSimulationTetrahedronMeshData;
-
-    pub fn phys_PxAssembleSoftBodyMesh(simulationMesh: *mut PxTetrahedronMeshData, simulationData: *mut PxSoftBodySimulationData, collisionMesh: *mut PxTetrahedronMeshData, collisionData: *mut PxSoftBodyCollisionData, mappingData: *mut PxCollisionMeshMappingData, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
-
-    pub fn phys_PxAssembleSoftBodyMesh_Sim(simulationMesh: *mut PxSimulationTetrahedronMeshData, collisionMesh: *mut PxCollisionTetrahedronMeshData, mappingData: *mut PxCollisionMeshMappingData, insertionCallback: *mut PxInsertionCallback) -> *mut PxSoftBodyMesh;
 
     pub fn PxDefaultMemoryOutputStream_new_alloc(allocator: *mut PxAllocatorCallback) -> *mut PxDefaultMemoryOutputStream;
 
