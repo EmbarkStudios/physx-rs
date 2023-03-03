@@ -4,6 +4,23 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) resolved [#187](https://github.com/EmbarkStudios/physx-rs/issues/187) by replacing the deprecated `PxCooking` class with the non-deprecated free functions that implement the same functionality.
+  - phys_PxCreateCooking -> **removed**
+  - PxCooking_cookBVH -> phys_PxCookBVH
+  - PxCooking_createBVH -> phys_PxCreateBVH
+  - PxCooking_cookConvexMesh -> phys_PxCookConvexMesh
+  - PxCooking_createConvexMesh -> phys_PxCreateConvexMesh
+  - PxCooking_validateConvexMesh -> phys_PxValidateConvexMesh
+  - PxCooking_cookHeightField -> phys_PxCookHeightField
+  - PxCooking_cookTriangleMesh -> phys_PxCookTriangleMesh
+  - PxCooking_createTriangleMesh -> phys_PxCreateTriangleMesh
+  - PxCooking_validateTriangleMesh -> phys_PxValidateTriangleMesh
+  - PxCooking* -> **removed**
+
+### Removed
+- [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) removed the cooking functions for soft bodies and tetrahedron meshes, these are only used when targeting Cuda, which this crate explicitly doesn't support.
+
 ## [0.10.0] - 2023-03-03
 ### Changed
 - [PR#183](https://github.com/EmbarkStudios/physx-rs/pull/183) resolved [#175](https://github.com/EmbarkStudios/physx-rs/issues/175) by upgrading from PhysX 4.1 to PhysX 5.1.3. See the [physx-sys](migration-4-5.md) migration guide for more information for updating your code to work with this big breaking change.
