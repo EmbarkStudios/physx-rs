@@ -2,31 +2,26 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created:  5 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
-
 use super::{foundation::Foundation, owner::Owner, traits::Class};
 
-use enumflags2::{bitflags, BitFlags};
-
+#[rustfmt::skip]
 use physx_sys::{
-    phys_PxCreatePvd, phys_PxDefaultPvdSocketTransportCreate, PxPvdInstrumentationFlag,
-    PxPvdInstrumentationFlags, PxPvdSceneClient_setScenePvdFlags_mut, PxPvdSceneFlags,
-    PxPvdTransport_release_mut, PxPvd_connect_mut, PxPvd_disconnect_mut, PxPvd_getTransport_mut,
-    PxPvd_isConnected_mut, PxPvd_release_mut,
+    phys_PxCreatePvd,
+    phys_PxDefaultPvdSocketTransportCreate,
+    PxPvdSceneClient_setScenePvdFlags_mut,
+    PxPvdTransport_release_mut,
+    PxPvd_connect_mut,
+    PxPvd_disconnect_mut,
+    PxPvd_getTransport_mut,
+    PxPvd_isConnected_mut,
+    PxPvd_release_mut,
 };
 
-#[bitflags]
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-#[repr(u8)]
-pub enum VisualDebuggerSceneFlag {
-    TransmitContacts = 1,
-    TransmitSceneQueries = 2,
-    TransmitConstraints = 4,
-}
+#[rustfmt::skip]
+pub use physx_sys::{
+    PxPvdInstrumentationFlags as InstrumentationFlags,
+    PxPvdSceneFlags as VisualDebuggerSceneFlags,
+};
 
 /// Combines the Pvd and it's current `PvdTransport`, if there is one.
 pub struct VisualDebugger {
@@ -78,9 +73,6 @@ impl VisualDebugger {
     ) -> Option<Self> {
         use std::ffi::CString;
 
-        let flags = PxPvdInstrumentationFlags {
-            mBits: PxPvdInstrumentationFlag::eDEBUG as u8,
-        };
         let oshost = CString::new(host).ok()?;
         let pvd = unsafe { Pvd::from_raw(phys_PxCreatePvd(foundation.as_mut_ptr()))? };
         let transport = unsafe {
@@ -97,14 +89,14 @@ impl VisualDebugger {
             _host: oshost,
         };
 
-        if !visual_debugger.connect(flags) {
+        if !visual_debugger.connect(InstrumentationFlags::Debug) {
             return None;
         };
         Some(visual_debugger)
     }
 
     /// Connect the Pvd to the `PvdTransport`.
-    pub fn connect(&mut self, flags: PxPvdInstrumentationFlags) -> bool {
+    pub fn connect(&mut self, flags: InstrumentationFlags) -> bool {
         if let Some(transport) = self.transport.as_mut() {
             self.pvd.connect(transport.as_mut(), flags)
         } else {
@@ -134,7 +126,7 @@ impl VisualDebugger {
     pub fn set_transport(
         &mut self,
         transport: Owner<PvdTransport>,
-        flags: PxPvdInstrumentationFlags,
+        flags: InstrumentationFlags,
     ) -> bool {
         if self.is_connected(false) {
             self.disconnect();
@@ -167,7 +159,7 @@ impl PvdTransport {
     pub(crate) unsafe fn from_raw(
         ptr: *mut physx_sys::PxPvdTransport,
     ) -> Option<Owner<PvdTransport>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 }
 
@@ -196,16 +188,12 @@ impl Pvd {
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvd) -> Option<Owner<Self>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Connect the visual debugger over the provided transport. Returns `true`
     /// if the connection succeded.
-    pub fn connect(
-        &mut self,
-        transport: &mut PvdTransport,
-        flags: PxPvdInstrumentationFlags,
-    ) -> bool {
+    pub fn connect(&mut self, transport: &mut PvdTransport, flags: InstrumentationFlags) -> bool {
         unsafe { PxPvd_connect_mut(self.as_mut_ptr(), transport.as_mut_ptr(), flags) }
     }
 
@@ -247,25 +235,19 @@ crate::DeriveClassForNewType!(PvdSceneClient: PxPvdSceneClient);
 
 impl PvdSceneClient {
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     #[allow(dead_code)]
     pub(crate) unsafe fn from_raw(ptr: *mut physx_sys::PxPvdSceneClient) -> Option<Owner<Self>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Enable and disable what should be transmitted to the visual debugger
     /// instance.
-    pub fn set_scene_flags(&mut self, flags: BitFlags<VisualDebuggerSceneFlag>) {
-        unsafe {
-            PxPvdSceneClient_setScenePvdFlags_mut(
-                self.as_mut_ptr(),
-                PxPvdSceneFlags {
-                    mBits: flags.bits(),
-                },
-            )
-        }
+    pub fn set_scene_flags(&mut self, flags: VisualDebuggerSceneFlags) {
+        unsafe { PxPvdSceneClient_setScenePvdFlags_mut(self.as_mut_ptr(), flags) }
     }
 }
 

@@ -8,14 +8,22 @@ use crate::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxArticulationDriveCache, PxArticulation_applyImpulse_mut,
-    PxArticulation_computeImpulseResponse, PxArticulation_createDriveCache,
-    PxArticulation_getExternalDriveIterations, PxArticulation_getInternalDriveIterations,
-    PxArticulation_getMaxProjectionIterations, PxArticulation_getSeparationTolerance,
-    PxArticulation_releaseDriveCache, PxArticulation_release_mut,
-    PxArticulation_setExternalDriveIterations_mut, PxArticulation_setInternalDriveIterations_mut,
-    PxArticulation_setMaxProjectionIterations_mut, PxArticulation_setSeparationTolerance_mut,
+    PxArticulationDriveCache,
+    PxArticulation_applyImpulse_mut,
+    PxArticulation_computeImpulseResponse,
+    PxArticulation_createDriveCache,
+    PxArticulation_getExternalDriveIterations,
+    PxArticulation_getInternalDriveIterations,
+    PxArticulation_getMaxProjectionIterations,
+    PxArticulation_getSeparationTolerance,
+    PxArticulation_releaseDriveCache,
+    PxArticulation_release_mut,
+    PxArticulation_setExternalDriveIterations_mut,
+    PxArticulation_setInternalDriveIterations_mut,
+    PxArticulation_setMaxProjectionIterations_mut,
+    PxArticulation_setSeparationTolerance_mut,
     PxArticulation_updateDriveCache,
 };
 
@@ -89,8 +97,10 @@ pub trait Articulation: Class<physx_sys::PxArticulation> + ArticulationBase + Us
         ptr: *mut physx_sys::PxArticulation,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let articulation = (ptr as *mut Self).as_mut();
-        Owner::from_raw(articulation?.init_user_data(user_data))
+        unsafe {
+            let articulation = (ptr as *mut Self).as_mut();
+            Owner::from_raw(articulation?.init_user_data(user_data))
+        }
     }
 
     /// Get a reference to the user data.

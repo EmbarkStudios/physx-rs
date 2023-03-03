@@ -1,5 +1,2 @@
 [workspace]
-members = [
-    "physx",
-    "physx-sys",
-]
+members = ["physx", "physx-sys", "physx-sys/pxbind"]

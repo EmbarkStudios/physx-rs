@@ -1,0 +1,25 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.rust
+---
+extern "C" {
+    pub fn PxJointLimitParameters_new_alloc() -> *mut PxJointLimitParameters;
+
+    /// Returns true if the current settings are valid.
+    ///
+    /// true if the current settings are valid
+    pub fn PxJointLimitParameters_isValid(self_: *const PxJointLimitParameters) -> bool;
+
+    pub fn PxJointLimitParameters_isSoft(self_: *const PxJointLimitParameters) -> bool;
+
+    pub fn PxJointAngularLimitPair_new(lowerLimit: f32, upperLimit: f32, contactDist_deprecated: f32) -> PxJointAngularLimitPair;
+
+    /// Returns true if the limit is valid.
+    ///
+    /// true if the current settings are valid
+    pub fn PxJointAngularLimitPair_isValid(self_: *const PxJointAngularLimitPair) -> bool;
+
+    pub fn PxJointAngularLimitPair_delete(self_: *mut PxJointAngularLimitPair);
+
+}
+

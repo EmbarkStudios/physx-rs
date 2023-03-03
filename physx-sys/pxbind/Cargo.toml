@@ -1,0 +1,19 @@
+[package]
+name = "pxbind"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+anyhow = "1.0"
+clang-ast = "0.1"
+env_logger = "0.10"
+heck = "0.4"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+insta = "1.26"
+tempfile = "3.3"

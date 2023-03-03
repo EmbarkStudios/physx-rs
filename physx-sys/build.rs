@@ -42,13 +42,28 @@ impl Context {
         self
     }
 
-    fn add_component(&mut self, name: &str, sources: &[&str]) -> &mut Self {
-        let src_dir = format!("source/{}/src", name);
+    fn add_component(&mut self, name: &str, rel: Option<&str>, sources: &[&str]) -> &mut Self {
+        let mut src_dir = format!("source/{name}");
+        if let Some(rel) = rel {
+            src_dir.push('/');
+            src_dir.push_str(rel);
+        }
         self.add_sources(&src_dir, sources);
+
+        let mut comproot = self.root.join("include");
+        comproot.push(name);
+
+        if comproot.exists() {
+            self.includes.push(comproot);
+        }
 
         let mut comproot = self.root.join("source");
         comproot.push(name);
-        self.includes.push(comproot.join("include"));
+        comproot.push("include");
+
+        if comproot.exists() {
+            self.includes.push(comproot);
+        }
 
         self
     }
@@ -58,7 +73,7 @@ macro_rules! component {
     ($name:ident) => {
         fn $name(ctx: &mut Context) {
             let sources = include!(concat!("sources/", stringify!($name)));
-            ctx.add_component(stringify!($name), &sources);
+            ctx.add_component(stringify!($name), Some("src"), &sources);
         }
     };
 }
@@ -77,7 +92,7 @@ component! {task}
 // specific compilands, so just calculate them here
 fn foundation(ctx: &mut Context) {
     let sources = include!("sources/foundation");
-    ctx.add_component("foundation", &sources);
+    ctx.add_component("foundation", None, &sources);
 
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY").expect("TARGET_FAMILY not specified");
     let sources = match target_family.as_str() {
@@ -86,7 +101,7 @@ fn foundation(ctx: &mut Context) {
         other => panic!("unknown TARGET_FAMILY '{}'", other),
     };
 
-    ctx.add_sources(&format!("source/foundation/src/{}", target_family), sources);
+    ctx.add_sources(&format!("source/foundation/{target_family}"), sources);
 }
 
 fn lowlevel(ctx: &mut Context) {
@@ -120,7 +135,7 @@ fn lowlevel(ctx: &mut Context) {
 
 fn vehicle(ctx: &mut Context) {
     let sources = include!("sources/vehicle");
-    ctx.add_component("physxvehicle", &sources);
+    ctx.add_component("physxvehicle", Some("src"), &sources);
 
     let sources = include!("sources/vehicle_metadata");
     ctx.add_sources("source/physxvehicle/src/physxmetadata/src", &sources);
@@ -130,7 +145,7 @@ fn vehicle(ctx: &mut Context) {
 
 fn extensions(ctx: &mut Context) {
     let sources = include!("sources/extensions");
-    ctx.add_component("physxextensions", &sources);
+    ctx.add_component("physxextensions", Some("src"), &sources);
 
     // metadata
     ctx.add_sources(
@@ -150,6 +165,10 @@ fn extensions(ctx: &mut Context) {
     // binary
     let sources = include!("sources/extensions_binary");
     ctx.add_sources("source/physxextensions/src/serialization/Binary", &sources);
+
+    // tet
+    let sources = include!("sources/extensions_tet");
+    ctx.add_sources("source/physxextensions/src/tet", &sources);
 
     ctx.add_includes("source/physxmetadata/extensions", &["include"]);
 }
@@ -175,6 +194,10 @@ fn geomutils(ctx: &mut Context) {
     // convex
     let sources = include!("sources/geomutils_convex");
     ctx.add_sources("source/geomutils/src/convex", &sources);
+
+    // cooking
+    let sources = include!("sources/geomutils_cooking");
+    ctx.add_sources("source/geomutils/src/cooking", &sources);
 
     // distance
     let sources = include!("sources/geomutils_distance");
@@ -210,17 +233,6 @@ fn cooking(ctx: &mut Context) {
     let sources = include!("sources/cooking");
     ctx.add_sources("source/physxcooking/src", &sources);
     ctx.add_includes("source/include", &["cooking"]);
-
-    // mesh
-    let sources = include!("sources/cooking_mesh");
-    ctx.add_sources("source/physxcooking/src/mesh", &sources);
-
-    // convex
-    let sources = include!("sources/cooking_convex");
-    ctx.add_sources("source/physxcooking/src/convex", &sources);
-
-    // physx gates various cooking functionality with this define
-    ctx.builder.define("PX_COOKING", None);
 }
 
 fn physx(ctx: &mut Context) {
@@ -236,10 +248,6 @@ fn physx(ctx: &mut Context) {
         ctx.root
             .join("source/immediatemode/src/NpImmediateMode.cpp"),
     );
-
-    // buffering
-    let sources = include!("sources/buffering");
-    ctx.add_sources("source/physx/src/buffering", &sources);
 
     // there's always a "core"
     let sources = include!("sources/core");
@@ -333,21 +341,10 @@ fn add_common(ctx: &mut Context) {
         builder.compiler("clang++");
     }
 
-    let flags = if builder.get_compiler().is_like_clang() {
+    let flags = if builder.get_compiler().is_like_clang() || builder.get_compiler().is_like_gnu() {
         vec![
             "-std=c++14",
-            "-ferror-limit=0",
-            "-Wall",
-            "-Wextra",
-            "-Wstrict-aliasing=2",
-            "-Wno-everything",
-        ]
-    } else if builder.get_compiler().is_like_gnu() {
-        vec![
-            "-std=c++14",
-            "-Wall",
-            "-Wextra",
-            "-Wstrict-aliasing=2",
+            // Disable all warnings
             "-w",
         ]
     } else if builder.get_compiler().is_like_msvc() {
@@ -376,17 +373,6 @@ fn add_common(ctx: &mut Context) {
 
         flags.push("/std:c++14");
 
-        flags.extend(["/W4", "/GF", "/GS-", "/GR-", "/Gd"].iter());
-
-        // Disable some warnings
-        flags.extend(
-            [
-                "/wd4514", "/wd4820", "/wd4127", "/wd4710", "/wd4711", "/wd4577", "/wd4996",
-                "/wd4723", // potential divide by zero, only found when building in release
-            ]
-            .iter(),
-        );
-
         flags
     } else {
         vec![]
@@ -414,7 +400,7 @@ fn add_common(ctx: &mut Context) {
 }
 
 fn cc_compile(target_env: Environment) {
-    let root = env::current_dir().unwrap().join("PhysX/physx");
+    let root = env::current_dir().unwrap().join("physx/physx");
 
     let ccenv = target_env;
 
@@ -478,10 +464,10 @@ fn main() {
     // Acquire the user-specified c++ compiler if one has been set, in the same
     // order and manner that cc-rs will do it
     let compiler = {
-        env::var(format!("CXX_{}", target))
+        env::var(format!("CXX_{target}"))
             .or_else(|_| {
                 let target_under = target.replace('-', "_");
-                env::var(format!("CXX_{}", target_under))
+                env::var(format!("CXX_{target_under}"))
             })
             .or_else(|_| env::var("TARGET_CXX"))
             .or_else(|_| env::var("CXX"))
@@ -521,9 +507,9 @@ fn main() {
         .extra_warnings(false)
         .define("NDEBUG", None)
         .define("PX_PHYSX_STATIC_LIB", None)
-        .include("PhysX/physx/include")
-        .include("PhysX/pxshared/include")
-        .include("PhysX/physx/source/foundation/include");
+        .include("physx/physx/include")
+        .include("physx/pxshared/include")
+        .include("physx/physx/source/foundation/include");
 
     if cfg!(feature = "profile") {
         physx_cc.define("PX_PROFILE", Some("1"));
@@ -554,6 +540,21 @@ fn main() {
 
         let structgen_compiler = physx_cc.get_compiler();
         let mut cmd = structgen_compiler.to_command();
+
+        if env::var("CARGO_FEATURE_CPP_WARNINGS").is_err() {
+            let dw = if physx_cc.get_compiler().is_like_clang()
+                || physx_cc.get_compiler().is_like_gnu()
+            {
+                "-w"
+            } else if physx_cc.get_compiler().is_like_msvc() {
+                "/w"
+            } else {
+                panic!("unknown compiler");
+            };
+
+            cmd.arg(dw);
+        }
+
         if structgen_compiler.is_like_msvc() {
             let mut s = OsString::from("/Fe");
             s.push(&structgen_path);
@@ -599,30 +600,33 @@ fn main() {
     } else {
         let mut include = PathBuf::from("src/generated");
 
-        match target.as_str() {
-            "x86_64-apple-darwin"
-            | "x86_64-pc-windows-msvc"
-            | "aarch64-linux-android"
-            | "aarch64-unknown-linux-gnu"
-            | "aarch64-apple-darwin" => {
-                include.push(target);
-            }
-            nix if nix.starts_with("x86_64-unknown-linux") => {
-                include.push("x86_64-unknown-linux");
-            }
-            _ => panic!("unknown TARGET triple '{}'", target),
+        if target == "x86_64-pc-windows-msvc" {
+            include.push(target);
+        } else if target.contains("-linux-") || target.ends_with("apple-darwin") {
+            // Note that (currently) the x86_64 and aarch64 structures we bind
+            // are the exact same for linux/android and MacOS (unsure about iOS, but also don't care)
+            include.push("unix");
+        } else {
+            panic!("unknown TARGET triple '{}'", target);
         }
 
         include
     };
 
-    // gcc gives this:
-    // warning: src/physx_generated.hpp:6777:7: warning:
-    // ‘void* memcpy(void*, const void*, size_t)’ reading 2 bytes from a region of size 1 [-Wstringop-overflow=]
-    // which from cursory glance seems to be an erroneous warning as the type it is talking
-    // about is inside a struct containing a single u16, so....
-    if physx_cc.get_compiler().is_like_gnu() {
-        physx_cc.flag("-Wno-stringop-overflow");
+    // Disable all warnings. The rationale for this is that end users don't care
+    // and the physx code is incredibly sloppy with warnings since it's mostly
+    // developed on windows
+    if env::var("CARGO_FEATURE_CPP_WARNINGS").is_err() {
+        let dw = if physx_cc.get_compiler().is_like_clang() || physx_cc.get_compiler().is_like_gnu()
+        {
+            "-w"
+        } else if physx_cc.get_compiler().is_like_msvc() {
+            "/w"
+        } else {
+            panic!("unknown compiler");
+        };
+
+        physx_cc.flag(dw);
     }
 
     physx_cc

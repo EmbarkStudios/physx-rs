@@ -1,9 +1,12 @@
 # `physx-sys` Changelog
 
-<!-- markdownlint-disable no-duplicate-heading blanks-around-headers -->
+<!-- markdownlint-disable no-duplicate-heading blanks-around-headers blanks-around-lists -->
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- [PR#183](https://github.com/EmbarkStudios/physx-rs/pull/183) resolved [#175](https://github.com/EmbarkStudios/physx-rs/issues/175) by upgrading from PhysX 4.1 to PhysX 5.1.3. See the [physx-sys](migration-4-5.md) migration guide for more information for updating your code to work with this big breaking change.
+
 ## [0.8.2] - 2023-02-17
 ### Added
 - [PR#181](https://github.com/EmbarkStudios/physx-rs/pull/181) add raycast, sweep and overlap buffer and callback create and delete methods, and update example to show how to use them for scene raycasting
@@ -32,14 +35,14 @@
 - [PR#157](https://github.com/EmbarkStudios/physx-rs/pull/157) Remove cmake support
 - [PR#154](https://github.com/EmbarkStudios/physx-rs/pull/154) Add support for `aarch64-unknown-linux-gnu`
 - [PR#158](https://github.com/EmbarkStudios/physx-rs/pull/158) Update pre generated `aarch64-linux-android` files
-    - `PxRepXObject` typename field changed from `*const u8` to `*const i8`
-    - `PxDebugText` typename field changed from `*const u8` to `*const i8`
-    - `PxProfileScoped` typename field changed from `*const u8` to `*const i8`
-    - `PxVehicleGraphChannelDesc` typename field changed from `*mut u8` to `*mut i8`
+  - `PxRepXObject` typename field changed from `*const u8` to `*const i8`
+  - `PxDebugText` typename field changed from `*const u8` to `*const i8`
+  - `PxProfileScoped` typename field changed from `*const u8` to `*const i8`
+  - `PxVehicleGraphChannelDesc` typename field changed from `*mut u8` to `*mut i8`
 - [PR#156](https://github.com/EmbarkStudios/physx-rs/pull/156) Update pre generated `aarch64-apple-darwin` files
-    - Adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
+  - Adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
 - [PR#153](https://github.com/EmbarkStudios/physx-rs/pull/153) Update clang/llvm lib used by `pxbind` and update `x86_64-apple-darwin`, `x86_64-pc-windows-msvc`, `x86_64-unknown-linux` pre generated files.
-    - Mostly an internal change but adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
+  - Mostly an internal change but adds `PxSpatialVelocity` to the `PxArticulationRootLinkData` struct as `linkVelocity` and `linkAcceleration` fields.
 
 ## [0.4.16] - 2021-12-21
 ### Fixed

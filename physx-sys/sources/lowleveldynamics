@@ -1,10 +1,6 @@
 [
-    "DyArticulation",
     "DyArticulationContactPrep",
     "DyArticulationContactPrepPF",
-    "DyArticulationHelper",
-    "DyArticulationScalar",
-    "DyArticulationSIMD",
     "DyFeatherstoneArticulation",
     "DyFeatherstoneForwardDynamic",
     "DyFeatherstoneInverseDynamic",

@@ -122,84 +122,6 @@
 //! license, shall be dual licensed as above, without any additional terms or
 //! conditions.
 
-// BEGIN - Embark standard lints v5 for Rust 1.55+
-// do not change or add/remove here, but one can add exceptions after this section
-// for more info see: <https://github.com/EmbarkStudios/rust-ecosystem/issues/59>
-#![deny(unsafe_code)]
-#![warn(
-    clippy::all,
-    clippy::await_holding_lock,
-    clippy::char_lit_as_u8,
-    clippy::checked_conversions,
-    clippy::dbg_macro,
-    clippy::debug_assert_with_mut_call,
-    clippy::doc_markdown,
-    clippy::empty_enum,
-    clippy::enum_glob_use,
-    clippy::exit,
-    clippy::expl_impl_clone_on_copy,
-    clippy::explicit_deref_methods,
-    clippy::explicit_into_iter_loop,
-    clippy::fallible_impl_from,
-    clippy::filter_map_next,
-    clippy::flat_map_option,
-    clippy::float_cmp_const,
-    clippy::fn_params_excessive_bools,
-    clippy::from_iter_instead_of_collect,
-    clippy::if_let_mutex,
-    clippy::implicit_clone,
-    clippy::imprecise_flops,
-    clippy::inefficient_to_string,
-    clippy::invalid_upcast_comparisons,
-    clippy::large_digit_groups,
-    clippy::large_stack_arrays,
-    clippy::large_types_passed_by_value,
-    clippy::let_unit_value,
-    clippy::linkedlist,
-    clippy::lossy_float_literal,
-    clippy::macro_use_imports,
-    clippy::manual_ok_or,
-    clippy::map_err_ignore,
-    clippy::map_flatten,
-    clippy::map_unwrap_or,
-    clippy::match_on_vec_items,
-    clippy::match_same_arms,
-    clippy::match_wild_err_arm,
-    clippy::match_wildcard_for_single_variants,
-    clippy::mem_forget,
-    clippy::mismatched_target_os,
-    clippy::missing_enforced_import_renames,
-    clippy::mut_mut,
-    clippy::mutex_integer,
-    clippy::needless_borrow,
-    clippy::needless_continue,
-    clippy::needless_for_each,
-    clippy::option_option,
-    clippy::path_buf_push_overwrite,
-    clippy::ptr_as_ptr,
-    clippy::rc_mutex,
-    clippy::ref_option_ref,
-    clippy::rest_pat_in_fully_bound_structs,
-    clippy::same_functions_in_if_condition,
-    clippy::semicolon_if_nothing_returned,
-    clippy::single_match_else,
-    clippy::string_add_assign,
-    clippy::string_add,
-    clippy::string_lit_as_bytes,
-    clippy::string_to_string,
-    clippy::todo,
-    clippy::trait_duplication_in_bounds,
-    clippy::unimplemented,
-    clippy::unnested_or_patterns,
-    clippy::unused_self,
-    clippy::useless_transmute,
-    clippy::verbose_file_reads,
-    clippy::zero_sized_map_values,
-    future_incompatible,
-    nonstandard_style,
-    rust_2018_idioms
-)]
-// END - Embark standard lints v0.5 for Rust 1.55+
 // crate-specific exceptions:
 #![allow(
     unsafe_code,
@@ -220,35 +142,35 @@ include!(concat!(env!("OUT_DIR"), "/structgen_out.rs"));
     target_os = "linux",
     target_arch = "x86_64",
 ))]
-include!("generated/x86_64-unknown-linux/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "linux",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-unknown-linux-gnu/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "android",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-linux-android/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "macos",
     target_arch = "x86_64",
 ))]
-include!("generated/x86_64-apple-darwin/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "macos",
     target_arch = "aarch64",
 ))]
-include!("generated/aarch64-apple-darwin/structgen.rs");
+include!("generated/unix/structgen.rs");
 
 #[cfg(all(
     not(feature = "structgen"),
@@ -326,7 +248,7 @@ pub type RaycastHitCallback = unsafe extern "C" fn(
     *const PxShape,
     hit_flags: u32,
     *const c_void,
-) -> u32;
+) -> PxQueryHitType;
 
 #[repr(C)]
 pub struct FilterShaderCallbackInfo {
@@ -339,7 +261,8 @@ pub struct FilterShaderCallbackInfo {
     pub constantBlockSize: u32,
 }
 
-pub type SimulationFilterShader = unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> u16;
+pub type SimulationFilterShader =
+    unsafe extern "C" fn(*mut FilterShaderCallbackInfo) -> PxFilterFlags;
 
 pub type RaycastProcessTouchesCallback =
     unsafe extern "C" fn(*const PxRaycastHit, u32, *mut c_void) -> bool;
@@ -361,7 +284,7 @@ pub type ZoneStartCallback =
 pub type ZoneEndCallback = unsafe extern "C" fn(*const c_void, *const i8, bool, u64, *const c_void);
 
 pub type ErrorCallback =
-    unsafe extern "C" fn(PxErrorCode::Enum, *const i8, *const i8, u32, *const c_void);
+    unsafe extern "C" fn(PxErrorCode, *const i8, *const i8, u32, *const c_void);
 
 pub type AssertHandler = unsafe extern "C" fn(*const i8, *const i8, u32, *mut bool, *const c_void);
 

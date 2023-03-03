@@ -2,9 +2,12 @@ use crate::{controller::Controller, owner::Owner, traits::Class};
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxControllerManager_createController_mut, PxControllerManager_getController_mut,
-    PxControllerManager_getNbControllers, PxControllerManager_purgeControllers_mut,
+    PxControllerManager_createController_mut,
+    PxControllerManager_getController_mut,
+    PxControllerManager_getNbControllers,
+    PxControllerManager_purgeControllers_mut,
     PxControllerManager_release_mut,
 };
 
@@ -39,10 +42,11 @@ pub trait ControllerManager: Class<physx_sys::PxControllerManager> + Sized {
     type Controller: Controller;
 
     /// # Safety
+    ///
     /// the pointee will be dropped when the Owner is dropped.  Use `into_ptr` to
     /// retrieve the pointer from the Owner without dropping it.
     unsafe fn from_raw(ptr: *mut physx_sys::PxControllerManager) -> Option<Owner<Self>> {
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Create a controller.

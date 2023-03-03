@@ -2,18 +2,11 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 10 April 2019
 
-#![warn(clippy::all)]
 #![allow(clippy::missing_safety_doc)]
-
-/*!
-Wrapper for PhysX PxScene
- */
 
 use crate::{
     actor::{Actor, ActorMap},
     aggregate::{Aggregate, PxAggregate},
-    articulation::Articulation,
-    articulation_base::{ArticulationBase, ArticulationMap},
     articulation_link::ArticulationLink,
     articulation_reduced_coordinate::ArticulationReducedCoordinate,
     constraint::Constraint,
@@ -30,11 +23,9 @@ use crate::{
         AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
         TriggerCallback, WakeSleepCallback,
     },
-    traits::{Class, PxFlags, UserData},
+    traits::{Class, UserData},
     visual_debugger::PvdSceneClient,
 };
-
-use enumflags2::{bitflags, BitFlags};
 
 use std::{
     marker::PhantomData,
@@ -43,54 +34,21 @@ use std::{
 
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
+#[rustfmt::skip]
 use physx_sys::{
     phys_PxCreateControllerManager,
-    PxActorTypeFlags,
     PxBaseTask,
     PxBroadPhaseCallback,
-    PxBroadPhaseType,
     PxCCDContactModifyCallback,
-    /*
-    PxOverlapCallback,
-    PxSweepCallback,
-    PxQueryFilterData,
-    PxQueryFilterData_new,
-    PxQueryFilterCallback,
-    PxQueryCache,
-    */
     PxContactModifyCallback,
     PxCpuDispatcher,
-    PxFrictionType,
-    PxPairFilteringMode,
-    PxPruningStructureType,
-    //PxHitFlags,
-    PxSceneFlag,
-    PxSceneFlags,
     PxSceneLimits,
-    PxSceneQueryUpdateMode,
     PxScene_addActor_mut,
     PxScene_addActors_mut,
     PxScene_addActors_mut_1,
     PxScene_addAggregate_mut,
     PxScene_addArticulation_mut,
     PxScene_fetchResults_mut,
-    /*
-    PxScene_advance_mut,
-    PxScene_collide_mut,
-    PxScene_checkQueries_mut,
-    PxScene_checkResults_mut,
-    PxScene_createBatchQuery_mut,
-    PxScene_createClient_mut,
-    PxScene_fetchCollision_mut,
-    PxScene_fetchResultsStart_mut,
-    PxScene_fetchResultsFinish_mut,
-    PxScene_flushSimulation_mut,
-    PxScene_fetchQueries_mut,
-    */
-    PxScene_flushQueryUpdates_mut,
-    // PxScene_overlap,
-    // PxScene_raycast,
-    // PxScene_sweep,
     PxScene_getActiveActors_mut,
     PxScene_getActors,
     PxScene_getAggregates,
@@ -99,11 +57,6 @@ use physx_sys::{
     PxScene_getCCDContactModifyCallback,
     PxScene_getConstraints,
     PxScene_getContactModifyCallback,
-    PxScene_getDynamicStructure,
-    //PxScene_getFilterCallback,
-    //PxScene_getFilterShader,
-    //PxScene_getFilterShaderData,
-    //PxScene_getFilterShaderDataSize,
     PxScene_getKinematicKinematicFilteringMode,
     PxScene_getNbActors,
     PxScene_getNbAggregates,
@@ -112,7 +65,6 @@ use physx_sys::{
     PxScene_getScenePvdClient_mut,
     PxScene_getSimulationEventCallback,
     PxScene_getStaticKinematicFilteringMode,
-    PxScene_getStaticStructure,
     PxScene_release_mut,
     PxScene_removeActor_mut,
     PxScene_removeActors_mut,
@@ -124,104 +76,83 @@ use physx_sys::{
     PxScene_setCCDContactModifyCallback_mut,
     PxScene_setContactModifyCallback_mut,
     PxScene_setGravity_mut,
-    //PxScene_setFilterShaderData_mut,
-    //PxScene_setSimulationEventCallback_mut,
-    /*
-    PxScene_addBroadPhaseRegion_mut,
-    PxScene_addCollection_mut,
-    PxScene_forceDynamicTreeRebuild_mut,
-    PxScene_getBounceThresholdVelocity,
-    PxScene_getBroadPhaseCaps,
-    PxScene_getBroadPhaseRegions,
-    PxScene_getBroadPhaseType,
-    PxScene_getCCDMaxPasses,
-    PxScene_getContactReportStreamBufferSize,
-    PxScene_getCpuDispatcher,
-    PxScene_getCudaContextManager,
-    PxScene_getDominanceGroupPair,
-    PxScene_getDynamicTreeRebuildRateHint,
-    PxScene_getFlags,
-    PxScene_getFrictionOffsetThreshold,
-    PxScene_getFrictionType,
-    PxScene_getGravity,
-    PxScene_getLimits,
-    PxScene_getMaxNbContactDataBlocksUsed,
-    PxScene_getNbBroadPhaseRegions,
-    PxScene_getNbContactDataBlocksUsed,
-    PxScene_getRenderBuffer_mut,
-    PxScene_getSceneQueryStaticTimestamp,
-    PxScene_getSceneQueryUpdateMode,
-    PxScene_getSimulationStatistics,
-    PxScene_getSolverArticulationBatchSize,
-    PxScene_getSolverBatchSize,
-    PxScene_getTaskManager,
-    PxScene_getTimestamp,
-    PxScene_getVisualizationCullingBox,
-    PxScene_getVisualizationParameter,
-    PxScene_getWakeCounterResetValue,
-    PxScene_processCallbacks_mut,
-    PxScene_removeBroadPhaseRegion_mut,
-    PxScene_sceneQueriesUpdate_mut,
-    PxScene_setBounceThresholdVelocity_mut,
-    PxScene_setCCDMaxPasses_mut,
-    PxScene_setDominanceGroupPair_mut,
-    PxScene_setDynamicTreeRebuildRateHint_mut,
-    PxScene_setFlag_mut,
-    PxScene_setFrictionType_mut,
-    PxScene_setLimits_mut,
-    PxScene_setNbContactDataBlocks_mut,
-    PxScene_setSceneQueryUpdateMode_mut,
-    PxScene_setSolverArticulationBatchSize_mut,
-    PxScene_setSolverBatchSize_mut,
-    PxScene_setVisualizationCullingBox_mut,
-    PxScene_setVisualizationParameter_mut,
-    PxScene_shiftOrigin_mut,
-    */
-    // PxScene_getPhysics_mut,
-    // PxScene_lockRead_mut,
-    // PxScene_unlockRead_mut,
-    // PxScene_lockWrite_mut,
-    // PxScene_unlockWrite_mut,
     PxScene_simulate_mut,
-    //PxSimulationFilterCallback,
-    PxSolverType,
 };
 
-pub type ActorTypeFlags = BitFlags<ActorTypeFlag>;
+#[rustfmt::skip]
+pub use physx_sys::{
+    PxActorTypeFlag as ActorTypeFlag,
+    PxActorTypeFlags as ActorTypeFlags,
+    PxBroadPhaseType as BroadPhaseType,
+    PxFrictionType as FrictionType,
+    PxHitFlag as HitFlag,
+    PxHitFlags as HitFlags,
+    PxPairFilteringMode as PairFilteringMode,
+    PxPruningStructureType as PruningStructureType,
+    PxSceneFlag as SceneFlag,
+    PxSceneFlags as SceneFlags,
+    PxSceneQueryUpdateMode as SceneQueryUpdateMode,
+    PxSolverType as SolverType,
+};
 
-impl PxFlags for ActorTypeFlags {
-    type Target = PxActorTypeFlags;
+#[derive(Default, Copy, Clone, Debug)]
+/// 0 means no limit.
+pub struct SceneLimits {
+    pub max_nb_actors: u32,
+    pub max_nb_bodies: u32,
+    pub max_nb_static_shapes: u32,
+    pub max_nb_dynamic_shapes: u32,
+    pub max_nb_aggregates: u32,
+    pub max_nb_constraints: u32,
+    pub max_nb_regions: u32,
+    pub max_nb_broad_phase_overlaps: u32,
+}
 
-    fn into_px(self) -> Self::Target {
-        PxActorTypeFlags { mBits: self.bits() }
-    }
-
-    fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
+impl From<SceneLimits> for PxSceneLimits {
+    fn from(value: SceneLimits) -> Self {
+        Self {
+            maxNbActors: value.max_nb_actors,
+            maxNbBodies: value.max_nb_bodies,
+            maxNbStaticShapes: value.max_nb_static_shapes,
+            maxNbDynamicShapes: value.max_nb_dynamic_shapes,
+            maxNbAggregates: value.max_nb_aggregates,
+            maxNbConstraints: value.max_nb_constraints,
+            maxNbRegions: value.max_nb_regions,
+            maxNbBroadPhaseOverlaps: value.max_nb_broad_phase_overlaps,
+        }
     }
 }
 
-#[bitflags]
-#[derive(Copy, Clone, Debug)]
-#[repr(u16)]
-pub enum ActorTypeFlag {
-    RigidStatic = 1,
-    RigidDynamic = 1 << 1,
+pub enum SimulationThreadType {
+    Dedicated(u32),
+    Shared(*mut PxCpuDispatcher),
+    Default,
 }
 
-/// A new type wrapper for PxScene.  Parametrized by it's user data type,
+pub enum FilterShaderDescriptor {
+    Default,
+    Custom(physx_sys::SimulationFilterShader),
+    CallDefaultFirst(physx_sys::SimulationFilterShader),
+}
+
+impl Default for FilterShaderDescriptor {
+    fn default() -> Self {
+        FilterShaderDescriptor::Default
+    }
+}
+
+/// A new type wrapper for PxScene.  Parametrized by its user data type,
 /// the ArticulationLink, RigidStatic, and RigidDynamic actors, Articulation, and
 /// ArticulationReducedCoordinate articulations, and Collision, Trigger, ConstraintBreak,
 /// WakeSleep and Advance Callbacks.  Due to the number of generic type parameters,
 /// creating a type alias is recommended.
 #[repr(transparent)]
 #[allow(clippy::type_complexity)]
-pub struct PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+pub struct PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -230,16 +161,15 @@ where
     OA: AdvanceCallback<L, D>,
 {
     pub(crate) obj: physx_sys::PxScene,
-    phantom_user_data: PhantomData<(U, L, S, D, T, C, OC, OT, OCB, OWS, OA)>,
+    phantom_user_data: PhantomData<(U, L, S, D, C, OC, OT, OCB, OWS, OA)>,
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> UserData
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> UserData
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -258,13 +188,11 @@ where
     }
 }
 
-impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Drop
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Drop for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -281,12 +209,9 @@ where
                 drop_in_place(ptr as *mut _)
             }
             for ptr in self.get_articulations() {
-                ptr.cast_map(
-                    |ptr| drop_in_place(ptr as *mut _),
-                    |ptr| drop_in_place(ptr as *mut _),
-                )
+                drop_in_place(ptr as *mut _);
             }
-            for ptr in self.get_actors(ActorTypeFlag::RigidDynamic | ActorTypeFlag::RigidStatic) {
+            for ptr in self.get_actors(ActorTypeFlags::RigidDynamic | ActorTypeFlags::RigidStatic) {
                 ptr.cast_map(
                     |ptr| drop_in_place(ptr as *mut _),
                     |ptr| drop_in_place(ptr as *mut _),
@@ -301,14 +226,13 @@ where
     }
 }
 
-unsafe impl<P, U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Class<P>
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<P, U, L, S, D, C, OC, OT, OCB, OWS, OA> Class<P>
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     physx_sys::PxScene: Class<P>,
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -325,13 +249,12 @@ where
     }
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Send
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Send
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink + Send,
     S: RigidStatic + Send,
     D: RigidDynamic + Send,
-    T: Articulation + Send,
     C: ArticulationReducedCoordinate + Send,
     OC: CollisionCallback + Send,
     OT: TriggerCallback + Send,
@@ -341,13 +264,12 @@ where
 {
 }
 
-unsafe impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Sync
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Sync
+    for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink + Sync,
     S: RigidStatic + Sync,
     D: RigidDynamic + Sync,
-    T: Articulation + Sync,
     C: ArticulationReducedCoordinate + Sync,
     OC: CollisionCallback + Sync,
     OT: TriggerCallback + Sync,
@@ -357,13 +279,11 @@ where
 {
 }
 
-impl<U, L, S, D, T, C, OC, OT, OCB, OWS, OA> Scene
-    for PxScene<U, L, S, D, T, C, OC, OT, OCB, OWS, OA>
+impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> Scene for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
     S: RigidStatic,
     D: RigidDynamic,
-    T: Articulation,
     C: ArticulationReducedCoordinate,
     OC: CollisionCallback,
     OT: TriggerCallback,
@@ -374,21 +294,17 @@ where
     type ArticulationLink = L;
     type RigidStatic = S;
     type RigidDynamic = D;
-    type Articulation = T;
     type ArticulationReducedCoordinate = C;
     type ActorMap = ActorMap<L, S, D>;
-    type ArticulationMap = ArticulationMap<T, C>;
-    type Aggregate = PxAggregate<L, S, D, T, C>;
+    type Aggregate = PxAggregate<L, S, D, C>;
 }
 
 pub trait Scene: Class<physx_sys::PxScene> + UserData {
     type ArticulationLink: ArticulationLink;
     type RigidStatic: RigidStatic;
     type RigidDynamic: RigidDynamic;
-    type Articulation: Articulation;
     type ArticulationReducedCoordinate: ArticulationReducedCoordinate;
     type ActorMap: RigidActor;
-    type ArticulationMap: ArticulationBase;
     type Aggregate: Aggregate;
 
     /// # Safety
@@ -397,7 +313,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// retrieve the pointer and consume the Owner without dropping the pointee.
     unsafe fn from_raw(ptr: *mut physx_sys::PxScene) -> Option<Owner<Self>> {
         // userData is initialized by the descriptor.
-        Owner::from_raw(ptr as *mut Self)
+        unsafe { Owner::from_raw(ptr as *mut Self) }
     }
 
     /// Get the user data.
@@ -518,7 +434,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     }
 
     /// Add an articulation to the scene.
-    fn add_articulation(&mut self, articulation: Owner<impl ArticulationBase>) {
+    fn add_articulation(&mut self, articulation: Owner<Self::ArticulationReducedCoordinate>) {
         unsafe {
             PxScene_addArticulation_mut(self.as_mut_ptr(), articulation.into_ptr());
         };
@@ -527,7 +443,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// Remove an articulation from the scene.
     fn remove_articulation(
         &mut self,
-        articulation: &mut impl ArticulationBase,
+        articulation: &mut Self::ArticulationReducedCoordinate,
         wake_touching: bool,
     ) {
         unsafe {
@@ -615,37 +531,15 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         self.fetch_results(block)
     }
 
-    // TODO implement the rest of the simulation methods.
-
-    ////////////////////////////////////////////////////////////////////////////////
-    // Queries
-
-    /// Get the pruning structure type for static physics objects that was set when creating the scene.
-    fn get_static_structure(&self) -> PruningStructureType {
-        unsafe { PxScene_getStaticStructure(self.as_ptr()).into() }
-    }
-
-    /// Get the pruning structure type for dynamic physics objects that was set when creating the scene.
-    fn get_dynamic_structure(&self) -> PruningStructureType {
-        unsafe { PxScene_getDynamicStructure(self.as_ptr()).into() }
-    }
-
-    /// Fluish any changes to the scene query represenation, forcing any buffered changes to be applied now,
-    /// rather than when the next scene query is executed.
-    fn flush_query_updates(&mut self) {
-        unsafe {
-            PxScene_flushQueryUpdates_mut(self.as_mut_ptr());
-        }
-    }
-
     ////////////////////////////////////////////////////////////////////////////////
     // Bulk Getters
 
     /// Get a Vec of the articulations in the scene.
-    fn get_articulations(&mut self) -> Vec<&mut Self::ArticulationMap> {
+    fn get_articulations(&mut self) -> Vec<&mut Self::ArticulationReducedCoordinate> {
         unsafe {
             let capacity = PxScene_getNbArticulations(self.as_ptr());
-            let mut buffer: Vec<&mut Self::ArticulationMap> = Vec::with_capacity(capacity as usize);
+            let mut buffer: Vec<&mut Self::ArticulationReducedCoordinate> =
+                Vec::with_capacity(capacity as usize);
             let len = PxScene_getArticulations(
                 self.as_ptr(),
                 buffer.as_mut_ptr() as *mut *mut _,
@@ -658,14 +552,13 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     }
 
     /// Get the actors in the scene, filtered by ActorTypeFlags.
-    fn get_actors(&mut self, actor_type: ActorTypeFlags) -> Vec<&mut Self::ActorMap> {
+    fn get_actors(&mut self, actor_types: ActorTypeFlags) -> Vec<&mut Self::ActorMap> {
         unsafe {
-            let flags = actor_type.into_px();
-            let capacity = PxScene_getNbActors(self.as_ptr(), flags);
+            let capacity = PxScene_getNbActors(self.as_ptr(), actor_types);
             let mut buffer: Vec<&mut Self::ActorMap> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
                 self.as_ptr(),
-                flags,
+                actor_types,
                 buffer.as_mut_ptr() as *mut *mut _,
                 capacity,
                 0,
@@ -689,9 +582,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// Get the static actors in the scene.
     fn get_static_actors(&mut self) -> Vec<&mut Self::RigidStatic> {
         unsafe {
-            let flags = PxActorTypeFlags {
-                mBits: ActorTypeFlag::RigidStatic as u16,
-            };
+            let flags = ActorTypeFlags::RigidStatic;
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
             let mut buffer: Vec<&mut Self::RigidStatic> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
@@ -709,9 +600,7 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// Get the dynamic actors in the scene.
     fn get_dynamic_actors(&mut self) -> Vec<&mut Self::RigidDynamic> {
         unsafe {
-            let flags = PxActorTypeFlags {
-                mBits: ActorTypeFlag::RigidDynamic as u16,
-            };
+            let flags = ActorTypeFlags::RigidDynamic;
             let capacity = PxScene_getNbActors(self.as_ptr(), flags);
             let mut buffer: Vec<&mut Self::RigidDynamic> = Vec::with_capacity(capacity as usize);
             let len = PxScene_getActors(
@@ -764,13 +653,15 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// # Safety
     /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_contact_modify_callback(&mut self, callback: &mut PxContactModifyCallback) {
-        PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_contact_modify_callback(&self) -> &PxContactModifyCallback {
-        &*PxScene_getContactModifyCallback(self.as_ptr())
+        unsafe { &*PxScene_getContactModifyCallback(self.as_ptr()) }
     }
 
     /// # Safety
@@ -779,32 +670,36 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         &mut self,
         callback: &mut PxCCDContactModifyCallback,
     ) {
-        PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setCCDContactModifyCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxCCDContactModifyCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_ccd_contact_callback(&self) -> &PxCCDContactModifyCallback {
-        &*PxScene_getCCDContactModifyCallback(self.as_ptr())
+        unsafe { &*PxScene_getCCDContactModifyCallback(self.as_ptr()) }
     }
 
     /// # Safety
     /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn set_broad_phase_callback(&mut self, callback: &mut PxBroadPhaseCallback) {
-        PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
+        unsafe {
+            PxScene_setBroadPhaseCallback_mut(self.as_mut_ptr(), callback);
+        }
     }
 
     /// # Safety
     /// PxBroadPhaseCallback does not have a safe wrapper, using it requires use of [`physx_sys`].
     unsafe fn get_broad_phase_callback(&self) -> &PxBroadPhaseCallback {
-        &*PxScene_getBroadPhaseCallback(self.as_ptr())
+        unsafe { &*PxScene_getBroadPhaseCallback(self.as_ptr()) }
     }
 
     //////////////////////////////////////////////////////////////////////////
     // Collision Filtering
 
     /// Reset the collision filtering for an actor.
-    fn reset_filtering(&mut self, actor: &mut impl Actor) {
+    fn reset_filtering(&mut self, actor: &mut impl Actor) -> bool {
         unsafe { PxScene_resetFiltering_mut(self.as_mut_ptr(), actor.as_mut_ptr()) }
     }
 
@@ -826,12 +721,12 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
 
     /// Get the kinematic-kinematic filtering mode.
     fn get_kinematic_kinematic_filtering_mode(&self) -> PairFilteringMode {
-        unsafe { PxScene_getKinematicKinematicFilteringMode(self.as_ptr()).into() }
+        unsafe { PxScene_getKinematicKinematicFilteringMode(self.as_ptr()) }
     }
 
     /// Get the static-kinematic filtering mode.
     fn get_static_kinematic_filtering_mode(&self) -> PairFilteringMode {
-        unsafe { PxScene_getStaticKinematicFilteringMode(self.as_ptr()).into() }
+        unsafe { PxScene_getStaticKinematicFilteringMode(self.as_ptr()) }
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -842,289 +737,5 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
         unsafe {
             PxScene_setGravity_mut(self.as_mut_ptr(), &PxVec3::new(x, y, z).into());
         }
-    }
-}
-
-#[bitflags]
-#[derive(Copy, Clone, Debug)]
-#[repr(u16)]
-pub enum HitFlag {
-    Position = 1 << 0,
-    Normal = 1 << 1,
-    Uv = 1 << 3,
-    AssumeNoInitialOverlap = 1 << 4,
-    MeshMultiple = 1 << 5,
-    MeshAny = 1 << 6,
-    MeshBothSides = 1 << 7,
-    PreciseSweep = 1 << 8,
-    Mtd = 1 << 9,
-    FaceIndex = 1 << 10,
-}
-
-impl HitFlag {
-    // Note[TSolberg]: This cannot be Default::default because it returns BitFlags<Self>, not Self.
-    #[allow(clippy::should_implement_trait)]
-    pub fn default() -> BitFlags<HitFlag> {
-        HitFlag::Position | HitFlag::Normal | HitFlag::FaceIndex
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum SceneQueryUpdateMode {
-    BuildEnabledCommitEnabled = 0,
-    BuildEnabledCommitDisabled = 1,
-    BuildDisabledCommitDisabled = 2,
-}
-
-impl From<SceneQueryUpdateMode> for PxSceneQueryUpdateMode::Enum {
-    fn from(value: SceneQueryUpdateMode) -> Self {
-        match value {
-            SceneQueryUpdateMode::BuildEnabledCommitEnabled => {
-                PxSceneQueryUpdateMode::eBUILD_ENABLED_COMMIT_ENABLED
-            }
-            SceneQueryUpdateMode::BuildEnabledCommitDisabled => {
-                PxSceneQueryUpdateMode::eBUILD_ENABLED_COMMIT_DISABLED
-            }
-            SceneQueryUpdateMode::BuildDisabledCommitDisabled => {
-                PxSceneQueryUpdateMode::eBUILD_DISABLED_COMMIT_DISABLED
-            }
-        }
-    }
-}
-
-impl Default for SceneQueryUpdateMode {
-    fn default() -> Self {
-        SceneQueryUpdateMode::BuildEnabledCommitEnabled
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-#[repr(u32)]
-pub enum PruningStructureType {
-    None = 0,
-    DynamicAabbTree = 1,
-    StaticAabbTree = 2,
-}
-
-impl From<PruningStructureType> for PxPruningStructureType::Enum {
-    fn from(value: PruningStructureType) -> Self {
-        match value {
-            PruningStructureType::None => PxPruningStructureType::eNONE,
-            PruningStructureType::DynamicAabbTree => PxPruningStructureType::eDYNAMIC_AABB_TREE,
-            PruningStructureType::StaticAabbTree => PxPruningStructureType::eSTATIC_AABB_TREE,
-        }
-    }
-}
-
-impl From<PxPruningStructureType::Enum> for PruningStructureType {
-    fn from(val: PxPruningStructureType::Enum) -> Self {
-        debug_assert!(val < PxPruningStructureType::eLAST);
-        match val {
-            PxPruningStructureType::eNONE => PruningStructureType::None,
-            PxPruningStructureType::eDYNAMIC_AABB_TREE => PruningStructureType::DynamicAabbTree,
-            PxPruningStructureType::eSTATIC_AABB_TREE => PruningStructureType::StaticAabbTree,
-            _ => unreachable!("Invalid enum variant."),
-        }
-    }
-}
-
-impl Default for PruningStructureType {
-    fn default() -> Self {
-        PruningStructureType::DynamicAabbTree
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum PairFilteringMode {
-    Keep = 0,
-    Suppress = 1,
-    Kill = 2,
-}
-
-impl Default for PairFilteringMode {
-    fn default() -> Self {
-        PairFilteringMode::Suppress
-    }
-}
-
-impl From<PairFilteringMode> for PxPairFilteringMode::Enum {
-    fn from(value: PairFilteringMode) -> Self {
-        match value {
-            PairFilteringMode::Keep => PxPairFilteringMode::eKEEP,
-            PairFilteringMode::Suppress => PxPairFilteringMode::eSUPPRESS,
-            PairFilteringMode::Kill => PxPairFilteringMode::eKILL,
-        }
-    }
-}
-
-impl From<PxPairFilteringMode::Enum> for PairFilteringMode {
-    fn from(mode: PxPairFilteringMode::Enum) -> Self {
-        match mode {
-            PxPairFilteringMode::eKEEP => PairFilteringMode::Keep,
-            PxPairFilteringMode::eSUPPRESS => PairFilteringMode::Suppress,
-            PxPairFilteringMode::eKILL => PairFilteringMode::Kill,
-            // eDEFAULT has the same integer value as eSUPPRESS so it will get caught by that branch
-            //PxPairFilteringMode::eDEFAULT => PairFilteringMode::Suppress,
-            _ => unreachable!("Invalid enum variant."),
-        }
-    }
-}
-
-#[derive(Default, Copy, Clone, Debug)]
-/// 0 means no limit.
-pub struct SceneLimits {
-    pub max_nb_actors: u32,
-    pub max_nb_bodies: u32,
-    pub max_nb_static_shapes: u32,
-    pub max_nb_dynamic_shapes: u32,
-    pub max_nb_aggregates: u32,
-    pub max_nb_constraints: u32,
-    pub max_nb_regions: u32,
-    pub max_nb_broad_phase_overlaps: u32,
-}
-
-impl From<SceneLimits> for PxSceneLimits {
-    fn from(value: SceneLimits) -> Self {
-        Self {
-            maxNbActors: value.max_nb_actors,
-            maxNbBodies: value.max_nb_bodies,
-            maxNbStaticShapes: value.max_nb_static_shapes,
-            maxNbDynamicShapes: value.max_nb_dynamic_shapes,
-            maxNbAggregates: value.max_nb_aggregates,
-            maxNbConstraints: value.max_nb_constraints,
-            maxNbRegions: value.max_nb_regions,
-            maxNbBroadPhaseOverlaps: value.max_nb_broad_phase_overlaps,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-#[repr(u32)]
-pub enum FrictionType {
-    Patch = 0,
-    OneDirectional = 1,
-    TwoDirectional = 2,
-}
-
-impl From<FrictionType> for PxFrictionType::Enum {
-    fn from(value: FrictionType) -> Self {
-        match value {
-            FrictionType::Patch => PxFrictionType::ePATCH,
-            FrictionType::OneDirectional => PxFrictionType::eONE_DIRECTIONAL,
-            FrictionType::TwoDirectional => PxFrictionType::eTWO_DIRECTIONAL,
-        }
-    }
-}
-
-impl Default for FrictionType {
-    fn default() -> Self {
-        FrictionType::Patch
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-#[repr(u32)]
-pub enum BroadPhaseType {
-    SweepAndPrune = 0,
-    MultiBoxPruning = 1,
-    AutomaticBoxPruning = 2,
-    Gpu = 3,
-}
-
-impl From<BroadPhaseType> for PxBroadPhaseType::Enum {
-    fn from(value: BroadPhaseType) -> Self {
-        match value {
-            BroadPhaseType::SweepAndPrune => PxBroadPhaseType::eSAP,
-            BroadPhaseType::MultiBoxPruning => PxBroadPhaseType::eMBP,
-            BroadPhaseType::AutomaticBoxPruning => PxBroadPhaseType::eABP,
-            BroadPhaseType::Gpu => PxBroadPhaseType::eGPU,
-        }
-    }
-}
-
-impl Default for BroadPhaseType {
-    fn default() -> Self {
-        BroadPhaseType::AutomaticBoxPruning
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-#[repr(u32)]
-pub enum SolverType {
-    Pgs = 0,
-    Tgs = 1,
-}
-
-impl From<SolverType> for PxSolverType::Enum {
-    fn from(value: SolverType) -> Self {
-        match value {
-            SolverType::Pgs => PxSolverType::ePGS,
-            SolverType::Tgs => PxSolverType::eTGS,
-        }
-    }
-}
-
-impl Default for SolverType {
-    fn default() -> Self {
-        SolverType::Pgs
-    }
-}
-
-pub enum SimulationThreadType {
-    Dedicated(u32),
-    Shared(*mut PxCpuDispatcher),
-    Default,
-}
-
-#[bitflags]
-#[derive(Copy, Clone, Debug)]
-#[repr(u32)]
-///  eMUTABLE_FLAGS = eENABLE_ACTIVE_ACTORS|eEXCLUDE_KINEMATICS_FROM_ACTIVE_ACTORS
-pub enum SceneFlag {
-    EnableActiveActors = 1,
-    EnableCcd = 2,
-    DisableCcdResweep = 4,
-    AdaptiveForce = 8,
-    EnablePcm = 64,
-    DisableContactReportBufferResize = 128,
-    DisableContactCache = 256,
-    RequireRwLock = 512,
-    EnableStabilization = 1024,
-    EnableAveragePoint = 2048,
-    ExcludeKinematicsFromActiveActors = 4096,
-    EnableGpuDynamics = 8192,
-    EnableEnhancedDeterminism = 16384,
-    EnableFrictionEveryIteration = 32768,
-}
-
-impl From<SceneFlag> for PxSceneFlag::Enum {
-    fn from(value: SceneFlag) -> Self {
-        value as PxSceneFlag::Enum
-    }
-}
-
-impl PxFlags for BitFlags<SceneFlag> {
-    type Target = PxSceneFlags;
-
-    fn into_px(self) -> Self::Target {
-        PxSceneFlags { mBits: self.bits() }
-    }
-
-    fn from_px(flags: Self::Target) -> Self {
-        BitFlags::from_bits_truncate(flags.mBits)
-    }
-}
-
-pub enum FilterShaderDescriptor {
-    Default,
-    Custom(physx_sys::SimulationFilterShader),
-    CallDefaultFirst(physx_sys::SimulationFilterShader),
-}
-
-impl Default for FilterShaderDescriptor {
-    fn default() -> Self {
-        FilterShaderDescriptor::Default
     }
 }

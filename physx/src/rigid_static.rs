@@ -2,12 +2,6 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 15 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
-
 use std::{marker::PhantomData, ptr::drop_in_place};
 
 use crate::{
@@ -20,7 +14,12 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use physx_sys::{phys_PxCreateStatic, PxRigidActor_release_mut, PxRigidStatic_getConcreteTypeName};
+#[rustfmt::skip]
+use physx_sys::{
+    phys_PxCreateStatic,
+    PxRigidActor_release_mut,
+    PxRigidStatic_getConcreteTypeName,
+};
 
 /// A new type wrapper for PxArticulation.  Parametrized by it's user data type,
 /// and the type of it's Shapes.
@@ -106,8 +105,10 @@ pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
         ptr: *mut physx_sys::PxRigidStatic,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let actor = (ptr as *mut Self).as_mut();
-        Owner::from_raw(actor?.init_user_data(user_data))
+        unsafe {
+            let actor = (ptr as *mut Self).as_mut();
+            Owner::from_raw(actor?.init_user_data(user_data))
+        }
     }
 
     /// Get the user data.

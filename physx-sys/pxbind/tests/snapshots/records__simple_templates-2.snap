@@ -1,0 +1,14 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.size_asserts
+---
+using namespace physx;
+#include "structgen_out.hpp"
+
+static_assert(sizeof(physx::PxVec3) == sizeof(physx_PxVec3_Pod), "POD wrapper for `physx::PxVec3` has incorrect size");
+static_assert(sizeof(physx::PxVec3Padded) == sizeof(physx_PxVec3Padded_Pod), "POD wrapper for `physx::PxVec3Padded` has incorrect size");
+static_assert(sizeof(physx::PxVec4) == sizeof(physx_PxVec4_Pod), "POD wrapper for `physx::PxVec4` has incorrect size");
+static_assert(sizeof(physx::PxMat44) == sizeof(physx_PxMat44_Pod), "POD wrapper for `physx::PxMat44` has incorrect size");
+static_assert(sizeof(physx::PxQuat) == sizeof(physx_PxQuat_Pod), "POD wrapper for `physx::PxQuat` has incorrect size");
+
+

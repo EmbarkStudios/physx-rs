@@ -2,136 +2,57 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 17 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-
-*/
 use std::marker::PhantomData;
 
 use crate::{
-    actor::{Actor, ActorFlag, ActorType},
+    actor::{Actor, ActorType},
     articulation_link::ArticulationLink,
     math::{PxTransform, PxVec3},
     rigid_actor::RigidActor,
     rigid_dynamic::RigidDynamic,
-    traits::{Class, PxFlags},
+    traits::Class,
 };
 
-use enumflags2::{bitflags, BitFlags};
-
+#[rustfmt::skip]
 use physx_sys::{
-    PxForceMode, PxRigidBody, PxRigidBodyFlag, PxRigidBodyFlags, PxRigidBody_addForce_mut,
-    PxRigidBody_addTorque_mut, PxRigidBody_clearForce_mut, PxRigidBody_clearTorque_mut,
-    PxRigidBody_getAngularDamping, PxRigidBody_getAngularVelocity, PxRigidBody_getCMassLocalPose,
-    PxRigidBody_getInvMass, PxRigidBody_getLinearDamping, PxRigidBody_getLinearVelocity,
-    PxRigidBody_getMass, PxRigidBody_getMassSpaceInertiaTensor,
-    PxRigidBody_getMassSpaceInvInertiaTensor, PxRigidBody_getMaxAngularVelocity,
-    PxRigidBody_getMaxContactImpulse, PxRigidBody_getMaxDepenetrationVelocity,
-    PxRigidBody_getMaxLinearVelocity, PxRigidBody_getMinCCDAdvanceCoefficient,
-    PxRigidBody_getRigidBodyFlags, PxRigidBody_setAngularDamping_mut,
-    PxRigidBody_setAngularVelocity_mut, PxRigidBody_setCMassLocalPose_mut,
-    PxRigidBody_setForceAndTorque_mut, PxRigidBody_setLinearDamping_mut,
-    PxRigidBody_setLinearVelocity_mut, PxRigidBody_setMassSpaceInertiaTensor_mut,
-    PxRigidBody_setMass_mut, PxRigidBody_setMaxAngularVelocity_mut,
-    PxRigidBody_setMaxContactImpulse_mut, PxRigidBody_setMaxDepenetrationVelocity_mut,
-    PxRigidBody_setMaxLinearVelocity_mut, PxRigidBody_setMinCCDAdvanceCoefficient_mut,
-    PxRigidBody_setRigidBodyFlag_mut, PxRigidBody_setRigidBodyFlags_mut,
+    PxRigidBody,
+    PxRigidBody_addForce_mut,
+    PxRigidBody_addTorque_mut,
+    PxRigidBody_clearForce_mut,
+    PxRigidBody_clearTorque_mut,
+    PxRigidBody_getAngularDamping,
+    PxRigidBody_getAngularVelocity,
+    PxRigidBody_getCMassLocalPose,
+    PxRigidBody_getInvMass,
+    PxRigidBody_getLinearDamping,
+    PxRigidBody_getLinearVelocity,
+    PxRigidBody_getMass,
+    PxRigidBody_getMassSpaceInertiaTensor,
+    PxRigidBody_getMassSpaceInvInertiaTensor,
+    PxRigidBody_getMaxAngularVelocity,
+    PxRigidBody_getMaxContactImpulse,
+    PxRigidBody_getMaxDepenetrationVelocity,
+    PxRigidBody_getMaxLinearVelocity,
+    PxRigidBody_getMinCCDAdvanceCoefficient,
+    PxRigidBody_getRigidBodyFlags,
+    PxRigidBody_setAngularDamping_mut,
+    PxRigidBody_setCMassLocalPose_mut,
+    PxRigidBody_setForceAndTorque_mut,
+    PxRigidBody_setLinearDamping_mut,
+    PxRigidBody_setMassSpaceInertiaTensor_mut,
+    PxRigidBody_setMass_mut,
+    PxRigidBody_setMaxAngularVelocity_mut,
+    PxRigidBody_setMaxContactImpulse_mut,
+    PxRigidBody_setMaxDepenetrationVelocity_mut,
+    PxRigidBody_setMaxLinearVelocity_mut,
+    PxRigidBody_setMinCCDAdvanceCoefficient_mut,
+    PxRigidBody_setRigidBodyFlag_mut,
+    PxRigidBody_setRigidBodyFlags_mut,
 };
 
-/*******************************************************************************
- * Section ENUMERATIONS                                                        *
- ******************************************************************************/
-pub type RigidBodyFlags = BitFlags<RigidBodyFlag>;
-
-impl PxFlags for RigidBodyFlags {
-    type Target = PxRigidBodyFlags;
-
-    fn into_px(self) -> Self::Target {
-        PxRigidBodyFlags { mBits: self.bits() }
-    }
-
-    fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::from_bits_unchecked(flags.mBits) }
-    }
-}
-
-#[bitflags]
-#[derive(Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum RigidBodyFlag {
-    Kinematic = 1,
-    UseKinematicTargetForSceneQueries = 2,
-    EnableCcd = 4,
-    EnableCcdFriction = 8,
-    EnablePoseIntegrationPreview = 16,
-    EnableSpeculativeCcd = 32,
-    EnableCcdMaxContactImpulse = 64,
-    RetainAccelerations = 128,
-}
-
-impl From<RigidBodyFlag> for PxRigidBodyFlag::Enum {
-    fn from(value: RigidBodyFlag) -> Self {
-        match value {
-            RigidBodyFlag::Kinematic => 1,
-            RigidBodyFlag::UseKinematicTargetForSceneQueries => 2,
-            RigidBodyFlag::EnableCcd => 4,
-            RigidBodyFlag::EnableCcdFriction => 8,
-            RigidBodyFlag::EnablePoseIntegrationPreview => 16,
-            RigidBodyFlag::EnableSpeculativeCcd => 32,
-            RigidBodyFlag::EnableCcdMaxContactImpulse => 64,
-            RigidBodyFlag::RetainAccelerations => 128,
-        }
-    }
-}
-
-impl From<PxRigidBodyFlag::Enum> for RigidBodyFlag {
-    fn from(other: PxRigidBodyFlag::Enum) -> RigidBodyFlag {
-        match other {
-            1 => RigidBodyFlag::Kinematic,
-            2 => RigidBodyFlag::UseKinematicTargetForSceneQueries,
-            4 => RigidBodyFlag::EnableCcd,
-            8 => RigidBodyFlag::EnableCcdFriction,
-            16 => RigidBodyFlag::EnablePoseIntegrationPreview,
-            32 => RigidBodyFlag::EnableSpeculativeCcd,
-            64 => RigidBodyFlag::EnableCcdMaxContactImpulse,
-            128 => RigidBodyFlag::RetainAccelerations,
-            _ => panic!("invalid value in RigidBodyFlag"),
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum ForceMode {
-    Force = 0,
-    Impulse = 1,
-    VelocityChange = 2,
-    Acceleration = 3,
-}
-
-impl From<ForceMode> for PxForceMode::Enum {
-    fn from(value: ForceMode) -> Self {
-        match value {
-            ForceMode::Force => 0,
-            ForceMode::Impulse => 1,
-            ForceMode::VelocityChange => 2,
-            ForceMode::Acceleration => 3,
-        }
-    }
-}
-
-impl From<PxForceMode::Enum> for ForceMode {
-    fn from(other: PxForceMode::Enum) -> ForceMode {
-        match other {
-            0 => ForceMode::Force,
-            1 => ForceMode::Impulse,
-            2 => ForceMode::VelocityChange,
-            3 => ForceMode::Acceleration,
-            _ => panic!("invalid value in ForceMode"),
-        }
-    }
-}
+pub use physx_sys::{
+    PxForceMode as ForceMode, PxRigidBodyFlag as RigidBodyFlag, PxRigidBodyFlags as RigidBodyFlags,
+};
 
 impl<T> RigidBody for T where T: Class<PxRigidBody> + RigidActor {}
 
@@ -144,16 +65,19 @@ pub trait RigidBody: Class<PxRigidBody> + RigidActor {
     }
 
     /// Get the angular velocity.
+    #[inline]
     fn get_angular_velocity(&self) -> PxVec3 {
         unsafe { PxRigidBody_getAngularVelocity(self.as_ptr()).into() }
     }
 
     /// Get the linear velocity.
+    #[inline]
     fn get_linear_velocity(&self) -> PxVec3 {
         unsafe { PxRigidBody_getLinearVelocity(self.as_ptr()).into() }
     }
 
     /// Get the (linear, angular) velocities.
+    #[inline]
     fn get_velocities(&self) -> (PxVec3, PxVec3) {
         (self.get_linear_velocity(), self.get_angular_velocity())
     }
@@ -224,27 +148,6 @@ pub trait RigidBody: Class<PxRigidBody> + RigidActor {
         unsafe { PxRigidBody_getAngularDamping(self.as_ptr()) }
     }
 
-    /// Set the linear velocity.  Continuously setting this will override the effects of gravity or friction
-    /// because forces effect the body via velocity.  If ActorFlag::DisableSimulation is set, this does nothing,
-    /// otherwise this call will wake the actor.
-    fn set_linear_velocity(&mut self, lin_vel: &PxVec3, autowake: bool) {
-        if !self
-            .get_actor_flags()
-            .contains(ActorFlag::DisableSimulation)
-        {
-            unsafe {
-                PxRigidBody_setLinearVelocity_mut(self.as_mut_ptr(), lin_vel.as_ptr(), autowake)
-            }
-        };
-    }
-
-    /// Set the angular velocity.  Continuously setting this will override the effects of gravity or friction
-    /// because forces effect the body via velocity.  If ActorFlag::DisableSimulation is set, this does nothing,
-    /// otherwise this call will wake the actor.
-    fn set_angular_velocity(&mut self, ang_vel: &PxVec3, autowake: bool) {
-        unsafe { PxRigidBody_setAngularVelocity_mut(self.as_mut_ptr(), ang_vel.as_ptr(), autowake) }
-    }
-
     /// Set the maximum angular velocity.  Very rapid rotation can cause simulation errors, setting this value
     /// will clamp velocty *before* the solver is ran (so velocty may briefly exceed this value).
     fn set_max_angular_velocity(&mut self, max_ang_vel: f32) {
@@ -271,30 +174,26 @@ pub trait RigidBody: Class<PxRigidBody> + RigidActor {
     /// `ForceMode::Acceleration` and `ForceMode::VelocityChange` directly effect the acceleration and velocity change
     /// accumulators.  `ForceMode::Force` and `ForceMode::Impulse` are multiplied by inverse mass first.
     fn add_force(&mut self, force: &PxVec3, mode: ForceMode, autowake: bool) {
-        unsafe {
-            PxRigidBody_addForce_mut(self.as_mut_ptr(), force.as_ptr(), mode.into(), autowake)
-        }
+        unsafe { PxRigidBody_addForce_mut(self.as_mut_ptr(), force.as_ptr(), mode, autowake) }
     }
 
     /// Apply a torque to the actor.  ForceMode determines how this force is applied.  `ForceMode::Acceleration`
     /// and `ForceMode::VelocityChange` directly effect the angular acceleration and angular velocity change
     /// accumulators.  `ForceMode::Force` and `ForceMode::Impulse` are multiplied by inverse mass first.
     fn add_torque(&mut self, torque: &PxVec3, mode: ForceMode, autowake: bool) {
-        unsafe {
-            PxRigidBody_addTorque_mut(self.as_mut_ptr(), torque.as_ptr(), mode.into(), autowake)
-        }
+        unsafe { PxRigidBody_addTorque_mut(self.as_mut_ptr(), torque.as_ptr(), mode, autowake) }
     }
 
     /// Clear the accumulated acceleration or velocity change.  `ForceMode::Acceleration` and `ForceMode::Force`
     /// clear the same accumulator, as do `ForceMode::VelocityChange` and `ForceMode::Impulse`.
     fn clear_force(&mut self, mode: ForceMode) {
-        unsafe { PxRigidBody_clearForce_mut(self.as_mut_ptr(), mode.into()) }
+        unsafe { PxRigidBody_clearForce_mut(self.as_mut_ptr(), mode) }
     }
 
     /// Clear the accumulated angular acceleration or angular velocity change.  `ForceMode::Acceleration`
     /// and `ForceMode::Force` clear the same accumulator, as do `ForceMode::VelocityChange` and `ForceMode::Impulse`.
     fn clear_torque(&mut self, mode: ForceMode) {
-        unsafe { PxRigidBody_clearTorque_mut(self.as_mut_ptr(), mode.into()) }
+        unsafe { PxRigidBody_clearTorque_mut(self.as_mut_ptr(), mode) }
     }
 
     /// Set the force and torque accumulators.
@@ -304,24 +203,24 @@ pub trait RigidBody: Class<PxRigidBody> + RigidActor {
                 self.as_mut_ptr(),
                 force.as_ptr(),
                 torque.as_ptr(),
-                mode.into(),
+                mode,
             )
         }
     }
 
     /// Set a rigid body flag.
     fn set_rigid_body_flag(&mut self, flag: RigidBodyFlag, value: bool) {
-        unsafe { PxRigidBody_setRigidBodyFlag_mut(self.as_mut_ptr(), flag.into(), value) }
+        unsafe { PxRigidBody_setRigidBodyFlag_mut(self.as_mut_ptr(), flag, value) }
     }
 
     /// Set all the rigid body flags.
     fn set_rigid_body_flags(&mut self, flags: RigidBodyFlags) {
-        unsafe { PxRigidBody_setRigidBodyFlags_mut(self.as_mut_ptr(), flags.into_px()) }
+        unsafe { PxRigidBody_setRigidBodyFlags_mut(self.as_mut_ptr(), flags) }
     }
 
     /// Get the rigid body flags.
     fn get_rigid_body_flags(&self) -> RigidBodyFlags {
-        unsafe { RigidBodyFlags::from_px(PxRigidBody_getRigidBodyFlags(self.as_ptr())) }
+        unsafe { PxRigidBody_getRigidBodyFlags(self.as_ptr()) }
     }
 
     /// Set the CCD advance coefficient, clamped to range [0.0 ..= 1.0].  Default is 0.15.  Values near 1.0

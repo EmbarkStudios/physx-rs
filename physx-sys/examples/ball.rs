@@ -2,6 +2,8 @@ use physx_sys::*;
 use std::ptr::null_mut;
 
 fn main() {
+    #[allow(unsafe_code)]
+    // SAFETY: It works...but is it safe? :D
     unsafe {
         let foundation = physx_create_foundation();
         let physics = physx_create_physics(foundation);
@@ -13,8 +15,13 @@ fn main() {
             z: 0.0,
         };
 
-        let dispatcher = phys_PxDefaultCpuDispatcherCreate(1, null_mut());
-        scene_desc.cpuDispatcher = dispatcher as *mut PxCpuDispatcher;
+        let dispatcher = phys_PxDefaultCpuDispatcherCreate(
+            1,
+            null_mut(),
+            PxDefaultCpuDispatcherWaitForWorkMode::WaitForWork,
+            0,
+        );
+        scene_desc.cpuDispatcher = dispatcher.cast();
         scene_desc.filterShader = get_default_simulation_filter_shader();
 
         let scene = PxPhysics_createScene_mut(physics, &scene_desc);
@@ -22,9 +29,9 @@ fn main() {
         let material = PxPhysics_createMaterial_mut(physics, 0.5, 0.5, 0.6);
         let ground_plane =
             phys_PxCreatePlane(physics, &PxPlane_new_1(0.0, 1.0, 0.0, 0.0), material);
-        PxScene_addActor_mut(scene, ground_plane as *mut PxActor, null_mut());
+        PxScene_addActor_mut(scene, ground_plane.cast(), null_mut());
 
-        let sphere_geo = PxSphereGeometry_new_1(10.0);
+        let sphere_geo = PxSphereGeometry_new(10.0);
         let sphere = phys_PxCreateDynamic(
             physics,
             &PxTransform_new_1(&PxVec3 {
@@ -32,19 +39,16 @@ fn main() {
                 y: 40.0,
                 z: 100.0,
             }),
-            &sphere_geo as *const PxSphereGeometry as *const PxGeometry,
+            (&sphere_geo as *const PxSphereGeometry).cast(),
             material,
             10.0,
-            &PxTransform_new_2(PxIdentity),
+            &PxTransform_new_2(PxIDENTITY::PxIdentity),
         );
-        PxRigidBody_setAngularDamping_mut(sphere as *mut PxRigidBody, 0.5);
-        let mut sphere_shape: Vec<*mut PxShape> = vec![null_mut()];
-        PxRigidActor_getShapes(sphere as _, sphere_shape.as_mut_ptr() as _, 1, 0);
-        PxShape_setFlag_mut(sphere_shape[0], PxShapeFlag::eSCENE_QUERY_SHAPE, true);
-        PxScene_addActor_mut(scene, sphere as *mut PxActor, null_mut());
+        PxRigidBody_setAngularDamping_mut(sphere.cast(), 0.5);
+        PxScene_addActor_mut(scene, sphere.cast(), null_mut());
 
-        let raycast_buffer = create_raycast_buffer();
         let filter_data = PxQueryFilterData_new();
+        let mut raycast_hits = Vec::new();
 
         let heights_over_time = (0..100)
             .map(|_| {
@@ -52,36 +56,33 @@ fn main() {
                 let mut error: u32 = 0;
                 PxScene_fetchResults_mut(scene, true, &mut error);
                 assert!(error == 0, "fetchResults has failed");
-                let pose = PxRigidActor_getGlobalPose(sphere as *mut PxRigidActor);
 
-                if physx_sys::PxScene_raycast(
+                let mut hit = std::mem::MaybeUninit::uninit();
+
+                if physx_sys::PxSceneQueryExt_raycastSingle(
                     scene,
                     &PxVec3 {
-                        x: 0.,
-                        y: 100.,
-                        z: 100.,
+                        x: 0.0,
+                        y: 100.0,
+                        z: 100.0,
                     }, // origin
                     &PxVec3 {
-                        x: 0.,
-                        y: -1.,
-                        z: 0.,
+                        x: 0.0,
+                        y: -1.0,
+                        z: 0.0,
                     }, // dir
-                    1000., // max distance
-                    raycast_buffer,
-                    physx_sys::PxHitFlags {
-                        mBits: PxHitFlag::eDEFAULT as u16,
-                    },
+                    1000.0, // max distance
+                    PxHitFlags::Default,
+                    hit.as_mut_ptr(),
                     &filter_data,
                     null_mut(),
                     null_mut(),
-                ) && (*raycast_buffer).hasBlock
-                {
-                    println!(
-                        "Raycast hit object {}m away",
-                        (*raycast_buffer).block.distance
-                    );
+                ) {
+                    let hit = hit.assume_init();
+                    raycast_hits.push(hit);
                 }
 
+                let pose = PxRigidActor_getGlobalPose(sphere.cast());
                 (pose.p.y) as i32 - 10
             })
             .collect::<Vec<_>>();
@@ -96,11 +97,14 @@ fn main() {
                     .collect::<String>()
             })
             .for_each(|line| {
-                println!("{}", line);
+                println!("{line}");
             });
-        delete_raycast_callback(raycast_buffer);
         PxScene_release_mut(scene);
         PxDefaultCpuDispatcher_release_mut(dispatcher);
         PxPhysics_release_mut(physics);
+
+        for hit in raycast_hits {
+            eprintln!("Raycast hit object {:.02}m away", hit.distance);
+        }
     }
 }

@@ -2,30 +2,15 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 16 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-Trait for PxActor
- */
-
 use crate::{
-    articulation_link::ArticulationLink,
-    base::Base,
-    math::*,
-    rigid_actor::RigidActor,
-    rigid_dynamic::RigidDynamic,
-    rigid_static::RigidStatic,
-    traits::{Class, PxFlags},
+    articulation_link::ArticulationLink, base::Base, math::*, rigid_actor::RigidActor,
+    rigid_dynamic::RigidDynamic, rigid_static::RigidStatic, traits::Class,
 };
-use enumflags2::{bitflags, BitFlags};
-
 use std::marker::PhantomData;
 
+#[rustfmt::skip]
 use physx_sys::{
     PxActor,
-    PxActorFlag,
-    PxActorFlags,
-    PxActorType,
     PxActor_getActorFlags,
     PxActor_getDominanceGroup,
     PxActor_getOwnerClient,
@@ -35,31 +20,11 @@ use physx_sys::{
     PxActor_setActorFlags_mut,
     PxActor_setDominanceGroup_mut,
     PxActor_setOwnerClient_mut,
-    // PxActor_release_mut,
-    // PxActor_getScene,
-    //  PxActor_getAggregate,
-    //  PxActor_getName,
-    //  PxActor_setName_mut,
 };
 
-/*
-* Define PxAggerate
-* Define PxScene conversion
-*/
-
-pub type ActorFlags = BitFlags<ActorFlag>;
-
-impl PxFlags for ActorFlags {
-    type Target = PxActorFlags;
-
-    fn into_px(self) -> Self::Target {
-        PxActorFlags { mBits: self.bits() }
-    }
-
-    fn from_px(flags: Self::Target) -> Self {
-        BitFlags::from_bits_truncate(flags.mBits)
-    }
-}
+pub use physx_sys::{
+    PxActorFlag as ActorFlag, PxActorFlags as ActorFlags, PxActorType as ActorType,
+};
 
 impl<T> Actor for T where T: Class<PxActor> + Base {}
 
@@ -76,7 +41,7 @@ pub trait Actor: Class<PxActor> + Base {
     */
     /// Get the concrete type of the actor
     fn get_type(&self) -> ActorType {
-        unsafe { PxActor_getType(self.as_ptr()).into() }
+        unsafe { PxActor_getType(self.as_ptr()) }
     }
 
     /// Get the world bounds of this actor
@@ -86,24 +51,17 @@ pub trait Actor: Class<PxActor> + Base {
 
     /// Set a flag on this actor
     fn set_actor_flag(&mut self, flag: ActorFlag, value: bool) {
-        unsafe { PxActor_setActorFlag_mut(self.as_mut_ptr(), flag.into(), value) }
+        unsafe { PxActor_setActorFlag_mut(self.as_mut_ptr(), flag, value) }
     }
 
     /// Set the flags to the provided value
-    fn set_actor_flags(&mut self, flags: BitFlags<ActorFlag>) {
-        unsafe {
-            PxActor_setActorFlags_mut(
-                self.as_mut_ptr(),
-                PxActorFlags {
-                    mBits: flags.bits(),
-                },
-            )
-        }
+    fn set_actor_flags(&mut self, flags: ActorFlags) {
+        unsafe { PxActor_setActorFlags_mut(self.as_mut_ptr(), flags) }
     }
 
     /// Get all actor flags
-    fn get_actor_flags(&self) -> BitFlags<ActorFlag> {
-        unsafe { PxFlags::from_px(PxActor_getActorFlags(self.as_ptr())) }
+    fn get_actor_flags(&self) -> ActorFlags {
+        unsafe { PxActor_getActorFlags(self.as_ptr()) }
     }
 
     /// Set the dominance group
@@ -129,19 +87,20 @@ pub trait Actor: Class<PxActor> + Base {
     /// Enable visualization of this actor
     fn enable_visualization(&mut self, enable: bool) {
         unsafe {
-            PxActor_setActorFlag_mut(self.as_mut_ptr(), PxActorFlag::eVISUALIZATION, enable);
+            PxActor_setActorFlag_mut(self.as_mut_ptr(), ActorFlag::Visualization, enable);
         }
     }
 
     /// set gravity state
     fn enable_gravity(&mut self, enable: bool) {
         unsafe {
-            PxActor_setActorFlag_mut(self.as_mut_ptr(), PxActorFlag::eDISABLE_GRAVITY, !enable);
+            PxActor_setActorFlag_mut(self.as_mut_ptr(), ActorFlag::DisableGravity, !enable);
         }
     }
 }
 
 /// A wrapper for PxActor or PxRigidActor objects that implements `RigidActor`.
+///
 /// It is parametrized by the ArticulationLink, RigidStatic, and RigidDynamic types,
 /// use `as_articulation_link` and co. or `cast_map` to cast to them safely.
 #[repr(transparent)]
@@ -235,68 +194,6 @@ where
         match self.get_type() {
             ActorType::ArticulationLink => unsafe { Some(&mut *(self as *mut _ as *mut L)) },
             _ => None,
-        }
-    }
-}
-
-/*******************************************************************************
- * Section ENUMS                                                               *
-******************************************************************************/
-
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum ActorType {
-    RigidStatic = 0,
-    RigidDynamic = 1,
-    ArticulationLink = 2,
-}
-
-impl From<ActorType> for PxActorType::Enum {
-    fn from(value: ActorType) -> Self {
-        value as u32
-    }
-}
-
-impl From<PxActorType::Enum> for ActorType {
-    fn from(ty: PxActorType::Enum) -> Self {
-        match ty {
-            0 => ActorType::RigidStatic,
-            1 => ActorType::RigidDynamic,
-            2 => ActorType::ArticulationLink,
-            _ => panic!("invalid enum variant"),
-        }
-    }
-}
-
-#[bitflags]
-#[derive(Debug, Copy, Clone)]
-#[repr(u8)]
-pub enum ActorFlag {
-    Visualization = 1,
-    DisableGravity = 2,
-    SendSleepNotifies = 4,
-    DisableSimulation = 8,
-}
-
-impl From<ActorFlag> for PxActorFlag::Enum {
-    fn from(value: ActorFlag) -> Self {
-        match value {
-            ActorFlag::Visualization => 1,
-            ActorFlag::DisableGravity => 2,
-            ActorFlag::SendSleepNotifies => 4,
-            ActorFlag::DisableSimulation => 8,
-        }
-    }
-}
-
-impl From<PxActorFlag::Enum> for ActorFlag {
-    fn from(other: PxActorFlag::Enum) -> Self {
-        match other {
-            1 => ActorFlag::Visualization,
-            2 => ActorFlag::DisableGravity,
-            4 => ActorFlag::SendSleepNotifies,
-            8 => ActorFlag::DisableSimulation,
-            _ => unreachable!("InvalidActorFlag"),
         }
     }
 }

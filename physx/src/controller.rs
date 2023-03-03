@@ -11,6 +11,7 @@ use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
 
 use thiserror::Error;
 
+#[rustfmt::skip]
 use physx_sys::{
     PxBoxControllerDesc_delete,
     PxBoxControllerDesc_isValid,
@@ -24,7 +25,6 @@ use physx_sys::{
     PxCapsuleControllerDesc_delete,
     PxCapsuleControllerDesc_isValid,
     PxCapsuleControllerDesc_new_alloc,
-    //PxController_getActor,
     PxCapsuleController_getClimbingMode,
     PxCapsuleController_getHeight,
     PxCapsuleController_getRadius,
@@ -38,6 +38,8 @@ use physx_sys::{
     PxController_setPosition_mut,
     PxController_setUserData_mut,
 };
+
+pub use physx_sys::PxCapsuleClimbingMode as CapsuleClimbingMode;
 
 pub trait Controller: Class<PxController> + Sized {
     type UserData;
@@ -141,7 +143,7 @@ impl<U> CapsuleController for PxCapsuleController<U> {}
 pub trait CapsuleController: Class<physx_sys::PxCapsuleController> + Controller {
     /// Get the climbing mode of the capsule controller.
     fn get_climbing_mode(&self) -> CapsuleClimbingMode {
-        unsafe { PxCapsuleController_getClimbingMode(self.as_ptr()).into() }
+        unsafe { PxCapsuleController_getClimbingMode(self.as_ptr()) }
     }
 
     /// Get the height of the capsule.
@@ -156,7 +158,7 @@ pub trait CapsuleController: Class<physx_sys::PxCapsuleController> + Controller 
 
     /// Set the climbing mode of the capsule controller.
     fn set_climbing_mode(&mut self, mode: CapsuleClimbingMode) -> bool {
-        unsafe { PxCapsuleController_setClimbingMode_mut(self.as_mut_ptr(), mode.into()) }
+        unsafe { PxCapsuleController_setClimbingMode_mut(self.as_mut_ptr(), mode) }
     }
 
     /// Set the height of the capsule.
@@ -219,6 +221,7 @@ impl<U> PxCapsuleControllerDesc<U> {
     }
 
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -226,7 +229,7 @@ impl<U> PxCapsuleControllerDesc<U> {
         ptr: *mut physx_sys::PxCapsuleControllerDesc,
         user_data: U,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 }
 
@@ -378,6 +381,7 @@ impl<U> PxBoxControllerDesc<U> {
     }
 
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -385,7 +389,7 @@ impl<U> PxBoxControllerDesc<U> {
         ptr: *mut physx_sys::PxBoxControllerDesc,
         user_data: U,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 }
 
@@ -426,29 +430,4 @@ pub enum ControllerError {
 
     #[error("No controller manager present")]
     NoControllerManager,
-}
-
-#[derive(Copy, Clone)]
-pub enum CapsuleClimbingMode {
-    Easy,
-    Constrained,
-}
-
-impl From<CapsuleClimbingMode> for physx_sys::PxCapsuleClimbingMode::Enum {
-    fn from(value: CapsuleClimbingMode) -> Self {
-        match value {
-            CapsuleClimbingMode::Easy => physx_sys::PxCapsuleClimbingMode::eEASY,
-            CapsuleClimbingMode::Constrained => physx_sys::PxCapsuleClimbingMode::eCONSTRAINED,
-        }
-    }
-}
-
-impl From<physx_sys::PxCapsuleClimbingMode::Enum> for CapsuleClimbingMode {
-    fn from(mode: physx_sys::PxCapsuleClimbingMode::Enum) -> Self {
-        match mode {
-            physx_sys::PxCapsuleClimbingMode::eEASY => CapsuleClimbingMode::Easy,
-            physx_sys::PxCapsuleClimbingMode::eCONSTRAINED => CapsuleClimbingMode::Constrained,
-            _ => unreachable!("invalid PxCapsuleClimbingMode: {:?}", mode),
-        }
-    }
 }

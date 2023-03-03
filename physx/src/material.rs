@@ -5,20 +5,14 @@ use crate::{
 
 use std::marker::PhantomData;
 
-use enumflags2::{bitflags, BitFlags};
-
+#[rustfmt::skip]
 use physx_sys::{
-    PxCombineMode,
-    PxMaterialFlags,
-    PxMaterial_acquireReference_mut,
     PxMaterial_getDynamicFriction,
     PxMaterial_getFlags,
     PxMaterial_getFrictionCombineMode,
-    PxMaterial_getReferenceCount,
     PxMaterial_getRestitution,
     PxMaterial_getRestitutionCombineMode,
     PxMaterial_getStaticFriction,
-    PxMaterial_release_mut,
     PxMaterial_setDynamicFriction_mut,
     PxMaterial_setFlag_mut,
     PxMaterial_setFlags_mut,
@@ -26,46 +20,16 @@ use physx_sys::{
     PxMaterial_setRestitutionCombineMode_mut,
     PxMaterial_setRestitution_mut,
     PxMaterial_setStaticFriction_mut,
-    //PxMaterial_getConcreteTypeName,
 };
 
-#[bitflags]
-#[derive(Copy, Clone, Debug)]
-#[repr(u16)]
-pub enum MaterialFlag {
-    DisableFriction = 1 << 0,
-    DisableStrongFriction = 1 << 1,
-    ImprovedPatchFriction = 1 << 2,
-}
+#[rustfmt::skip]
+pub use physx_sys::{
+    PxCombineMode as CombineMode,
+    PxMaterialFlag as MaterialFlag,
+    PxMaterialFlags as MaterialFlags,
+};
 
-pub type MaterialFlags = BitFlags<MaterialFlag>;
-
-/// Determines how the restitution and friction properties of materials are combined
-/// to produce the coefficients for that interaction.
-#[derive(Copy, Clone, Debug)]
-#[repr(u32)]
-pub enum CombineMode {
-    Average = 0,
-    Min = 1,
-    Multiply = 2,
-    Max = 3,
-    //NValues, // These are not valid variants, and they don't need to be defined in Rust
-    //Pad32,
-}
-
-impl From<PxCombineMode::Enum> for CombineMode {
-    fn from(mode: PxCombineMode::Enum) -> Self {
-        match mode {
-            PxCombineMode::eAVERAGE => CombineMode::Average,
-            PxCombineMode::eMIN => CombineMode::Min,
-            PxCombineMode::eMULTIPLY => CombineMode::Multiply,
-            PxCombineMode::eMAX => CombineMode::Max,
-            _ => unreachable!("Invalid enum variant: {:?}.", mode),
-        }
-    }
-}
-
-/// A new type wrapper for PxMaterial.  Parametrized by it's user data type.
+/// A new type wrapper for PxMaterial.  Parametrized by its user data type.
 #[repr(transparent)]
 pub struct PxMaterial<U> {
     pub(crate) obj: physx_sys::PxMaterial,
@@ -86,9 +50,8 @@ unsafe impl<U> UserData for PxMaterial<U> {
 
 impl<U> Drop for PxMaterial<U> {
     fn drop(&mut self) {
-        unsafe {
-            PxMaterial_release_mut(self.as_mut_ptr());
-        }
+        use crate::base::RefCounted;
+        self.release();
     }
 }
 
@@ -112,6 +75,7 @@ impl<M> Material for PxMaterial<M> {}
 
 pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     /// # Safety
+    ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
     /// or creating multiple Owners from the same pointer will cause UB.  Use `into_ptr` to
     /// retrieve the pointer and consume the Owner without dropping the pointee.
@@ -119,7 +83,7 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
         ptr: *mut physx_sys::PxMaterial,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data))
+        unsafe { Owner::from_raw((ptr as *mut Self).as_mut()?.init_user_data(user_data)) }
     }
 
     /// Get a reference to the user data.
@@ -134,18 +98,6 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all constructors go through from_raw which calls init_user_data
         unsafe { UserData::get_user_data_mut(self) }
-    }
-
-    /// Get the current ref count of the material.
-    #[inline]
-    fn get_reference_count(&self) -> u32 {
-        unsafe { PxMaterial_getReferenceCount(self.as_ptr()) }
-    }
-
-    /// Increment the ref count of the material.
-    #[inline]
-    fn acquire_reference(&mut self) {
-        unsafe { PxMaterial_acquireReference_mut(self.as_mut_ptr()) }
     }
 
     /// Set the dynamic friction.
@@ -211,60 +163,48 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     /// Set a material flag.
     #[inline]
     fn set_flag(&mut self, flag: MaterialFlag, set: bool) {
-        unsafe { PxMaterial_setFlag_mut(self.as_mut_ptr(), flag as _, set) }
+        unsafe { PxMaterial_setFlag_mut(self.as_mut_ptr(), flag, set) }
     }
 
     /// Set all the material flags.
     #[inline]
     fn set_flags(&mut self, flags: MaterialFlags) {
         unsafe {
-            PxMaterial_setFlags_mut(
-                self.as_mut_ptr(),
-                PxMaterialFlags {
-                    mBits: flags.bits(),
-                },
-            );
+            PxMaterial_setFlags_mut(self.as_mut_ptr(), flags);
         }
     }
 
     /// Get the material flags.
     #[inline]
     fn get_flags(&self) -> MaterialFlags {
-        unsafe {
-            let PxMaterialFlags { mBits } = PxMaterial_getFlags(self.as_ptr());
-            BitFlags::from_bits_unchecked(mBits)
-        }
+        unsafe { PxMaterial_getFlags(self.as_ptr()) }
     }
 
     /// Set the friction combine mode.
     #[inline]
     fn set_friction_combined_mode(&mut self, combine_mode: CombineMode) {
         unsafe {
-            PxMaterial_setFrictionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
+            PxMaterial_setFrictionCombineMode_mut(self.as_mut_ptr(), combine_mode);
         }
     }
 
     /// Get the friction combine mode.
     #[inline]
     fn get_friction_combine_mode(&self) -> CombineMode {
-        let combine_mode = unsafe { PxMaterial_getFrictionCombineMode(self.as_ptr()) };
-        debug_assert!(combine_mode < PxCombineMode::eN_VALUES);
-        combine_mode.into()
+        unsafe { PxMaterial_getFrictionCombineMode(self.as_ptr()) }
     }
 
     /// Set the restitution combine mode.
     #[inline]
     fn set_restitution_combine_mode(&mut self, combine_mode: CombineMode) {
         unsafe {
-            PxMaterial_setRestitutionCombineMode_mut(self.as_mut_ptr(), combine_mode as _);
+            PxMaterial_setRestitutionCombineMode_mut(self.as_mut_ptr(), combine_mode);
         }
     }
 
     /// Get the restitution combine mode.
     #[inline]
     fn get_restitution_combine_mode(&self) -> CombineMode {
-        let combine_mode = unsafe { PxMaterial_getRestitutionCombineMode(self.as_ptr()) };
-        debug_assert!(combine_mode < PxCombineMode::eN_VALUES);
-        combine_mode.into()
+        unsafe { PxMaterial_getRestitutionCombineMode(self.as_ptr()) }
     }
 }

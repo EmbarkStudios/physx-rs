@@ -6,7 +6,6 @@ type PxShape = physx::shape::PxShape<(), PxMaterial>;
 type PxArticulationLink = physx::articulation_link::PxArticulationLink<(), PxShape>;
 type PxRigidStatic = physx::rigid_static::PxRigidStatic<(), PxShape>;
 type PxRigidDynamic = physx::rigid_dynamic::PxRigidDynamic<(), PxShape>;
-type PxArticulation = physx::articulation::PxArticulation<(), PxArticulationLink>;
 type PxArticulationReducedCoordinate =
     physx::articulation_reduced_coordinate::PxArticulationReducedCoordinate<(), PxArticulationLink>;
 type PxScene = physx::scene::PxScene<
@@ -14,7 +13,6 @@ type PxScene = physx::scene::PxScene<
     PxArticulationLink,
     PxRigidStatic,
     PxRigidDynamic,
-    PxArticulation,
     PxArticulationReducedCoordinate,
     OnCollision,
     OnTrigger,
@@ -67,6 +65,8 @@ struct PrintProfilerCallback {
     start: std::time::Instant,
 }
 
+#[allow(unsafe_code)]
+// SAFETY: Unsafe trait impl which is the point of this example
 unsafe impl ProfilerCallback for PrintProfilerCallback {
     unsafe extern "C" fn zone_start(
         _name: *const i8,
@@ -74,7 +74,7 @@ unsafe impl ProfilerCallback for PrintProfilerCallback {
         _context_id: u64,
         user_data: *const std::ffi::c_void,
     ) -> *mut std::ffi::c_void {
-        let this = &*(user_data as *const Self);
+        let this = &*user_data.cast::<Self>();
         let start = this.start.elapsed().as_micros() as u64;
 
         start as *mut std::ffi::c_void
@@ -88,7 +88,7 @@ unsafe impl ProfilerCallback for PrintProfilerCallback {
         user_data: *const std::ffi::c_void,
     ) {
         let name: &'static str = std::mem::transmute(CStr::from_ptr(name).to_str().unwrap());
-        let this = &*(user_data as *const Self);
+        let this = &*user_data.cast::<Self>();
         let end = this.start.elapsed().as_micros() as u64;
 
         let start = context as u64;
@@ -141,15 +141,14 @@ fn main() {
     scene.add_dynamic_actor(sphere_actor);
 
     for _ in 0..100 {
+        #[allow(unsafe_code)]
+        // SAFETY: it's unsafe /shrug
+        let mut sb = unsafe { ScratchBuffer::new(4) };
+
         // Calls both simulate and fetch_results.  More complex simulation update
         // controls are not fully supported.
         scene
-            .step(
-                0.1,
-                None::<&mut physx_sys::PxBaseTask>,
-                Some(unsafe { &mut ScratchBuffer::new(4) }),
-                true,
-            )
+            .step(0.1, None::<&mut physx_sys::PxBaseTask>, Some(&mut sb), true)
             .expect("error occured during simulation");
     }
 }

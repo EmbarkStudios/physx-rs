@@ -2,76 +2,42 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 29 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-Wrapper for PxShape
- */
+#![allow(non_upper_case_globals)]
 
 use crate::{
     material::Material,
     owner::Owner,
-    traits::{Class, PxFlags, UserData},
+    traits::{Class, UserData},
 };
-
-use enumflags2::{bitflags, BitFlags};
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+#[rustfmt::skip]
 use physx_sys::{
-    PxFilterData, PxFilterData_new_1, PxShapeFlag, PxShapeFlags, PxShape_getMaterials,
-    PxShape_getNbMaterials, PxShape_getQueryFilterData, PxShape_getReferenceCount,
-    PxShape_getSimulationFilterData, PxShape_release_mut, PxShape_setFlag_mut,
-    PxShape_setQueryFilterData_mut, PxShape_setSimulationFilterData_mut,
+    PxFilterData,
+    PxFilterData_new_1,
+    PxShape_getMaterials,
+    PxShape_getNbMaterials,
+    PxShape_getQueryFilterData,
+    PxShape_getSimulationFilterData,
+    PxShape_setFlag_mut,
+    PxShape_setFlags_mut,
+    PxShape_setQueryFilterData_mut,
+    PxShape_setSimulationFilterData_mut,
 };
 
-/// Layers used for collision/querying of shapes
-#[bitflags]
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum CollisionLayer {
-    Ghost = 1,
-    Terrain = 2,
-    Static = 4,
-    Character = 8,
-}
-
-pub type ShapeFlags = BitFlags<ShapeFlag>;
-
-impl PxFlags for ShapeFlags {
-    type Target = PxShapeFlags;
-
-    fn into_px(self) -> Self::Target {
-        PxShapeFlags {
-            mBits: self.bits() as u8,
-        }
-    }
-
-    fn from_px(flags: Self::Target) -> Self {
-        unsafe { BitFlags::from_bits_unchecked(flags.mBits as u32) }
+bitflags::bitflags! {
+    /// Layers used for collision/querying of shapes
+    #[repr(transparent)]
+    pub struct CollisionLayers: u32 {
+        const Ghost = 1 << 0;
+        const Terrain = 1 << 1;
+        const Static = 1 << 2;
+        const Character = 1 << 3;
     }
 }
-/// Layers used for collision/querying of shapes
-#[bitflags]
-#[derive(Debug, Copy, Clone)]
-#[repr(u32)]
-pub enum ShapeFlag {
-    SimulationShape = 1u32,
-    SceneQueryShape = 2u32,
-    TriggerShape = 4u32,
-    Visualization = 8u32,
-}
 
-impl From<ShapeFlag> for PxShapeFlag::Enum {
-    fn from(value: ShapeFlag) -> Self {
-        match value {
-            ShapeFlag::SimulationShape => 1u32,
-            ShapeFlag::SceneQueryShape => 2u32,
-            ShapeFlag::TriggerShape => 4u32,
-            ShapeFlag::Visualization => 8u32,
-        }
-    }
-}
+pub use physx_sys::{PxShapeFlag as ShapeFlag, PxShapeFlags as ShapeFlags};
 
 /// A new type wrapper for PxShape.  Parametrized by it's user data type,
 /// and the type of it's Material.
@@ -100,7 +66,8 @@ impl<U, M: Material> Drop for PxShape<U, M> {
                 drop_in_place(material as *mut _);
             }
             drop_in_place(self.get_user_data_mut());
-            PxShape_release_mut(self.as_mut_ptr());
+            use crate::base::RefCounted;
+            self.release();
         }
     }
 }
@@ -136,8 +103,10 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
         ptr: *mut physx_sys::PxShape,
         user_data: Self::UserData,
     ) -> Option<Owner<Self>> {
-        let shape = (ptr as *mut Self).as_mut();
-        Owner::from_raw(shape?.init_user_data(user_data))
+        unsafe {
+            let shape = (ptr as *mut Self).as_mut();
+            Owner::from_raw(shape?.init_user_data(user_data))
+        }
     }
 
     /// Get a reference to the user data.
@@ -155,8 +124,8 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
     /// Set the simulation (collision) filter of this shape
     fn set_simulation_filter_data(
         &mut self,
-        this_layers: BitFlags<CollisionLayer>,
-        other_layers: BitFlags<CollisionLayer>,
+        this_layers: CollisionLayers,
+        other_layers: CollisionLayers,
         word3: u32,
         word4: u32,
     ) {
@@ -166,9 +135,7 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
         data.word2 = word3;
         data.word3 = word4;
 
-        unsafe {
-            PxShape_setSimulationFilterData_mut(self.as_mut_ptr(), &data as *const PxFilterData)
-        }
+        unsafe { PxShape_setSimulationFilterData_mut(self.as_mut_ptr(), &data) }
     }
 
     /// Read the collision filter data of this shape
@@ -176,20 +143,15 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
         unsafe { PxShape_getSimulationFilterData(self.as_ptr()) }
     }
 
-    /// Get the reference count
-    fn get_reference_count(&self) -> u32 {
-        unsafe { PxShape_getReferenceCount(self.as_ptr()) }
-    }
-
     /// Set the query filter of this shape
-    fn set_query_filter_data(&mut self, this_layers: BitFlags<CollisionLayer>) {
+    fn set_query_filter_data(&mut self, this_layers: CollisionLayers) {
         let mut data = unsafe { PxFilterData_new_1() };
         data.word0 = this_layers.bits();
         data.word1 = 0;
         data.word2 = 0;
         data.word3 = 0;
 
-        unsafe { PxShape_setQueryFilterData_mut(self.as_mut_ptr(), &data as *const PxFilterData) }
+        unsafe { PxShape_setQueryFilterData_mut(self.as_mut_ptr(), &data) }
     }
 
     /// Read the query filter data of this shape
@@ -236,6 +198,11 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
 
     /// Toggle a flag on this shape
     fn set_flag(&mut self, flag: ShapeFlag, enable: bool) {
-        unsafe { PxShape_setFlag_mut(self.as_mut_ptr(), flag.into(), enable) }
+        unsafe { PxShape_setFlag_mut(self.as_mut_ptr(), flag, enable) }
+    }
+
+    /// Sets the flags on this shape to the specified bitset
+    fn set_flags(&mut self, flags: ShapeFlags) {
+        unsafe { PxShape_setFlags_mut(self.as_mut_ptr(), flags) }
     }
 }

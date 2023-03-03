@@ -2,29 +2,17 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created:  9 May 2019
 
-#![warn(clippy::all)]
-
-/*!
-Prelude for commonly useful types
-
- */
-
 pub use crate::actor::{Actor, ActorFlag, ActorFlags};
 pub use crate::aggregate::Aggregate;
-pub use crate::articulation::Articulation;
-pub use crate::articulation_base::ArticulationBase;
 pub use crate::articulation_cache::*;
-pub use crate::articulation_joint::{ArticulationJoint, ArticulationJointDriveType};
-pub use crate::articulation_joint_base::ArticulationJointBase;
 pub use crate::articulation_joint_reduced_coordinate::*;
-pub use crate::articulation_link::{ArticulationDriveType, ArticulationLink};
+pub use crate::articulation_link::ArticulationLink;
 pub use crate::articulation_reduced_coordinate::{
     ArticulationFlag, ArticulationFlags, ArticulationReducedCoordinate,
 };
 pub use crate::base::{Base, BaseFlag, ConcreteType};
 pub use crate::controller::Controller;
 pub use crate::controller_manager::ControllerManager;
-//pub use crate::cooking::*;
 pub use crate::foundation::{AllocatorCallback, Foundation, ScratchBuffer};
 pub use crate::geometry::*;
 pub use crate::height_field::*;
@@ -39,7 +27,7 @@ pub use crate::scene::{
     BroadPhaseType, FilterShaderDescriptor, PairFilteringMode, PruningStructureType, Scene,
     SceneFlag, SimulationThreadType, SolverType,
 };
-pub use crate::shape::{CollisionLayer, Shape, ShapeFlag, ShapeFlags};
+pub use crate::shape::{CollisionLayers, Shape, ShapeFlag, ShapeFlags};
 pub use crate::simulation_event_callback::{
     AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
     TriggerCallback, WakeSleepCallback,

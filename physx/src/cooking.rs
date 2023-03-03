@@ -1,27 +1,22 @@
+// We've deprecated PxCooking...but this is the implementation :p
+#![allow(deprecated)]
+
 use crate::{
-    bvh_structure::BvhStructure, convex_mesh::ConvexMesh, foundation::Foundation,
-    height_field::HeightField, owner::Owner, physics::Physics, traits::Class,
-    triangle_mesh::TriangleMesh,
+    bvh::Bvh, convex_mesh::ConvexMesh, foundation::Foundation, height_field::HeightField,
+    owner::Owner, physics::Physics, traits::Class, triangle_mesh::TriangleMesh,
 };
 
+#[rustfmt::skip]
 use physx_sys::{
     phys_PxCreateCooking,
-    PxBVHStructureDesc_isValid,
-    PxBVHStructureDesc_new,
-    PxBVHStructureDesc_setToDefault_mut,
+    PxBVHDesc_isValid,
+    PxBVHDesc_new,
+    PxBVHDesc_setToDefault_mut,
     PxConvexMeshDesc_isValid,
     PxConvexMeshDesc_new,
     PxConvexMeshDesc_setToDefault_mut,
     PxCookingParams_new,
-    //PxCooking_getParams,
-    //PxCooking_setParams_mut,
-    //PxCooking_platformMismatch,
-    //PxCooking_computeHullPolygons,
-    //PxCooking_cookBVHStructure,
-    //PxCooking_cookConvexMesh,
-    //PxCooking_cookHeightField,
-    //PxCooking_cookTriangleMesh,
-    PxCooking_createBVHStructure,
+    PxCooking_createBVH,
     PxCooking_createConvexMesh,
     PxCooking_createHeightField,
     PxCooking_createTriangleMesh,
@@ -37,6 +32,10 @@ use physx_sys::{
 };
 
 /// A new-type wrapper around `physx_sys::PxCooking`.
+#[deprecated(
+    since = "0.15.0",
+    note = "The PxCooking interface has been deprecated, but for the initial upgrade to PhysX 5 we still support it"
+)]
 pub struct PxCooking {
     obj: physx_sys::PxCooking,
 }
@@ -72,14 +71,10 @@ impl PxCooking {
         }
     }
 
-    /// Cook a new BVH structure.
-    pub fn create_bvh_structure(
-        &self,
-        physics: &mut impl Physics,
-        desc: &PxBvhStructureDesc,
-    ) -> Option<Owner<BvhStructure>> {
+    /// Cook a new BVH
+    pub fn create_bvh(&self, physics: &mut impl Physics, desc: &PxBVHDesc) -> Option<Owner<Bvh>> {
         unsafe {
-            BvhStructure::from_raw(PxCooking_createBVHStructure(
+            Bvh::from_raw(PxCooking_createBVH(
                 self.as_ptr(),
                 desc.as_ptr(),
                 physics.get_physics_insertion_callback()?,
@@ -99,7 +94,7 @@ impl PxCooking {
             return ConvexMeshCookingResult::InvalidDescriptor;
         };
         if let Some(callback) = physics.get_physics_insertion_callback() {
-            let mut result = physx_sys::PxConvexMeshCookingResult::eFAILURE;
+            let mut result = ConvRes::Failure;
             let ptr = unsafe {
                 ConvexMesh::from_raw(PxCooking_createConvexMesh(
                     self.as_ptr(),
@@ -141,7 +136,7 @@ impl PxCooking {
             return TriangleMeshCookingResult::InvalidDescriptor;
         };
         if let Some(callback) = physics.get_physics_insertion_callback() {
-            let mut result = physx_sys::PxTriangleMeshCookingResult::eFAILURE;
+            let mut result = TriResult::Failure;
             let ptr = unsafe {
                 TriangleMesh::from_raw(PxCooking_createTriangleMesh(
                     self.as_ptr(),
@@ -167,6 +162,8 @@ impl PxCooking {
     }
 }
 
+use physx_sys::PxConvexMeshCookingResult as ConvRes;
+
 pub enum ConvexMeshCookingResult {
     Success(Owner<ConvexMesh>),
     ZeroAreaTestFailed,
@@ -176,32 +173,23 @@ pub enum ConvexMeshCookingResult {
 }
 
 impl ConvexMeshCookingResult {
-    fn from_raw(
-        px_result: physx_sys::PxConvexMeshCookingResult::Enum,
-        ptr: Option<Owner<ConvexMesh>>,
-    ) -> Self {
+    fn from_raw(px_result: ConvRes, ptr: Option<Owner<ConvexMesh>>) -> Self {
         match px_result {
-            physx_sys::PxConvexMeshCookingResult::eSUCCESS => {
+            ConvRes::Success => {
                 if let Some(ptr) = ptr {
-                    ConvexMeshCookingResult::Success(ptr)
+                    Self::Success(ptr)
                 } else {
-                    ConvexMeshCookingResult::Failure
+                    Self::Failure
                 }
             }
-            physx_sys::PxConvexMeshCookingResult::eZERO_AREA_TEST_FAILED => {
-                ConvexMeshCookingResult::ZeroAreaTestFailed
-            }
-            physx_sys::PxConvexMeshCookingResult::ePOLYGONS_LIMIT_REACHED => {
-                ConvexMeshCookingResult::PolygonsLimitReached
-            }
-            physx_sys::PxConvexMeshCookingResult::eFAILURE => ConvexMeshCookingResult::Failure,
-            _ => unreachable!(
-                "invalid PxConvexMeshCookingResult enum variant: {:?}",
-                px_result
-            ),
+            ConvRes::ZeroAreaTestFailed => Self::ZeroAreaTestFailed,
+            ConvRes::PolygonsLimitReached => Self::PolygonsLimitReached,
+            ConvRes::Failure => Self::Failure,
         }
     }
 }
+
+use physx_sys::PxTriangleMeshCookingResult as TriResult;
 
 pub enum TriangleMeshCookingResult {
     Success(Owner<TriangleMesh>),
@@ -211,26 +199,17 @@ pub enum TriangleMeshCookingResult {
 }
 
 impl TriangleMeshCookingResult {
-    fn from_raw(
-        px_result: physx_sys::PxTriangleMeshCookingResult::Enum,
-        ptr: Option<Owner<TriangleMesh>>,
-    ) -> Self {
+    fn from_raw(px_result: TriResult, ptr: Option<Owner<TriangleMesh>>) -> Self {
         match px_result {
-            physx_sys::PxTriangleMeshCookingResult::eSUCCESS => {
+            TriResult::Success => {
                 if let Some(ptr) = ptr {
-                    TriangleMeshCookingResult::Success(ptr)
+                    Self::Success(ptr)
                 } else {
-                    TriangleMeshCookingResult::Failure
+                    Self::Failure
                 }
             }
-            physx_sys::PxTriangleMeshCookingResult::eLARGE_TRIANGLE => {
-                TriangleMeshCookingResult::LargeTriangle
-            }
-            physx_sys::PxTriangleMeshCookingResult::eFAILURE => TriangleMeshCookingResult::Failure,
-            _ => unreachable!(
-                "invalid PxTriangleMeshCookingResult enum variant: {:?}",
-                px_result
-            ),
+            TriResult::LargeTriangle => Self::LargeTriangle,
+            TriResult::Failure => Self::Failure,
         }
     }
 }
@@ -367,45 +346,45 @@ impl PxHeightFieldDesc {
     }
 }
 
-pub struct PxBvhStructureDesc {
-    pub obj: physx_sys::PxBVHStructureDesc,
+pub struct PxBVHDesc {
+    pub obj: physx_sys::PxBVHDesc,
 }
 
-unsafe impl Class<physx_sys::PxBVHStructureDesc> for PxBvhStructureDesc {
-    fn as_ptr(&self) -> *const physx_sys::PxBVHStructureDesc {
+unsafe impl Class<physx_sys::PxBVHDesc> for PxBVHDesc {
+    fn as_ptr(&self) -> *const physx_sys::PxBVHDesc {
         &self.obj
     }
 
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxBVHStructureDesc {
+    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxBVHDesc {
         &mut self.obj
     }
 }
 
-impl Default for PxBvhStructureDesc {
+impl Default for PxBVHDesc {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PxBvhStructureDesc {
+impl PxBVHDesc {
     /// Create a new BVH structure descriptor.
     pub fn new() -> Self {
         unsafe {
             Self {
-                obj: PxBVHStructureDesc_new(),
+                obj: PxBVHDesc_new(),
             }
         }
     }
 
     /// Check if the descriptor is valid.
     pub fn is_valid(&self) -> bool {
-        unsafe { PxBVHStructureDesc_isValid(self.as_ptr()) }
+        unsafe { PxBVHDesc_isValid(self.as_ptr()) }
     }
 
     /// Set the descriptor to its default values.
     pub fn set_to_default(&mut self) -> &mut Self {
         unsafe {
-            PxBVHStructureDesc_setToDefault_mut(self.as_mut_ptr());
+            PxBVHDesc_setToDefault_mut(self.as_mut_ptr());
         }
         self
     }

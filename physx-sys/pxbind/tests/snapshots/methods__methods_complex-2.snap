@@ -1,0 +1,260 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.rust
+---
+extern "C" {
+    /// Decrements the reference count of a shape and releases it if the new reference count is zero.
+    ///
+    /// Note that in releases prior to PhysX 3.3 this method did not have reference counting semantics and was used to destroy a shape
+    /// created with PxActor::createShape(). In PhysX 3.3 and above, this usage is deprecated, instead, use PxRigidActor::detachShape() to detach
+    /// a shape from an actor. If the shape to be detached was created with PxActor::createShape(), the actor holds the only counted reference,
+    /// and so when the shape is detached it will also be destroyed.
+    pub fn PxShape_release_mut(self_: *mut PxShape);
+
+    /// Adjust the geometry of the shape.
+    ///
+    /// The type of the passed in geometry must match the geometry type of the shape.
+    ///
+    /// It is not allowed to change the geometry type of a shape.
+    ///
+    /// This function does not guarantee correct/continuous behavior when objects are resting on top of old or new geometry.
+    pub fn PxShape_setGeometry_mut(self_: *mut PxShape, geometry: *const PxGeometry);
+
+    /// Retrieve a reference to the shape's geometry.
+    ///
+    /// The returned reference has the same lifetime as the PxShape it comes from.
+    ///
+    /// Reference to internal PxGeometry object.
+    pub fn PxShape_getGeometry(self_: *const PxShape) -> *const PxGeometry;
+
+    /// Retrieves the actor which this shape is associated with.
+    ///
+    /// The actor this shape is associated with, if it is an exclusive shape, else NULL
+    pub fn PxShape_getActor(self_: *const PxShape) -> *mut PxRigidActor;
+
+    /// Sets the pose of the shape in actor space, i.e. relative to the actors to which they are attached.
+    ///
+    /// This transformation is identity by default.
+    ///
+    /// The local pose is an attribute of the shape, and so will apply to all actors to which the shape is attached.
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the associated actor up automatically.
+    ///
+    /// Note:
+    /// Does not automatically update the inertia properties of the owning actor (if applicable); use the
+    /// PhysX extensions method [`PxRigidBodyExt::updateMassAndInertia`]() to do this.
+    ///
+    /// Default:
+    /// the identity transform
+    pub fn PxShape_setLocalPose_mut(self_: *mut PxShape, pose: *const PxTransform);
+
+    /// Retrieves the pose of the shape in actor space, i.e. relative to the actor they are owned by.
+    ///
+    /// This transformation is identity by default.
+    ///
+    /// Pose of shape relative to the actor's frame.
+    pub fn PxShape_getLocalPose(self_: *const PxShape) -> PxTransform;
+
+    /// Sets the user definable collision filter data.
+    ///
+    /// Sleeping:
+    /// Does wake up the actor if the filter data change causes a formerly suppressed
+    /// collision pair to be enabled.
+    ///
+    /// Default:
+    /// (0,0,0,0)
+    pub fn PxShape_setSimulationFilterData_mut(self_: *mut PxShape, data: *const PxFilterData);
+
+    /// Retrieves the shape's collision filter data.
+    pub fn PxShape_getSimulationFilterData(self_: *const PxShape) -> PxFilterData;
+
+    /// Sets the user definable query filter data.
+    ///
+    /// Default:
+    /// (0,0,0,0)
+    pub fn PxShape_setQueryFilterData_mut(self_: *mut PxShape, data: *const PxFilterData);
+
+    /// Retrieves the shape's Query filter data.
+    pub fn PxShape_getQueryFilterData(self_: *const PxShape) -> PxFilterData;
+
+    /// Assigns material(s) to the shape. Will remove existing materials from the shape.
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the associated actor up automatically.
+    pub fn PxShape_setMaterials_mut(self_: *mut PxShape, materials: *const *mut PxMaterial, materialCount: u16);
+
+    /// Returns the number of materials assigned to the shape.
+    ///
+    /// You can use [`getMaterials`]() to retrieve the material pointers.
+    ///
+    /// Number of materials associated with this shape.
+    pub fn PxShape_getNbMaterials(self_: *const PxShape) -> u16;
+
+    /// Retrieve all the material pointers associated with the shape.
+    ///
+    /// You can retrieve the number of material pointers by calling [`getNbMaterials`]()
+    ///
+    /// Note: The returned data may contain invalid pointers if you release materials using [`PxMaterial::release`]().
+    ///
+    /// Number of material pointers written to the buffer.
+    pub fn PxShape_getMaterials(self_: *const PxShape, userBuffer: *mut *mut PxMaterial, bufferSize: u32, startIndex: u32) -> u32;
+
+    /// Retrieve material from given triangle index.
+    ///
+    /// The input index is the internal triangle index as used inside the SDK. This is the index
+    /// returned to users by various SDK functions such as raycasts.
+    ///
+    /// This function is only useful for triangle meshes or heightfields, which have per-triangle
+    /// materials. For other shapes or SDF triangle meshes, the function returns the single material
+    /// associated with the shape, regardless of the index.
+    ///
+    /// Material from input triangle
+    ///
+    /// If faceIndex value of 0xFFFFffff is passed as an input for mesh and heightfield shapes, this function will issue a warning and return NULL.
+    ///
+    /// Scene queries set the value of PxQueryHit::faceIndex to 0xFFFFffff whenever it is undefined or does not apply.
+    pub fn PxShape_getMaterialFromInternalFaceIndex(self_: *const PxShape, faceIndex: u32) -> *mut PxBaseMaterial;
+
+    /// Sets the contact offset.
+    ///
+    /// Shapes whose distance is less than the sum of their contactOffset values will generate contacts. The contact offset must be positive and
+    /// greater than the rest offset. Having a contactOffset greater than than the restOffset allows the collision detection system to
+    /// predictively enforce the contact constraint even when the objects are slightly separated. This prevents jitter that would occur
+    /// if the constraint were enforced only when shapes were within the rest distance.
+    ///
+    /// Default:
+    /// 0.02f * PxTolerancesScale::length
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the associated actor up automatically.
+    pub fn PxShape_setContactOffset_mut(self_: *mut PxShape, contactOffset: f32);
+
+    /// Retrieves the contact offset.
+    ///
+    /// The contact offset of the shape.
+    pub fn PxShape_getContactOffset(self_: *const PxShape) -> f32;
+
+    /// Sets the rest offset.
+    ///
+    /// Two shapes will come to rest at a distance equal to the sum of their restOffset values. If the restOffset is 0, they should converge to touching
+    /// exactly.  Having a restOffset greater than zero is useful to have objects slide smoothly, so that they do not get hung up on irregularities of
+    /// each others' surfaces.
+    ///
+    /// Default:
+    /// 0.0f
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the associated actor up automatically.
+    pub fn PxShape_setRestOffset_mut(self_: *mut PxShape, restOffset: f32);
+
+    /// Retrieves the rest offset.
+    ///
+    /// The rest offset of the shape.
+    pub fn PxShape_getRestOffset(self_: *const PxShape) -> f32;
+
+    /// Sets the density used to interact with fluids.
+    ///
+    /// To be physically accurate, the density of a rigid body should be computed as its mass divided by its volume. To
+    /// simplify tuning the interaction of fluid and rigid bodies, the density for fluid can differ from the real density. This
+    /// allows to create floating bodies, even if they are supposed to sink with their mass and volume.
+    ///
+    /// Default:
+    /// 800.0f
+    pub fn PxShape_setDensityForFluid_mut(self_: *mut PxShape, densityForFluid: f32);
+
+    /// Retrieves the density used to interact with fluids.
+    ///
+    /// The density of the body when interacting with fluid.
+    pub fn PxShape_getDensityForFluid(self_: *const PxShape) -> f32;
+
+    /// Sets torsional patch radius.
+    ///
+    /// This defines the radius of the contact patch used to apply torsional friction. If the radius is 0, no torsional friction
+    /// will be applied. If the radius is > 0, some torsional friction will be applied. This is proportional to the penetration depth
+    /// so, if the shapes are separated or penetration is zero, no torsional friction will be applied. It is used to approximate
+    /// rotational friction introduced by the compression of contacting surfaces.
+    ///
+    /// Default:
+    /// 0.0
+    pub fn PxShape_setTorsionalPatchRadius_mut(self_: *mut PxShape, radius: f32);
+
+    /// Gets torsional patch radius.
+    ///
+    /// This defines the radius of the contact patch used to apply torsional friction. If the radius is 0, no torsional friction
+    /// will be applied. If the radius is > 0, some torsional friction will be applied. This is proportional to the penetration depth
+    /// so, if the shapes are separated or penetration is zero, no torsional friction will be applied. It is used to approximate
+    /// rotational friction introduced by the compression of contacting surfaces.
+    ///
+    /// The torsional patch radius of the shape.
+    pub fn PxShape_getTorsionalPatchRadius(self_: *const PxShape) -> f32;
+
+    /// Sets minimum torsional patch radius.
+    ///
+    /// This defines the minimum radius of the contact patch used to apply torsional friction. If the radius is 0, the amount of torsional friction
+    /// that will be applied will be entirely dependent on the value of torsionalPatchRadius.
+    ///
+    /// If the radius is > 0, some torsional friction will be applied regardless of the value of torsionalPatchRadius or the amount of penetration.
+    ///
+    /// Default:
+    /// 0.0
+    pub fn PxShape_setMinTorsionalPatchRadius_mut(self_: *mut PxShape, radius: f32);
+
+    /// Gets minimum torsional patch radius.
+    ///
+    /// This defines the minimum radius of the contact patch used to apply torsional friction. If the radius is 0, the amount of torsional friction
+    /// that will be applied will be entirely dependent on the value of torsionalPatchRadius.
+    ///
+    /// If the radius is > 0, some torsional friction will be applied regardless of the value of torsionalPatchRadius or the amount of penetration.
+    ///
+    /// The minimum torsional patch radius of the shape.
+    pub fn PxShape_getMinTorsionalPatchRadius(self_: *const PxShape) -> f32;
+
+    /// Sets shape flags
+    ///
+    /// Sleeping:
+    /// Does
+    /// NOT
+    /// wake the associated actor up automatically.
+    ///
+    /// Default:
+    /// PxShapeFlag::eVISUALIZATION | PxShapeFlag::eSIMULATION_SHAPE | PxShapeFlag::eSCENE_QUERY_SHAPE
+    pub fn PxShape_setFlag_mut(self_: *mut PxShape, flag: PxShapeFlag, value: bool);
+
+    /// Sets shape flags
+    pub fn PxShape_setFlags_mut(self_: *mut PxShape, inFlags: PxShapeFlags);
+
+    /// Retrieves shape flags.
+    ///
+    /// The values of the shape flags.
+    pub fn PxShape_getFlags(self_: *const PxShape) -> PxShapeFlags;
+
+    /// Returns true if the shape is exclusive to an actor.
+    pub fn PxShape_isExclusive(self_: *const PxShape) -> bool;
+
+    /// Sets a name string for the object that can be retrieved with [`getName`]().
+    ///
+    /// This is for debugging and is not used by the SDK.
+    /// The string is not copied by the SDK, only the pointer is stored.
+    ///
+    /// Default:
+    /// NULL
+    pub fn PxShape_setName_mut(self_: *mut PxShape, name: *const std::ffi::c_char);
+
+    /// retrieves the name string set with setName().
+    ///
+    /// The name associated with the shape.
+    pub fn PxShape_getName(self_: *const PxShape) -> *const std::ffi::c_char;
+
+    pub fn PxShape_getConcreteTypeName(self_: *const PxShape) -> *const std::ffi::c_char;
+
+}
+

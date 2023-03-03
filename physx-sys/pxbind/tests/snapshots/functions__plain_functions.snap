@@ -1,0 +1,87 @@
+---
+source: physx-sys/pxbind/tests/functions.rs
+expression: mo.cpp
+---
+extern "C" {
+    physx_PxCollection_Pod* phys_PxCreateCollection() {
+        physx::PxCollection* return_val = PxCreateCollection();
+        auto return_val_pod = reinterpret_cast<physx_PxCollection_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    physx_PxAssertHandler_Pod* phys_PxGetAssertHandler() {
+        physx::PxAssertHandler& return_val = PxGetAssertHandler();
+        auto return_val_pod = reinterpret_cast<physx_PxAssertHandler_Pod*>(&return_val);
+        return return_val_pod;
+    }
+
+    void phys_PxSetAssertHandler(physx_PxAssertHandler_Pod* handler_pod) {
+        physx::PxAssertHandler& handler = reinterpret_cast<physx::PxAssertHandler&>(*handler_pod);
+        PxSetAssertHandler(handler);
+    }
+
+    void* phys_PxMemZero(void* dest, uint32_t count) {
+        void* return_val = PxMemZero(dest, count);
+        return return_val;
+    }
+
+    void* phys_PxMemSet(void* dest, int32_t c, uint32_t count) {
+        void* return_val = PxMemSet(dest, c, count);
+        return return_val;
+    }
+
+    void* phys_PxMemCopy(void* dest, void const* src, uint32_t count) {
+        void* return_val = PxMemCopy(dest, src, count);
+        return return_val;
+    }
+
+    void* phys_PxMemMove(void* dest, void const* src, uint32_t count) {
+        void* return_val = PxMemMove(dest, src, count);
+        return return_val;
+    }
+
+    void phys_PxMarkSerializedMemory(void* ptr, uint32_t byteSize) {
+        PxMarkSerializedMemory(ptr, byteSize);
+    }
+
+    uint32_t phys_PxCustomGeometry_getUniqueID() {
+        uint32_t return_val = PxCustomGeometry_getUniqueID();
+        return return_val;
+    }
+
+    uint32_t phys_PxGetAggregateFilterHint(int32_t type_pod, bool enableSelfCollision) {
+        auto type = static_cast<physx::PxAggregateType::Enum>(type_pod);
+        uint32_t return_val = PxGetAggregateFilterHint(type, enableSelfCollision);
+        return return_val;
+    }
+
+    uint32_t phys_PxGetAggregateSelfCollisionBit(uint32_t hint) {
+        uint32_t return_val = PxGetAggregateSelfCollisionBit(hint);
+        return return_val;
+    }
+
+    int32_t phys_PxGetAggregateType(uint32_t hint) {
+        physx::PxAggregateType::Enum return_val = PxGetAggregateType(hint);
+        int32_t return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    physx_PxPhysics_Pod* phys_PxCreatePhysics(uint32_t version, physx_PxFoundation_Pod* foundation_pod, physx_PxTolerancesScale_Pod const* scale_pod, bool trackOutstandingAllocations, physx_PxPvd_Pod* pvd_pod, physx_PxOmniPvd_Pod* omniPvd_pod) {
+        physx::PxFoundation& foundation = reinterpret_cast<physx::PxFoundation&>(*foundation_pod);
+        physx::PxTolerancesScale const& scale = reinterpret_cast<physx::PxTolerancesScale const&>(*scale_pod);
+        physx::PxPvd* pvd = reinterpret_cast<physx::PxPvd*>(pvd_pod);
+        physx::PxOmniPvd* omniPvd = reinterpret_cast<physx::PxOmniPvd*>(omniPvd_pod);
+        physx::PxPhysics* return_val = PxCreatePhysics(version, foundation, scale, trackOutstandingAllocations, pvd, omniPvd);
+        auto return_val_pod = reinterpret_cast<physx_PxPhysics_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    physx_PxPhysics_Pod* phys_PxGetPhysics() {
+        physx::PxPhysics& return_val = PxGetPhysics();
+        auto return_val_pod = reinterpret_cast<physx_PxPhysics_Pod*>(&return_val);
+        return return_val_pod;
+    }
+
+}
+

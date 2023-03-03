@@ -22,6 +22,11 @@ fn main() {
         builder.build().expect("a foundation being built");
 
     physics.set_assert_handler(AssertHandler);
+
+    #[allow(unsafe_code)]
+    // SAFETY: Calling assertion handlers explicitly since they are not part of
+    // of the safe API of physx since they are only normally called from within
+    // the SDK itself
     unsafe {
         let assert_handler = physx_sys::phys_PxGetAssertHandler();
 

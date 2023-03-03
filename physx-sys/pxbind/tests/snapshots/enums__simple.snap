@@ -1,0 +1,11 @@
+---
+source: physx-sys/pxbind/tests/enums.rs
+expression: "gen_enums(\"simple.h\", &[]).unwrap()"
+---
+/// enum for empty constructor tag
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(i32)]
+pub enum PxEMPTY {
+    PxEmpty = 0,
+}
+

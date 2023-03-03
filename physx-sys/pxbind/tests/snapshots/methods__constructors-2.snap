@@ -1,0 +1,31 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.rust
+---
+extern "C" {
+    pub fn PxFilterData_new(anon_param0: PxEMPTY) -> PxFilterData;
+
+    /// Default constructor.
+    pub fn PxFilterData_new_1() -> PxFilterData;
+
+    /// Constructor to set filter data initially.
+    pub fn PxFilterData_new_2(w0: u32, w1: u32, w2: u32, w3: u32) -> PxFilterData;
+
+    /// (re)sets the structure to the default.
+    pub fn PxFilterData_setToDefault_mut(self_: *mut PxFilterData);
+
+    /// constructor sets to default.
+    pub fn PxBoxControllerDesc_new_alloc() -> *mut PxBoxControllerDesc;
+
+    pub fn PxBoxControllerDesc_delete(self_: *mut PxBoxControllerDesc);
+
+    /// (re)sets the structure to the default.
+    pub fn PxBoxControllerDesc_setToDefault_mut(self_: *mut PxBoxControllerDesc);
+
+    /// returns true if the current settings are valid
+    ///
+    /// True if the descriptor is valid.
+    pub fn PxBoxControllerDesc_isValid(self_: *const PxBoxControllerDesc) -> bool;
+
+}
+

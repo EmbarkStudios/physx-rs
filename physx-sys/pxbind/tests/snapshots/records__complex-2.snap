@@ -1,0 +1,47 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.size_asserts
+---
+using namespace physx;
+#include "structgen_out.hpp"
+
+static_assert(sizeof(physx::PxAssertHandler) == sizeof(physx_PxAssertHandler_Pod), "POD wrapper for `physx::PxAssertHandler` has incorrect size");
+static_assert(sizeof(physx::PxVec3) == sizeof(physx_PxVec3_Pod), "POD wrapper for `physx::PxVec3` has incorrect size");
+static_assert(sizeof(physx::PxVec3Padded) == sizeof(physx_PxVec3Padded_Pod), "POD wrapper for `physx::PxVec3Padded` has incorrect size");
+static_assert(sizeof(physx::PxQuat) == sizeof(physx_PxQuat_Pod), "POD wrapper for `physx::PxQuat` has incorrect size");
+static_assert(sizeof(physx::PxMat33) == sizeof(physx_PxMat33_Pod), "POD wrapper for `physx::PxMat33` has incorrect size");
+static_assert(sizeof(physx::PxTransform) == sizeof(physx_PxTransform_Pod), "POD wrapper for `physx::PxTransform` has incorrect size");
+static_assert(sizeof(physx::PxTransformPadded) == sizeof(physx_PxTransformPadded_Pod), "POD wrapper for `physx::PxTransformPadded` has incorrect size");
+static_assert(sizeof(physx::PxProcessPxBaseCallback) == sizeof(physx_PxProcessPxBaseCallback_Pod), "POD wrapper for `physx::PxProcessPxBaseCallback` has incorrect size");
+static_assert(sizeof(physx::PxSerializationContext) == sizeof(physx_PxSerializationContext_Pod), "POD wrapper for `physx::PxSerializationContext` has incorrect size");
+static_assert(sizeof(physx::PxDeserializationContext) == sizeof(physx_PxDeserializationContext_Pod), "POD wrapper for `physx::PxDeserializationContext` has incorrect size");
+static_assert(sizeof(physx::PxSerializationRegistry) == sizeof(physx_PxSerializationRegistry_Pod), "POD wrapper for `physx::PxSerializationRegistry` has incorrect size");
+static_assert(sizeof(physx::PxCollection) == sizeof(physx_PxCollection_Pod), "POD wrapper for `physx::PxCollection` has incorrect size");
+static_assert(sizeof(physx::PxBase) == sizeof(physx_PxBase_Pod), "POD wrapper for `physx::PxBase` has incorrect size");
+static_assert(sizeof(physx::PxRefCounted) == sizeof(physx_PxRefCounted_Pod), "POD wrapper for `physx::PxRefCounted` has incorrect size");
+static_assert(sizeof(physx::PxSpringModifiers) == sizeof(physx_PxSpringModifiers_Pod), "POD wrapper for `physx::PxSpringModifiers` has incorrect size");
+static_assert(sizeof(physx::PxRestitutionModifiers) == sizeof(physx_PxRestitutionModifiers_Pod), "POD wrapper for `physx::PxRestitutionModifiers` has incorrect size");
+static_assert(sizeof(physx::Px1DConstraintMods) == sizeof(physx_Px1DConstraintMods_Pod), "POD wrapper for `physx::Px1DConstraintMods` has incorrect size");
+static_assert(sizeof(physx::Px1DConstraint) == sizeof(physx_Px1DConstraint_Pod), "POD wrapper for `physx::Px1DConstraint` has incorrect size");
+static_assert(sizeof(physx::PxConstraintInvMassScale) == sizeof(physx_PxConstraintInvMassScale_Pod), "POD wrapper for `physx::PxConstraintInvMassScale` has incorrect size");
+static_assert(sizeof(physx::PxConstraintVisualizer) == sizeof(physx_PxConstraintVisualizer_Pod), "POD wrapper for `physx::PxConstraintVisualizer` has incorrect size");
+static_assert(sizeof(physx::PxConstraintConnector) == sizeof(physx_PxConstraintConnector_Pod), "POD wrapper for `physx::PxConstraintConnector` has incorrect size");
+static_assert(sizeof(physx::PxContactPoint) == sizeof(physx_PxContactPoint_Pod), "POD wrapper for `physx::PxContactPoint` has incorrect size");
+static_assert(sizeof(physx::PxSolverBody) == sizeof(physx_PxSolverBody_Pod), "POD wrapper for `physx::PxSolverBody` has incorrect size");
+static_assert(sizeof(physx::PxSolverBodyData) == sizeof(physx_PxSolverBodyData_Pod), "POD wrapper for `physx::PxSolverBodyData` has incorrect size");
+static_assert(sizeof(physx::PxConstraintBatchHeader) == sizeof(physx_PxConstraintBatchHeader_Pod), "POD wrapper for `physx::PxConstraintBatchHeader` has incorrect size");
+static_assert(sizeof(physx::PxSolverConstraintDesc) == sizeof(physx_PxSolverConstraintDesc_Pod), "POD wrapper for `physx::PxSolverConstraintDesc` has incorrect size");
+static_assert(sizeof(physx::PxSolverConstraintPrepDescBase) == sizeof(physx_PxSolverConstraintPrepDescBase_Pod), "POD wrapper for `physx::PxSolverConstraintPrepDescBase` has incorrect size");
+static_assert(sizeof(physx::PxSolverConstraintPrepDesc) == sizeof(physx_PxSolverConstraintPrepDesc_Pod), "POD wrapper for `physx::PxSolverConstraintPrepDesc` has incorrect size");
+static_assert(sizeof(physx::PxSolverContactDesc) == sizeof(physx_PxSolverContactDesc_Pod), "POD wrapper for `physx::PxSolverContactDesc` has incorrect size");
+static_assert(sizeof(physx::PxConstraintAllocator) == sizeof(physx_PxConstraintAllocator_Pod), "POD wrapper for `physx::PxConstraintAllocator` has incorrect size");
+static_assert(sizeof(physx::PxArticulationLimit) == sizeof(physx_PxArticulationLimit_Pod), "POD wrapper for `physx::PxArticulationLimit` has incorrect size");
+static_assert(sizeof(physx::PxArticulationDrive) == sizeof(physx_PxArticulationDrive_Pod), "POD wrapper for `physx::PxArticulationDrive` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverBodyVel) == sizeof(physx_PxTGSSolverBodyVel_Pod), "POD wrapper for `physx::PxTGSSolverBodyVel` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverBodyTxInertia) == sizeof(physx_PxTGSSolverBodyTxInertia_Pod), "POD wrapper for `physx::PxTGSSolverBodyTxInertia` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverBodyData) == sizeof(physx_PxTGSSolverBodyData_Pod), "POD wrapper for `physx::PxTGSSolverBodyData` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverConstraintPrepDescBase) == sizeof(physx_PxTGSSolverConstraintPrepDescBase_Pod), "POD wrapper for `physx::PxTGSSolverConstraintPrepDescBase` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverConstraintPrepDesc) == sizeof(physx_PxTGSSolverConstraintPrepDesc_Pod), "POD wrapper for `physx::PxTGSSolverConstraintPrepDesc` has incorrect size");
+static_assert(sizeof(physx::PxTGSSolverContactDesc) == sizeof(physx_PxTGSSolverContactDesc_Pod), "POD wrapper for `physx::PxTGSSolverContactDesc` has incorrect size");
+
+

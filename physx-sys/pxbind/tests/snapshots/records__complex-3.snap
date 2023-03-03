@@ -1,0 +1,386 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.rust_decls
+---
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxAllocatorCallback {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxErrorCallback {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxInputStream {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxInputData {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxOutputStream {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxVec2 {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxVec4 {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxMat34 {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxMat44 {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxPlane {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxBounds3 {
+    _unused: [u8; 0],
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxAssertHandler {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxRepXSerializer {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxSerializer {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxPhysics {
+    _unused: [u8; 0],
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxProcessPxBaseCallback {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxSerializationContext {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxSerializationRegistry {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxCollection {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxTypeInfo {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxFEMSoftBodyMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxFEMClothMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxPBDMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxFLIPMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxMPMMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxCustomMaterial {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxConvexMesh {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxTriangleMesh {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxBVH33TriangleMesh {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxBVH34TriangleMesh {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxTetrahedronMesh {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxHeightField {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxActor {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxRigidActor {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxRigidBody {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxRigidDynamic {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxRigidStatic {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxArticulationLink {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxArticulationJointReducedCoordinate {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxArticulationReducedCoordinate {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxAggregate {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxConstraint {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxShape {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxPruningStructure {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxParticleSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxPBDParticleSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxFLIPParticleSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxMPMParticleSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxCustomParticleSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxSoftBody {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxFEMCloth {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxHairSystem {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxParticleBuffer {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxParticleAndDiffuseBuffer {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxParticleClothBuffer {
+    _unused: [u8; 0],
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct PxParticleRigidBuffer {
+    _unused: [u8; 0],
+}
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub union Px1DConstraintMods {
+    pub spring: PxSpringModifiers,
+    pub bounce: PxRestitutionModifiers,
+}
+#[cfg(feature = "debug-structs")]
+impl std::fmt::Debug for Px1DConstraintMods {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Px1DConstraintMods")
+    }
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxConstraintVisualizer {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxConstraintConnector {
+    vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxConstraintAllocator {
+    vtable_: *const std::ffi::c_void,
+}
+

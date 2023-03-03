@@ -35,10 +35,14 @@ unsafe {
         z: 0.0,
     };
 
-    let dispatcher = PxDefaultCpuDispatcherCreate(2, null_mut());
-
-    scene_desc.cpuDispatcher = dispatcher as *mut PxCpuDispatcher;
-    scene_desc.filterShader = Some(PxDefaultSimulationFilterShader);
+    let dispatcher = phys_PxDefaultCpuDispatcherCreate(
+        1,
+        null_mut(),
+        PxDefaultCpuDispatcherWaitForWorkMode::WaitForWork,
+        0,
+    );
+    scene_desc.cpuDispatcher = dispatcher.cast();
+    scene_desc.filterShader = get_default_simulation_filter_shader();
 
     let scene = PxPhysics_createScene_mut(physics, &scene_desc);
 
@@ -75,7 +79,7 @@ A simple example to showcase how to use physx-sys. It can be run with `cargo run
 
 ## How it works
 
-The binding is generated using a custom C++ app written against clang's [libtooling](https://clang.llvm.org/docs/LibTooling.html). It queries the compiler's abstract syntax tree, and maps the C++ PhysX functions and types to Rust using heuristics chosen specifically for this SDK. It is not a general C++ <-> Rust binding generator, and using it on other projects *will* likely crash and burn.
+The binding is generated using a custom Rust app that parses the abstract syntax tree of the SDK, and maps the C++ PhysX functions and types to Rust using heuristics chosen specifically for this SDK. It is not a general C++ <-> Rust binding generator, and using it on other projects *will* likely crash and burn.
 
 Since C++ does not have a standardized and stable ABI, it's generally not safe to call it from Rust code; since PhysX exposes a C++ interface, we can't use it directly. That's why `physx-sys` generates both a Rust interface as well as a plain C wrapper. The C code is compiled into a static library at build time, and Rust then talks to C.
 
@@ -90,8 +94,6 @@ The build process comprises a few steps:
 
 Steps *2..4* are performed completely automatically from within `build.rs`, while step *1* is only necessary when upgrading the PhysX SDK or modifying the generator. As such, building and running `pxbind` is a manual task, and is currently only supported on \*nix systems.
 
-Since `pxbind` relies on unstable clang internals only specific clang/llvm versions are supported to build it. Currently supported versions are `llvm-14` and `libclang-14-dev`. You may find it working with other versions but it's not guarenteed.
-
 ## License
 
 Licensed under either of
@@ -101,16 +103,7 @@ Licensed under either of
 
 at your option.
 
-Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
-
-If you use [`cargo deny`](https://github.com/EmbarkStudios/cargo-deny), you can use this clarification in your configuration, at least until [crates.io supports parentheses](https://github.com/rust-lang/crates.io/issues/2595).
-
-```ini
-[[licenses.clarify]]
-name = "physx-sys"
-expression = "(MIT OR Apache-2.0) AND BSD-3-Clause"
-license-files = [{ path = "LICENSE", hash = 0xe326546e }]
-```
+Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](LICENSE-BSD).
 
 ### Contribution
 

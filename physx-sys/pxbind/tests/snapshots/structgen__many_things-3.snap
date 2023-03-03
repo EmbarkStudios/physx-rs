@@ -1,0 +1,324 @@
+---
+source: physx-sys/pxbind/tests/structgen.rs
+expression: generated.rust
+---
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxDeserializationContext {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBase {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxRefCounted {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVec3Padded {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub padding: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQuat {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTransform {
+    pub q: PxQuat,
+    pub p: PxVec3,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTransformPadded {
+    pub transform: PxTransform,
+    pub padding: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxPlane {
+    pub n: PxVec3,
+    pub d: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBoxGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub halfExtents: PxVec3,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxSphereGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub radius: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCapsuleGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub radius: f32,
+    pub halfHeight: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxPlaneGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxMat33 {
+    pub column0: PxVec3,
+    pub column1: PxVec3,
+    pub column2: PxVec3,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxMeshScale {
+    pub scale: PxVec3,
+    pub rotation: PxQuat,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxStridedData {
+    pub stride: u32,
+    pub structgen_pad0: [u8; 4],
+    pub data: *const std::ffi::c_void,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBoundedData {
+    pub stride: u32,
+    pub structgen_pad0: [u8; 4],
+    pub data: *const std::ffi::c_void,
+    pub count: u32,
+    pub structgen_pad1: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxHullPolygon {
+    pub mPlane: [f32; 4],
+    pub mNbVerts: u16,
+    pub mIndexBase: u16,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConvexMesh {
+    pub structgen_pad0: [u8; 16],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxConvexMeshGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub scale: PxMeshScale,
+    pub structgen_pad1: [u8; 4],
+    pub convexMesh: *mut PxConvexMesh,
+    pub meshFlags: PxConvexMeshGeometryFlags,
+    pub structgen_pad2: [u8; 7],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTriangleMeshGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub scale: PxMeshScale,
+    pub meshFlags: PxMeshGeometryFlags,
+    pub structgen_pad1: [u8; 3],
+    pub triangleMesh: *mut PxTriangleMesh,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxHeightFieldGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub heightField: *mut PxHeightField,
+    pub heightScale: f32,
+    pub rowScale: f32,
+    pub columnScale: f32,
+    pub heightFieldFlags: PxMeshGeometryFlags,
+    pub structgen_pad1: [u8; 3],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxBounds3 {
+    pub minimum: PxVec3,
+    pub maximum: PxVec3,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxVec4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub w: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxParticleSystemGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub mSolverType: PxParticleSolverType,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxHairSystemGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxTetrahedronMeshGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub tetrahedronMesh: *mut PxTetrahedronMesh,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQueryHit {
+    pub faceIndex: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxLocationHit {
+    pub faceIndex: u32,
+    pub flags: PxHitFlags,
+    pub structgen_pad0: [u8; 2],
+    pub position: PxVec3,
+    pub normal: PxVec3,
+    pub distance: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomRaycastHit {
+    pub faceIndex: u32,
+    pub flags: PxHitFlags,
+    pub structgen_pad0: [u8; 2],
+    pub position: PxVec3,
+    pub normal: PxVec3,
+    pub distance: f32,
+    pub u: f32,
+    pub v: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomOverlapHit {
+    pub faceIndex: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomSweepHit {
+    pub faceIndex: u32,
+    pub flags: PxHitFlags,
+    pub structgen_pad0: [u8; 2],
+    pub position: PxVec3,
+    pub normal: PxVec3,
+    pub distance: f32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeomIndexPair {
+    pub id0: u32,
+    pub id1: u32,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxQueryThreadContext {
+    pub structgen_pad0: [u8; 1],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCustomGeometryType {
+    pub structgen_pad0: [u8; 4],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxCustomGeometry {
+    pub structgen_pad0: [u8; 4],
+    pub mTypePadding: f32,
+    pub callbacks: *mut PxCustomGeometryCallbacks,
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxGeometryHolder {
+    pub structgen_pad0: [u8; 56],
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+pub struct PxShape {
+    pub structgen_pad0: [u8; 16],
+    pub userData: *mut std::ffi::c_void,
+}
+#[cfg(test)]
+mod sizes {
+    #[test]
+    fn check_sizes() {
+        assert_eq!(std::mem::size_of::<PxDeserializationContext>(), 16);
+        assert_eq!(std::mem::size_of::<PxBase>(), 16);
+        assert_eq!(std::mem::size_of::<PxRefCounted>(), 16);
+        assert_eq!(std::mem::size_of::<PxGeometry>(), 8);
+        assert_eq!(std::mem::size_of::<PxVec3>(), 12);
+        assert_eq!(std::mem::size_of::<PxVec3Padded>(), 16);
+        assert_eq!(std::mem::size_of::<PxQuat>(), 16);
+        assert_eq!(std::mem::size_of::<PxTransform>(), 28);
+        assert_eq!(std::mem::size_of::<PxTransformPadded>(), 32);
+        assert_eq!(std::mem::size_of::<PxPlane>(), 16);
+        assert_eq!(std::mem::size_of::<PxBoxGeometry>(), 20);
+        assert_eq!(std::mem::size_of::<PxSphereGeometry>(), 12);
+        assert_eq!(std::mem::size_of::<PxCapsuleGeometry>(), 16);
+        assert_eq!(std::mem::size_of::<PxPlaneGeometry>(), 8);
+        assert_eq!(std::mem::size_of::<PxMat33>(), 36);
+        assert_eq!(std::mem::size_of::<PxMeshScale>(), 28);
+        assert_eq!(std::mem::size_of::<PxStridedData>(), 16);
+        assert_eq!(std::mem::size_of::<PxBoundedData>(), 24);
+        assert_eq!(std::mem::size_of::<PxHullPolygon>(), 20);
+        assert_eq!(std::mem::size_of::<PxConvexMesh>(), 16);
+        assert_eq!(std::mem::size_of::<PxConvexMeshGeometry>(), 56);
+        assert_eq!(std::mem::size_of::<PxTriangleMeshGeometry>(), 48);
+        assert_eq!(std::mem::size_of::<PxHeightFieldGeometry>(), 32);
+        assert_eq!(std::mem::size_of::<PxBounds3>(), 24);
+        assert_eq!(std::mem::size_of::<PxVec4>(), 16);
+        assert_eq!(std::mem::size_of::<PxParticleSystemGeometry>(), 12);
+        assert_eq!(std::mem::size_of::<PxHairSystemGeometry>(), 8);
+        assert_eq!(std::mem::size_of::<PxTetrahedronMeshGeometry>(), 16);
+        assert_eq!(std::mem::size_of::<PxQueryHit>(), 4);
+        assert_eq!(std::mem::size_of::<PxLocationHit>(), 36);
+        assert_eq!(std::mem::size_of::<PxGeomRaycastHit>(), 44);
+        assert_eq!(std::mem::size_of::<PxGeomOverlapHit>(), 4);
+        assert_eq!(std::mem::size_of::<PxGeomSweepHit>(), 36);
+        assert_eq!(std::mem::size_of::<PxGeomIndexPair>(), 8);
+        assert_eq!(std::mem::size_of::<PxQueryThreadContext>(), 1);
+        assert_eq!(std::mem::size_of::<PxCustomGeometryType>(), 4);
+        assert_eq!(std::mem::size_of::<PxCustomGeometry>(), 16);
+        assert_eq!(std::mem::size_of::<PxGeometryHolder>(), 56);
+        assert_eq!(std::mem::size_of::<PxShape>(), 24);
+    }
+}
+

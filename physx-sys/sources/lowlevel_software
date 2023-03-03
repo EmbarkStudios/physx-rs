@@ -4,7 +4,6 @@
     "PxsContext",
     "PxsDefaultMemoryManager",
     "PxsIslandSim",
-    "PxsMaterialCombiner",
     "PxsNphaseImplementationContext",
     "PxsSimpleIslandManager",
 ]

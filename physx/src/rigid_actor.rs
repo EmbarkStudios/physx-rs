@@ -2,26 +2,17 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 15 April 2019
 
-#![warn(clippy::all)]
-
-/*!
-Trait for RigidActor
- */
-
 use super::{
     actor::Actor,
     constraint::Constraint,
     math::{PxQuat, PxTransform, PxVec3},
-    shape::CollisionLayer,
-    shape::Shape,
+    shape::{CollisionLayers, Shape},
     traits::Class,
 };
-use enumflags2::BitFlags;
 
+#[rustfmt::skip]
 use physx_sys::{
     PxRigidActor,
-    //PxContactPair,
-    //PxContactPairPoint,
     PxRigidActor_attachShape_mut,
     PxRigidActor_detachShape_mut,
     PxRigidActor_getConstraints,
@@ -30,7 +21,6 @@ use physx_sys::{
     PxRigidActor_getNbShapes,
     PxRigidActor_getShapes,
     PxRigidActor_setGlobalPose_mut,
-    //PxRigidActor_release_mut,
 };
 
 pub trait RigidActor: Class<PxRigidActor> + Actor {
@@ -119,8 +109,8 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
     /// Set the collision filter. Collisions will only occur if this_layers & other_layers != 0.
     fn set_collision_filter(
         &mut self,
-        this_layers: BitFlags<CollisionLayer>,
-        other_layers: BitFlags<CollisionLayer>,
+        this_layers: CollisionLayers,
+        other_layers: CollisionLayers,
         word3: u32,
         word4: u32,
     ) {
@@ -130,7 +120,7 @@ pub trait RigidActor: Class<PxRigidActor> + Actor {
     }
 
     /// Set the query filter. Queries will only find this item if queried with one of the flags.
-    fn set_query_filter(&mut self, this_layers: BitFlags<CollisionLayer>) {
+    fn set_query_filter(&mut self, this_layers: CollisionLayers) {
         for shape in self.get_shapes_mut() {
             shape.set_query_filter_data(this_layers);
         }

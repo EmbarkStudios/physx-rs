@@ -1,0 +1,56 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.cpp
+---
+extern "C" {
+    physx_PxFilterData_Pod PxFilterData_new(int32_t anon_param0_pod) {
+        auto anon_param0 = static_cast<physx::PxEMPTY>(anon_param0_pod);
+        PxFilterData return_val(anon_param0);
+        physx_PxFilterData_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    physx_PxFilterData_Pod PxFilterData_new_1() {
+        PxFilterData return_val;
+        physx_PxFilterData_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    physx_PxFilterData_Pod PxFilterData_new_2(uint32_t w0, uint32_t w1, uint32_t w2, uint32_t w3) {
+        PxFilterData return_val(w0, w1, w2, w3);
+        physx_PxFilterData_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    void PxFilterData_setToDefault_mut(physx_PxFilterData_Pod* self__pod) {
+        physx::PxFilterData* self_ = reinterpret_cast<physx::PxFilterData*>(self__pod);
+        self_->setToDefault();
+    }
+
+    physx_PxBoxControllerDesc_Pod* PxBoxControllerDesc_new_alloc() {
+        auto return_val = new physx::PxBoxControllerDesc();
+        auto return_val_pod = reinterpret_cast<physx_PxBoxControllerDesc_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    void PxBoxControllerDesc_delete(physx_PxBoxControllerDesc_Pod* self__pod) {
+        physx::PxBoxControllerDesc* self_ = reinterpret_cast<physx::PxBoxControllerDesc*>(self__pod);
+        delete self_;
+    }
+
+    void PxBoxControllerDesc_setToDefault_mut(physx_PxBoxControllerDesc_Pod* self__pod) {
+        physx::PxBoxControllerDesc* self_ = reinterpret_cast<physx::PxBoxControllerDesc*>(self__pod);
+        self_->setToDefault();
+    }
+
+    bool PxBoxControllerDesc_isValid(physx_PxBoxControllerDesc_Pod const* self__pod) {
+        physx::PxBoxControllerDesc const* self_ = reinterpret_cast<physx::PxBoxControllerDesc const*>(self__pod);
+        bool return_val = self_->isValid();
+        return return_val;
+    }
+
+}
+

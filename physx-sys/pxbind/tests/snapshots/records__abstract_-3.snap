@@ -1,0 +1,12 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.rust_decls
+---
+
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+#[repr(C)]
+pub struct PxAllocatorCallback {
+    vtable_: *const std::ffi::c_void,
+}
+

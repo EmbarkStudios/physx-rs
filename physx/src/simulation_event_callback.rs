@@ -1,14 +1,26 @@
 use std::{ffi::c_void, marker::PhantomData, ptr::null_mut, slice};
 
+#[rustfmt::skip]
 use crate::{
-    actor::ActorMap, articulation_link::ArticulationLink, math::PxTransform, owner::Owner,
-    rigid_body::RigidBodyMap, rigid_dynamic::RigidDynamic, rigid_static::RigidStatic,
+    actor::ActorMap,
+    articulation_link::ArticulationLink,
+    math::PxTransform,
+    owner::Owner,
+    rigid_body::RigidBodyMap,
+    rigid_dynamic::RigidDynamic,
+    rigid_static::RigidStatic,
     traits::Class,
 };
 
+#[rustfmt::skip]
 use physx_sys::{
-    create_simulation_event_callbacks, destroy_simulation_event_callbacks,
-    get_simulation_event_info, PxConstraintInfo, PxContactPair, PxContactPairHeader, PxTriggerPair,
+    create_simulation_event_callbacks,
+    destroy_simulation_event_callbacks,
+    get_simulation_event_info,
+    PxConstraintInfo,
+    PxContactPair,
+    PxContactPairHeader,
+    PxTriggerPair,
     SimulationEventCallbackInfo,
 };
 
@@ -165,11 +177,13 @@ trait CollisionCallbackRaw: CollisionCallback {
         pairs: *const physx_sys::PxContactPair,
         nb_pairs: u32,
     ) {
-        Self::on_collision(
-            &mut *(user_data as *mut Self),
-            &*header,
-            slice::from_raw_parts(pairs, nb_pairs as usize),
-        )
+        unsafe {
+            Self::on_collision(
+                &mut *(user_data as *mut Self),
+                &*header,
+                slice::from_raw_parts(pairs, nb_pairs as usize),
+            )
+        }
     }
 
     fn into_cb_user_data(self) -> (Option<physx_sys::CollisionCallback>, *mut c_void) {
@@ -193,10 +207,12 @@ trait TriggerCallbackRaw: TriggerCallback {
         pairs: *const physx_sys::PxTriggerPair,
         nb_pairs: u32,
     ) {
-        Self::on_trigger(
-            &mut *(user_data as *mut Self),
-            slice::from_raw_parts(pairs, nb_pairs as usize),
-        )
+        unsafe {
+            Self::on_trigger(
+                &mut *(user_data as *mut Self),
+                slice::from_raw_parts(pairs, nb_pairs as usize),
+            )
+        }
     }
 
     fn into_cb_user_data(self) -> (Option<physx_sys::TriggerCallback>, *mut c_void) {
@@ -220,10 +236,12 @@ trait ConstraintBreakCallbackRaw: ConstraintBreakCallback {
         constraints: *const physx_sys::PxConstraintInfo,
         nb_constraints: u32,
     ) {
-        Self::on_constraint_break(
-            &mut *(this as *mut Self),
-            slice::from_raw_parts(constraints, nb_constraints as usize),
-        )
+        unsafe {
+            Self::on_constraint_break(
+                &mut *(this as *mut Self),
+                slice::from_raw_parts(constraints, nb_constraints as usize),
+            )
+        }
     }
 
     fn into_cb_user_data(self) -> (Option<physx_sys::ConstraintBreakCallback>, *mut c_void) {
@@ -261,11 +279,13 @@ where
         nb_actors: u32,
         is_waking: bool,
     ) {
-        Self::on_wake_sleep(
-            &mut *(this as *mut Self),
-            slice::from_raw_parts(actors as *const &ActorMap<L, S, D>, nb_actors as usize),
-            is_waking,
-        );
+        unsafe {
+            Self::on_wake_sleep(
+                &mut *(this as *mut Self),
+                slice::from_raw_parts(actors as *const &ActorMap<L, S, D>, nb_actors as usize),
+                is_waking,
+            );
+        }
     }
 
     fn into_cb_user_data(self) -> (Option<physx_sys::WakeSleepCallback>, *mut c_void) {
@@ -304,11 +324,13 @@ where
         transforms: *const physx_sys::PxTransform,
         nb_actors: u32,
     ) {
-        Self::on_advance(
-            &*(this as *const _ as *const Self),
-            slice::from_raw_parts(bodies as *const &RigidBodyMap<L, D>, nb_actors as usize),
-            slice::from_raw_parts(transforms as *const PxTransform, nb_actors as usize),
-        )
+        unsafe {
+            Self::on_advance(
+                &*(this as *const _ as *const Self),
+                slice::from_raw_parts(bodies as *const &RigidBodyMap<L, D>, nb_actors as usize),
+                slice::from_raw_parts(transforms as *const PxTransform, nb_actors as usize),
+            )
+        }
     }
 
     fn into_cb_user_data(self) -> (Option<physx_sys::AdvanceCallback>, *mut c_void) {

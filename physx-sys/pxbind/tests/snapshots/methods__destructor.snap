@@ -1,0 +1,43 @@
+---
+source: physx-sys/pxbind/tests/methods.rs
+expression: mo.cpp
+---
+extern "C" {
+    physx_PxJointLimitParameters_Pod* PxJointLimitParameters_new_alloc() {
+        auto return_val = new physx::PxJointLimitParameters();
+        auto return_val_pod = reinterpret_cast<physx_PxJointLimitParameters_Pod*>(return_val);
+        return return_val_pod;
+    }
+
+    bool PxJointLimitParameters_isValid(physx_PxJointLimitParameters_Pod const* self__pod) {
+        physx::PxJointLimitParameters const* self_ = reinterpret_cast<physx::PxJointLimitParameters const*>(self__pod);
+        bool return_val = self_->isValid();
+        return return_val;
+    }
+
+    bool PxJointLimitParameters_isSoft(physx_PxJointLimitParameters_Pod const* self__pod) {
+        physx::PxJointLimitParameters const* self_ = reinterpret_cast<physx::PxJointLimitParameters const*>(self__pod);
+        bool return_val = self_->isSoft();
+        return return_val;
+    }
+
+    physx_PxJointAngularLimitPair_Pod PxJointAngularLimitPair_new(float lowerLimit, float upperLimit, float contactDist_deprecated) {
+        PxJointAngularLimitPair return_val(lowerLimit, upperLimit, contactDist_deprecated);
+        physx_PxJointAngularLimitPair_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    bool PxJointAngularLimitPair_isValid(physx_PxJointAngularLimitPair_Pod const* self__pod) {
+        physx::PxJointAngularLimitPair const* self_ = reinterpret_cast<physx::PxJointAngularLimitPair const*>(self__pod);
+        bool return_val = self_->isValid();
+        return return_val;
+    }
+
+    void PxJointAngularLimitPair_delete(physx_PxJointAngularLimitPair_Pod* self__pod) {
+        physx::PxJointAngularLimitPair* self_ = reinterpret_cast<physx::PxJointAngularLimitPair*>(self__pod);
+        delete self_;
+    }
+
+}
+

@@ -381,7 +381,7 @@ extern "C"
 
     PxPhysics *physx_create_physics(PxFoundation *foundation)
     {
-        return PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(), true, nullptr);
+        return PxCreatePhysics(PX_PHYSICS_VERSION, *foundation, PxTolerancesScale(), true, nullptr, nullptr);
     }
 
     PxQueryFilterCallback *create_raycast_filter_callback(PxRigidActor *actor_to_ignore)

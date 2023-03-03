@@ -1,0 +1,10 @@
+---
+source: physx-sys/pxbind/tests/records.rs
+expression: ro.size_asserts
+---
+using namespace physx;
+#include "structgen_out.hpp"
+
+static_assert(sizeof(physx::PxReffyMcRefface) == sizeof(physx_PxReffyMcRefface_Pod), "POD wrapper for `physx::PxReffyMcRefface` has incorrect size");
+
+

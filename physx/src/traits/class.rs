@@ -1,15 +1,12 @@
 // PxBase hierarchy
+#[rustfmt::skip]
 use physx_sys::{
     PxActor,
     PxAggregate,
-    PxArticulation,
-    PxArticulationBase,
-    PxArticulationJoint,
-    PxArticulationJointBase,
     PxArticulationJointReducedCoordinate,
     PxArticulationLink,
     PxArticulationReducedCoordinate,
-    PxBVHStructure,
+    PxBVH,
     PxBase,
     PxConstraint,
     PxContactJoint,
@@ -22,6 +19,7 @@ use physx_sys::{
     PxMaterial,
     PxPrismaticJoint,
     PxPruningStructure,
+    PxRefCounted,
     PxRevoluteJoint,
     PxRigidActor,
     PxRigidBody,
@@ -30,34 +28,54 @@ use physx_sys::{
     PxShape,
     PxSphericalJoint,
     PxTriangleMesh,
-    PxVehicleDrive,
-    PxVehicleDrive4W,
-    PxVehicleDriveNW,
-    PxVehicleDriveTank,
-    //PxBVH34TriangleMesh, // Doesn't exist?
-    //PxBVH33TriangleMesh, // Doesn't exist?
-    PxVehicleNoDrive,
-    PxVehicleWheels,
 };
 
 // Main classes
+#[rustfmt::skip]
 use physx_sys::{
-    PxCooking, PxFoundation, PxPhysics, PxPvd, PxPvdSceneClient, PxPvdTransport, PxScene,
+    PxCooking,
+    PxFoundation,
+    PxPhysics,
+    PxPvd,
+    PxPvdSceneClient,
+    PxPvdTransport,
+    PxScene,
 };
 
 // Controller stuff
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxController, PxBoxControllerDesc, PxCapsuleController, PxCapsuleControllerDesc,
-    PxController, PxControllerDesc, PxControllerManager,
+    PxBoxController,
+    PxBoxControllerDesc,
+    PxCapsuleController,
+    PxCapsuleControllerDesc,
+    PxController,
+    PxControllerDesc,
+    PxControllerManager,
 };
 
 // Math
-use physx_sys::{PxBounds3, PxExtendedVec3, PxMeshScale, PxQuat, PxTransform, PxVec3};
+#[rustfmt::skip]
+use physx_sys::{
+    PxBounds3,
+    PxExtendedVec3,
+    PxMeshScale,
+    PxQuat,
+    PxTransform,
+    PxVec3,
+};
 
 // Geometries
+#[rustfmt::skip]
 use physx_sys::{
-    PxBoxGeometry, PxCapsuleGeometry, PxConvexMeshGeometry, PxGeometry, PxHeightFieldGeometry,
-    PxPlaneGeometry, PxSphereGeometry, PxTriangleMeshGeometry,
+    PxBoxGeometry,
+    PxCapsuleGeometry,
+    PxConvexMeshGeometry,
+    PxGeometry,
+    PxHeightFieldGeometry,
+    PxPlaneGeometry,
+    PxSphereGeometry,
+    PxTriangleMeshGeometry,
 };
 
 // Misc
@@ -95,9 +113,12 @@ pub unsafe trait Class<S> {
 macro_rules! DeriveClassForNewType {
     ($PxWrap:ident : $($PxClass:ident),+) => {
         $(unsafe impl Class<::physx_sys::$PxClass> for $PxWrap {
+            #[inline]
             fn as_ptr(&self) -> *const ::physx_sys::$PxClass {
                 &self.obj as *const _ as *const _
             }
+
+            #[inline]
             fn as_mut_ptr(&mut self) -> *mut ::physx_sys::$PxClass {
                 &mut self.obj as *mut _ as *mut _
             }
@@ -109,18 +130,24 @@ macro_rules! DeriveClassForNewType {
 macro_rules! DeriveClass {
     ($PxType:ty $(: $($PxClass:ty),*)?) => {
         unsafe impl Class<$PxType> for $PxType {
+            #[inline]
             fn as_ptr(&self) -> *const $PxType {
                 self
             }
+
+            #[inline]
             fn as_mut_ptr(&mut self) -> *mut $PxType {
                 self
             }
         }
 
         $($(unsafe impl Class<$PxClass> for $PxType {
+            #[inline]
             fn as_ptr(&self) -> *const $PxClass {
                 self as *const _ as *const _
             }
+
+            #[inline]
             fn as_mut_ptr(&mut self) -> *mut $PxClass {
                 self as *mut _ as *mut _
             }
@@ -141,16 +168,9 @@ DeriveClass!(
     PxBase
 );
 DeriveClass!(PxAggregate: PxBase);
-DeriveClass!(PxArticulationBase: PxBase);
-DeriveClass!(PxArticulation: PxArticulationBase, PxBase);
-DeriveClass!(PxArticulationReducedCoordinate: PxArticulationBase, PxBase);
-DeriveClass!(PxArticulationJointBase: PxBase);
-DeriveClass!(PxArticulationJoint: PxArticulationJointBase, PxBase);
-DeriveClass!(
-    PxArticulationJointReducedCoordinate: PxArticulationJointBase,
-    PxBase
-);
-DeriveClass!(PxBVHStructure: PxBase);
+DeriveClass!(PxArticulationReducedCoordinate: PxBase);
+DeriveClass!(PxArticulationJointReducedCoordinate: PxBase);
+DeriveClass!(PxBVH: PxBase);
 DeriveClass!(PxConstraint: PxBase);
 DeriveClass!(PxConvexMesh: PxBase);
 DeriveClass!(PxHeightField: PxBase);
@@ -162,16 +182,10 @@ DeriveClass!(PxFixedJoint: PxJoint, PxBase);
 DeriveClass!(PxPrismaticJoint: PxJoint, PxBase);
 DeriveClass!(PxRevoluteJoint: PxJoint, PxBase);
 DeriveClass!(PxSphericalJoint: PxJoint, PxBase);
-DeriveClass!(PxMaterial: PxBase);
+DeriveClass!(PxMaterial: PxRefCounted, PxBase);
 DeriveClass!(PxPruningStructure: PxBase);
-DeriveClass!(PxShape: PxBase);
+DeriveClass!(PxShape: PxRefCounted, PxBase);
 DeriveClass!(PxTriangleMesh: PxBase);
-DeriveClass!(PxVehicleWheels: PxBase);
-DeriveClass!(PxVehicleNoDrive: PxVehicleWheels, PxBase);
-DeriveClass!(PxVehicleDrive: PxVehicleWheels, PxBase);
-DeriveClass!(PxVehicleDrive4W: PxVehicleDrive, PxVehicleWheels, PxBase);
-DeriveClass!(PxVehicleDriveNW: PxVehicleDrive, PxVehicleWheels, PxBase);
-DeriveClass!(PxVehicleDriveTank: PxVehicleDrive, PxVehicleWheels, PxBase);
 
 DeriveClass!(PxFoundation);
 DeriveClass!(PxPhysics);
@@ -202,17 +216,23 @@ macro_rules! DeriveClassForGeometries {
     ($($Px: ty,)*) => {
         $(
             unsafe impl Class<$Px> for $Px {
+                #[inline]
                 fn as_ptr(&self) -> *const $Px {
                     self
                 }
+
+                #[inline]
                 fn as_mut_ptr(&mut self) -> *mut $Px {
                     self
                 }
             }
             unsafe impl Class<PxGeometry> for $Px {
+                #[inline]
                 fn as_ptr(&self) -> *const PxGeometry {
                     self as *const _ as *const _
                 }
+
+                #[inline]
                 fn as_mut_ptr(&mut self) -> *mut PxGeometry {
                     self as *mut _ as *mut _
                 }

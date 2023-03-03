@@ -3,13 +3,26 @@ use crate::{
     traits::Class,
 };
 
-//pub use physx_sys::PxTransform;
+#[rustfmt::skip]
 use physx_sys::{
-    PxPlane, PxTransform_getInverse, PxTransform_getNormalized, PxTransform_inverseTransform,
-    PxTransform_isFinite, PxTransform_isSane, PxTransform_isValid, PxTransform_new_1,
-    PxTransform_new_2, PxTransform_new_3, PxTransform_new_5, PxTransform_rotate,
-    PxTransform_rotateInv, PxTransform_transform, PxTransform_transformInv,
-    PxTransform_transformInv_1, PxTransform_transform_1, PxTransform_transform_2,
+    PxPlane,
+    PxPlane_inverseTransform,
+    PxPlane_transform,
+    PxTransform_getInverse,
+    PxTransform_getNormalized,
+    PxTransform_isFinite,
+    PxTransform_isSane,
+    PxTransform_isValid,
+    PxTransform_new_1,
+    PxTransform_new_2,
+    PxTransform_new_3,
+    PxTransform_new_5,
+    PxTransform_rotate,
+    PxTransform_rotateInv,
+    PxTransform_transform,
+    PxTransform_transformInv,
+    PxTransform_transformInv_1,
+    PxTransform_transform_1,
 };
 
 #[derive(Copy, Clone)]
@@ -24,7 +37,7 @@ impl Default for PxTransform {
     fn default() -> Self {
         unsafe {
             Self {
-                obj: PxTransform_new_2(0),
+                obj: PxTransform_new_2(physx_sys::PxIDENTITY::PxIdentity),
             }
         }
     }
@@ -118,11 +131,11 @@ impl PxTransform {
     }
 
     pub fn transform_plane(&self, plane: &PxPlane) -> PxPlane {
-        unsafe { PxTransform_transform_2(self.as_ptr(), plane) }
+        unsafe { PxPlane_transform(plane, self.as_ptr()) }
     }
 
     pub fn transform_plane_inv(&self, plane: &PxPlane) -> PxPlane {
-        unsafe { PxTransform_inverseTransform(self.as_ptr(), plane) }
+        unsafe { PxPlane_inverseTransform(plane, self.as_ptr()) }
     }
 }
 

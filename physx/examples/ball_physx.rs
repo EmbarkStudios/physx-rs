@@ -8,10 +8,10 @@ use physx::prelude::*;
 /// amount of unsafe in your code, and make it clearer where we cannot abstract
 /// away the underlying dangers.
 ///
-/// The overall goal is to maintain a close mapping to the underlying PhysX API
+/// The overall goal is to maintain a close mapping to the underlying `PhysX` API
 /// while improving safety and reliability of the code.
 
-/// Many of the main types in PhysX have a userData *mut c_void field.
+/// Many of the main types in `PhysX` have a userData `*mut c_void` field.
 /// Representing this safely in Rust requires generics everywhere,
 /// and pre-defining all the generic parameters makes things more usable.
 type PxMaterial = physx::material::PxMaterial<()>;
@@ -19,7 +19,6 @@ type PxShape = physx::shape::PxShape<(), PxMaterial>;
 type PxArticulationLink = physx::articulation_link::PxArticulationLink<(), PxShape>;
 type PxRigidStatic = physx::rigid_static::PxRigidStatic<(), PxShape>;
 type PxRigidDynamic = physx::rigid_dynamic::PxRigidDynamic<(), PxShape>;
-type PxArticulation = physx::articulation::PxArticulation<(), PxArticulationLink>;
 type PxArticulationReducedCoordinate =
     physx::articulation_reduced_coordinate::PxArticulationReducedCoordinate<(), PxArticulationLink>;
 type PxScene = physx::scene::PxScene<
@@ -27,7 +26,6 @@ type PxScene = physx::scene::PxScene<
     PxArticulationLink,
     PxRigidStatic,
     PxRigidDynamic,
-    PxArticulation,
     PxArticulationReducedCoordinate,
     OnCollision,
     OnTrigger,
@@ -117,6 +115,10 @@ fn main() {
     sphere_actor.set_rigid_body_flag(RigidBodyFlag::EnablePoseIntegrationPreview, true);
     scene.add_dynamic_actor(sphere_actor);
 
+    // SAFETY: scratch buffer creation
+    #[allow(unsafe_code)]
+    let mut scratch = unsafe { ScratchBuffer::new(4) };
+
     // Updating
     let heights_over_time = (0..100)
         .map(|_| {
@@ -126,7 +128,7 @@ fn main() {
                 .step(
                     0.1,
                     None::<&mut physx_sys::PxBaseTask>,
-                    Some(unsafe { &mut ScratchBuffer::new(4) }),
+                    Some(&mut scratch),
                     true,
                 )
                 .expect("error occured during simulation");

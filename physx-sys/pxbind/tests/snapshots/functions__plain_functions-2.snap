@@ -1,0 +1,73 @@
+---
+source: physx-sys/pxbind/tests/functions.rs
+expression: mo.rust
+---
+extern "C" {
+    /// Creates a collection object.
+    ///
+    /// Objects can only be serialized or deserialized through a collection.
+    /// For serialization, users must add objects to the collection and serialize the collection as a whole.
+    /// For deserialization, the system gives back a collection of deserialized objects to users.
+    ///
+    /// The new collection object.
+    pub fn phys_PxCreateCollection() -> *mut PxCollection;
+
+    pub fn phys_PxGetAssertHandler() -> *mut PxAssertHandler;
+
+    pub fn phys_PxSetAssertHandler(handler: *mut PxAssertHandler);
+
+    /// Sets the bytes of the provided buffer to zero.
+    ///
+    /// Pointer to memory block (same as input)
+    pub fn phys_PxMemZero(dest: *mut std::ffi::c_void, count: u32) -> *mut std::ffi::c_void;
+
+    /// Sets the bytes of the provided buffer to the specified value.
+    ///
+    /// Pointer to memory block (same as input)
+    pub fn phys_PxMemSet(dest: *mut std::ffi::c_void, c: i32, count: u32) -> *mut std::ffi::c_void;
+
+    /// Copies the bytes of one memory block to another. The memory blocks must not overlap.
+    ///
+    /// Use [`PxMemMove`] if memory blocks overlap.
+    ///
+    /// Pointer to destination memory block
+    pub fn phys_PxMemCopy(dest: *mut std::ffi::c_void, src: *const std::ffi::c_void, count: u32) -> *mut std::ffi::c_void;
+
+    /// Copies the bytes of one memory block to another. The memory blocks can overlap.
+    ///
+    /// Use [`PxMemCopy`] if memory blocks do not overlap.
+    ///
+    /// Pointer to destination memory block
+    pub fn phys_PxMemMove(dest: *mut std::ffi::c_void, src: *const std::ffi::c_void, count: u32) -> *mut std::ffi::c_void;
+
+    /// Mark a specified amount of memory with 0xcd pattern. This is used to check that the meta data
+    /// definition for serialized classes is complete in checked builds.
+    pub fn phys_PxMarkSerializedMemory(ptr: *mut std::ffi::c_void, byteSize: u32);
+
+    /// For internal use
+    pub fn phys_PxCustomGeometry_getUniqueID() -> u32;
+
+    pub fn phys_PxGetAggregateFilterHint(type_: PxAggregateType, enableSelfCollision: bool) -> u32;
+
+    pub fn phys_PxGetAggregateSelfCollisionBit(hint: u32) -> u32;
+
+    pub fn phys_PxGetAggregateType(hint: u32) -> PxAggregateType;
+
+    /// Creates an instance of the physics SDK.
+    ///
+    /// Creates an instance of this class. May not be a class member to avoid name mangling.
+    /// Pass the constant [`PX_PHYSICS_VERSION`] as the argument.
+    /// There may be only one instance of this class per process. Calling this method after an instance
+    /// has been created already will result in an error message and NULL will be returned.
+    ///
+    /// Calling this will register all optional code modules (Articulations and HeightFields), preparing them for use.
+    /// If you do not need some of these modules, consider calling PxCreateBasePhysics() instead and registering needed
+    /// modules manually.
+    ///
+    /// PxPhysics instance on success, NULL if operation failed
+    pub fn phys_PxCreatePhysics(version: u32, foundation: *mut PxFoundation, scale: *const PxTolerancesScale, trackOutstandingAllocations: bool, pvd: *mut PxPvd, omniPvd: *mut PxOmniPvd) -> *mut PxPhysics;
+
+    pub fn phys_PxGetPhysics() -> *mut PxPhysics;
+
+}
+
