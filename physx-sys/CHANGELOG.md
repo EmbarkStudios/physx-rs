@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.10.0] - 2023-03-03
 ### Changed
 - [PR#183](https://github.com/EmbarkStudios/physx-rs/pull/183) resolved [#175](https://github.com/EmbarkStudios/physx-rs/issues/175) by upgrading from PhysX 4.1 to PhysX 5.1.3. See the [physx-sys](migration-4-5.md) migration guide for more information for updating your code to work with this big breaking change.
 
@@ -161,7 +162,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.2...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.10.0...HEAD
+[0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.2...physx-sys-v0.10.0
 [0.8.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.1...physx-sys-v0.8.2
 [0.8.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.0...physx-sys-v0.8.1
 [0.8.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.7.0...physx-sys-v0.8.0
