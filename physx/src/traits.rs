@@ -4,6 +4,7 @@
 
 mod class;
 pub use class::Class;
+pub(crate) use class::DeriveClassForNewType;
 
 mod user_data;
 pub(crate) use user_data::UserData;

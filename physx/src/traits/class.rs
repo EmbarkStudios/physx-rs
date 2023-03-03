@@ -106,7 +106,6 @@ pub unsafe trait Class<S> {
     fn as_mut_ptr(&mut self) -> *mut S;
 }
 
-#[macro_export(crate)]
 /// Macro for quickly defining Class<...> impls for new type wrappers.
 /// The type must be repr(transparent), and have the Px object in a field
 /// named obj.  Will not work if the type parameters have trait bounds.
@@ -125,6 +124,8 @@ macro_rules! DeriveClassForNewType {
         })+
     }
 }
+
+pub(crate) use DeriveClassForNewType;
 
 /// Derive Class<T> for the raw Px* types.
 macro_rules! DeriveClass {
