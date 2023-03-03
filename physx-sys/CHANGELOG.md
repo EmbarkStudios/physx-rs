@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.11.0] - 2023-03-03
 ### Changed
 - [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) resolved [#187](https://github.com/EmbarkStudios/physx-rs/issues/187) by replacing the deprecated `PxCooking` class with the non-deprecated free functions that implement the same functionality.
   - phys_PxCreateCooking -> **removed**
@@ -179,7 +180,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.10.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.0...HEAD
+[0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.10.0...physx-sys-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.2...physx-sys-v0.10.0
 [0.8.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.1...physx-sys-v0.8.2
 [0.8.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.0...physx-sys-v0.8.1
