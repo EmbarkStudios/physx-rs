@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.18.0] - 2023-03-03
 ### Changed
 - [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) replaced `PxCooking` with regular functions as `PxCooking` is deprecated in the C++ code.
   - `PxCooking::create_bvh` -> `physx::cooking::create_bvh`
@@ -192,7 +193,8 @@
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.17.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.18.0...HEAD
+[0.18.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.17.0...physx-v0.18.0
 [0.17.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.1...physx-v0.17.0
 [0.16.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.0...physx-v0.16.1
 [0.16.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.15.0...physx-v0.16.0
