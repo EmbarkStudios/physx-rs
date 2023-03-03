@@ -1842,9 +1842,6 @@ struct physx_PxCookingParams_Pod {
     uint32_t gaussMapLimit;
     float maxWeightRatioInTet;
 };
-struct physx_PxCooking_Pod {
-    void* vtable_;
-};
 struct physx_PxDefaultMemoryOutputStream_Pod {
     char structgen_pad0[32];
 };
@@ -2051,6 +2048,7 @@ struct physx_PxRepXObject_Pod {
     void const* serializable;
     uint64_t id;
 };
+struct physx_PxCooking_Pod;
 struct physx_PxRepXInstantiationArgs_Pod {
     char structgen_pad0[8];
     physx_PxCooking_Pod* cooker;

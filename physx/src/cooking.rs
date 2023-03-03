@@ -1,14 +1,16 @@
-// We've deprecated PxCooking...but this is the implementation :p
-#![allow(deprecated)]
-
 use crate::{
-    bvh::Bvh, convex_mesh::ConvexMesh, foundation::Foundation, height_field::HeightField,
-    owner::Owner, physics::Physics, traits::Class, triangle_mesh::TriangleMesh,
+    bvh::Bvh, convex_mesh::ConvexMesh, height_field::HeightField, owner::Owner, physics::Physics,
+    traits::Class, triangle_mesh::TriangleMesh,
 };
 
 #[rustfmt::skip]
 use physx_sys::{
-    phys_PxCreateCooking,
+    phys_PxCreateBVH,
+    phys_PxCreateConvexMesh,
+    phys_PxCreateHeightField,
+    phys_PxCreateTriangleMesh,
+    phys_PxValidateConvexMesh,
+    phys_PxValidateTriangleMesh,
     PxBVHDesc_isValid,
     PxBVHDesc_new,
     PxBVHDesc_setToDefault_mut,
@@ -16,13 +18,6 @@ use physx_sys::{
     PxConvexMeshDesc_new,
     PxConvexMeshDesc_setToDefault_mut,
     PxCookingParams_new,
-    PxCooking_createBVH,
-    PxCooking_createConvexMesh,
-    PxCooking_createHeightField,
-    PxCooking_createTriangleMesh,
-    PxCooking_release_mut,
-    PxCooking_validateConvexMesh,
-    PxCooking_validateTriangleMesh,
     PxHeightFieldDesc_isValid,
     PxHeightFieldDesc_new,
     PxHeightFieldDesc_setToDefault_mut,
@@ -31,135 +26,112 @@ use physx_sys::{
     PxTriangleMeshDesc_setToDefault_mut,
 };
 
-/// A new-type wrapper around `physx_sys::PxCooking`.
-#[deprecated(
-    since = "0.15.0",
-    note = "The PxCooking interface has been deprecated, but for the initial upgrade to PhysX 5 we still support it"
-)]
-pub struct PxCooking {
-    obj: physx_sys::PxCooking,
-}
-
-unsafe impl Class<physx_sys::PxCooking> for PxCooking {
-    fn as_ptr(&self) -> *const physx_sys::PxCooking {
-        &self.obj
-    }
-
-    fn as_mut_ptr(&mut self) -> *mut physx_sys::PxCooking {
-        &mut self.obj
+/// Cooks and creates a bounding volume hierarchy without going through a stream.
+///
+/// This method does the same as `cook_bvh`, but the produced BVH is not stored
+/// into a stream but is directly inserted into the provided `Physics`.
+///
+/// A [`crate::Bvh`] object on success
+#[inline]
+pub fn create_bvh(physics: &mut impl Physics, desc: &PxBVHDesc) -> Option<Owner<Bvh>> {
+    unsafe {
+        Bvh::from_raw(phys_PxCreateBVH(
+            desc.as_ptr(),
+            physics.get_physics_insertion_callback()?,
+        ))
     }
 }
 
-impl Drop for PxCooking {
-    fn drop(&mut self) {
-        unsafe { PxCooking_release_mut(self.as_mut_ptr()) }
-    }
-}
-
-unsafe impl Send for PxCooking {}
-unsafe impl Sync for PxCooking {}
-
-impl PxCooking {
-    /// Create a new cooking instance.
-    pub fn new(foundation: &mut impl Foundation, params: &PxCookingParams) -> Option<Owner<Self>> {
-        unsafe {
-            Owner::from_raw(phys_PxCreateCooking(
-                crate::physics::PX_PHYSICS_VERSION,
-                foundation.as_mut_ptr(),
+/// Cooks and creates a convex mesh without going through a stream.
+///
+/// This method does the same as `cook_convex_mesh`, but the produced mesh is not
+/// stored into a stream but but is directly inserted into the provided `Physics`.
+#[inline]
+pub fn create_convex_mesh(
+    physics: &mut impl Physics,
+    params: &PxCookingParams,
+    desc: &PxConvexMeshDesc,
+) -> ConvexMeshCookingResult {
+    if !desc.is_valid() {
+        return ConvexMeshCookingResult::InvalidDescriptor;
+    };
+    if let Some(callback) = physics.get_physics_insertion_callback() {
+        let mut result = ConvRes::Failure;
+        let ptr = unsafe {
+            ConvexMesh::from_raw(phys_PxCreateConvexMesh(
                 params.as_ptr(),
-            ) as *mut _)
-        }
-    }
-
-    /// Cook a new BVH
-    pub fn create_bvh(&self, physics: &mut impl Physics, desc: &PxBVHDesc) -> Option<Owner<Bvh>> {
-        unsafe {
-            Bvh::from_raw(PxCooking_createBVH(
-                self.as_ptr(),
                 desc.as_ptr(),
-                physics.get_physics_insertion_callback()?,
+                callback,
+                &mut result,
             ))
-        }
-    }
-
-    /// Cook a new convex mesh using a mesh descriptor.
-    /// The data provided in the mesh descriptor should be validated by [`PxCooking::validate_convex_mesh`] before being
-    /// passed into this method.
-    pub fn create_convex_mesh(
-        &self,
-        physics: &mut impl Physics,
-        desc: &PxConvexMeshDesc,
-    ) -> ConvexMeshCookingResult {
-        if !desc.is_valid() {
-            return ConvexMeshCookingResult::InvalidDescriptor;
         };
-        if let Some(callback) = physics.get_physics_insertion_callback() {
-            let mut result = ConvRes::Failure;
-            let ptr = unsafe {
-                ConvexMesh::from_raw(PxCooking_createConvexMesh(
-                    self.as_ptr(),
-                    desc.as_ptr(),
-                    callback,
-                    &mut result,
-                ))
-            };
-            ConvexMeshCookingResult::from_raw(result, ptr)
-        } else {
-            ConvexMeshCookingResult::Failure
-        }
+        ConvexMeshCookingResult::from_raw(result, ptr)
+    } else {
+        ConvexMeshCookingResult::Failure
     }
+}
 
-    /// Cook a new height field.
-    pub fn create_height_field(
-        &self,
-        physics: &mut impl Physics,
-        desc: &PxHeightFieldDesc,
-    ) -> Option<Owner<HeightField>> {
-        unsafe {
-            HeightField::from_raw(PxCooking_createHeightField(
-                self.as_ptr(),
+/// Cooks and creates a heightfield mesh and inserts it into PxPhysics.
+///
+/// PxHeightField pointer on success
+#[inline]
+pub fn create_height_field(
+    physics: &mut impl Physics,
+    desc: &PxHeightFieldDesc,
+) -> Option<Owner<HeightField>> {
+    unsafe {
+        HeightField::from_raw(phys_PxCreateHeightField(
+            desc.as_ptr(),
+            physics.get_physics_insertion_callback()?,
+        ))
+    }
+}
+
+/// Cooks and creates a triangle mesh without going through a stream.
+///
+/// This method does the same as `cook_triangle_mesh`, but the produced mesh is
+/// not stored stored into a stream but but is directly inserted into the provided `Physics`.
+#[inline]
+pub fn create_triangle_mesh(
+    physics: &mut impl Physics,
+    params: &PxCookingParams,
+    desc: &PxTriangleMeshDesc,
+) -> TriangleMeshCookingResult {
+    if !desc.is_valid() {
+        return TriangleMeshCookingResult::InvalidDescriptor;
+    };
+    if let Some(callback) = physics.get_physics_insertion_callback() {
+        let mut result = TriResult::Failure;
+        let ptr = unsafe {
+            TriangleMesh::from_raw(phys_PxCreateTriangleMesh(
+                params.as_ptr(),
                 desc.as_ptr(),
-                physics.get_physics_insertion_callback()?,
+                callback,
+                &mut result,
             ))
-        }
-    }
-
-    /// Cook a new triangle mesh using a mesh descriptor.
-    /// The data provided in the mesh descriptor should be validated by [`PxCooking::validate_triangle_mesh`] before being
-    /// passed into this method.
-    pub fn create_triangle_mesh(
-        &self,
-        physics: &mut impl Physics,
-        desc: &PxTriangleMeshDesc,
-    ) -> TriangleMeshCookingResult {
-        if !desc.is_valid() {
-            return TriangleMeshCookingResult::InvalidDescriptor;
         };
-        if let Some(callback) = physics.get_physics_insertion_callback() {
-            let mut result = TriResult::Failure;
-            let ptr = unsafe {
-                TriangleMesh::from_raw(PxCooking_createTriangleMesh(
-                    self.as_ptr(),
-                    desc.as_ptr(),
-                    callback,
-                    &mut result,
-                ))
-            };
-            TriangleMeshCookingResult::from_raw(result, ptr)
-        } else {
-            TriangleMeshCookingResult::Failure
-        }
+        TriangleMeshCookingResult::from_raw(result, ptr)
+    } else {
+        TriangleMeshCookingResult::Failure
     }
+}
 
-    /// Validate a convex mesh descriptor.
-    pub fn validate_convex_mesh(&self, desc: &PxConvexMeshDesc) -> bool {
-        unsafe { PxCooking_validateConvexMesh(self.as_ptr(), desc.as_ptr()) }
-    }
+/// Validate a convex mesh descriptor.
+#[inline]
+pub fn validate_convex_mesh(params: &PxCookingParams, desc: &PxConvexMeshDesc) -> bool {
+    unsafe { phys_PxValidateConvexMesh(params.as_ptr(), desc.as_ptr()) }
+}
 
-    /// Validate a triangle mesh descriptor.
-    pub fn validate_triangle_mesh(&self, desc: &PxTriangleMeshDesc) -> bool {
-        unsafe { PxCooking_validateTriangleMesh(self.as_ptr(), desc.as_ptr()) }
-    }
+/// Verifies if the triangle mesh is valid. Prints an error message for each inconsistency found.
+///
+/// The following conditions are true for a valid triangle mesh:
+/// 1. There are no duplicate vertices (within specified vertexWeldTolerance. See PxCookingParams::meshWeldTolerance)
+/// 2. There are no large triangles (within specified PxTolerancesScale.)
+///
+/// true if all the validity conditions hold, false otherwise.
+#[inline]
+pub fn validate_triangle_mesh(params: &PxCookingParams, desc: &PxTriangleMeshDesc) -> bool {
+    unsafe { phys_PxValidateTriangleMesh(params.as_ptr(), desc.as_ptr()) }
 }
 
 use physx_sys::PxConvexMeshCookingResult as ConvRes;

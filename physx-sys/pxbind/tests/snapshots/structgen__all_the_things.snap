@@ -2858,7 +2858,6 @@ int main() {
     };
     physx_PxCookingParams_Pod::dump_layout(sg);
 
-    sg.pass_thru("struct physx_PxCooking_Pod {\n    void* vtable_;\n};\n");
     struct physx_PxDefaultMemoryOutputStream_Pod: public physx::PxDefaultMemoryOutputStream {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxDefaultMemoryOutputStream_Pod", "PxDefaultMemoryOutputStream");
@@ -3261,6 +3260,7 @@ int main() {
     };
     physx_PxRepXObject_Pod::dump_layout(sg);
 
+    sg.pass_thru("struct physx_PxCooking_Pod;\n");
     struct physx_PxRepXInstantiationArgs_Pod: public physx::PxRepXInstantiationArgs {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxRepXInstantiationArgs_Pod", "PxRepXInstantiationArgs");
