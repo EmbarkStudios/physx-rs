@@ -4,13 +4,22 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) replaced `PxCooking` with regular functions as `PxCooking` is deprecated in the C++ code.
+  - `PxCooking::create_bvh` -> `physx::cooking::create_bvh`
+  - `PxCooking::create_convex_mesh` -> `physx::cooking::create_convex_mesh`
+  - `PxCooking::validate_convex_mesh` -> `physx::cooking::validate_convex_mesh`
+  - `PxCooking::create_height_field` -> `physx::cooking::create_height_field`
+  - `PxCooking::create_triangle_mesh` -> `physx::cooking::create_triangle_mesh`
+  - `PxCooking::validate_triangle_mesh` -> `physx::cooking::validate_triangle_mesh`
+
 ## [0.17.0] - 2023-03-03
 ### Changed
 - [PR#183](https://github.com/EmbarkStudios/physx-rs/pull/183) resolved [#175](https://github.com/EmbarkStudios/physx-rs/issues/175) by upgrading from PhysX 4.1 to PhysX 5.1.3. See the [physx](migration-4-5.md) migration guide for more information for updating your code to work with this big breaking change.
 
 ## [0.16.1] - 2023-02-17
 ### Fixed
-- [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.66.0.
+- [PR#182](https://github.com/EmbarkStudios/physx-rs/pull/182) fixed a clippy lint that triggers in 1.66.0.
 - [PR#176](https://github.com/EmbarkStudios/physx-rs/pull/176) fixed a clippy lint that triggers in 1.65.0.
 
 ## [0.16.0] - 2022-10-20
