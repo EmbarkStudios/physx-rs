@@ -596,6 +596,9 @@ fn main() {
         structgen.current_dir(&output_dir_path);
         structgen.status().expect("structgen failed to execute, if you are cross compiling to aarch64 you need to have qemu-aarch64 installed");
 
+        println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
+        println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
+
         output_dir_path
     } else {
         let mut include = PathBuf::from("src/generated");
@@ -634,13 +637,10 @@ fn main() {
         .file("src/physx_api.cpp")
         .compile("physx_api");
 
-    println!("cargo:rerun-if-changed=src/structgen/structgen.cpp");
-    println!("cargo:rerun-if-changed=src/structgen/structgen.hpp");
-    println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=src/physx_generated.hpp");
     println!("cargo:rerun-if-changed=src/physx_generated.rs");
     println!("cargo:rerun-if-changed=src/physx_api.cpp");
 
     // TODO: use the cloned git revision number instead
-    println!("cargo:rerun-if-changed=PhysX/physx/include/PxPhysicsVersion.h");
+    println!("cargo:rerun-if-changed=physx/physx/include/foundation/PxPhysicsVersion.h");
 }
