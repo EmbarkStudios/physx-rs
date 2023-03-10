@@ -2,7 +2,7 @@
 
 # 🎳 physx-sys
 
-**Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 4.1](https://github.com/NVIDIAGameWorks/PhysX) C++ API.**
+**Unsafe automatically-generated Rust bindings for [NVIDIA PhysX 5.1](https://github.com/NVIDIA-Omniverse/PhysX) C++ API.**
 
 ![Build Status](https://github.com/EmbarkStudios/physx-rs/workflows/CI/badge.svg)
 [![Crates.io](https://img.shields.io/crates/v/physx-sys.svg)](https://crates.io/crates/physx-sys)
@@ -103,7 +103,7 @@ Licensed under either of
 
 at your option.
 
-Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](LICENSE-BSD).
+Note that the [PhysX C++ SDK](https://github.com/NVIDIA-Omniverse/PhysX) has its [own BSD 3 license](LICENSE-BSD).
 
 ### Contribution
 
