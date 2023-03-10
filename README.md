@@ -2,7 +2,7 @@
 
 # `🎳 physx-rs`
 
-**Rust binding for [NVIDIA PhysX](https://github.com/NVIDIAGameWorks/PhysX), a popular and mature physics engine well-suited for games**
+**Rust binding for [NVIDIA PhysX](https://github.com/NVIDIA-Omniverse/PhysX), a popular and mature physics engine well-suited for games**
 
 [![Embark](https://img.shields.io/badge/embark-open%20source-blueviolet.svg)](https://embark.dev)
 [![Embark](https://img.shields.io/badge/discord-ark-%237289da.svg?logo=discord)](https://discord.gg/dAuKfZS)
@@ -42,7 +42,7 @@ This repository contains 2 crates:
 
 ## Presentation
 
-[Tomasz Stachowiak](https://github.com/h3r2tic) did a presentation at the Stockholm Rust Meetup on October 2019 about this project that goes through the tecnical details of how C++ to Rust bindings of `physx-sys` works:
+[Tomasz Stachowiak](https://github.com/h3r2tic) did a presentation at the Stockholm Rust Meetup on October 2019 about this project that goes through the technical details of how C++ to Rust bindings of `physx-sys` works:
 
 [![An unholy fusion of Rust and C++ in physx-rs (Stockholm Rust Meetup, October 2019)](http://img.youtube.com/vi/RxtXGeDHu0w/0.jpg)](http://www.youtube.com/watch?v=RxtXGeDHu0w)
 
@@ -71,7 +71,7 @@ You can run an example with `cargo run --example ball`, which should show the fo
 
 Information about all wrapper functionality can be found in the [physx](physx/) crate docs.
 
-If you require functionality not covered by the [physx](physx/) wrapper you can use the low level [physx-sys](physx-sys) crate, which closely maps to the official PhysX SDK. You can find the PhysX user guide [here](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Introduction.html).
+If you require functionality not covered by the [physx](physx/) wrapper you can use the low level [physx-sys](physx-sys) crate, which closely maps to the official PhysX SDK. You can find the PhysX user guide [here](https://nvidia-omniverse.github.io/PhysX/physx/index.html).
 
 ## Prerequisites
 
@@ -117,7 +117,7 @@ Licensed under either of
 
 at your option.
 
-Note that the [PhysX C++ SDK](https://github.com/NVIDIAGameWorks/PhysX) has its [own BSD 3 license](https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIAGameWorks/PhysX/tree/4.1/externals).
+Note that the [PhysX C++ SDK](https://github.com/NVIDIA-Omniverse/PhysX) has its [own BSD 3 license](https://nvidia-omniverse.github.io/PhysX/physx/5.1.3/docs/License.html) and depends on [additional C++ third party libraries](https://github.com/NVIDIA-Omniverse/PhysX/tree/release/104.2/physx#acknowledgements).
 
 ### Contribution
 
