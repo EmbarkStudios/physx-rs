@@ -18,11 +18,11 @@ deny = [
     { name = "floating-duration" }, # not needed with Rust 1.38, and very few users and commits
     { name = "mopa" },              # abandoned, have not been updated for 4 years
 ]
-skip = [
+skip = []
+skip-tree = [
     # window-sys duplicates, only used by pxbind, doesn't affect physx-sys/physx itself
-    { name = "windows-sys", version = "=0.42.0" },
+    { name = "windows-sys" },
 ]
-skip-tree = []
 
 [licenses]
 unlicensed = "deny"
