@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Fixed
+- [PR#193](https://github.com/EmbarkStudios/physx-rs/pull/193) fixed an issue where `physx-sys` would be needlessly recompiled due to an incorrect filepath.
+
 ## [0.11.0] - 2023-03-03
 ### Changed
 - [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) resolved [#187](https://github.com/EmbarkStudios/physx-rs/issues/187) by replacing the deprecated `PxCooking` class with the non-deprecated free functions that implement the same functionality.
