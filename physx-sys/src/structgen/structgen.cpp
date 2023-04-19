@@ -433,7 +433,6 @@ int main() {
     sg.pass_thru("struct physx_PxCustomParticleSystem_Pod;\n");
     sg.pass_thru("struct physx_PxSoftBody_Pod;\n");
     sg.pass_thru("struct physx_PxFEMCloth_Pod;\n");
-    sg.pass_thru("struct physx_PxHairSystem_Pod;\n");
     sg.pass_thru("struct physx_PxParticleBuffer_Pod;\n");
     sg.pass_thru("struct physx_PxParticleAndDiffuseBuffer_Pod;\n");
     sg.pass_thru("struct physx_PxParticleClothBuffer_Pod;\n");
@@ -650,15 +649,6 @@ int main() {
         }
     };
     physx_PxParticleSystemGeometry_Pod::dump_layout(sg);
-
-    struct physx_PxHairSystemGeometry_Pod: public physx::PxHairSystemGeometry {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxHairSystemGeometry_Pod", "PxHairSystemGeometry");
-            sg.add_field("float mTypePadding", "mTypePadding", "f32", sizeof(float), unsafe_offsetof(physx_PxHairSystemGeometry_Pod, mTypePadding));
-            sg.end_struct(sizeof(physx::PxHairSystemGeometry));
-        }
-    };
-    physx_PxHairSystemGeometry_Pod::dump_layout(sg);
 
     struct physx_PxTetrahedronMeshGeometry_Pod: public physx::PxTetrahedronMeshGeometry {
         static void dump_layout(PodStructGen& sg) {
@@ -2157,7 +2147,6 @@ int main() {
             sg.add_field("uint32_t maxFemClothContacts", "maxFemClothContacts", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxgDynamicsMemoryConfig_Pod, maxFemClothContacts));
             sg.add_field("uint32_t maxParticleContacts", "maxParticleContacts", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxgDynamicsMemoryConfig_Pod, maxParticleContacts));
             sg.add_field("uint32_t collisionStackSize", "collisionStackSize", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxgDynamicsMemoryConfig_Pod, collisionStackSize));
-            sg.add_field("uint32_t maxHairContacts", "maxHairContacts", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxgDynamicsMemoryConfig_Pod, maxHairContacts));
             sg.end_struct(sizeof(physx::PxgDynamicsMemoryConfig));
         }
     };
@@ -2227,7 +2216,7 @@ int main() {
             sg.add_field("uint32_t nbStaticBodies", "nbStaticBodies", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbStaticBodies));
             sg.add_field("uint32_t nbDynamicBodies", "nbDynamicBodies", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDynamicBodies));
             sg.add_field("uint32_t nbKinematicBodies", "nbKinematicBodies", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbKinematicBodies));
-            sg.add_field("uint32_t nbShapes[11]", "nbShapes", "[u32; 11]", sizeof(uint32_t[11]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbShapes));
+            sg.add_field("uint32_t nbShapes[10]", "nbShapes", "[u32; 10]", sizeof(uint32_t[10]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbShapes));
             sg.add_field("uint32_t nbAggregates", "nbAggregates", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbAggregates));
             sg.add_field("uint32_t nbArticulations", "nbArticulations", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbArticulations));
             sg.add_field("uint32_t nbAxisSolverConstraints", "nbAxisSolverConstraints", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbAxisSolverConstraints));
@@ -2245,7 +2234,6 @@ int main() {
             sg.add_field("uint64_t gpuMemParticles", "gpuMemParticles", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemParticles));
             sg.add_field("uint64_t gpuMemSoftBodies", "gpuMemSoftBodies", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemSoftBodies));
             sg.add_field("uint64_t gpuMemFEMCloths", "gpuMemFEMCloths", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemFEMCloths));
-            sg.add_field("uint64_t gpuMemHairSystems", "gpuMemHairSystems", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHairSystems));
             sg.add_field("uint64_t gpuMemHeap", "gpuMemHeap", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeap));
             sg.add_field("uint64_t gpuMemHeapBroadPhase", "gpuMemHeapBroadPhase", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapBroadPhase));
             sg.add_field("uint64_t gpuMemHeapNarrowPhase", "gpuMemHeapNarrowPhase", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapNarrowPhase));
@@ -2256,18 +2244,16 @@ int main() {
             sg.add_field("uint64_t gpuMemHeapSimulationParticles", "gpuMemHeapSimulationParticles", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapSimulationParticles));
             sg.add_field("uint64_t gpuMemHeapSimulationSoftBody", "gpuMemHeapSimulationSoftBody", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapSimulationSoftBody));
             sg.add_field("uint64_t gpuMemHeapSimulationFEMCloth", "gpuMemHeapSimulationFEMCloth", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapSimulationFEMCloth));
-            sg.add_field("uint64_t gpuMemHeapSimulationHairSystem", "gpuMemHeapSimulationHairSystem", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapSimulationHairSystem));
             sg.add_field("uint64_t gpuMemHeapParticles", "gpuMemHeapParticles", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapParticles));
             sg.add_field("uint64_t gpuMemHeapSoftBodies", "gpuMemHeapSoftBodies", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapSoftBodies));
             sg.add_field("uint64_t gpuMemHeapFEMCloths", "gpuMemHeapFEMCloths", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapFEMCloths));
-            sg.add_field("uint64_t gpuMemHeapHairSystems", "gpuMemHeapHairSystems", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapHairSystems));
             sg.add_field("uint64_t gpuMemHeapOther", "gpuMemHeapOther", "u64", sizeof(uint64_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, gpuMemHeapOther));
             sg.add_field("uint32_t nbBroadPhaseAdds", "nbBroadPhaseAdds", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbBroadPhaseAdds));
             sg.add_field("uint32_t nbBroadPhaseRemoves", "nbBroadPhaseRemoves", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbBroadPhaseRemoves));
-            sg.add_field("uint32_t nbDiscreteContactPairs[11][11]", "nbDiscreteContactPairs", "[[u32; 11]; 11]", sizeof(uint32_t[11][11]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDiscreteContactPairs));
-            sg.add_field("uint32_t nbCCDPairs[11][11]", "nbCCDPairs", "[[u32; 11]; 11]", sizeof(uint32_t[11][11]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbCCDPairs));
-            sg.add_field("uint32_t nbModifiedContactPairs[11][11]", "nbModifiedContactPairs", "[[u32; 11]; 11]", sizeof(uint32_t[11][11]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbModifiedContactPairs));
-            sg.add_field("uint32_t nbTriggerPairs[11][11]", "nbTriggerPairs", "[[u32; 11]; 11]", sizeof(uint32_t[11][11]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbTriggerPairs));
+            sg.add_field("uint32_t nbDiscreteContactPairs[10][10]", "nbDiscreteContactPairs", "[[u32; 10]; 10]", sizeof(uint32_t[10][10]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbDiscreteContactPairs));
+            sg.add_field("uint32_t nbCCDPairs[10][10]", "nbCCDPairs", "[[u32; 10]; 10]", sizeof(uint32_t[10][10]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbCCDPairs));
+            sg.add_field("uint32_t nbModifiedContactPairs[10][10]", "nbModifiedContactPairs", "[[u32; 10]; 10]", sizeof(uint32_t[10][10]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbModifiedContactPairs));
+            sg.add_field("uint32_t nbTriggerPairs[10][10]", "nbTriggerPairs", "[[u32; 10]; 10]", sizeof(uint32_t[10][10]), unsafe_offsetof(physx_PxSimulationStatistics_Pod, nbTriggerPairs));
             sg.end_struct(sizeof(physx::PxSimulationStatistics));
         }
     };

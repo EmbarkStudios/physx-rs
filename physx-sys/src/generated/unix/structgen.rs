@@ -423,13 +423,6 @@ pub struct PxParticleSystemGeometry {
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
-pub struct PxHairSystemGeometry {
-    pub structgen_pad0: [u8; 4],
-    pub mTypePadding: f32,
-}
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "debug-structs", derive(Debug))]
-#[repr(C)]
 pub struct PxTetrahedronMeshGeometry {
     pub structgen_pad0: [u8; 4],
     pub mTypePadding: f32,
@@ -1639,7 +1632,6 @@ pub struct PxgDynamicsMemoryConfig {
     pub maxFemClothContacts: u32,
     pub maxParticleContacts: u32,
     pub collisionStackSize: u32,
-    pub maxHairContacts: u32,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1694,8 +1686,9 @@ pub struct PxSceneDesc {
     pub gpuMaxNumStaticPartitions: u32,
     pub gpuComputeVersion: u32,
     pub contactPairSlabSize: u32,
+    pub structgen_pad3: [u8; 4],
     pub sceneQuerySystem: *mut PxSceneQuerySystem,
-    pub structgen_pad3: [u8; 8],
+    pub structgen_pad4: [u8; 8],
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1707,7 +1700,7 @@ pub struct PxSimulationStatistics {
     pub nbStaticBodies: u32,
     pub nbDynamicBodies: u32,
     pub nbKinematicBodies: u32,
-    pub nbShapes: [u32; 11],
+    pub nbShapes: [u32; 10],
     pub nbAggregates: u32,
     pub nbArticulations: u32,
     pub nbAxisSolverConstraints: u32,
@@ -1722,11 +1715,9 @@ pub struct PxSimulationStatistics {
     pub nbNewTouches: u32,
     pub nbLostTouches: u32,
     pub nbPartitions: u32,
-    pub structgen_pad0: [u8; 4],
     pub gpuMemParticles: u64,
     pub gpuMemSoftBodies: u64,
     pub gpuMemFEMCloths: u64,
-    pub gpuMemHairSystems: u64,
     pub gpuMemHeap: u64,
     pub gpuMemHeapBroadPhase: u64,
     pub gpuMemHeapNarrowPhase: u64,
@@ -1737,18 +1728,16 @@ pub struct PxSimulationStatistics {
     pub gpuMemHeapSimulationParticles: u64,
     pub gpuMemHeapSimulationSoftBody: u64,
     pub gpuMemHeapSimulationFEMCloth: u64,
-    pub gpuMemHeapSimulationHairSystem: u64,
     pub gpuMemHeapParticles: u64,
     pub gpuMemHeapSoftBodies: u64,
     pub gpuMemHeapFEMCloths: u64,
-    pub gpuMemHeapHairSystems: u64,
     pub gpuMemHeapOther: u64,
     pub nbBroadPhaseAdds: u32,
     pub nbBroadPhaseRemoves: u32,
-    pub nbDiscreteContactPairs: [[u32; 11]; 11],
-    pub nbCCDPairs: [[u32; 11]; 11],
-    pub nbModifiedContactPairs: [[u32; 11]; 11],
-    pub nbTriggerPairs: [[u32; 11]; 11],
+    pub nbDiscreteContactPairs: [[u32; 10]; 10],
+    pub nbCCDPairs: [[u32; 10]; 10],
+    pub nbModifiedContactPairs: [[u32; 10]; 10],
+    pub nbTriggerPairs: [[u32; 10]; 10],
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2607,7 +2596,6 @@ mod sizes {
         assert_eq!(size_of::<PxTriangleMeshGeometry>(), 48);
         assert_eq!(size_of::<PxHeightFieldGeometry>(), 32);
         assert_eq!(size_of::<PxParticleSystemGeometry>(), 12);
-        assert_eq!(size_of::<PxHairSystemGeometry>(), 8);
         assert_eq!(size_of::<PxTetrahedronMeshGeometry>(), 16);
         assert_eq!(size_of::<PxQueryHit>(), 4);
         assert_eq!(size_of::<PxLocationHit>(), 36);
@@ -2725,9 +2713,9 @@ mod sizes {
         assert_eq!(size_of::<PxBroadPhasePair>(), 8);
         assert_eq!(size_of::<PxBroadPhaseResults>(), 32);
         assert_eq!(size_of::<PxSceneLimits>(), 32);
-        assert_eq!(size_of::<PxgDynamicsMemoryConfig>(), 48);
+        assert_eq!(size_of::<PxgDynamicsMemoryConfig>(), 44);
         assert_eq!(size_of::<PxSceneDesc>(), 352);
-        assert_eq!(size_of::<PxSimulationStatistics>(), 2232);
+        assert_eq!(size_of::<PxSimulationStatistics>(), 1864);
         assert_eq!(size_of::<PxGpuBodyData>(), 64);
         assert_eq!(size_of::<PxGpuActorPair>(), 16);
         assert_eq!(size_of::<PxIndexDataPair>(), 16);

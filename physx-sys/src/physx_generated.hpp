@@ -82,7 +82,6 @@ static_assert(sizeof(physx::PxPlaneGeometry) == sizeof(physx_PxPlaneGeometry_Pod
 static_assert(sizeof(physx::PxTriangleMeshGeometry) == sizeof(physx_PxTriangleMeshGeometry_Pod), "POD wrapper for `physx::PxTriangleMeshGeometry` has incorrect size");
 static_assert(sizeof(physx::PxHeightFieldGeometry) == sizeof(physx_PxHeightFieldGeometry_Pod), "POD wrapper for `physx::PxHeightFieldGeometry` has incorrect size");
 static_assert(sizeof(physx::PxParticleSystemGeometry) == sizeof(physx_PxParticleSystemGeometry_Pod), "POD wrapper for `physx::PxParticleSystemGeometry` has incorrect size");
-static_assert(sizeof(physx::PxHairSystemGeometry) == sizeof(physx_PxHairSystemGeometry_Pod), "POD wrapper for `physx::PxHairSystemGeometry` has incorrect size");
 static_assert(sizeof(physx::PxTetrahedronMeshGeometry) == sizeof(physx_PxTetrahedronMeshGeometry_Pod), "POD wrapper for `physx::PxTetrahedronMeshGeometry` has incorrect size");
 static_assert(sizeof(physx::PxQueryHit) == sizeof(physx_PxQueryHit_Pod), "POD wrapper for `physx::PxQueryHit` has incorrect size");
 static_assert(sizeof(physx::PxLocationHit) == sizeof(physx_PxLocationHit_Pod), "POD wrapper for `physx::PxLocationHit` has incorrect size");
@@ -3798,19 +3797,6 @@ extern "C" {
         return return_val;
     }
 
-    physx_PxHairSystemGeometry_Pod PxHairSystemGeometry_new() {
-        PxHairSystemGeometry return_val;
-        physx_PxHairSystemGeometry_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxHairSystemGeometry_isValid(physx_PxHairSystemGeometry_Pod const* self__pod) {
-        physx::PxHairSystemGeometry const* self_ = reinterpret_cast<physx::PxHairSystemGeometry const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
     physx_PxTetrahedronMeshGeometry_Pod PxTetrahedronMeshGeometry_new(physx_PxTetrahedronMesh_Pod* mesh_pod) {
         physx::PxTetrahedronMesh* mesh = reinterpret_cast<physx::PxTetrahedronMesh*>(mesh_pod);
         PxTetrahedronMeshGeometry return_val(mesh);
@@ -4148,20 +4134,6 @@ extern "C" {
         physx::PxGeometryHolder const* self_ = reinterpret_cast<physx::PxGeometryHolder const*>(self__pod);
         physx::PxParticleSystemGeometry const& return_val = self_->particleSystem();
         auto return_val_pod = reinterpret_cast<physx_PxParticleSystemGeometry_Pod const*>(&return_val);
-        return return_val_pod;
-    }
-
-    physx_PxHairSystemGeometry_Pod* PxGeometryHolder_hairSystem_mut(physx_PxGeometryHolder_Pod* self__pod) {
-        physx::PxGeometryHolder* self_ = reinterpret_cast<physx::PxGeometryHolder*>(self__pod);
-        physx::PxHairSystemGeometry& return_val = self_->hairSystem();
-        auto return_val_pod = reinterpret_cast<physx_PxHairSystemGeometry_Pod*>(&return_val);
-        return return_val_pod;
-    }
-
-    physx_PxHairSystemGeometry_Pod const* PxGeometryHolder_hairSystem(physx_PxGeometryHolder_Pod const* self__pod) {
-        physx::PxGeometryHolder const* self_ = reinterpret_cast<physx::PxGeometryHolder const*>(self__pod);
-        physx::PxHairSystemGeometry const& return_val = self_->hairSystem();
-        auto return_val_pod = reinterpret_cast<physx_PxHairSystemGeometry_Pod const*>(&return_val);
         return return_val_pod;
     }
 

@@ -265,7 +265,6 @@ struct physx_PxMPMParticleSystem_Pod;
 struct physx_PxCustomParticleSystem_Pod;
 struct physx_PxSoftBody_Pod;
 struct physx_PxFEMCloth_Pod;
-struct physx_PxHairSystem_Pod;
 struct physx_PxParticleBuffer_Pod;
 struct physx_PxParticleAndDiffuseBuffer_Pod;
 struct physx_PxParticleClothBuffer_Pod;
@@ -398,10 +397,6 @@ struct physx_PxParticleSystemGeometry_Pod {
     char structgen_pad0[4];
     float mTypePadding;
     int32_t mSolverType;
-};
-struct physx_PxHairSystemGeometry_Pod {
-    char structgen_pad0[4];
-    float mTypePadding;
 };
 struct physx_PxTetrahedronMeshGeometry_Pod {
     char structgen_pad0[4];
@@ -1335,7 +1330,6 @@ struct physx_PxgDynamicsMemoryConfig_Pod {
     uint32_t maxFemClothContacts;
     uint32_t maxParticleContacts;
     uint32_t collisionStackSize;
-    uint32_t maxHairContacts;
 };
 struct physx_PxSceneDesc_Pod {
     int32_t staticStructure;
@@ -1387,8 +1381,9 @@ struct physx_PxSceneDesc_Pod {
     uint32_t gpuMaxNumStaticPartitions;
     uint32_t gpuComputeVersion;
     uint32_t contactPairSlabSize;
+    char structgen_pad3[4];
     physx_PxSceneQuerySystem_Pod* sceneQuerySystem;
-    char structgen_pad3[8];
+    char structgen_pad4[8];
 };
 struct physx_PxSimulationStatistics_Pod {
     uint32_t nbActiveConstraints;
@@ -1397,7 +1392,7 @@ struct physx_PxSimulationStatistics_Pod {
     uint32_t nbStaticBodies;
     uint32_t nbDynamicBodies;
     uint32_t nbKinematicBodies;
-    uint32_t nbShapes[11];
+    uint32_t nbShapes[10];
     uint32_t nbAggregates;
     uint32_t nbArticulations;
     uint32_t nbAxisSolverConstraints;
@@ -1412,11 +1407,9 @@ struct physx_PxSimulationStatistics_Pod {
     uint32_t nbNewTouches;
     uint32_t nbLostTouches;
     uint32_t nbPartitions;
-    char structgen_pad0[4];
     uint64_t gpuMemParticles;
     uint64_t gpuMemSoftBodies;
     uint64_t gpuMemFEMCloths;
-    uint64_t gpuMemHairSystems;
     uint64_t gpuMemHeap;
     uint64_t gpuMemHeapBroadPhase;
     uint64_t gpuMemHeapNarrowPhase;
@@ -1427,18 +1420,16 @@ struct physx_PxSimulationStatistics_Pod {
     uint64_t gpuMemHeapSimulationParticles;
     uint64_t gpuMemHeapSimulationSoftBody;
     uint64_t gpuMemHeapSimulationFEMCloth;
-    uint64_t gpuMemHeapSimulationHairSystem;
     uint64_t gpuMemHeapParticles;
     uint64_t gpuMemHeapSoftBodies;
     uint64_t gpuMemHeapFEMCloths;
-    uint64_t gpuMemHeapHairSystems;
     uint64_t gpuMemHeapOther;
     uint32_t nbBroadPhaseAdds;
     uint32_t nbBroadPhaseRemoves;
-    uint32_t nbDiscreteContactPairs[11][11];
-    uint32_t nbCCDPairs[11][11];
-    uint32_t nbModifiedContactPairs[11][11];
-    uint32_t nbTriggerPairs[11][11];
+    uint32_t nbDiscreteContactPairs[10][10];
+    uint32_t nbCCDPairs[10][10];
+    uint32_t nbModifiedContactPairs[10][10];
+    uint32_t nbTriggerPairs[10][10];
 };
 struct physx_PxGpuBodyData_Pod {
     physx_PxQuat_Pod quat;

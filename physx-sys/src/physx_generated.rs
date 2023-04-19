@@ -124,12 +124,11 @@ pub enum PxConcreteType {
     MpmParticlesystem = 33,
     CustomParticlesystem = 34,
     FemCloth = 35,
-    HairSystem = 36,
-    ParticleBuffer = 37,
-    ParticleDiffuseBuffer = 38,
-    ParticleClothBuffer = 39,
-    ParticleRigidBuffer = 40,
-    PhysxCoreCount = 41,
+    ParticleBuffer = 36,
+    ParticleDiffuseBuffer = 37,
+    ParticleClothBuffer = 38,
+    ParticleRigidBuffer = 39,
+    PhysxCoreCount = 40,
     FirstPhysxExtension = 256,
     FirstVehicleExtension = 512,
     FirstUserExtension = 1024,
@@ -175,12 +174,11 @@ impl From<u16> for PxConcreteType {
             33 => Self::MpmParticlesystem,
             34 => Self::CustomParticlesystem,
             35 => Self::FemCloth,
-            36 => Self::HairSystem,
-            37 => Self::ParticleBuffer,
-            38 => Self::ParticleDiffuseBuffer,
-            39 => Self::ParticleClothBuffer,
-            40 => Self::ParticleRigidBuffer,
-            41 => Self::PhysxCoreCount,
+            36 => Self::ParticleBuffer,
+            37 => Self::ParticleDiffuseBuffer,
+            38 => Self::ParticleClothBuffer,
+            39 => Self::ParticleRigidBuffer,
+            40 => Self::PhysxCoreCount,
             256 => Self::FirstPhysxExtension,
             512 => Self::FirstVehicleExtension,
             1024 => Self::FirstUserExtension,
@@ -275,10 +273,9 @@ pub enum PxGeometryType {
     Tetrahedronmesh = 6,
     Trianglemesh = 7,
     Heightfield = 8,
-    Hairsystem = 9,
-    Custom = 10,
+    Custom = 9,
     /// internal use only!
-    GeometryCount = 11,
+    GeometryCount = 10,
     /// internal use only!
     Invalid = -1,
 }
@@ -1544,10 +1541,6 @@ pub enum PxFilterObjectType {
     ///
     /// In development
     Femcloth = 5,
-    /// A hair system
-    ///
-    /// In development
-    Hairsystem = 6,
     /// internal use only!
     MaxTypeCount = 16,
     /// internal use only!
@@ -2398,54 +2391,6 @@ pub enum PxSoftBodyDataFlag {
     SimPositionInvMass = 8,
     /// The simulation mesh kinematic target positions
     SimKinematicTarget = 9,
-}
-
-/// Identifies input and output buffers for PxHairSystem
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxHairSystemData {
-    /// No data specified
-    None = 0,
-    /// Specifies the position (first 3 floats) and inverse mass (last float) data (array of PxVec4 * max number of vertices)
-    PositionInvmass = 1,
-    /// Specifies the velocity (first 3 floats) data (array of PxVec4 * max number of vertices)
-    Velocity = 2,
-    /// Specifies everything
-    All = 3,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxHairSystemData`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxHairSystemDataFlags: u32 {
-        const PositionInvmass = 1 << 0;
-        const Velocity = 1 << 1;
-        const All = Self::PositionInvmass.bits | Self::Velocity.bits;
-    }
-}
-
-/// Binary settings for hair system simulation
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxHairSystemFlag {
-    /// Determines if self-collision between hair vertices is ignored
-    DisableSelfCollision = 1,
-    /// Determines if collision between hair and external bodies is ignored
-    DisableExternalCollision = 2,
-    /// Determines if attachment constraint is also felt by body to which the hair is attached
-    DisableTwosidedAttachment = 4,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxHairSystemFlag`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxHairSystemFlags: u32 {
-        const DisableSelfCollision = 1 << 0;
-        const DisableExternalCollision = 1 << 1;
-        const DisableTwosidedAttachment = 1 << 2;
-    }
 }
 
 /// Identifies each type of information for retrieving from actor.
@@ -3523,12 +3468,6 @@ pub struct PxSoftBody {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct PxFEMCloth {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxHairSystem {
     _unused: [u8; 0],
 }
 
@@ -5830,14 +5769,6 @@ extern "C" {
     /// True if the current settings are valid for shape creation.
     pub fn PxParticleSystemGeometry_isValid(self_: *const PxParticleSystemGeometry) -> bool;
 
-    /// Default constructor.
-    pub fn PxHairSystemGeometry_new() -> PxHairSystemGeometry;
-
-    /// Returns true if the geometry is valid.
-    ///
-    /// True if the current settings are valid for shape creation.
-    pub fn PxHairSystemGeometry_isValid(self_: *const PxHairSystemGeometry) -> bool;
-
     /// Constructor. By default creates an empty object with a NULL mesh and identity scale.
     pub fn PxTetrahedronMeshGeometry_new(mesh: *mut PxTetrahedronMesh) -> PxTetrahedronMeshGeometry;
 
@@ -5970,10 +5901,6 @@ extern "C" {
 
     pub fn PxGeometryHolder_particleSystem(self_: *const PxGeometryHolder) -> *const PxParticleSystemGeometry;
 
-    pub fn PxGeometryHolder_hairSystem_mut(self_: *mut PxGeometryHolder) -> *mut PxHairSystemGeometry;
-
-    pub fn PxGeometryHolder_hairSystem(self_: *const PxGeometryHolder) -> *const PxHairSystemGeometry;
-
     pub fn PxGeometryHolder_custom_mut(self_: *mut PxGeometryHolder) -> *mut PxCustomGeometry;
 
     pub fn PxGeometryHolder_custom(self_: *const PxGeometryHolder) -> *const PxCustomGeometry;
@@ -5986,7 +5913,7 @@ extern "C" {
 
     /// Raycast test against a geometry object.
     ///
-    /// All geometry types are supported except PxParticleSystemGeometry, PxTetrahedronMeshGeometry and PxHairSystemGeometry.
+    /// All geometry types are supported.
     ///
     /// Number of hits between the ray and the geometry object
     pub fn PxGeometryQuery_raycast(origin: *const PxVec3, unitDir: *const PxVec3, geom: *const PxGeometry, pose: *const PxTransform, maxDist: f32, hitFlags: PxHitFlags, maxHits: u32, rayHits: *mut PxGeomRaycastHit, stride: u32, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> u32;
@@ -6000,8 +5927,6 @@ extern "C" {
     /// PxTriangleMeshGeometry vs. PxHeightFieldGeometry
     ///
     /// PxHeightFieldGeometry vs. PxHeightFieldGeometry
-    ///
-    /// Anything involving PxParticleSystemGeometry, PxTetrahedronMeshGeometry or PxHairSystemGeometry.
     ///
     /// True if the two geometry objects overlap
     pub fn PxGeometryQuery_overlap(geom0: *const PxGeometry, pose0: *const PxTransform, geom1: *const PxGeometry, pose1: *const PxTransform, queryFlags: PxGeometryQueryFlags, threadContext: *mut PxQueryThreadContext) -> bool;
@@ -6030,7 +5955,6 @@ extern "C" {
     /// - mesh/mesh
     /// - mesh/heightfield
     /// - heightfield/heightfield
-    /// - anything involving PxParticleSystemGeometry, PxTetrahedronMeshGeometry or PxHairSystemGeometry
     ///
     /// The function returns a unit vector ('direction') and a penetration depth ('depth').
     ///
