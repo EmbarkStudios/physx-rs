@@ -129,16 +129,12 @@ pub enum SimulationThreadType {
     Default,
 }
 
+#[derive(Default)]
 pub enum FilterShaderDescriptor {
+    #[default]
     Default,
     Custom(physx_sys::SimulationFilterShader),
     CallDefaultFirst(physx_sys::SimulationFilterShader),
-}
-
-impl Default for FilterShaderDescriptor {
-    fn default() -> Self {
-        FilterShaderDescriptor::Default
-    }
 }
 
 /// A new type wrapper for PxScene.  Parametrized by its user data type,
