@@ -474,6 +474,18 @@ fn main() {
             .ok()
     };
 
+    println!("cargo:rerun-if-env-changed=PHYSX_SRC");
+
+    let mut root = if let Ok(root_dir) = env::var("PHYSX_SRC") {
+        root_dir.into()
+    } else {
+        let mut cd = env::current_dir().expect("Couldn't retrieve current working dir");
+        cd.push("physx");
+        cd
+    };
+
+    root.push("physx");
+
     {
         let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target os not specified");
         let target_env = env::var("CARGO_CFG_TARGET_ENV").ok();
@@ -494,7 +506,7 @@ fn main() {
             static_crt,
         };
 
-        cc_compile(environment);
+        cc_compile(environment, root.clone());
     }
 
     let mut cc_builder = cc::Build::new();
@@ -507,9 +519,7 @@ fn main() {
         .extra_warnings(false)
         .define("NDEBUG", None)
         .define("PX_PHYSX_STATIC_LIB", None)
-        .include("physx/physx/include")
-        .include("physx/pxshared/include")
-        .include("physx/physx/source/foundation/include");
+        .include(root.join("include"));
 
     if cfg!(feature = "profile") {
         physx_cc.define("PX_PROFILE", Some("1"));
