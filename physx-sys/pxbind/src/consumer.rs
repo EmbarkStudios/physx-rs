@@ -586,7 +586,12 @@ impl<'ast> AstConsumer<'ast> {
                 cxx_qt: type_str,
                 repr: *repr,
             })
-        } else if let Some(name) = type_str.strip_prefix("physx::") {
+        } else if let Some(name) = type_str.strip_prefix("union ") {
+            Ok(QualType::Record { name })
+        } else if let Some(name) = type_str.strip_prefix("struct ") {
+            Ok(QualType::Record { name })
+        } else {
+            let name = type_str.strip_prefix("physx::").unwrap_or(type_str);
             let qt = if let Some((repr, unqualified)) = self.enum_map.get(name) {
                 QualType::Enum {
                     name: unqualified,
@@ -602,12 +607,6 @@ impl<'ast> AstConsumer<'ast> {
             };
 
             Ok(qt)
-        } else if let Some(name) = type_str.strip_prefix("union ") {
-            Ok(QualType::Record { name })
-        } else if let Some(name) = type_str.strip_prefix("struct ") {
-            Ok(QualType::Record { name })
-        } else {
-            anyhow::bail!("Unknown type '{kind:?}'");
         }
     }
 
@@ -668,7 +667,11 @@ impl<'ast> AstType<'ast> {
     fn as_str(&self) -> &'ast str {
         let ty = match self {
             Self::Simple(s) => s,
-            Self::Qualified(kind) => kind.qual_type.as_str(),
+            Self::Qualified(kind) => kind
+                .desugared_qual_type
+                .as_deref()
+                .filter(|dqt| !dqt.contains('<'))
+                .unwrap_or(kind.qual_type.as_str()),
         };
 
         let ty = ty.strip_prefix("volatile ").unwrap_or(ty);

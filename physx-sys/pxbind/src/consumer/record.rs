@@ -249,13 +249,12 @@ impl<'ast> super::AstConsumer<'ast> {
             return None;
         }
 
-        node.inner.iter().find_map(|inn| {
-            if let Item::TemplateSpecializationType { template_name } = &inn.kind {
-                Some(template_name.as_str())
-            } else {
-                None
-            }
-        })
+        let (_spec_node, template_name) = super::search(node, &|node: &Node| match &node.kind {
+            Item::TemplateSpecializationType { template_name } => Some(template_name),
+            _ => None,
+        })?;
+
+        Some(template_name)
     }
 
     pub(super) fn consume_template_typedef(
@@ -380,10 +379,15 @@ impl<'ast> super::AstConsumer<'ast> {
         rec: &'ast Record,
     ) -> impl Iterator<Item = anyhow::Result<(&ClassDef<'ast>, &RecBindingDef<'ast>)>> {
         rec.bases.iter().filter_map(|base| {
-            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
+            let Some(base_name) = base.kind.desugared_qual_type.as_ref().unwrap_or(&base.kind.qual_type).strip_prefix("physx::") else {
                 log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
                 return None;
             };
+
+            if base_name.contains('<') {
+                log::debug!("skipping template base class {base_name} for class {}", rec.name.as_deref().unwrap());
+                return None;
+            }
 
             let get = || {
                 let base_rec = self.classes.get(base_name).with_context(|| {
@@ -685,18 +689,18 @@ impl<'ast> super::AstConsumer<'ast> {
                 Item::AccessSpecDecl { access } => {
                     is_public = matches!(access, Access::Public);
                 }
-                Item::FieldDecl { name, kind } => {
+                Item::FieldDecl { name, kind: fkind } => {
                     // Skip anonymous fields, they aren't really accessible
                     if let Some(name) = name.as_deref() {
                         // PhysX uses PxPadding<BYTES> in some struct, but this
                         // is uninteresting so we can just skip it, they'll be
                         // accounted for in our own padding calculations regardless
-                        if kind.qual_type.starts_with("PxPadding<") {
+                        if fkind.qual_type.starts_with("PxPadding<") {
                             log::debug!("skipping padding field");
                             continue;
                         }
 
-                        if kind.qual_type.contains('<') {
+                        if fkind.qual_type.contains('<') {
                             log::debug!("skipping templated field {rname}::{name}");
                             continue;
                         }
@@ -708,7 +712,7 @@ impl<'ast> super::AstConsumer<'ast> {
                         }
 
                         let kind = self
-                            .parse_type(kind, template_types)
+                            .parse_type(fkind, template_types)
                             .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
 
                         // if matches!(&kind, QualType::FunctionPointer) {

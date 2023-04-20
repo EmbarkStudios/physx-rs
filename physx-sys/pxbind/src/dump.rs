@@ -17,17 +17,60 @@ pub fn get_repo_root() -> anyhow::Result<String> {
 
 #[inline]
 pub fn get_include_dir() -> anyhow::Result<String> {
-    // Acquire the repo root so we don't need to care about where we are executing
-    // this from (eg root, tests, wherever)
-    let repo_root = get_repo_root()?;
+    let mut root = if let Ok(root) = std::env::var("PHYSX_SRC") {
+        root
+    } else {
+        // Acquire the repo root so we don't need to care about where we are executing
+        // this from (eg root, tests, wherever)
+        let mut repo_root = get_repo_root()?;
+        repo_root.push_str("/physx-sys/physx");
+        repo_root
+    };
 
-    Ok(format!("{repo_root}/physx-sys/physx/physx/include"))
+    root.push_str("/physx/include");
+    Ok(root)
+}
+
+/// The AST format is unstable across major version (at least...) so we need to
+/// check what the version is to prevent "wtf" moments
+const CLANG_VERSION: u8 = 16;
+
+fn ensure_clang_version() -> anyhow::Result<()> {
+    let mut cmd = std::process::Command::new("clang++");
+    cmd.arg("--version");
+    cmd.stdout(std::process::Stdio::piped());
+
+    let captured = cmd.output().context("failed to run clang++")?;
+
+    anyhow::ensure!(captured.status.success(), "failed to query clang++ version");
+
+    let output =
+        String::from_utf8(captured.stdout).context("clang++ --version gave non-utf8 output")?;
+    let stripped = output
+        .strip_prefix("clang version ")
+        .with_context(|| format!("clang++ --version gave unexpected output:\n{output}"))?;
+
+    let end = stripped
+        .find('.')
+        .context("clang output didn't have a valid semver")?;
+
+    let actual_version: u8 = stripped[..end]
+        .parse()
+        .with_context(|| format!("failed to parse major version '{}'", &stripped[..end]))?;
+
+    anyhow::ensure!(
+        CLANG_VERSION == actual_version,
+        "pxbind only works with clang++ {CLANG_VERSION} but `clang++`'s major version is {actual_version}"
+    );
+    Ok(())
 }
 
 pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
-    let mut cmd = std::process::Command::new("clang++");
+    ensure_clang_version()?;
 
     let include_dir = get_include_dir()?;
+
+    let mut cmd = std::process::Command::new("clang++");
 
     cmd.args([
         "-Xclang",
@@ -79,6 +122,8 @@ pub fn get_parsed_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<(No
     let t = std::time::Instant::now();
     let ast = get_ast(header)?;
     log::info!("Gathered AST in {}ms", t.elapsed().as_millis());
+
+    std::fs::write("wtf.json", &ast).unwrap();
 
     log::info!("Parsing AST...");
     let t = std::time::Instant::now();
