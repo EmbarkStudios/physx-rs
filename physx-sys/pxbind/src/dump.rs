@@ -123,8 +123,6 @@ pub fn get_parsed_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<(No
     let ast = get_ast(header)?;
     log::info!("Gathered AST in {}ms", t.elapsed().as_millis());
 
-    std::fs::write("wtf.json", &ast).unwrap();
-
     log::info!("Parsing AST...");
     let t = std::time::Instant::now();
     let root_node: Node = serde_json::from_slice(&ast).context("failed to parse AST")?;
