@@ -93,42 +93,23 @@ pub enum PxConcreteType {
     ConvexMesh = 2,
     TriangleMeshBvh33 = 3,
     TriangleMeshBvh34 = 4,
-    TetrahedronMesh = 5,
-    SoftbodyMesh = 6,
-    RigidDynamic = 7,
-    RigidStatic = 8,
-    Shape = 9,
-    Material = 10,
-    SoftbodyMaterial = 11,
-    ClothMaterial = 12,
-    PbdMaterial = 13,
-    FlipMaterial = 14,
-    MpmMaterial = 15,
-    CustomMaterial = 16,
-    Constraint = 17,
-    Aggregate = 18,
-    ArticulationReducedCoordinate = 19,
-    ArticulationLink = 20,
-    ArticulationJointReducedCoordinate = 21,
-    ArticulationSensor = 22,
-    ArticulationSpatialTendon = 23,
-    ArticulationFixedTendon = 24,
-    ArticulationAttachment = 25,
-    ArticulationTendonJoint = 26,
-    PruningStructure = 27,
-    Bvh = 28,
-    SoftBody = 29,
-    SoftBodyState = 30,
-    PbdParticlesystem = 31,
-    FlipParticlesystem = 32,
-    MpmParticlesystem = 33,
-    CustomParticlesystem = 34,
-    FemCloth = 35,
-    ParticleBuffer = 36,
-    ParticleDiffuseBuffer = 37,
-    ParticleClothBuffer = 38,
-    ParticleRigidBuffer = 39,
-    PhysxCoreCount = 40,
+    RigidDynamic = 5,
+    RigidStatic = 6,
+    Shape = 7,
+    Material = 8,
+    Constraint = 9,
+    Aggregate = 10,
+    ArticulationReducedCoordinate = 11,
+    ArticulationLink = 12,
+    ArticulationJointReducedCoordinate = 13,
+    ArticulationSensor = 14,
+    ArticulationSpatialTendon = 15,
+    ArticulationFixedTendon = 16,
+    ArticulationAttachment = 17,
+    ArticulationTendonJoint = 18,
+    PruningStructure = 19,
+    Bvh = 20,
+    PhysxCoreCount = 21,
     FirstPhysxExtension = 256,
     FirstVehicleExtension = 512,
     FirstUserExtension = 1024,
@@ -143,42 +124,23 @@ impl From<u16> for PxConcreteType {
             2 => Self::ConvexMesh,
             3 => Self::TriangleMeshBvh33,
             4 => Self::TriangleMeshBvh34,
-            5 => Self::TetrahedronMesh,
-            6 => Self::SoftbodyMesh,
-            7 => Self::RigidDynamic,
-            8 => Self::RigidStatic,
-            9 => Self::Shape,
-            10 => Self::Material,
-            11 => Self::SoftbodyMaterial,
-            12 => Self::ClothMaterial,
-            13 => Self::PbdMaterial,
-            14 => Self::FlipMaterial,
-            15 => Self::MpmMaterial,
-            16 => Self::CustomMaterial,
-            17 => Self::Constraint,
-            18 => Self::Aggregate,
-            19 => Self::ArticulationReducedCoordinate,
-            20 => Self::ArticulationLink,
-            21 => Self::ArticulationJointReducedCoordinate,
-            22 => Self::ArticulationSensor,
-            23 => Self::ArticulationSpatialTendon,
-            24 => Self::ArticulationFixedTendon,
-            25 => Self::ArticulationAttachment,
-            26 => Self::ArticulationTendonJoint,
-            27 => Self::PruningStructure,
-            28 => Self::Bvh,
-            29 => Self::SoftBody,
-            30 => Self::SoftBodyState,
-            31 => Self::PbdParticlesystem,
-            32 => Self::FlipParticlesystem,
-            33 => Self::MpmParticlesystem,
-            34 => Self::CustomParticlesystem,
-            35 => Self::FemCloth,
-            36 => Self::ParticleBuffer,
-            37 => Self::ParticleDiffuseBuffer,
-            38 => Self::ParticleClothBuffer,
-            39 => Self::ParticleRigidBuffer,
-            40 => Self::PhysxCoreCount,
+            5 => Self::RigidDynamic,
+            6 => Self::RigidStatic,
+            7 => Self::Shape,
+            8 => Self::Material,
+            9 => Self::Constraint,
+            10 => Self::Aggregate,
+            11 => Self::ArticulationReducedCoordinate,
+            12 => Self::ArticulationLink,
+            13 => Self::ArticulationJointReducedCoordinate,
+            14 => Self::ArticulationSensor,
+            15 => Self::ArticulationSpatialTendon,
+            16 => Self::ArticulationFixedTendon,
+            17 => Self::ArticulationAttachment,
+            18 => Self::ArticulationTendonJoint,
+            19 => Self::PruningStructure,
+            20 => Self::Bvh,
+            21 => Self::PhysxCoreCount,
             256 => Self::FirstPhysxExtension,
             512 => Self::FirstVehicleExtension,
             1024 => Self::FirstUserExtension,
@@ -269,13 +231,11 @@ pub enum PxGeometryType {
     Capsule = 2,
     Box = 3,
     Convexmesh = 4,
-    Particlesystem = 5,
-    Tetrahedronmesh = 6,
-    Trianglemesh = 7,
-    Heightfield = 8,
-    Custom = 9,
+    Trianglemesh = 5,
+    Heightfield = 6,
+    Custom = 7,
     /// internal use only!
-    GeometryCount = 10,
+    GeometryCount = 8,
     /// internal use only!
     Invalid = -1,
 }
@@ -351,20 +311,6 @@ bitflags::bitflags! {
         const TightBounds = 1 << 0;
         const DoubleSided = 1 << 1;
     }
-}
-
-/// Identifies the solver to use for a particle system.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxParticleSolverType {
-    /// The position based dynamics solver that can handle fluid, granular material, cloth, inflatables etc. See [`PxPBDParticleSystem`].
-    Pbd = 1,
-    /// The FLIP fluid solver. See [`PxFLIPParticleSystem`].
-    Flip = 2,
-    /// The MPM (material point method) solver that can handle a variety of materials. See [`PxMPMParticleSystem`].
-    Mpm = 4,
-    /// Custom solver. The user needs to specify the interaction of the particle by providing appropriate functions. Can be used e.g. for molecular dynamics simulations. See [`PxCustomParticleSystem`].
-    Custom = 8,
 }
 
 /// Scene query and geometry query behavior flags.
@@ -626,22 +572,6 @@ bitflags::bitflags! {
         const E16BitIndices = 1 << 1;
         const AdjacencyInfo = 1 << 2;
         const PreferNoSdfProj = 1 << 3;
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxTetrahedronMeshFlag {
-    /// The tetrahedron mesh has 16bits vertex indices
-    E16BitIndices = 2,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxTetrahedronMeshFlag`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxTetrahedronMeshFlags: u8 {
-        const E16BitIndices = 1 << 1;
     }
 }
 
@@ -911,51 +841,6 @@ pub enum PxArticulationDriveType {
     /// Sets the drive gains internally to track a target velocity almost kinematically (i.e. with very high drive gains).
     Velocity = 3,
     None = 4,
-}
-
-/// A description of the types of articulation data that may be directly written to and read from the GPU using the functions
-/// PxScene::copyArticulationData() and PxScene::applyArticulationData(). Types that are read-only may only be used in conjunction with
-/// PxScene::copyArticulationData(). Types that are write-only may only be used in conjunction with PxScene::applyArticulationData().
-/// A subset of data types may be used in conjunction with both PxScene::applyArticulationData() and PxScene::applyArticulationData().
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxArticulationGpuDataType {
-    /// The joint positions, read and write, see PxScene::copyArticulationData(), PxScene::applyArticulationData()
-    JointPosition = 0,
-    /// The joint velocities, read and write,  see PxScene::copyArticulationData(), PxScene::applyArticulationData()
-    JointVelocity = 1,
-    /// The joint accelerations, read only, see PxScene::copyArticulationData()
-    JointAcceleration = 2,
-    /// The applied joint forces, write only, see PxScene::applyArticulationData()
-    JointForce = 3,
-    /// The computed joint constraint solver forces, read only, see PxScene::copyArticulationData()()
-    JointSolverForce = 4,
-    /// The velocity targets for the joint drives, write only, see PxScene::applyArticulationData()
-    JointTargetVelocity = 5,
-    /// The position targets for the joint drives, write only, see PxScene::applyArticulationData()
-    JointTargetPosition = 6,
-    /// The spatial sensor forces, read only, see PxScene::copyArticulationData()
-    SensorForce = 7,
-    /// The root link transform, read and write, see PxScene::copyArticulationData(), PxScene::applyArticulationData()
-    RootTransform = 8,
-    /// The root link velocity, read and write, see PxScene::copyArticulationData(), PxScene::applyArticulationData()
-    RootVelocity = 9,
-    /// The link transforms including root link, read only, see PxScene::copyArticulationData()
-    LinkTransform = 10,
-    /// The link velocities including root link, read only, see PxScene::copyArticulationData()
-    LinkVelocity = 11,
-    /// The forces to apply to links, write only, see PxScene::applyArticulationData()
-    LinkForce = 12,
-    /// The torques to apply to links, write only, see PxScene::applyArticulationData()
-    LinkTorque = 13,
-    /// Fixed tendon data, write only, see PxScene::applyArticulationData()
-    FixedTendon = 14,
-    /// Fixed tendon joint data, write only, see PxScene::applyArticulationData()
-    FixedTendonJoint = 15,
-    /// Spatial tendon data, write only, see PxScene::applyArticulationData()
-    SpatialTendon = 16,
-    /// Spatial tendon attachment data, write only, see PxScene::applyArticulationData()
-    SpatialTendonAttachment = 17,
 }
 
 /// These flags determine what data is read or written to the internal articulation data via cache.
@@ -1533,14 +1418,6 @@ pub enum PxFilterObjectType {
     RigidDynamic = 1,
     /// An articulation
     Articulation = 2,
-    /// A particle system
-    Particlesystem = 3,
-    /// A FEM-based soft body
-    Softbody = 4,
-    /// A FEM-based cloth
-    ///
-    /// In development
-    Femcloth = 5,
     /// internal use only!
     MaxTypeCount = 16,
     /// internal use only!
@@ -1672,89 +1549,6 @@ pub enum PxCombineMode {
     NValues = 4,
     /// This is not a valid combine mode, it is to assure that the size of the enum type is big enough.
     Pad32 = 2147483647,
-}
-
-/// Identifies dirty particle buffers that need to be updated in the particle system.
-///
-/// This flag can be used mark the device user buffers that are dirty and need to be written to the particle system.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxParticleBufferFlag {
-    /// No data specified
-    None = 0,
-    /// Specifies the position (first 3 floats) and inverse mass (last float) data (array of PxVec4 * number of particles)
-    UpdatePosition = 1,
-    /// Specifies the velocity (first 3 floats) data (array of PxVec4 * number of particles)
-    UpdateVelocity = 2,
-    /// Specifies the per-particle phase flag data (array of PxU32 * number of particles)
-    UpdatePhase = 4,
-    /// Specifies the rest position (first 3 floats) data for cloth buffers
-    UpdateRestposition = 8,
-    /// Specifies the cloth buffer (see PxParticleClothBuffer)
-    UpdateCloth = 32,
-    /// Specifies the rigid buffer (see PxParticleRigidBuffer)
-    UpdateRigid = 64,
-    /// Specifies the diffuse particle parameter buffer (see PxDiffuseParticleParams)
-    UpdateDiffuseParam = 128,
-    /// Specifies the attachments.
-    UpdateAttachments = 256,
-    All = 495,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxParticleBufferFlag`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxParticleBufferFlags: u32 {
-        const UpdatePosition = 1 << 0;
-        const UpdateVelocity = 1 << 1;
-        const UpdatePhase = 1 << 2;
-        const UpdateRestposition = 1 << 3;
-        const UpdateCloth = 1 << 5;
-        const UpdateRigid = 1 << 6;
-        const UpdateDiffuseParam = 1 << 7;
-        const UpdateAttachments = 1 << 8;
-        const All = Self::UpdatePosition.bits | Self::UpdateVelocity.bits | Self::UpdatePhase.bits | Self::UpdateRestposition.bits | Self::UpdateCloth.bits | Self::UpdateRigid.bits | Self::UpdateDiffuseParam.bits | Self::UpdateAttachments.bits;
-    }
-}
-
-/// Identifies per-particle behavior for a PxParticleSystem.
-///
-/// See [`PxParticleSystem::createPhase`]().
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(u32)]
-pub enum PxParticlePhaseFlag {
-    /// Bits [ 0, 19] represent the particle group for controlling collisions
-    ParticlePhaseGroupMask = 1048575,
-    /// Bits [20, 23] hold flags about how the particle behave
-    ParticlePhaseFlagsMask = 4293918720,
-    /// If set this particle will interact with particles of the same group
-    ParticlePhaseSelfCollide = 1048576,
-    /// If set this particle will ignore collisions with particles closer than the radius in the rest pose, this flag should not be specified unless valid rest positions have been specified using setRestParticles()
-    ParticlePhaseSelfCollideFilter = 2097152,
-    /// If set this particle will generate fluid density constraints for its overlapping neighbors
-    ParticlePhaseFluid = 4194304,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxParticlePhaseFlag`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxParticlePhaseFlags: u32 {
-        const ParticlePhaseGroupMask = 0x000fffff;
-        const ParticlePhaseFlagsMask = Self::ParticlePhaseSelfCollide.bits | Self::ParticlePhaseSelfCollideFilter.bits | Self::ParticlePhaseFluid.bits;
-        const ParticlePhaseSelfCollide = 1 << 20;
-        const ParticlePhaseSelfCollideFilter = 1 << 21;
-        const ParticlePhaseFluid = 1 << 22;
-    }
-}
-
-/// Specifies memory space for a PxBuffer instance.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxBufferType {
-    Host = 0,
-    Device = 1,
 }
 
 /// Filtering flags for scene queries.
@@ -1978,14 +1772,6 @@ pub enum PxScenePrunerIndex {
 ///
 /// ePABP is a parallel implementation of ABP. It can often be the fastest (CPU) broadphase, but it
 /// can use more memory than ABP.
-///
-/// eGPU is a GPU implementation of the incremental sweep and prune approach. Additionally, it uses a ABP-style
-/// initial pair generation approach to avoid large spikes when inserting shapes. It not only has the advantage
-/// of traditional SAP approch which is good for when many objects are sleeping, but due to being fully parallel,
-/// it also is great when lots of shapes are moving or for runtime pair insertion and removal. It can become a
-/// performance bottleneck if there are a very large number of shapes roughly projecting to the same values
-/// on a given axis. If the scene has a very large number of shapes in an actor, e.g. a humanoid, it is recommended
-/// to use an aggregate to represent multi-shape or multi-body actors to minimize stress placed on the broad phase.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum PxBroadPhaseType {
@@ -1997,9 +1783,7 @@ pub enum PxBroadPhaseType {
     Abp = 2,
     /// Parallel automatic box pruning
     Pabp = 3,
-    /// GPU broad phase
-    Gpu = 4,
-    Last = 5,
+    Last = 4,
 }
 
 /// Enum for selecting the friction algorithm used for simulation.
@@ -2146,16 +1930,6 @@ pub enum PxSceneFlag {
     /// Default:
     /// false
     ExcludeKinematicsFromActiveActors = 4096,
-    /// Do not report kinematics in list of active actors.
-    ///
-    /// Since the target pose for kinematics is set by the user, an application can track the activity state directly and use
-    /// this flag to avoid that kinematics get added to the list of active actors.
-    ///
-    /// This flag has only an effect in combination with eENABLE_ACTIVE_ACTORS.
-    ///
-    /// Default:
-    /// false
-    EnableGpuDynamics = 8192,
     /// Provides improved determinism at the expense of performance.
     ///
     /// By default, PhysX provides limited determinism guarantees. Specifically, PhysX guarantees that the exact scene (same actors created in the same order) and simulated using the same
@@ -2202,33 +1976,7 @@ pub enum PxSceneFlag {
     /// a robotic manipulator, better results can be achieved by enabling friction in all solver iterations.
     ///
     /// This flag only has effect with the default solver. The TGS solver always performs friction per-iteration.
-    SuppressReadback = 65536,
-    /// Controls processing friction in all solver iterations
-    ///
-    /// By default, PhysX processes friction only in the final 3 position iterations, and all velocity
-    /// iterations. This flag enables friction processing in all position and velocity iterations.
-    ///
-    /// The default behaviour provides a good trade-off between performance and stability and is aimed
-    /// primarily at game development.
-    ///
-    /// When simulating more complex frictional behaviour, such as grasping of complex geometries with
-    /// a robotic manipulator, better results can be achieved by enabling friction in all solver iterations.
-    ///
-    /// This flag only has effect with the default solver. The TGS solver always performs friction per-iteration.
-    ForceReadback = 131072,
-    /// Controls processing friction in all solver iterations
-    ///
-    /// By default, PhysX processes friction only in the final 3 position iterations, and all velocity
-    /// iterations. This flag enables friction processing in all position and velocity iterations.
-    ///
-    /// The default behaviour provides a good trade-off between performance and stability and is aimed
-    /// primarily at game development.
-    ///
-    /// When simulating more complex frictional behaviour, such as grasping of complex geometries with
-    /// a robotic manipulator, better results can be achieved by enabling friction in all solver iterations.
-    ///
-    /// This flag only has effect with the default solver. The TGS solver always performs friction per-iteration.
-    MutableFlags = 69633,
+    MutableFlags = 4097,
 }
 
 bitflags::bitflags! {
@@ -2246,12 +1994,9 @@ bitflags::bitflags! {
         const EnableStabilization = 1 << 10;
         const EnableAveragePoint = 1 << 11;
         const ExcludeKinematicsFromActiveActors = 1 << 12;
-        const EnableGpuDynamics = 1 << 13;
         const EnableEnhancedDeterminism = 1 << 14;
         const EnableFrictionEveryIteration = 1 << 15;
-        const SuppressReadback = 1 << 16;
-        const ForceReadback = 1 << 17;
-        const MutableFlags = Self::EnableActiveActors.bits | Self::ExcludeKinematicsFromActiveActors.bits | Self::SuppressReadback.bits;
+        const MutableFlags = Self::EnableActiveActors.bits | Self::ExcludeKinematicsFromActiveActors.bits;
     }
 }
 
@@ -2365,32 +2110,6 @@ pub enum RbPairStatsType {
     ModifiedContactPairs = 2,
     /// Trigger shape pairs processed for the current simulation step.
     TriggerPairs = 3,
-}
-
-/// These flags determine what data is read or written to the gpu softbody.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxSoftBodyDataFlag {
-    /// The collision mesh tetrahedron indices (quadruples of int32)
-    TetIndices = 0,
-    /// The collision mesh cauchy stress tensors (float 3x3 matrices)
-    TetStress = 1,
-    /// The collision mesh tetrahedron von Mises stress (float scalar)
-    TetStresscoeff = 2,
-    /// The collision mesh tetrahedron rest poses (float 3x3 matrices)
-    TetRestPoses = 3,
-    /// The collision mesh tetrahedron orientations (quaternions, quadruples of float)
-    TetRotations = 4,
-    /// The collision mesh vertex positions and their inverted mass in the 4th component (quadruples of float)
-    TetPositionInvMass = 5,
-    /// The simulation mesh tetrahedron indices (quadruples of int32)
-    SimTetIndices = 6,
-    /// The simulation mesh vertex velocities and their inverted mass in the 4th component (quadruples of float)
-    SimVelocityInvMass = 7,
-    /// The simulation mesh vertex positions and their inverted mass in the 4th component (quadruples of float)
-    SimPositionInvMass = 8,
-    /// The simulation mesh kinematic target positions
-    SimKinematicTarget = 9,
 }
 
 /// Identifies each type of information for retrieving from actor.
@@ -2554,67 +2273,6 @@ bitflags::bitflags! {
         const RemovedShapeTrigger = 1 << 0;
         const RemovedShapeOther = 1 << 1;
         const NextFree = 1 << 2;
-    }
-}
-
-/// Identifies input and output buffers for PxSoftBody.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxSoftBodyData {
-    None = 0,
-    /// Flag to request access to the collision mesh's positions; read only
-    PositionInvmass = 1,
-    /// Flag to request access to the simulation mesh's positions and inverse masses
-    SimPositionInvmass = 4,
-    /// Flag to request access to the simulation mesh's velocities and inverse masses
-    SimVelocity = 8,
-    /// Flag to request access to the simulation mesh's kinematic target position
-    SimKinematicTarget = 16,
-    All = 29,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxSoftBodyData`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxSoftBodyDataFlags: u32 {
-        const PositionInvmass = 1 << 0;
-        const SimPositionInvmass = 1 << 2;
-        const SimVelocity = 1 << 3;
-        const SimKinematicTarget = 1 << 4;
-        const All = Self::PositionInvmass.bits | Self::SimPositionInvmass.bits | Self::SimVelocity.bits | Self::SimKinematicTarget.bits;
-    }
-}
-
-/// Flags to enable or disable special modes of a SoftBody
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxSoftBodyFlag {
-    /// Determines if self collision will be detected and resolved
-    DisableSelfCollision = 1,
-    /// Enables computation of a Cauchy stress tensor for every tetrahedron in the simulation mesh. The tensors can be accessed through the softbody direct API
-    ComputeStressTensor = 2,
-    /// Enables support for continuous collision detection
-    EnableCcd = 4,
-    /// Enable debug rendering to display the simulation mesh
-    DisplaySimMesh = 8,
-    /// Enables support for kinematic motion of the collision and simulation mesh.
-    Kinematic = 16,
-    /// Enables partially kinematic motion of the collisios and simulation mesh.
-    PartiallyKinematic = 32,
-}
-
-bitflags::bitflags! {
-    /// Flags for [`PxSoftBodyFlag`]
-    #[derive(Default)]
-    #[repr(transparent)]
-    pub struct PxSoftBodyFlags: u32 {
-        const DisableSelfCollision = 1 << 0;
-        const ComputeStressTensor = 1 << 1;
-        const EnableCcd = 1 << 2;
-        const DisplaySimMesh = 1 << 3;
-        const Kinematic = 1 << 4;
-        const PartiallyKinematic = 1 << 5;
     }
 }
 
@@ -2782,11 +2440,6 @@ pub enum PxConvexFlag {
     /// Inertia tensor computation is faster using SIMD code, but the precision is lower, which may result
     /// in incorrect inertia for very thin hulls.
     FastInertiaComputation = 64,
-    /// Convex hulls are created with respect to GPU simulation limitations. Vertex limit and polygon limit
-    /// is set to 64 and vertex limit per face is internally set to 32.
-    ///
-    /// Can be used only with eCOMPUTE_CONVEX flag.
-    GpuCompatible = 128,
     /// Convex hull input vertices are shifted to be around origin to provide better computation stability.
     /// It is recommended to provide input vertices around the origin, otherwise use this flag to improve
     /// numerical stability.
@@ -2807,19 +2460,8 @@ bitflags::bitflags! {
         const DisableMeshValidation = 1 << 4;
         const PlaneShifting = 1 << 5;
         const FastInertiaComputation = 1 << 6;
-        const GpuCompatible = 1 << 7;
         const ShiftVertices = 1 << 8;
     }
-}
-
-/// Defines the tetrahedron structure of a mesh.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[repr(i32)]
-pub enum PxMeshFormat {
-    /// Normal tetmesh with arbitrary tetrahedra
-    TetMesh = 0,
-    /// 6 tetrahedra in a row will form a hexahedron
-    HexMesh = 1,
 }
 
 /// Desired build strategy for PxMeshMidPhase::eBVH34
@@ -3389,109 +3031,7 @@ pub struct PxTypeInfo {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct PxFEMSoftBodyMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxFEMClothMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxPBDMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxFLIPMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxMPMMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxCustomMaterial {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct PxBVH33TriangleMesh {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleSystem {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxPBDParticleSystem {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxFLIPParticleSystem {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxMPMParticleSystem {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxCustomParticleSystem {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxSoftBody {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxFEMCloth {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleBuffer {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleAndDiffuseBuffer {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleClothBuffer {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleRigidBuffer {
     _unused: [u8; 0],
 }
 
@@ -3641,18 +3181,6 @@ pub struct PxLockedData {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct PxCudaContextManager {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct PxParticleRigidAttachment {
-    _unused: [u8; 0],
-}
-
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct PxOmniPvd {
     _unused: [u8; 0],
 }
@@ -3788,6 +3316,12 @@ pub struct PxControllerBehaviorCallback {
 #[repr(C)]
 pub struct PxControllerManager {
     vtable_: *const std::ffi::c_void,
+}
+
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct FILE {
+    _unused: [u8; 0],
 }
 
 #[derive(Clone, Copy)]
@@ -3931,7 +3465,7 @@ extern "C" {
     /// and physics processing thread(s).
     ///
     /// The allocated block of memory.
-    pub fn PxAllocatorCallback_allocate_mut(self_: *mut PxAllocatorCallback, size: usize, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxAllocatorCallback_allocate_mut(self_: *mut PxAllocatorCallback, size: u64, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     /// Frees memory previously allocated by allocate().
     ///
@@ -4022,25 +3556,25 @@ extern "C" {
 
     pub fn PxAllocator_new(anon_param0: *const std::ffi::c_char) -> PxAllocator;
 
-    pub fn PxAllocator_allocate_mut(self_: *mut PxAllocator, size: usize, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxAllocator_allocate_mut(self_: *mut PxAllocator, size: u64, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     pub fn PxAllocator_deallocate_mut(self_: *mut PxAllocator, ptr: *mut std::ffi::c_void);
 
     pub fn PxRawAllocator_new(anon_param0: *const std::ffi::c_char) -> PxRawAllocator;
 
-    pub fn PxRawAllocator_allocate_mut(self_: *mut PxRawAllocator, size: usize, anon_param1: *const std::ffi::c_char, anon_param2: i32) -> *mut std::ffi::c_void;
+    pub fn PxRawAllocator_allocate_mut(self_: *mut PxRawAllocator, size: u64, anon_param1: *const std::ffi::c_char, anon_param2: i32) -> *mut std::ffi::c_void;
 
     pub fn PxRawAllocator_deallocate_mut(self_: *mut PxRawAllocator, ptr: *mut std::ffi::c_void);
 
     pub fn PxVirtualAllocatorCallback_delete(self_: *mut PxVirtualAllocatorCallback);
 
-    pub fn PxVirtualAllocatorCallback_allocate_mut(self_: *mut PxVirtualAllocatorCallback, size: usize, group: i32, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxVirtualAllocatorCallback_allocate_mut(self_: *mut PxVirtualAllocatorCallback, size: u64, group: i32, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     pub fn PxVirtualAllocatorCallback_deallocate_mut(self_: *mut PxVirtualAllocatorCallback, ptr: *mut std::ffi::c_void);
 
     pub fn PxVirtualAllocator_new(callback: *mut PxVirtualAllocatorCallback, group: i32) -> PxVirtualAllocator;
 
-    pub fn PxVirtualAllocator_allocate_mut(self_: *mut PxVirtualAllocator, size: usize, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxVirtualAllocator_allocate_mut(self_: *mut PxVirtualAllocator, size: u64, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     pub fn PxVirtualAllocator_deallocate_mut(self_: *mut PxVirtualAllocator, ptr: *mut std::ffi::c_void);
 
@@ -4048,7 +3582,7 @@ extern "C" {
 
     pub fn PxTempAllocator_new(anon_param0: *const std::ffi::c_char) -> PxTempAllocator;
 
-    pub fn PxTempAllocator_allocate_mut(self_: *mut PxTempAllocator, size: usize, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxTempAllocator_allocate_mut(self_: *mut PxTempAllocator, size: u64, file: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     pub fn PxTempAllocator_deallocate_mut(self_: *mut PxTempAllocator, ptr: *mut std::ffi::c_void);
 
@@ -4481,7 +4015,7 @@ extern "C" {
     pub fn PxErrorCallback_reportError_mut(self_: *mut PxErrorCallback, code: PxErrorCode, message: *const std::ffi::c_char, file: *const std::ffi::c_char, line: i32);
 
     /// callback when memory is allocated.
-    pub fn PxAllocationListener_onAllocation_mut(self_: *mut PxAllocationListener, size: usize, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32, allocatedMemory: *mut std::ffi::c_void);
+    pub fn PxAllocationListener_onAllocation_mut(self_: *mut PxAllocationListener, size: u64, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32, allocatedMemory: *mut std::ffi::c_void);
 
     /// callback when memory is deallocated.
     pub fn PxAllocationListener_onDeallocation_mut(self_: *mut PxAllocationListener, allocatedMemory: *mut std::ffi::c_void);
@@ -4502,7 +4036,7 @@ extern "C" {
     /// and physics processing thread(s).
     ///
     /// The allocated block of memory.
-    pub fn PxBroadcastingAllocator_allocate_mut(self_: *mut PxBroadcastingAllocator, size: usize, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
+    pub fn PxBroadcastingAllocator_allocate_mut(self_: *mut PxBroadcastingAllocator, size: u64, typeName: *const std::ffi::c_char, filename: *const std::ffi::c_char, line: i32) -> *mut std::ffi::c_void;
 
     /// Frees memory previously allocated by allocate().
     ///
@@ -4899,7 +4433,7 @@ extern "C" {
 
     pub fn phys_PxTlsSet(index: u32, value: *mut std::ffi::c_void) -> u32;
 
-    pub fn phys_PxTlsSetValue(index: u32, value: usize) -> u32;
+    pub fn phys_PxTlsSetValue(index: u32, value: u64) -> u32;
 
     pub fn PxCounterFrequencyToTensOfNanos_new(inNum: u64, inDenom: u64) -> PxCounterFrequencyToTensOfNanos;
 
@@ -5039,7 +4573,7 @@ extern "C" {
     /// to the PxBase object). Integer references maybe registered as well (used for internal material
     /// indices with PX_SERIAL_REF_KIND_MATERIAL_IDX). Other kinds could be added with the restriction that
     /// for pointer types the kind value needs to be marked with the PX_SERIAL_REF_KIND_PTR_TYPE_BIT.
-    pub fn PxSerializationContext_registerReference_mut(self_: *mut PxSerializationContext, base: *mut PxBase, kind: u32, reference: usize);
+    pub fn PxSerializationContext_registerReference_mut(self_: *mut PxSerializationContext, base: *mut PxBase, kind: u32, reference: u64);
 
     /// Returns the collection that is being serialized.
     pub fn PxSerializationContext_getCollection(self_: *const PxSerializationContext) -> *const PxCollection;
@@ -5071,7 +4605,7 @@ extern "C" {
     /// For other kinds of references the reverence values need to be updated by deduction given the corresponding PxBase instance.
     ///
     /// PxBase object associated with the reference value
-    pub fn PxDeserializationContext_resolveReference(self_: *const PxDeserializationContext, kind: u32, reference: usize) -> *mut PxBase;
+    pub fn PxDeserializationContext_resolveReference(self_: *const PxDeserializationContext, kind: u32, reference: u64) -> *mut PxBase;
 
     /// Helper function to read a name from the extra data during deserialization.
     ///
@@ -5670,13 +5204,6 @@ extern "C" {
 
     pub fn PxConvexMesh_getConcreteTypeName(self_: *const PxConvexMesh) -> *const std::ffi::c_char;
 
-    /// This method decides whether a convex mesh is gpu compatible. If the total number of vertices are more than 64 or any number of vertices in a polygon is more than 32, or
-    /// convex hull data was not cooked with GPU data enabled during cooking or was loaded from a serialized collection, the convex hull is incompatible with GPU collision detection. Otherwise
-    /// it is compatible.
-    ///
-    /// True if the convex hull is gpu compatible
-    pub fn PxConvexMesh_isGpuCompatible(self_: *const PxConvexMesh) -> bool;
-
     /// Constructor initializes to identity scale.
     pub fn PxMeshScale_new() -> PxMeshScale;
 
@@ -5758,27 +5285,6 @@ extern "C" {
     /// A valid height field has a positive scale value in each direction (heightScale > 0, rowScale > 0, columnScale > 0).
     /// It is illegal to call PxRigidActor::createShape and PxPhysics::createShape with a height field that has zero extents in any direction.
     pub fn PxHeightFieldGeometry_isValid(self_: *const PxHeightFieldGeometry) -> bool;
-
-    /// Default constructor.
-    ///
-    /// Creates an empty object with no particles.
-    pub fn PxParticleSystemGeometry_new() -> PxParticleSystemGeometry;
-
-    /// Returns true if the geometry is valid.
-    ///
-    /// True if the current settings are valid for shape creation.
-    pub fn PxParticleSystemGeometry_isValid(self_: *const PxParticleSystemGeometry) -> bool;
-
-    /// Constructor. By default creates an empty object with a NULL mesh and identity scale.
-    pub fn PxTetrahedronMeshGeometry_new(mesh: *mut PxTetrahedronMesh) -> PxTetrahedronMeshGeometry;
-
-    /// Returns true if the geometry is valid.
-    ///
-    /// True if the current settings are valid for shape creation.
-    ///
-    /// A valid tetrahedron mesh has a positive scale value in each direction (scale.scale.x > 0, scale.scale.y > 0, scale.scale.z > 0).
-    /// It is illegal to call PxRigidActor::createShape and PxPhysics::createShape with a tetrahedron mesh that has zero extents in any direction.
-    pub fn PxTetrahedronMeshGeometry_isValid(self_: *const PxTetrahedronMeshGeometry) -> bool;
 
     pub fn PxQueryHit_new() -> PxQueryHit;
 
@@ -5885,10 +5391,6 @@ extern "C" {
 
     pub fn PxGeometryHolder_convexMesh(self_: *const PxGeometryHolder) -> *const PxConvexMeshGeometry;
 
-    pub fn PxGeometryHolder_tetMesh_mut(self_: *mut PxGeometryHolder) -> *mut PxTetrahedronMeshGeometry;
-
-    pub fn PxGeometryHolder_tetMesh(self_: *const PxGeometryHolder) -> *const PxTetrahedronMeshGeometry;
-
     pub fn PxGeometryHolder_triangleMesh_mut(self_: *mut PxGeometryHolder) -> *mut PxTriangleMeshGeometry;
 
     pub fn PxGeometryHolder_triangleMesh(self_: *const PxGeometryHolder) -> *const PxTriangleMeshGeometry;
@@ -5896,10 +5398,6 @@ extern "C" {
     pub fn PxGeometryHolder_heightField_mut(self_: *mut PxGeometryHolder) -> *mut PxHeightFieldGeometry;
 
     pub fn PxGeometryHolder_heightField(self_: *const PxGeometryHolder) -> *const PxHeightFieldGeometry;
-
-    pub fn PxGeometryHolder_particleSystem_mut(self_: *mut PxGeometryHolder) -> *mut PxParticleSystemGeometry;
-
-    pub fn PxGeometryHolder_particleSystem(self_: *const PxGeometryHolder) -> *const PxParticleSystemGeometry;
 
     pub fn PxGeometryHolder_custom_mut(self_: *mut PxGeometryHolder) -> *mut PxCustomGeometry;
 
@@ -6337,108 +5835,6 @@ extern "C" {
     /// Similarly, to obtain the localInertia of an identically shaped object with a uniform density of d, simply multiply the
     /// localInertia of the unit density mesh by d.
     pub fn PxTriangleMesh_getMassInformation(self_: *const PxTriangleMesh, mass: *mut f32, localInertia: *mut PxMat33, localCenterOfMass: *mut PxVec3);
-
-    /// Constructor
-    pub fn PxTetrahedron_new_alloc() -> *mut PxTetrahedron;
-
-    /// Constructor
-    pub fn PxTetrahedron_new_alloc_1(p0: *const PxVec3, p1: *const PxVec3, p2: *const PxVec3, p3: *const PxVec3) -> *mut PxTetrahedron;
-
-    /// Destructor
-    pub fn PxTetrahedron_delete(self_: *mut PxTetrahedron);
-
-    /// Decrements the reference count of a tetrahedron mesh and releases it if the new reference count is zero.
-    pub fn PxSoftBodyAuxData_release_mut(self_: *mut PxSoftBodyAuxData);
-
-    /// Returns the number of vertices.
-    ///
-    /// number of vertices
-    pub fn PxTetrahedronMesh_getNbVertices(self_: *const PxTetrahedronMesh) -> u32;
-
-    /// Returns the vertices
-    ///
-    /// array of vertices
-    pub fn PxTetrahedronMesh_getVertices(self_: *const PxTetrahedronMesh) -> *const PxVec3;
-
-    /// Returns the number of tetrahedrons.
-    ///
-    /// number of tetrahedrons
-    pub fn PxTetrahedronMesh_getNbTetrahedrons(self_: *const PxTetrahedronMesh) -> u32;
-
-    /// Returns the tetrahedron indices.
-    ///
-    /// The indices can be 16 or 32bit depending on the number of tetrahedrons in the mesh.
-    /// Call getTetrahedronMeshFlags() to know if the indices are 16 or 32 bits.
-    ///
-    /// The number of indices is the number of tetrahedrons * 4.
-    ///
-    /// array of tetrahedrons
-    pub fn PxTetrahedronMesh_getTetrahedrons(self_: *const PxTetrahedronMesh) -> *const std::ffi::c_void;
-
-    /// Reads the PxTetrahedronMesh flags.
-    ///
-    /// See the list of flags [`PxTetrahedronMeshFlags`]
-    ///
-    /// The values of the PxTetrahedronMesh flags.
-    pub fn PxTetrahedronMesh_getTetrahedronMeshFlags(self_: *const PxTetrahedronMesh) -> PxTetrahedronMeshFlags;
-
-    /// Returns the tetrahedra remapping table.
-    ///
-    /// The tetrahedra are internally sorted according to various criteria. Hence the internal tetrahedron order
-    /// does not always match the original (user-defined) order. The remapping table helps finding the old
-    /// indices knowing the new ones:
-    ///
-    /// remapTable[ internalTetrahedronIndex ] = originalTetrahedronIndex
-    ///
-    /// the remapping table (or NULL if 'PxCookingParams::suppressTriangleMeshRemapTable' has been used)
-    pub fn PxTetrahedronMesh_getTetrahedraRemap(self_: *const PxTetrahedronMesh) -> *const u32;
-
-    /// Returns the local-space (vertex space) AABB from the tetrahedron mesh.
-    ///
-    /// local-space bounds
-    pub fn PxTetrahedronMesh_getLocalBounds(self_: *const PxTetrahedronMesh) -> PxBounds3;
-
-    /// Decrements the reference count of a tetrahedron mesh and releases it if the new reference count is zero.
-    pub fn PxTetrahedronMesh_release_mut(self_: *mut PxTetrahedronMesh);
-
-    /// Const accecssor to the softbody's collision mesh.
-    pub fn PxSoftBodyMesh_getCollisionMesh(self_: *const PxSoftBodyMesh) -> *const PxTetrahedronMesh;
-
-    /// Accecssor to the softbody's collision mesh.
-    pub fn PxSoftBodyMesh_getCollisionMesh_mut(self_: *mut PxSoftBodyMesh) -> *mut PxTetrahedronMesh;
-
-    /// Const accessor to the softbody's simulation mesh.
-    pub fn PxSoftBodyMesh_getSimulationMesh(self_: *const PxSoftBodyMesh) -> *const PxTetrahedronMesh;
-
-    /// Accecssor to the softbody's simulation mesh.
-    pub fn PxSoftBodyMesh_getSimulationMesh_mut(self_: *mut PxSoftBodyMesh) -> *mut PxTetrahedronMesh;
-
-    /// Const accessor to the softbodies simulation state.
-    pub fn PxSoftBodyMesh_getSoftBodyAuxData(self_: *const PxSoftBodyMesh) -> *const PxSoftBodyAuxData;
-
-    /// Accessor to the softbody's auxilary data like mass and rest pose information
-    pub fn PxSoftBodyMesh_getSoftBodyAuxData_mut(self_: *mut PxSoftBodyMesh) -> *mut PxSoftBodyAuxData;
-
-    /// Decrements the reference count of a tetrahedron mesh and releases it if the new reference count is zero.
-    pub fn PxSoftBodyMesh_release_mut(self_: *mut PxSoftBodyMesh);
-
-    pub fn PxCollisionMeshMappingData_release_mut(self_: *mut PxCollisionMeshMappingData);
-
-    pub fn PxCollisionTetrahedronMeshData_getMesh(self_: *const PxCollisionTetrahedronMeshData) -> *const PxTetrahedronMeshData;
-
-    pub fn PxCollisionTetrahedronMeshData_getMesh_mut(self_: *mut PxCollisionTetrahedronMeshData) -> *mut PxTetrahedronMeshData;
-
-    pub fn PxCollisionTetrahedronMeshData_getData(self_: *const PxCollisionTetrahedronMeshData) -> *const PxSoftBodyCollisionData;
-
-    pub fn PxCollisionTetrahedronMeshData_getData_mut(self_: *mut PxCollisionTetrahedronMeshData) -> *mut PxSoftBodyCollisionData;
-
-    pub fn PxCollisionTetrahedronMeshData_release_mut(self_: *mut PxCollisionTetrahedronMeshData);
-
-    pub fn PxSimulationTetrahedronMeshData_getMesh_mut(self_: *mut PxSimulationTetrahedronMeshData) -> *mut PxTetrahedronMeshData;
-
-    pub fn PxSimulationTetrahedronMeshData_getData_mut(self_: *mut PxSimulationTetrahedronMeshData) -> *mut PxSoftBodySimulationData;
-
-    pub fn PxSimulationTetrahedronMeshData_release_mut(self_: *mut PxSimulationTetrahedronMeshData);
 
     /// Deletes the actor.
     ///
@@ -7529,11 +6925,6 @@ extern "C" {
     /// This call may only be made on articulations that are in a scene, and it is not allowed to use this method while the simulation
     /// is running except in a split simulation during [`PxScene::collide`]() and up to #PxScene::advance(), and in PxContactModifyCallback or in contact report callbacks.
     pub fn PxArticulationReducedCoordinate_getLinkAcceleration_mut(self_: *mut PxArticulationReducedCoordinate, linkId: u32) -> PxSpatialVelocity;
-
-    /// Returns the GPU articulation index.
-    ///
-    /// The GPU index, or 0xFFFFFFFF if the articulation is not in a scene or PxSceneFlag::eSUPPRESS_READBACK is not set.
-    pub fn PxArticulationReducedCoordinate_getGpuArticulationIndex_mut(self_: *mut PxArticulationReducedCoordinate) -> u32;
 
     /// Creates a spatial tendon to attach to the articulation with default attribute values.
     ///
@@ -9025,32 +8416,6 @@ extern "C" {
     /// allowed to dereference the object pointer in the callback.
     pub fn PxDeletionListener_onRelease_mut(self_: *mut PxDeletionListener, observed: *const PxBase, userData: *mut std::ffi::c_void, deletionEvent: PxDeletionEventFlag);
 
-    pub fn PxBaseMaterial_isKindOf(self_: *const PxBaseMaterial, name: *const std::ffi::c_char) -> bool;
-
-    /// Sets young's modulus which defines the body's stiffness
-    pub fn PxFEMMaterial_setYoungsModulus_mut(self_: *mut PxFEMMaterial, young: f32);
-
-    /// Retrieves the young's modulus value.
-    ///
-    /// The young's modulus value.
-    pub fn PxFEMMaterial_getYoungsModulus(self_: *const PxFEMMaterial) -> f32;
-
-    /// Sets the Poisson's ratio which defines the body's volume preservation. Completely incompressible materials have a poisson ratio of 0.5. Its value should not be set to exactly 0.5 because this leads to numerical problems.
-    pub fn PxFEMMaterial_setPoissons_mut(self_: *mut PxFEMMaterial, poisson: f32);
-
-    /// Retrieves the Poisson's ratio.
-    ///
-    /// The Poisson's ratio.
-    pub fn PxFEMMaterial_getPoissons(self_: *const PxFEMMaterial) -> f32;
-
-    /// Sets the dynamic friction value which defines the strength of resistance when two objects slide relative to each other while in contact.
-    pub fn PxFEMMaterial_setDynamicFriction_mut(self_: *mut PxFEMMaterial, dynamicFriction: f32);
-
-    /// Retrieves the dynamic friction value
-    ///
-    /// The dynamic friction value
-    pub fn PxFEMMaterial_getDynamicFriction(self_: *const PxFEMMaterial) -> f32;
-
     pub fn PxFilterData_new(anon_param0: PxEMPTY) -> PxFilterData;
 
     /// Default constructor.
@@ -9119,6 +8484,8 @@ extern "C" {
 
     /// virtual destructor
     pub fn PxLockedData_delete(self_: *mut PxLockedData);
+
+    pub fn PxBaseMaterial_isKindOf(self_: *const PxBaseMaterial, name: *const std::ffi::c_char) -> bool;
 
     /// Sets the coefficient of dynamic friction.
     ///
@@ -9263,53 +8630,6 @@ extern "C" {
 
     pub fn PxMaterial_getConcreteTypeName(self_: *const PxMaterial) -> *const std::ffi::c_char;
 
-    /// Construct parameters with default values.
-    pub fn PxDiffuseParticleParams_new() -> PxDiffuseParticleParams;
-
-    /// (re)sets the structure to the default.
-    pub fn PxDiffuseParticleParams_setToDefault_mut(self_: *mut PxDiffuseParticleParams);
-
-    /// Sets friction
-    pub fn PxParticleMaterial_setFriction_mut(self_: *mut PxParticleMaterial, friction: f32);
-
-    /// Retrieves the friction value.
-    ///
-    /// The friction value.
-    pub fn PxParticleMaterial_getFriction(self_: *const PxParticleMaterial) -> f32;
-
-    /// Sets velocity damping term
-    pub fn PxParticleMaterial_setDamping_mut(self_: *mut PxParticleMaterial, damping: f32);
-
-    /// Retrieves the velocity damping term
-    ///
-    /// The velocity damping term.
-    pub fn PxParticleMaterial_getDamping(self_: *const PxParticleMaterial) -> f32;
-
-    /// Sets adhesion term
-    pub fn PxParticleMaterial_setAdhesion_mut(self_: *mut PxParticleMaterial, adhesion: f32);
-
-    /// Retrieves the adhesion term
-    ///
-    /// The adhesion term.
-    pub fn PxParticleMaterial_getAdhesion(self_: *const PxParticleMaterial) -> f32;
-
-    /// Sets gravity scale term
-    pub fn PxParticleMaterial_setGravityScale_mut(self_: *mut PxParticleMaterial, scale: f32);
-
-    /// Retrieves the gravity scale term
-    ///
-    /// The gravity scale term.
-    pub fn PxParticleMaterial_getGravityScale(self_: *const PxParticleMaterial) -> f32;
-
-    /// Sets material adhesion radius scale. This is multiplied by the particle rest offset to compute the fall-off distance
-    /// at which point adhesion ceases to operate.
-    pub fn PxParticleMaterial_setAdhesionRadiusScale_mut(self_: *mut PxParticleMaterial, scale: f32);
-
-    /// Retrieves the adhesion radius scale.
-    ///
-    /// The adhesion radius scale.
-    pub fn PxParticleMaterial_getAdhesionRadiusScale(self_: *const PxParticleMaterial) -> f32;
-
     /// Destroys the instance it is called on.
     ///
     /// Use this release method to destroy an instance of this class. Be sure
@@ -9368,32 +8688,6 @@ extern "C" {
     ///
     /// The number of triangle mesh pointers written to userBuffer, this should be less or equal to bufferSize.
     pub fn PxPhysics_getTriangleMeshes(self_: *const PxPhysics, userBuffer: *mut *mut PxTriangleMesh, bufferSize: u32, startIndex: u32) -> u32;
-
-    /// Creates a tetrahedron mesh object.
-    ///
-    /// This can then be instanced into [`PxShape`] objects.
-    ///
-    /// The new tetrahedron mesh.
-    pub fn PxPhysics_createTetrahedronMesh_mut(self_: *mut PxPhysics, stream: *mut PxInputStream) -> *mut PxTetrahedronMesh;
-
-    /// Creates a softbody mesh object.
-    ///
-    /// The new softbody mesh.
-    pub fn PxPhysics_createSoftBodyMesh_mut(self_: *mut PxPhysics, stream: *mut PxInputStream) -> *mut PxSoftBodyMesh;
-
-    /// Return the number of tetrahedron meshes that currently exist.
-    ///
-    /// Number of tetrahedron meshes.
-    pub fn PxPhysics_getNbTetrahedronMeshes(self_: *const PxPhysics) -> u32;
-
-    /// Writes the array of tetrahedron mesh pointers to a user buffer.
-    ///
-    /// Returns the number of pointers written.
-    ///
-    /// The ordering of the tetrahedron meshes in the array is not specified.
-    ///
-    /// The number of tetrahedron mesh pointers written to userBuffer, this should be less or equal to bufferSize.
-    pub fn PxPhysics_getTetrahedronMeshes(self_: *const PxPhysics, userBuffer: *mut *mut PxTetrahedronMesh, bufferSize: u32, startIndex: u32) -> u32;
 
     /// Creates a heightfield object from previously cooked stream.
     ///
@@ -10402,10 +9696,6 @@ extern "C" {
     /// true if the current settings are valid.
     pub fn PxSceneLimits_isValid(self_: *const PxSceneLimits) -> bool;
 
-    pub fn PxgDynamicsMemoryConfig_new() -> PxgDynamicsMemoryConfig;
-
-    pub fn PxgDynamicsMemoryConfig_isValid(self_: *const PxgDynamicsMemoryConfig) -> bool;
-
     /// constructor sets to default.
     pub fn PxSceneDesc_new(scale: *const PxTolerancesScale) -> PxSceneDesc;
 
@@ -10945,9 +10235,6 @@ extern "C" {
     /// Note that once fetchResultsFinish() has been called, the contact streams returned in fetchResultsStart() will be invalid.
     pub fn PxScene_fetchResultsFinish_mut(self_: *mut PxScene, errorState: *mut u32);
 
-    /// This call performs the synchronization of particle system data copies.
-    pub fn PxScene_fetchResultsParticleSystem_mut(self_: *mut PxScene);
-
     /// Clear internal buffers and free memory.
     ///
     /// This method can be used to clear buffers and free internal memory without having to destroy the scene. Can be useful if
@@ -11261,80 +10548,6 @@ extern "C" {
     /// the client, NULL if no PVD supported.
     pub fn PxScene_getScenePvdClient_mut(self_: *mut PxScene) -> *mut PxPvdSceneClient;
 
-    /// Copy GPU articulation data from the internal GPU buffer to a user-provided device buffer.
-    pub fn PxScene_copyArticulationData_mut(self_: *mut PxScene, data: *mut std::ffi::c_void, index: *mut std::ffi::c_void, dataType: PxArticulationGpuDataType, nbCopyArticulations: u32, copyEvent: *mut std::ffi::c_void);
-
-    /// Apply GPU articulation data from a user-provided device buffer to the internal GPU buffer.
-    pub fn PxScene_applyArticulationData_mut(self_: *mut PxScene, data: *mut std::ffi::c_void, index: *mut std::ffi::c_void, dataType: PxArticulationGpuDataType, nbUpdatedArticulations: u32, waitEvent: *mut std::ffi::c_void, signalEvent: *mut std::ffi::c_void);
-
-    /// Copy GPU softbody data from the internal GPU buffer to a user-provided device buffer.
-    pub fn PxScene_copySoftBodyData_mut(self_: *mut PxScene, data: *mut *mut std::ffi::c_void, dataSizes: *mut std::ffi::c_void, softBodyIndices: *mut std::ffi::c_void, flag: PxSoftBodyDataFlag, nbCopySoftBodies: u32, maxSize: u32, copyEvent: *mut std::ffi::c_void);
-
-    /// Apply user-provided data to the internal softbody system.
-    pub fn PxScene_applySoftBodyData_mut(self_: *mut PxScene, data: *mut *mut std::ffi::c_void, dataSizes: *mut std::ffi::c_void, softBodyIndices: *mut std::ffi::c_void, flag: PxSoftBodyDataFlag, nbUpdatedSoftBodies: u32, maxSize: u32, applyEvent: *mut std::ffi::c_void);
-
-    /// Copy contact data from the internal GPU buffer to a user-provided device buffer.
-    ///
-    /// The contact data contains pointers to internal state and is only valid until the next call to simulate().
-    pub fn PxScene_copyContactData_mut(self_: *mut PxScene, data: *mut std::ffi::c_void, maxContactPairs: u32, numContactPairs: *mut std::ffi::c_void, copyEvent: *mut std::ffi::c_void);
-
-    /// Copy GPU rigid body data from the internal GPU buffer to a user-provided device buffer.
-    pub fn PxScene_copyBodyData_mut(self_: *mut PxScene, data: *mut PxGpuBodyData, index: *mut PxGpuActorPair, nbCopyActors: u32, copyEvent: *mut std::ffi::c_void);
-
-    /// Apply user-provided data to rigid body.
-    pub fn PxScene_applyActorData_mut(self_: *mut PxScene, data: *mut std::ffi::c_void, index: *mut PxGpuActorPair, flag: PxActorCacheFlag, nbUpdatedActors: u32, waitEvent: *mut std::ffi::c_void, signalEvent: *mut std::ffi::c_void);
-
-    /// Compute dense Jacobian matrices for specified articulations on the GPU.
-    ///
-    /// The size of Jacobians can vary by articulation, since it depends on the number of links, degrees-of-freedom, and whether the base is fixed.
-    ///
-    /// The size is determined using these formulas:
-    /// nCols = (fixedBase ? 0 : 6) + dofCount
-    /// nRows = (fixedBase ? 0 : 6) + (linkCount - 1) * 6;
-    ///
-    /// The user must ensure that adequate space is provided for each Jacobian matrix.
-    pub fn PxScene_computeDenseJacobians_mut(self_: *mut PxScene, indices: *const PxIndexDataPair, nbIndices: u32, computeEvent: *mut std::ffi::c_void);
-
-    /// Compute the joint-space inertia matrices that maps joint accelerations to joint forces: forces = M * accelerations on the GPU.
-    ///
-    /// The size of matrices can vary by articulation, since it depends on the number of links and degrees-of-freedom.
-    ///
-    /// The size is determined using this formula:
-    /// sizeof(float) * dofCount * dofCount
-    ///
-    /// The user must ensure that adequate space is provided for each mass matrix.
-    pub fn PxScene_computeGeneralizedMassMatrices_mut(self_: *mut PxScene, indices: *const PxIndexDataPair, nbIndices: u32, computeEvent: *mut std::ffi::c_void);
-
-    /// Computes the joint DOF forces required to counteract gravitational forces for the given articulation pose.
-    ///
-    /// The size of the result can vary by articulation, since it depends on the number of links and degrees-of-freedom.
-    ///
-    /// The size is determined using this formula:
-    /// sizeof(float) * dofCount
-    ///
-    /// The user must ensure that adequate space is provided for each articulation.
-    pub fn PxScene_computeGeneralizedGravityForces_mut(self_: *mut PxScene, indices: *const PxIndexDataPair, nbIndices: u32, computeEvent: *mut std::ffi::c_void);
-
-    /// Computes the joint DOF forces required to counteract coriolis and centrifugal forces for the given articulation pose.
-    ///
-    /// The size of the result can vary by articulation, since it depends on the number of links and degrees-of-freedom.
-    ///
-    /// The size is determined using this formula:
-    /// sizeof(float) * dofCount
-    ///
-    /// The user must ensure that adequate space is provided for each articulation.
-    pub fn PxScene_computeCoriolisAndCentrifugalForces_mut(self_: *mut PxScene, indices: *const PxIndexDataPair, nbIndices: u32, computeEvent: *mut std::ffi::c_void);
-
-    pub fn PxScene_getGpuDynamicsConfig(self_: *const PxScene) -> PxgDynamicsMemoryConfig;
-
-    /// Apply user-provided data to particle buffers.
-    ///
-    /// This function should be used if the particle buffer flags are already on the device. Otherwise, use PxParticleBuffer::raiseFlags()
-    /// from the CPU.
-    ///
-    /// This assumes the data has been changed directly in the PxParticleBuffer.
-    pub fn PxScene_applyParticleBufferData_mut(self_: *mut PxScene, indices: *const u32, bufferIndexPair: *const PxGpuParticleBufferIndexPair, flags: *const PxParticleBufferFlags, nbUpdatedBuffers: u32, waitEvent: *mut std::ffi::c_void, signalEvent: *mut std::ffi::c_void);
-
     /// Constructor
     pub fn PxSceneReadLock_new_alloc(scene: *mut PxScene, file: *const std::ffi::c_char, line: u32) -> *mut PxSceneReadLock;
 
@@ -11465,8 +10678,6 @@ extern "C" {
     pub fn PxSimulationEventCallback_onAdvance_mut(self_: *mut PxSimulationEventCallback, bodyBuffer: *const *const PxRigidBody, poseBuffer: *const PxTransform, count: u32);
 
     pub fn PxSimulationEventCallback_delete(self_: *mut PxSimulationEventCallback);
-
-    pub fn PxFEMParameters_new() -> PxFEMParameters;
 
     /// Release this object.
     pub fn PxPruningStructure_release_mut(self_: *mut PxPruningStructure);
@@ -12056,16 +11267,6 @@ extern "C" {
     /// true if the current settings are valid
     pub fn PxTriangleMeshDesc_isValid(self_: *const PxTriangleMeshDesc) -> bool;
 
-    /// Constructor to build an empty tetmesh description
-    pub fn PxTetrahedronMeshDesc_new() -> PxTetrahedronMeshDesc;
-
-    pub fn PxTetrahedronMeshDesc_isValid(self_: *const PxTetrahedronMeshDesc) -> bool;
-
-    /// Constructor to build an empty simulation description
-    pub fn PxSoftBodySimulationDataDesc_new() -> PxSoftBodySimulationDataDesc;
-
-    pub fn PxSoftBodySimulationDataDesc_isValid(self_: *const PxSoftBodySimulationDataDesc) -> bool;
-
     /// Desc initialization to default value.
     pub fn PxBVH34MidphaseDesc_setToDefault_mut(self_: *mut PxBVH34MidphaseDesc);
 
@@ -12259,11 +11460,11 @@ extern "C" {
 
     pub fn PxDefaultFileInputData_isValid(self_: *const PxDefaultFileInputData) -> bool;
 
-    pub fn phys_platformAlignedAlloc(size: usize) -> *mut std::ffi::c_void;
+    pub fn phys_platformAlignedAlloc(size: u64) -> *mut std::ffi::c_void;
 
     pub fn phys_platformAlignedFree(ptr: *mut std::ffi::c_void);
 
-    pub fn PxDefaultAllocator_allocate_mut(self_: *mut PxDefaultAllocator, size: usize, anon_param1: *const std::ffi::c_char, anon_param2: *const std::ffi::c_char, anon_param3: i32) -> *mut std::ffi::c_void;
+    pub fn PxDefaultAllocator_allocate_mut(self_: *mut PxDefaultAllocator, size: u64, anon_param1: *const std::ffi::c_char, anon_param2: *const std::ffi::c_char, anon_param3: i32) -> *mut std::ffi::c_void;
 
     pub fn PxDefaultAllocator_deallocate_mut(self_: *mut PxDefaultAllocator, ptr: *mut std::ffi::c_void);
 
@@ -14073,16 +13274,6 @@ extern "C" {
     ///
     /// Returns the sampler
     pub fn phys_PxCreateTriangleMeshSampler(triangles: *const u32, numTriangles: u32, vertices: *const PxVec3, numVertices: u32, initialSamplingRadius: f32, numSampleAttemptsAroundPoint: i32) -> *mut PxTriangleMeshPoissonSampler;
-
-    /// Returns the index of the tetrahedron that contains a point
-    ///
-    /// The index of the tetrahedon containing the point, -1 if not tetrahedron contains the opoint
-    pub fn PxTetrahedronMeshExt_findTetrahedronContainingPoint(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4, tolerance: f32) -> i32;
-
-    /// Returns the index of the tetrahedron closest to a point
-    ///
-    /// The index of the tetrahedon closest to the point
-    pub fn PxTetrahedronMeshExt_findTetrahedronClosestToPoint(mesh: *const PxTetrahedronMesh, point: *const PxVec3, bary: *mut PxVec4) -> i32;
 
     /// Initialize the PhysXExtensions library.
     ///

@@ -166,10 +166,6 @@ fn extensions(ctx: &mut Context) {
     let sources = include!("sources/extensions_binary");
     ctx.add_sources("source/physxextensions/src/serialization/Binary", &sources);
 
-    // tet
-    let sources = include!("sources/extensions_tet");
-    ctx.add_sources("source/physxextensions/src/tet", &sources);
-
     ctx.add_includes("source/physxmetadata/extensions", &["include"]);
 }
 
@@ -399,9 +395,7 @@ fn add_common(ctx: &mut Context) {
     }
 }
 
-fn cc_compile(target_env: Environment) {
-    let root = env::current_dir().unwrap().join("physx/physx");
-
+fn cc_compile(target_env: Environment, root: PathBuf) {
     let ccenv = target_env;
 
     let mut ctx = Context {

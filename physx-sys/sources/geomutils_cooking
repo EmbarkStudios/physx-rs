@@ -9,7 +9,6 @@
     "GuCookingConvexPolygonsBuilder",
     "GuCookingHF",
     "GuCookingQuickHullConvexHullLib",
-    "GuCookingTetrahedronMesh",
     "GuCookingTriangleMesh",
     "GuCookingVolumeIntegration",
     "GuRTreeCooking",

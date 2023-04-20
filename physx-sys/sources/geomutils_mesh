@@ -19,7 +19,6 @@
     "GuRTree",
     "GuRTreeQueries",
     "GuSweepsMesh",
-    "GuTetrahedronMesh",
     "GuTriangleMeshBV4",
     "GuTriangleMesh",
     "GuTriangleMeshRTree",

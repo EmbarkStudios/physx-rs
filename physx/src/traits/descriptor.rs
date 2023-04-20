@@ -82,10 +82,6 @@ pub struct SceneDescriptor<
     pub broad_phase_callback: *mut physx_sys::PxBroadPhaseCallback,
     pub contact_modify_callback: *mut physx_sys::PxContactModifyCallback,
     pub ccd_contact_modify_callback: *mut physx_sys::PxCCDContactModifyCallback,
-
-    pub gpu_dynamics_config: physx_sys::PxgDynamicsMemoryConfig,
-    pub gpu_max_num_partitions: u32,
-    pub gpu_compute_version: u32,
 }
 
 impl<
@@ -149,9 +145,6 @@ impl<
             broad_phase_callback: null_mut(),
             contact_modify_callback: null_mut(),
             ccd_contact_modify_callback: null_mut(),
-            gpu_dynamics_config: unsafe { physx_sys::PxgDynamicsMemoryConfig_new() },
-            gpu_max_num_partitions: 8,
-            gpu_compute_version: 0,
         }
     }
 }
@@ -225,9 +218,6 @@ impl<
                 contactModifyCallback: self.contact_modify_callback,
                 ccdContactModifyCallback: self.ccd_contact_modify_callback,
                 broadPhaseCallback: self.broad_phase_callback,
-                gpuDynamicsConfig: self.gpu_dynamics_config,
-                gpuMaxNumPartitions: self.gpu_max_num_partitions,
-                gpuComputeVersion: self.gpu_compute_version,
                 ..physx_sys::PxSceneDesc_new(creator.get_tolerances_scale()?)
             }
         };

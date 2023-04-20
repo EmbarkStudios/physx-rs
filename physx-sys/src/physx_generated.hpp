@@ -81,8 +81,6 @@ static_assert(sizeof(physx::PxSphereGeometry) == sizeof(physx_PxSphereGeometry_P
 static_assert(sizeof(physx::PxPlaneGeometry) == sizeof(physx_PxPlaneGeometry_Pod), "POD wrapper for `physx::PxPlaneGeometry` has incorrect size");
 static_assert(sizeof(physx::PxTriangleMeshGeometry) == sizeof(physx_PxTriangleMeshGeometry_Pod), "POD wrapper for `physx::PxTriangleMeshGeometry` has incorrect size");
 static_assert(sizeof(physx::PxHeightFieldGeometry) == sizeof(physx_PxHeightFieldGeometry_Pod), "POD wrapper for `physx::PxHeightFieldGeometry` has incorrect size");
-static_assert(sizeof(physx::PxParticleSystemGeometry) == sizeof(physx_PxParticleSystemGeometry_Pod), "POD wrapper for `physx::PxParticleSystemGeometry` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedronMeshGeometry) == sizeof(physx_PxTetrahedronMeshGeometry_Pod), "POD wrapper for `physx::PxTetrahedronMeshGeometry` has incorrect size");
 static_assert(sizeof(physx::PxQueryHit) == sizeof(physx_PxQueryHit_Pod), "POD wrapper for `physx::PxQueryHit` has incorrect size");
 static_assert(sizeof(physx::PxLocationHit) == sizeof(physx_PxLocationHit_Pod), "POD wrapper for `physx::PxLocationHit` has incorrect size");
 static_assert(sizeof(physx::PxGeomRaycastHit) == sizeof(physx_PxGeomRaycastHit_Pod), "POD wrapper for `physx::PxGeomRaycastHit` has incorrect size");
@@ -104,16 +102,6 @@ static_assert(sizeof(physx::PxTriangle) == sizeof(physx_PxTriangle_Pod), "POD wr
 static_assert(sizeof(physx::PxTrianglePadded) == sizeof(physx_PxTrianglePadded_Pod), "POD wrapper for `physx::PxTrianglePadded` has incorrect size");
 static_assert(sizeof(physx::PxTriangleMesh) == sizeof(physx_PxTriangleMesh_Pod), "POD wrapper for `physx::PxTriangleMesh` has incorrect size");
 static_assert(sizeof(physx::PxBVH34TriangleMesh) == sizeof(physx_PxBVH34TriangleMesh_Pod), "POD wrapper for `physx::PxBVH34TriangleMesh` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedron) == sizeof(physx_PxTetrahedron_Pod), "POD wrapper for `physx::PxTetrahedron` has incorrect size");
-static_assert(sizeof(physx::PxSoftBodyAuxData) == sizeof(physx_PxSoftBodyAuxData_Pod), "POD wrapper for `physx::PxSoftBodyAuxData` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedronMesh) == sizeof(physx_PxTetrahedronMesh_Pod), "POD wrapper for `physx::PxTetrahedronMesh` has incorrect size");
-static_assert(sizeof(physx::PxSoftBodyMesh) == sizeof(physx_PxSoftBodyMesh_Pod), "POD wrapper for `physx::PxSoftBodyMesh` has incorrect size");
-static_assert(sizeof(physx::PxCollisionMeshMappingData) == sizeof(physx_PxCollisionMeshMappingData_Pod), "POD wrapper for `physx::PxCollisionMeshMappingData` has incorrect size");
-static_assert(sizeof(physx::PxSoftBodyCollisionData) == sizeof(physx_PxSoftBodyCollisionData_Pod), "POD wrapper for `physx::PxSoftBodyCollisionData` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedronMeshData) == sizeof(physx_PxTetrahedronMeshData_Pod), "POD wrapper for `physx::PxTetrahedronMeshData` has incorrect size");
-static_assert(sizeof(physx::PxSoftBodySimulationData) == sizeof(physx_PxSoftBodySimulationData_Pod), "POD wrapper for `physx::PxSoftBodySimulationData` has incorrect size");
-static_assert(sizeof(physx::PxCollisionTetrahedronMeshData) == sizeof(physx_PxCollisionTetrahedronMeshData_Pod), "POD wrapper for `physx::PxCollisionTetrahedronMeshData` has incorrect size");
-static_assert(sizeof(physx::PxSimulationTetrahedronMeshData) == sizeof(physx_PxSimulationTetrahedronMeshData_Pod), "POD wrapper for `physx::PxSimulationTetrahedronMeshData` has incorrect size");
 static_assert(sizeof(physx::PxActor) == sizeof(physx_PxActor_Pod), "POD wrapper for `physx::PxActor` has incorrect size");
 static_assert(sizeof(physx::PxAggregate) == sizeof(physx_PxAggregate_Pod), "POD wrapper for `physx::PxAggregate` has incorrect size");
 static_assert(sizeof(physx::PxSpringModifiers) == sizeof(physx_PxSpringModifiers_Pod), "POD wrapper for `physx::PxSpringModifiers` has incorrect size");
@@ -168,24 +156,16 @@ static_assert(sizeof(physx::PxContact) == sizeof(physx_PxContact_Pod), "POD wrap
 static_assert(sizeof(physx::PxExtendedContact) == sizeof(physx_PxExtendedContact_Pod), "POD wrapper for `physx::PxExtendedContact` has incorrect size");
 static_assert(sizeof(physx::PxModifiableContact) == sizeof(physx_PxModifiableContact_Pod), "POD wrapper for `physx::PxModifiableContact` has incorrect size");
 static_assert(sizeof(physx::PxContactStreamIterator) == sizeof(physx_PxContactStreamIterator_Pod), "POD wrapper for `physx::PxContactStreamIterator` has incorrect size");
-static_assert(sizeof(physx::PxGpuContactPair) == sizeof(physx_PxGpuContactPair_Pod), "POD wrapper for `physx::PxGpuContactPair` has incorrect size");
 static_assert(sizeof(physx::PxContactSet) == sizeof(physx_PxContactSet_Pod), "POD wrapper for `physx::PxContactSet` has incorrect size");
 static_assert(sizeof(physx::PxContactModifyPair) == sizeof(physx_PxContactModifyPair_Pod), "POD wrapper for `physx::PxContactModifyPair` has incorrect size");
 static_assert(sizeof(physx::PxContactModifyCallback) == sizeof(physx_PxContactModifyCallback_Pod), "POD wrapper for `physx::PxContactModifyCallback` has incorrect size");
 static_assert(sizeof(physx::PxCCDContactModifyCallback) == sizeof(physx_PxCCDContactModifyCallback_Pod), "POD wrapper for `physx::PxCCDContactModifyCallback` has incorrect size");
 static_assert(sizeof(physx::PxDeletionListener) == sizeof(physx_PxDeletionListener_Pod), "POD wrapper for `physx::PxDeletionListener` has incorrect size");
-static_assert(sizeof(physx::PxBaseMaterial) == sizeof(physx_PxBaseMaterial_Pod), "POD wrapper for `physx::PxBaseMaterial` has incorrect size");
-static_assert(sizeof(physx::PxFEMMaterial) == sizeof(physx_PxFEMMaterial_Pod), "POD wrapper for `physx::PxFEMMaterial` has incorrect size");
 static_assert(sizeof(physx::PxFilterData) == sizeof(physx_PxFilterData_Pod), "POD wrapper for `physx::PxFilterData` has incorrect size");
 static_assert(sizeof(physx::PxSimulationFilterCallback) == sizeof(physx_PxSimulationFilterCallback_Pod), "POD wrapper for `physx::PxSimulationFilterCallback` has incorrect size");
-static_assert(sizeof(physx::PxParticleRigidFilterPair) == sizeof(physx_PxParticleRigidFilterPair_Pod), "POD wrapper for `physx::PxParticleRigidFilterPair` has incorrect size");
 static_assert(sizeof(physx::PxLockedData) == sizeof(physx_PxLockedData_Pod), "POD wrapper for `physx::PxLockedData` has incorrect size");
+static_assert(sizeof(physx::PxBaseMaterial) == sizeof(physx_PxBaseMaterial_Pod), "POD wrapper for `physx::PxBaseMaterial` has incorrect size");
 static_assert(sizeof(physx::PxMaterial) == sizeof(physx_PxMaterial_Pod), "POD wrapper for `physx::PxMaterial` has incorrect size");
-static_assert(sizeof(physx::PxGpuParticleBufferIndexPair) == sizeof(physx_PxGpuParticleBufferIndexPair_Pod), "POD wrapper for `physx::PxGpuParticleBufferIndexPair` has incorrect size");
-static_assert(sizeof(physx::PxParticleVolume) == sizeof(physx_PxParticleVolume_Pod), "POD wrapper for `physx::PxParticleVolume` has incorrect size");
-static_assert(sizeof(physx::PxDiffuseParticleParams) == sizeof(physx_PxDiffuseParticleParams_Pod), "POD wrapper for `physx::PxDiffuseParticleParams` has incorrect size");
-static_assert(sizeof(physx::PxParticleSpring) == sizeof(physx_PxParticleSpring_Pod), "POD wrapper for `physx::PxParticleSpring` has incorrect size");
-static_assert(sizeof(physx::PxParticleMaterial) == sizeof(physx_PxParticleMaterial_Pod), "POD wrapper for `physx::PxParticleMaterial` has incorrect size");
 static_assert(sizeof(physx::PxPhysics) == sizeof(physx_PxPhysics_Pod), "POD wrapper for `physx::PxPhysics` has incorrect size");
 static_assert(sizeof(physx::PxActorShape) == sizeof(physx_PxActorShape_Pod), "POD wrapper for `physx::PxActorShape` has incorrect size");
 static_assert(sizeof(physx::PxRaycastHit) == sizeof(physx_PxRaycastHit_Pod), "POD wrapper for `physx::PxRaycastHit` has incorrect size");
@@ -217,11 +197,8 @@ static_assert(sizeof(physx::PxBroadPhaseRegions) == sizeof(physx_PxBroadPhaseReg
 static_assert(sizeof(physx::PxBroadPhase) == sizeof(physx_PxBroadPhase_Pod), "POD wrapper for `physx::PxBroadPhase` has incorrect size");
 static_assert(sizeof(physx::PxAABBManager) == sizeof(physx_PxAABBManager_Pod), "POD wrapper for `physx::PxAABBManager` has incorrect size");
 static_assert(sizeof(physx::PxSceneLimits) == sizeof(physx_PxSceneLimits_Pod), "POD wrapper for `physx::PxSceneLimits` has incorrect size");
-static_assert(sizeof(physx::PxgDynamicsMemoryConfig) == sizeof(physx_PxgDynamicsMemoryConfig_Pod), "POD wrapper for `physx::PxgDynamicsMemoryConfig` has incorrect size");
 static_assert(sizeof(physx::PxSceneDesc) == sizeof(physx_PxSceneDesc_Pod), "POD wrapper for `physx::PxSceneDesc` has incorrect size");
 static_assert(sizeof(physx::PxSimulationStatistics) == sizeof(physx_PxSimulationStatistics_Pod), "POD wrapper for `physx::PxSimulationStatistics` has incorrect size");
-static_assert(sizeof(physx::PxGpuBodyData) == sizeof(physx_PxGpuBodyData_Pod), "POD wrapper for `physx::PxGpuBodyData` has incorrect size");
-static_assert(sizeof(physx::PxGpuActorPair) == sizeof(physx_PxGpuActorPair_Pod), "POD wrapper for `physx::PxGpuActorPair` has incorrect size");
 static_assert(sizeof(physx::PxIndexDataPair) == sizeof(physx_PxIndexDataPair_Pod), "POD wrapper for `physx::PxIndexDataPair` has incorrect size");
 static_assert(sizeof(physx::PxPvdSceneClient) == sizeof(physx_PxPvdSceneClient_Pod), "POD wrapper for `physx::PxPvdSceneClient` has incorrect size");
 static_assert(sizeof(physx::PxDominanceGroupPair) == sizeof(physx_PxDominanceGroupPair_Pod), "POD wrapper for `physx::PxDominanceGroupPair` has incorrect size");
@@ -240,7 +217,6 @@ static_assert(sizeof(physx::PxContactPair) == sizeof(physx_PxContactPair_Pod), "
 static_assert(sizeof(physx::PxTriggerPair) == sizeof(physx_PxTriggerPair_Pod), "POD wrapper for `physx::PxTriggerPair` has incorrect size");
 static_assert(sizeof(physx::PxConstraintInfo) == sizeof(physx_PxConstraintInfo_Pod), "POD wrapper for `physx::PxConstraintInfo` has incorrect size");
 static_assert(sizeof(physx::PxSimulationEventCallback) == sizeof(physx_PxSimulationEventCallback_Pod), "POD wrapper for `physx::PxSimulationEventCallback` has incorrect size");
-static_assert(sizeof(physx::PxFEMParameters) == sizeof(physx_PxFEMParameters_Pod), "POD wrapper for `physx::PxFEMParameters` has incorrect size");
 static_assert(sizeof(physx::PxPruningStructure) == sizeof(physx_PxPruningStructure_Pod), "POD wrapper for `physx::PxPruningStructure` has incorrect size");
 static_assert(sizeof(physx::PxExtendedVec3) == sizeof(physx_PxExtendedVec3_Pod), "POD wrapper for `physx::PxExtendedVec3` has incorrect size");
 static_assert(sizeof(physx::PxObstacle) == sizeof(physx_PxObstacle_Pod), "POD wrapper for `physx::PxObstacle` has incorrect size");
@@ -268,8 +244,6 @@ static_assert(sizeof(physx::PxDim3) == sizeof(physx_PxDim3_Pod), "POD wrapper fo
 static_assert(sizeof(physx::PxSDFDesc) == sizeof(physx_PxSDFDesc_Pod), "POD wrapper for `physx::PxSDFDesc` has incorrect size");
 static_assert(sizeof(physx::PxConvexMeshDesc) == sizeof(physx_PxConvexMeshDesc_Pod), "POD wrapper for `physx::PxConvexMeshDesc` has incorrect size");
 static_assert(sizeof(physx::PxTriangleMeshDesc) == sizeof(physx_PxTriangleMeshDesc_Pod), "POD wrapper for `physx::PxTriangleMeshDesc` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedronMeshDesc) == sizeof(physx_PxTetrahedronMeshDesc_Pod), "POD wrapper for `physx::PxTetrahedronMeshDesc` has incorrect size");
-static_assert(sizeof(physx::PxSoftBodySimulationDataDesc) == sizeof(physx_PxSoftBodySimulationDataDesc_Pod), "POD wrapper for `physx::PxSoftBodySimulationDataDesc` has incorrect size");
 static_assert(sizeof(physx::PxBVH34MidphaseDesc) == sizeof(physx_PxBVH34MidphaseDesc_Pod), "POD wrapper for `physx::PxBVH34MidphaseDesc` has incorrect size");
 static_assert(sizeof(physx::PxMidphaseDesc) == sizeof(physx_PxMidphaseDesc_Pod), "POD wrapper for `physx::PxMidphaseDesc` has incorrect size");
 static_assert(sizeof(physx::PxBVHDesc) == sizeof(physx_PxBVHDesc_Pod), "POD wrapper for `physx::PxBVHDesc` has incorrect size");
@@ -317,7 +291,6 @@ static_assert(sizeof(physx::PxCustomSceneQuerySystemAdapter) == sizeof(physx_PxC
 static_assert(sizeof(physx::PxSamplingExt) == sizeof(physx_PxSamplingExt_Pod), "POD wrapper for `physx::PxSamplingExt` has incorrect size");
 static_assert(sizeof(physx::PxPoissonSampler) == sizeof(physx_PxPoissonSampler_Pod), "POD wrapper for `physx::PxPoissonSampler` has incorrect size");
 static_assert(sizeof(physx::PxTriangleMeshPoissonSampler) == sizeof(physx_PxTriangleMeshPoissonSampler_Pod), "POD wrapper for `physx::PxTriangleMeshPoissonSampler` has incorrect size");
-static_assert(sizeof(physx::PxTetrahedronMeshExt) == sizeof(physx_PxTetrahedronMeshExt_Pod), "POD wrapper for `physx::PxTetrahedronMeshExt` has incorrect size");
 static_assert(sizeof(physx::PxRepXObject) == sizeof(physx_PxRepXObject_Pod), "POD wrapper for `physx::PxRepXObject` has incorrect size");
 static_assert(sizeof(physx::PxRepXInstantiationArgs) == sizeof(physx_PxRepXInstantiationArgs_Pod), "POD wrapper for `physx::PxRepXInstantiationArgs` has incorrect size");
 static_assert(sizeof(physx::PxRepXSerializer) == sizeof(physx_PxRepXSerializer_Pod), "POD wrapper for `physx::PxRepXSerializer` has incorrect size");
@@ -330,10 +303,8 @@ extern "C" {
         delete self_;
     }
 
-    void* PxAllocatorCallback_allocate_mut(physx_PxAllocatorCallback_Pod* self__pod, size_t size_pod, char const* typeName, char const* filename, int32_t line) {
+    void* PxAllocatorCallback_allocate_mut(physx_PxAllocatorCallback_Pod* self__pod, uint64_t size, char const* typeName, char const* filename, int32_t line) {
         physx::PxAllocatorCallback* self_ = reinterpret_cast<physx::PxAllocatorCallback*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, typeName, filename, line);
         return return_val;
     }
@@ -498,10 +469,8 @@ extern "C" {
         return return_val_pod;
     }
 
-    void* PxAllocator_allocate_mut(physx_PxAllocator_Pod* self__pod, size_t size_pod, char const* file, int32_t line) {
+    void* PxAllocator_allocate_mut(physx_PxAllocator_Pod* self__pod, uint64_t size, char const* file, int32_t line) {
         physx::PxAllocator* self_ = reinterpret_cast<physx::PxAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, file, line);
         return return_val;
     }
@@ -518,10 +487,8 @@ extern "C" {
         return return_val_pod;
     }
 
-    void* PxRawAllocator_allocate_mut(physx_PxRawAllocator_Pod* self__pod, size_t size_pod, char const* anon_param1, int32_t anon_param2) {
+    void* PxRawAllocator_allocate_mut(physx_PxRawAllocator_Pod* self__pod, uint64_t size, char const* anon_param1, int32_t anon_param2) {
         physx::PxRawAllocator* self_ = reinterpret_cast<physx::PxRawAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, anon_param1, anon_param2);
         return return_val;
     }
@@ -536,10 +503,8 @@ extern "C" {
         delete self_;
     }
 
-    void* PxVirtualAllocatorCallback_allocate_mut(physx_PxVirtualAllocatorCallback_Pod* self__pod, size_t size_pod, int32_t group, char const* file, int32_t line) {
+    void* PxVirtualAllocatorCallback_allocate_mut(physx_PxVirtualAllocatorCallback_Pod* self__pod, uint64_t size, int32_t group, char const* file, int32_t line) {
         physx::PxVirtualAllocatorCallback* self_ = reinterpret_cast<physx::PxVirtualAllocatorCallback*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, group, file, line);
         return return_val;
     }
@@ -557,10 +522,8 @@ extern "C" {
         return return_val_pod;
     }
 
-    void* PxVirtualAllocator_allocate_mut(physx_PxVirtualAllocator_Pod* self__pod, size_t size_pod, char const* file, int32_t line) {
+    void* PxVirtualAllocator_allocate_mut(physx_PxVirtualAllocator_Pod* self__pod, uint64_t size, char const* file, int32_t line) {
         physx::PxVirtualAllocator* self_ = reinterpret_cast<physx::PxVirtualAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, file, line);
         return return_val;
     }
@@ -584,10 +547,8 @@ extern "C" {
         return return_val_pod;
     }
 
-    void* PxTempAllocator_allocate_mut(physx_PxTempAllocator_Pod* self__pod, size_t size_pod, char const* file, int32_t line) {
+    void* PxTempAllocator_allocate_mut(physx_PxTempAllocator_Pod* self__pod, uint64_t size, char const* file, int32_t line) {
         physx::PxTempAllocator* self_ = reinterpret_cast<physx::PxTempAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, file, line);
         return return_val;
     }
@@ -1533,10 +1494,8 @@ extern "C" {
         self_->reportError(code, message, file, line);
     }
 
-    void PxAllocationListener_onAllocation_mut(physx_PxAllocationListener_Pod* self__pod, size_t size_pod, char const* typeName, char const* filename, int32_t line, void* allocatedMemory) {
+    void PxAllocationListener_onAllocation_mut(physx_PxAllocationListener_Pod* self__pod, uint64_t size, char const* typeName, char const* filename, int32_t line, void* allocatedMemory) {
         physx::PxAllocationListener* self_ = reinterpret_cast<physx::PxAllocationListener*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         self_->onAllocation(size, typeName, filename, line, allocatedMemory);
     }
 
@@ -1558,10 +1517,8 @@ extern "C" {
         delete self_;
     }
 
-    void* PxBroadcastingAllocator_allocate_mut(physx_PxBroadcastingAllocator_Pod* self__pod, size_t size_pod, char const* typeName, char const* filename, int32_t line) {
+    void* PxBroadcastingAllocator_allocate_mut(physx_PxBroadcastingAllocator_Pod* self__pod, uint64_t size, char const* typeName, char const* filename, int32_t line) {
         physx::PxBroadcastingAllocator* self_ = reinterpret_cast<physx::PxBroadcastingAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, typeName, filename, line);
         return return_val;
     }
@@ -2455,9 +2412,7 @@ extern "C" {
         return return_val;
     }
 
-    uint32_t phys_PxTlsSetValue(uint32_t index, size_t value_pod) {
-        size_t value;
-        memcpy(&value, &value_pod, sizeof(value));
+    uint32_t phys_PxTlsSetValue(uint32_t index, uint64_t value) {
         uint32_t return_val = PxTlsSetValue(index, value);
         return return_val;
     }
@@ -2813,11 +2768,9 @@ extern "C" {
         self_->process(anon_param0);
     }
 
-    void PxSerializationContext_registerReference_mut(physx_PxSerializationContext_Pod* self__pod, physx_PxBase_Pod* base_pod, uint32_t kind, size_t reference_pod) {
+    void PxSerializationContext_registerReference_mut(physx_PxSerializationContext_Pod* self__pod, physx_PxBase_Pod* base_pod, uint32_t kind, uint64_t reference) {
         physx::PxSerializationContext* self_ = reinterpret_cast<physx::PxSerializationContext*>(self__pod);
         physx::PxBase& base = reinterpret_cast<physx::PxBase&>(*base_pod);
-        size_t reference;
-        memcpy(&reference, &reference_pod, sizeof(reference));
         self_->registerReference(base, kind, reference);
     }
 
@@ -2843,10 +2796,8 @@ extern "C" {
         self_->writeName(name);
     }
 
-    physx_PxBase_Pod* PxDeserializationContext_resolveReference(physx_PxDeserializationContext_Pod const* self__pod, uint32_t kind, size_t reference_pod) {
+    physx_PxBase_Pod* PxDeserializationContext_resolveReference(physx_PxDeserializationContext_Pod const* self__pod, uint32_t kind, uint64_t reference) {
         physx::PxDeserializationContext const* self_ = reinterpret_cast<physx::PxDeserializationContext const*>(self__pod);
-        size_t reference;
-        memcpy(&reference, &reference_pod, sizeof(reference));
         physx::PxBase* return_val = self_->resolveReference(kind, reference);
         auto return_val_pod = reinterpret_cast<physx_PxBase_Pod*>(return_val);
         return return_val_pod;
@@ -3625,12 +3576,6 @@ extern "C" {
         return return_val;
     }
 
-    bool PxConvexMesh_isGpuCompatible(physx_PxConvexMesh_Pod const* self__pod) {
-        physx::PxConvexMesh const* self_ = reinterpret_cast<physx::PxConvexMesh const*>(self__pod);
-        bool return_val = self_->isGpuCompatible();
-        return return_val;
-    }
-
     physx_PxMeshScale_Pod PxMeshScale_new() {
         PxMeshScale return_val;
         physx_PxMeshScale_Pod return_val_pod;
@@ -3780,33 +3725,6 @@ extern "C" {
 
     bool PxHeightFieldGeometry_isValid(physx_PxHeightFieldGeometry_Pod const* self__pod) {
         physx::PxHeightFieldGeometry const* self_ = reinterpret_cast<physx::PxHeightFieldGeometry const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
-    physx_PxParticleSystemGeometry_Pod PxParticleSystemGeometry_new() {
-        PxParticleSystemGeometry return_val;
-        physx_PxParticleSystemGeometry_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxParticleSystemGeometry_isValid(physx_PxParticleSystemGeometry_Pod const* self__pod) {
-        physx::PxParticleSystemGeometry const* self_ = reinterpret_cast<physx::PxParticleSystemGeometry const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
-    physx_PxTetrahedronMeshGeometry_Pod PxTetrahedronMeshGeometry_new(physx_PxTetrahedronMesh_Pod* mesh_pod) {
-        physx::PxTetrahedronMesh* mesh = reinterpret_cast<physx::PxTetrahedronMesh*>(mesh_pod);
-        PxTetrahedronMeshGeometry return_val(mesh);
-        physx_PxTetrahedronMeshGeometry_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxTetrahedronMeshGeometry_isValid(physx_PxTetrahedronMeshGeometry_Pod const* self__pod) {
-        physx::PxTetrahedronMeshGeometry const* self_ = reinterpret_cast<physx::PxTetrahedronMeshGeometry const*>(self__pod);
         bool return_val = self_->isValid();
         return return_val;
     }
@@ -4081,20 +3999,6 @@ extern "C" {
         return return_val_pod;
     }
 
-    physx_PxTetrahedronMeshGeometry_Pod* PxGeometryHolder_tetMesh_mut(physx_PxGeometryHolder_Pod* self__pod) {
-        physx::PxGeometryHolder* self_ = reinterpret_cast<physx::PxGeometryHolder*>(self__pod);
-        physx::PxTetrahedronMeshGeometry& return_val = self_->tetMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMeshGeometry_Pod*>(&return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedronMeshGeometry_Pod const* PxGeometryHolder_tetMesh(physx_PxGeometryHolder_Pod const* self__pod) {
-        physx::PxGeometryHolder const* self_ = reinterpret_cast<physx::PxGeometryHolder const*>(self__pod);
-        physx::PxTetrahedronMeshGeometry const& return_val = self_->tetMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMeshGeometry_Pod const*>(&return_val);
-        return return_val_pod;
-    }
-
     physx_PxTriangleMeshGeometry_Pod* PxGeometryHolder_triangleMesh_mut(physx_PxGeometryHolder_Pod* self__pod) {
         physx::PxGeometryHolder* self_ = reinterpret_cast<physx::PxGeometryHolder*>(self__pod);
         physx::PxTriangleMeshGeometry& return_val = self_->triangleMesh();
@@ -4120,20 +4024,6 @@ extern "C" {
         physx::PxGeometryHolder const* self_ = reinterpret_cast<physx::PxGeometryHolder const*>(self__pod);
         physx::PxHeightFieldGeometry const& return_val = self_->heightField();
         auto return_val_pod = reinterpret_cast<physx_PxHeightFieldGeometry_Pod const*>(&return_val);
-        return return_val_pod;
-    }
-
-    physx_PxParticleSystemGeometry_Pod* PxGeometryHolder_particleSystem_mut(physx_PxGeometryHolder_Pod* self__pod) {
-        physx::PxGeometryHolder* self_ = reinterpret_cast<physx::PxGeometryHolder*>(self__pod);
-        physx::PxParticleSystemGeometry& return_val = self_->particleSystem();
-        auto return_val_pod = reinterpret_cast<physx_PxParticleSystemGeometry_Pod*>(&return_val);
-        return return_val_pod;
-    }
-
-    physx_PxParticleSystemGeometry_Pod const* PxGeometryHolder_particleSystem(physx_PxGeometryHolder_Pod const* self__pod) {
-        physx::PxGeometryHolder const* self_ = reinterpret_cast<physx::PxGeometryHolder const*>(self__pod);
-        physx::PxParticleSystemGeometry const& return_val = self_->particleSystem();
-        auto return_val_pod = reinterpret_cast<physx_PxParticleSystemGeometry_Pod const*>(&return_val);
         return return_val_pod;
     }
 
@@ -4604,188 +4494,6 @@ extern "C" {
         physx::PxMat33& localInertia = reinterpret_cast<physx::PxMat33&>(*localInertia_pod);
         physx::PxVec3& localCenterOfMass = reinterpret_cast<physx::PxVec3&>(*localCenterOfMass_pod);
         self_->getMassInformation(mass, localInertia, localCenterOfMass);
-    }
-
-    physx_PxTetrahedron_Pod* PxTetrahedron_new_alloc() {
-        auto return_val = new physx::PxTetrahedron();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedron_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedron_Pod* PxTetrahedron_new_alloc_1(physx_PxVec3_Pod const* p0_pod, physx_PxVec3_Pod const* p1_pod, physx_PxVec3_Pod const* p2_pod, physx_PxVec3_Pod const* p3_pod) {
-        physx::PxVec3 const& p0 = reinterpret_cast<physx::PxVec3 const&>(*p0_pod);
-        physx::PxVec3 const& p1 = reinterpret_cast<physx::PxVec3 const&>(*p1_pod);
-        physx::PxVec3 const& p2 = reinterpret_cast<physx::PxVec3 const&>(*p2_pod);
-        physx::PxVec3 const& p3 = reinterpret_cast<physx::PxVec3 const&>(*p3_pod);
-        auto return_val = new physx::PxTetrahedron(p0, p1, p2, p3);
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedron_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxTetrahedron_delete(physx_PxTetrahedron_Pod* self__pod) {
-        physx::PxTetrahedron* self_ = reinterpret_cast<physx::PxTetrahedron*>(self__pod);
-        delete self_;
-    }
-
-    void PxSoftBodyAuxData_release_mut(physx_PxSoftBodyAuxData_Pod* self__pod) {
-        physx::PxSoftBodyAuxData* self_ = reinterpret_cast<physx::PxSoftBodyAuxData*>(self__pod);
-        self_->release();
-    }
-
-    uint32_t PxTetrahedronMesh_getNbVertices(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        uint32_t return_val = self_->getNbVertices();
-        return return_val;
-    }
-
-    physx_PxVec3_Pod const* PxTetrahedronMesh_getVertices(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        physx::PxVec3 const* return_val = self_->getVertices();
-        auto return_val_pod = reinterpret_cast<physx_PxVec3_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    uint32_t PxTetrahedronMesh_getNbTetrahedrons(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        uint32_t return_val = self_->getNbTetrahedrons();
-        return return_val;
-    }
-
-    void const* PxTetrahedronMesh_getTetrahedrons(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        void const* return_val = self_->getTetrahedrons();
-        return return_val;
-    }
-
-    uint8_t PxTetrahedronMesh_getTetrahedronMeshFlags(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        physx::PxTetrahedronMeshFlags return_val = self_->getTetrahedronMeshFlags();
-        uint8_t return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    uint32_t const* PxTetrahedronMesh_getTetrahedraRemap(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        uint32_t const* return_val = self_->getTetrahedraRemap();
-        return return_val;
-    }
-
-    physx_PxBounds3_Pod PxTetrahedronMesh_getLocalBounds(physx_PxTetrahedronMesh_Pod const* self__pod) {
-        physx::PxTetrahedronMesh const* self_ = reinterpret_cast<physx::PxTetrahedronMesh const*>(self__pod);
-        physx::PxBounds3 return_val = self_->getLocalBounds();
-        physx_PxBounds3_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    void PxTetrahedronMesh_release_mut(physx_PxTetrahedronMesh_Pod* self__pod) {
-        physx::PxTetrahedronMesh* self_ = reinterpret_cast<physx::PxTetrahedronMesh*>(self__pod);
-        self_->release();
-    }
-
-    physx_PxTetrahedronMesh_Pod const* PxSoftBodyMesh_getCollisionMesh(physx_PxSoftBodyMesh_Pod const* self__pod) {
-        physx::PxSoftBodyMesh const* self_ = reinterpret_cast<physx::PxSoftBodyMesh const*>(self__pod);
-        physx::PxTetrahedronMesh const* return_val = self_->getCollisionMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMesh_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedronMesh_Pod* PxSoftBodyMesh_getCollisionMesh_mut(physx_PxSoftBodyMesh_Pod* self__pod) {
-        physx::PxSoftBodyMesh* self_ = reinterpret_cast<physx::PxSoftBodyMesh*>(self__pod);
-        physx::PxTetrahedronMesh* return_val = self_->getCollisionMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMesh_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedronMesh_Pod const* PxSoftBodyMesh_getSimulationMesh(physx_PxSoftBodyMesh_Pod const* self__pod) {
-        physx::PxSoftBodyMesh const* self_ = reinterpret_cast<physx::PxSoftBodyMesh const*>(self__pod);
-        physx::PxTetrahedronMesh const* return_val = self_->getSimulationMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMesh_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedronMesh_Pod* PxSoftBodyMesh_getSimulationMesh_mut(physx_PxSoftBodyMesh_Pod* self__pod) {
-        physx::PxSoftBodyMesh* self_ = reinterpret_cast<physx::PxSoftBodyMesh*>(self__pod);
-        physx::PxTetrahedronMesh* return_val = self_->getSimulationMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMesh_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodyAuxData_Pod const* PxSoftBodyMesh_getSoftBodyAuxData(physx_PxSoftBodyMesh_Pod const* self__pod) {
-        physx::PxSoftBodyMesh const* self_ = reinterpret_cast<physx::PxSoftBodyMesh const*>(self__pod);
-        physx::PxSoftBodyAuxData const* return_val = self_->getSoftBodyAuxData();
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodyAuxData_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodyAuxData_Pod* PxSoftBodyMesh_getSoftBodyAuxData_mut(physx_PxSoftBodyMesh_Pod* self__pod) {
-        physx::PxSoftBodyMesh* self_ = reinterpret_cast<physx::PxSoftBodyMesh*>(self__pod);
-        physx::PxSoftBodyAuxData* return_val = self_->getSoftBodyAuxData();
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodyAuxData_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxSoftBodyMesh_release_mut(physx_PxSoftBodyMesh_Pod* self__pod) {
-        physx::PxSoftBodyMesh* self_ = reinterpret_cast<physx::PxSoftBodyMesh*>(self__pod);
-        self_->release();
-    }
-
-    void PxCollisionMeshMappingData_release_mut(physx_PxCollisionMeshMappingData_Pod* self__pod) {
-        physx::PxCollisionMeshMappingData* self_ = reinterpret_cast<physx::PxCollisionMeshMappingData*>(self__pod);
-        self_->release();
-    }
-
-    physx_PxTetrahedronMeshData_Pod const* PxCollisionTetrahedronMeshData_getMesh(physx_PxCollisionTetrahedronMeshData_Pod const* self__pod) {
-        physx::PxCollisionTetrahedronMeshData const* self_ = reinterpret_cast<physx::PxCollisionTetrahedronMeshData const*>(self__pod);
-        physx::PxTetrahedronMeshData const* return_val = self_->getMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMeshData_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxTetrahedronMeshData_Pod* PxCollisionTetrahedronMeshData_getMesh_mut(physx_PxCollisionTetrahedronMeshData_Pod* self__pod) {
-        physx::PxCollisionTetrahedronMeshData* self_ = reinterpret_cast<physx::PxCollisionTetrahedronMeshData*>(self__pod);
-        physx::PxTetrahedronMeshData* return_val = self_->getMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMeshData_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodyCollisionData_Pod const* PxCollisionTetrahedronMeshData_getData(physx_PxCollisionTetrahedronMeshData_Pod const* self__pod) {
-        physx::PxCollisionTetrahedronMeshData const* self_ = reinterpret_cast<physx::PxCollisionTetrahedronMeshData const*>(self__pod);
-        physx::PxSoftBodyCollisionData const* return_val = self_->getData();
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodyCollisionData_Pod const*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodyCollisionData_Pod* PxCollisionTetrahedronMeshData_getData_mut(physx_PxCollisionTetrahedronMeshData_Pod* self__pod) {
-        physx::PxCollisionTetrahedronMeshData* self_ = reinterpret_cast<physx::PxCollisionTetrahedronMeshData*>(self__pod);
-        physx::PxSoftBodyCollisionData* return_val = self_->getData();
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodyCollisionData_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxCollisionTetrahedronMeshData_release_mut(physx_PxCollisionTetrahedronMeshData_Pod* self__pod) {
-        physx::PxCollisionTetrahedronMeshData* self_ = reinterpret_cast<physx::PxCollisionTetrahedronMeshData*>(self__pod);
-        self_->release();
-    }
-
-    physx_PxTetrahedronMeshData_Pod* PxSimulationTetrahedronMeshData_getMesh_mut(physx_PxSimulationTetrahedronMeshData_Pod* self__pod) {
-        physx::PxSimulationTetrahedronMeshData* self_ = reinterpret_cast<physx::PxSimulationTetrahedronMeshData*>(self__pod);
-        physx::PxTetrahedronMeshData* return_val = self_->getMesh();
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMeshData_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodySimulationData_Pod* PxSimulationTetrahedronMeshData_getData_mut(physx_PxSimulationTetrahedronMeshData_Pod* self__pod) {
-        physx::PxSimulationTetrahedronMeshData* self_ = reinterpret_cast<physx::PxSimulationTetrahedronMeshData*>(self__pod);
-        physx::PxSoftBodySimulationData* return_val = self_->getData();
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodySimulationData_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    void PxSimulationTetrahedronMeshData_release_mut(physx_PxSimulationTetrahedronMeshData_Pod* self__pod) {
-        physx::PxSimulationTetrahedronMeshData* self_ = reinterpret_cast<physx::PxSimulationTetrahedronMeshData*>(self__pod);
-        self_->release();
     }
 
     void PxActor_release_mut(physx_PxActor_Pod* self__pod) {
@@ -5865,12 +5573,6 @@ extern "C" {
         physx_PxSpatialVelocity_Pod return_val_pod;
         memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
         return return_val_pod;
-    }
-
-    uint32_t PxArticulationReducedCoordinate_getGpuArticulationIndex_mut(physx_PxArticulationReducedCoordinate_Pod* self__pod) {
-        physx::PxArticulationReducedCoordinate* self_ = reinterpret_cast<physx::PxArticulationReducedCoordinate*>(self__pod);
-        uint32_t return_val = self_->getGpuArticulationIndex();
-        return return_val;
     }
 
     physx_PxArticulationSpatialTendon_Pod* PxArticulationReducedCoordinate_createSpatialTendon_mut(physx_PxArticulationReducedCoordinate_Pod* self__pod) {
@@ -7201,45 +6903,6 @@ extern "C" {
         self_->onRelease(observed, userData, deletionEvent);
     }
 
-    bool PxBaseMaterial_isKindOf(physx_PxBaseMaterial_Pod const* self__pod, char const* name) {
-        physx::PxBaseMaterial const* self_ = reinterpret_cast<physx::PxBaseMaterial const*>(self__pod);
-        bool return_val = self_->isKindOf(name);
-        return return_val;
-    }
-
-    void PxFEMMaterial_setYoungsModulus_mut(physx_PxFEMMaterial_Pod* self__pod, float young) {
-        physx::PxFEMMaterial* self_ = reinterpret_cast<physx::PxFEMMaterial*>(self__pod);
-        self_->setYoungsModulus(young);
-    }
-
-    float PxFEMMaterial_getYoungsModulus(physx_PxFEMMaterial_Pod const* self__pod) {
-        physx::PxFEMMaterial const* self_ = reinterpret_cast<physx::PxFEMMaterial const*>(self__pod);
-        float return_val = self_->getYoungsModulus();
-        return return_val;
-    }
-
-    void PxFEMMaterial_setPoissons_mut(physx_PxFEMMaterial_Pod* self__pod, float poisson) {
-        physx::PxFEMMaterial* self_ = reinterpret_cast<physx::PxFEMMaterial*>(self__pod);
-        self_->setPoissons(poisson);
-    }
-
-    float PxFEMMaterial_getPoissons(physx_PxFEMMaterial_Pod const* self__pod) {
-        physx::PxFEMMaterial const* self_ = reinterpret_cast<physx::PxFEMMaterial const*>(self__pod);
-        float return_val = self_->getPoissons();
-        return return_val;
-    }
-
-    void PxFEMMaterial_setDynamicFriction_mut(physx_PxFEMMaterial_Pod* self__pod, float dynamicFriction) {
-        physx::PxFEMMaterial* self_ = reinterpret_cast<physx::PxFEMMaterial*>(self__pod);
-        self_->setDynamicFriction(dynamicFriction);
-    }
-
-    float PxFEMMaterial_getDynamicFriction(physx_PxFEMMaterial_Pod const* self__pod) {
-        physx::PxFEMMaterial const* self_ = reinterpret_cast<physx::PxFEMMaterial const*>(self__pod);
-        float return_val = self_->getDynamicFriction();
-        return return_val;
-    }
-
     physx_PxFilterData_Pod PxFilterData_new(int32_t anon_param0_pod) {
         auto anon_param0 = static_cast<physx::PxEMPTY>(anon_param0_pod);
         PxFilterData return_val(anon_param0);
@@ -7335,6 +6998,12 @@ extern "C" {
     void PxLockedData_delete(physx_PxLockedData_Pod* self__pod) {
         physx::PxLockedData* self_ = reinterpret_cast<physx::PxLockedData*>(self__pod);
         delete self_;
+    }
+
+    bool PxBaseMaterial_isKindOf(physx_PxBaseMaterial_Pod const* self__pod, char const* name) {
+        physx::PxBaseMaterial const* self_ = reinterpret_cast<physx::PxBaseMaterial const*>(self__pod);
+        bool return_val = self_->isKindOf(name);
+        return return_val;
     }
 
     void PxMaterial_setDynamicFriction_mut(physx_PxMaterial_Pod* self__pod, float coef) {
@@ -7435,73 +7104,6 @@ extern "C" {
         return return_val;
     }
 
-    physx_PxDiffuseParticleParams_Pod PxDiffuseParticleParams_new() {
-        PxDiffuseParticleParams return_val;
-        physx_PxDiffuseParticleParams_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    void PxDiffuseParticleParams_setToDefault_mut(physx_PxDiffuseParticleParams_Pod* self__pod) {
-        physx::PxDiffuseParticleParams* self_ = reinterpret_cast<physx::PxDiffuseParticleParams*>(self__pod);
-        self_->setToDefault();
-    }
-
-    void PxParticleMaterial_setFriction_mut(physx_PxParticleMaterial_Pod* self__pod, float friction) {
-        physx::PxParticleMaterial* self_ = reinterpret_cast<physx::PxParticleMaterial*>(self__pod);
-        self_->setFriction(friction);
-    }
-
-    float PxParticleMaterial_getFriction(physx_PxParticleMaterial_Pod const* self__pod) {
-        physx::PxParticleMaterial const* self_ = reinterpret_cast<physx::PxParticleMaterial const*>(self__pod);
-        float return_val = self_->getFriction();
-        return return_val;
-    }
-
-    void PxParticleMaterial_setDamping_mut(physx_PxParticleMaterial_Pod* self__pod, float damping) {
-        physx::PxParticleMaterial* self_ = reinterpret_cast<physx::PxParticleMaterial*>(self__pod);
-        self_->setDamping(damping);
-    }
-
-    float PxParticleMaterial_getDamping(physx_PxParticleMaterial_Pod const* self__pod) {
-        physx::PxParticleMaterial const* self_ = reinterpret_cast<physx::PxParticleMaterial const*>(self__pod);
-        float return_val = self_->getDamping();
-        return return_val;
-    }
-
-    void PxParticleMaterial_setAdhesion_mut(physx_PxParticleMaterial_Pod* self__pod, float adhesion) {
-        physx::PxParticleMaterial* self_ = reinterpret_cast<physx::PxParticleMaterial*>(self__pod);
-        self_->setAdhesion(adhesion);
-    }
-
-    float PxParticleMaterial_getAdhesion(physx_PxParticleMaterial_Pod const* self__pod) {
-        physx::PxParticleMaterial const* self_ = reinterpret_cast<physx::PxParticleMaterial const*>(self__pod);
-        float return_val = self_->getAdhesion();
-        return return_val;
-    }
-
-    void PxParticleMaterial_setGravityScale_mut(physx_PxParticleMaterial_Pod* self__pod, float scale) {
-        physx::PxParticleMaterial* self_ = reinterpret_cast<physx::PxParticleMaterial*>(self__pod);
-        self_->setGravityScale(scale);
-    }
-
-    float PxParticleMaterial_getGravityScale(physx_PxParticleMaterial_Pod const* self__pod) {
-        physx::PxParticleMaterial const* self_ = reinterpret_cast<physx::PxParticleMaterial const*>(self__pod);
-        float return_val = self_->getGravityScale();
-        return return_val;
-    }
-
-    void PxParticleMaterial_setAdhesionRadiusScale_mut(physx_PxParticleMaterial_Pod* self__pod, float scale) {
-        physx::PxParticleMaterial* self_ = reinterpret_cast<physx::PxParticleMaterial*>(self__pod);
-        self_->setAdhesionRadiusScale(scale);
-    }
-
-    float PxParticleMaterial_getAdhesionRadiusScale(physx_PxParticleMaterial_Pod const* self__pod) {
-        physx::PxParticleMaterial const* self_ = reinterpret_cast<physx::PxParticleMaterial const*>(self__pod);
-        float return_val = self_->getAdhesionRadiusScale();
-        return return_val;
-    }
-
     void PxPhysics_release_mut(physx_PxPhysics_Pod* self__pod) {
         physx::PxPhysics* self_ = reinterpret_cast<physx::PxPhysics*>(self__pod);
         self_->release();
@@ -7546,35 +7148,6 @@ extern "C" {
         physx::PxPhysics const* self_ = reinterpret_cast<physx::PxPhysics const*>(self__pod);
         physx::PxTriangleMesh** userBuffer = reinterpret_cast<physx::PxTriangleMesh**>(userBuffer_pod);
         uint32_t return_val = self_->getTriangleMeshes(userBuffer, bufferSize, startIndex);
-        return return_val;
-    }
-
-    physx_PxTetrahedronMesh_Pod* PxPhysics_createTetrahedronMesh_mut(physx_PxPhysics_Pod* self__pod, physx_PxInputStream_Pod* stream_pod) {
-        physx::PxPhysics* self_ = reinterpret_cast<physx::PxPhysics*>(self__pod);
-        physx::PxInputStream& stream = reinterpret_cast<physx::PxInputStream&>(*stream_pod);
-        physx::PxTetrahedronMesh* return_val = self_->createTetrahedronMesh(stream);
-        auto return_val_pod = reinterpret_cast<physx_PxTetrahedronMesh_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    physx_PxSoftBodyMesh_Pod* PxPhysics_createSoftBodyMesh_mut(physx_PxPhysics_Pod* self__pod, physx_PxInputStream_Pod* stream_pod) {
-        physx::PxPhysics* self_ = reinterpret_cast<physx::PxPhysics*>(self__pod);
-        physx::PxInputStream& stream = reinterpret_cast<physx::PxInputStream&>(*stream_pod);
-        physx::PxSoftBodyMesh* return_val = self_->createSoftBodyMesh(stream);
-        auto return_val_pod = reinterpret_cast<physx_PxSoftBodyMesh_Pod*>(return_val);
-        return return_val_pod;
-    }
-
-    uint32_t PxPhysics_getNbTetrahedronMeshes(physx_PxPhysics_Pod const* self__pod) {
-        physx::PxPhysics const* self_ = reinterpret_cast<physx::PxPhysics const*>(self__pod);
-        uint32_t return_val = self_->getNbTetrahedronMeshes();
-        return return_val;
-    }
-
-    uint32_t PxPhysics_getTetrahedronMeshes(physx_PxPhysics_Pod const* self__pod, physx_PxTetrahedronMesh_Pod** userBuffer_pod, uint32_t bufferSize, uint32_t startIndex) {
-        physx::PxPhysics const* self_ = reinterpret_cast<physx::PxPhysics const*>(self__pod);
-        physx::PxTetrahedronMesh** userBuffer = reinterpret_cast<physx::PxTetrahedronMesh**>(userBuffer_pod);
-        uint32_t return_val = self_->getTetrahedronMeshes(userBuffer, bufferSize, startIndex);
         return return_val;
     }
 
@@ -8562,19 +8135,6 @@ extern "C" {
         return return_val;
     }
 
-    physx_PxgDynamicsMemoryConfig_Pod PxgDynamicsMemoryConfig_new() {
-        PxgDynamicsMemoryConfig return_val;
-        physx_PxgDynamicsMemoryConfig_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxgDynamicsMemoryConfig_isValid(physx_PxgDynamicsMemoryConfig_Pod const* self__pod) {
-        physx::PxgDynamicsMemoryConfig const* self_ = reinterpret_cast<physx::PxgDynamicsMemoryConfig const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
     physx_PxSceneDesc_Pod PxSceneDesc_new(physx_PxTolerancesScale_Pod const* scale_pod) {
         physx::PxTolerancesScale const& scale = reinterpret_cast<physx::PxTolerancesScale const&>(*scale_pod);
         PxSceneDesc return_val(scale);
@@ -9067,11 +8627,6 @@ extern "C" {
         self_->fetchResultsFinish(errorState);
     }
 
-    void PxScene_fetchResultsParticleSystem_mut(physx_PxScene_Pod* self__pod) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        self_->fetchResultsParticleSystem();
-    }
-
     void PxScene_flushSimulation_mut(physx_PxScene_Pod* self__pod, bool sendPendingReports) {
         physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
         self_->flushSimulation(sendPendingReports);
@@ -9357,88 +8912,6 @@ extern "C" {
         return return_val_pod;
     }
 
-    void PxScene_copyArticulationData_mut(physx_PxScene_Pod* self__pod, void* data, void* index, int32_t dataType_pod, uint32_t nbCopyArticulations, void* copyEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        auto dataType = static_cast<physx::PxArticulationGpuDataType::Enum>(dataType_pod);
-        self_->copyArticulationData(data, index, dataType, nbCopyArticulations, copyEvent);
-    }
-
-    void PxScene_applyArticulationData_mut(physx_PxScene_Pod* self__pod, void* data, void* index, int32_t dataType_pod, uint32_t nbUpdatedArticulations, void* waitEvent, void* signalEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        auto dataType = static_cast<physx::PxArticulationGpuDataType::Enum>(dataType_pod);
-        self_->applyArticulationData(data, index, dataType, nbUpdatedArticulations, waitEvent, signalEvent);
-    }
-
-    void PxScene_copySoftBodyData_mut(physx_PxScene_Pod* self__pod, void** data, void* dataSizes, void* softBodyIndices, int32_t flag_pod, uint32_t nbCopySoftBodies, uint32_t maxSize, void* copyEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        auto flag = static_cast<physx::PxSoftBodyDataFlag::Enum>(flag_pod);
-        self_->copySoftBodyData(data, dataSizes, softBodyIndices, flag, nbCopySoftBodies, maxSize, copyEvent);
-    }
-
-    void PxScene_applySoftBodyData_mut(physx_PxScene_Pod* self__pod, void** data, void* dataSizes, void* softBodyIndices, int32_t flag_pod, uint32_t nbUpdatedSoftBodies, uint32_t maxSize, void* applyEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        auto flag = static_cast<physx::PxSoftBodyDataFlag::Enum>(flag_pod);
-        self_->applySoftBodyData(data, dataSizes, softBodyIndices, flag, nbUpdatedSoftBodies, maxSize, applyEvent);
-    }
-
-    void PxScene_copyContactData_mut(physx_PxScene_Pod* self__pod, void* data, uint32_t maxContactPairs, void* numContactPairs, void* copyEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        self_->copyContactData(data, maxContactPairs, numContactPairs, copyEvent);
-    }
-
-    void PxScene_copyBodyData_mut(physx_PxScene_Pod* self__pod, physx_PxGpuBodyData_Pod* data_pod, physx_PxGpuActorPair_Pod* index_pod, uint32_t nbCopyActors, void* copyEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxGpuBodyData* data = reinterpret_cast<physx::PxGpuBodyData*>(data_pod);
-        physx::PxGpuActorPair* index = reinterpret_cast<physx::PxGpuActorPair*>(index_pod);
-        self_->copyBodyData(data, index, nbCopyActors, copyEvent);
-    }
-
-    void PxScene_applyActorData_mut(physx_PxScene_Pod* self__pod, void* data, physx_PxGpuActorPair_Pod* index_pod, int32_t flag_pod, uint32_t nbUpdatedActors, void* waitEvent, void* signalEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxGpuActorPair* index = reinterpret_cast<physx::PxGpuActorPair*>(index_pod);
-        auto flag = static_cast<physx::PxActorCacheFlag::Enum>(flag_pod);
-        self_->applyActorData(data, index, flag, nbUpdatedActors, waitEvent, signalEvent);
-    }
-
-    void PxScene_computeDenseJacobians_mut(physx_PxScene_Pod* self__pod, physx_PxIndexDataPair_Pod const* indices_pod, uint32_t nbIndices, void* computeEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxIndexDataPair const* indices = reinterpret_cast<physx::PxIndexDataPair const*>(indices_pod);
-        self_->computeDenseJacobians(indices, nbIndices, computeEvent);
-    }
-
-    void PxScene_computeGeneralizedMassMatrices_mut(physx_PxScene_Pod* self__pod, physx_PxIndexDataPair_Pod const* indices_pod, uint32_t nbIndices, void* computeEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxIndexDataPair const* indices = reinterpret_cast<physx::PxIndexDataPair const*>(indices_pod);
-        self_->computeGeneralizedMassMatrices(indices, nbIndices, computeEvent);
-    }
-
-    void PxScene_computeGeneralizedGravityForces_mut(physx_PxScene_Pod* self__pod, physx_PxIndexDataPair_Pod const* indices_pod, uint32_t nbIndices, void* computeEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxIndexDataPair const* indices = reinterpret_cast<physx::PxIndexDataPair const*>(indices_pod);
-        self_->computeGeneralizedGravityForces(indices, nbIndices, computeEvent);
-    }
-
-    void PxScene_computeCoriolisAndCentrifugalForces_mut(physx_PxScene_Pod* self__pod, physx_PxIndexDataPair_Pod const* indices_pod, uint32_t nbIndices, void* computeEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxIndexDataPair const* indices = reinterpret_cast<physx::PxIndexDataPair const*>(indices_pod);
-        self_->computeCoriolisAndCentrifugalForces(indices, nbIndices, computeEvent);
-    }
-
-    physx_PxgDynamicsMemoryConfig_Pod PxScene_getGpuDynamicsConfig(physx_PxScene_Pod const* self__pod) {
-        physx::PxScene const* self_ = reinterpret_cast<physx::PxScene const*>(self__pod);
-        physx::PxgDynamicsMemoryConfig return_val = self_->getGpuDynamicsConfig();
-        physx_PxgDynamicsMemoryConfig_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    void PxScene_applyParticleBufferData_mut(physx_PxScene_Pod* self__pod, uint32_t const* indices, physx_PxGpuParticleBufferIndexPair_Pod const* bufferIndexPair_pod, uint32_t const* flags_pod, uint32_t nbUpdatedBuffers, void* waitEvent, void* signalEvent) {
-        physx::PxScene* self_ = reinterpret_cast<physx::PxScene*>(self__pod);
-        physx::PxGpuParticleBufferIndexPair const* bufferIndexPair = reinterpret_cast<physx::PxGpuParticleBufferIndexPair const*>(bufferIndexPair_pod);
-        physx::PxParticleBufferFlags const* flags = reinterpret_cast<physx::PxParticleBufferFlags const*>(flags_pod);
-        self_->applyParticleBufferData(indices, bufferIndexPair, flags, nbUpdatedBuffers, waitEvent, signalEvent);
-    }
-
     physx_PxSceneReadLock_Pod* PxSceneReadLock_new_alloc(physx_PxScene_Pod* scene_pod, char const* file, uint32_t line) {
         physx::PxScene& scene = reinterpret_cast<physx::PxScene&>(*scene_pod);
         auto return_val = new physx::PxSceneReadLock(scene, file, line);
@@ -9600,13 +9073,6 @@ extern "C" {
     void PxSimulationEventCallback_delete(physx_PxSimulationEventCallback_Pod* self__pod) {
         physx::PxSimulationEventCallback* self_ = reinterpret_cast<physx::PxSimulationEventCallback*>(self__pod);
         delete self_;
-    }
-
-    physx_PxFEMParameters_Pod PxFEMParameters_new() {
-        PxFEMParameters return_val;
-        physx_PxFEMParameters_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
     }
 
     void PxPruningStructure_release_mut(physx_PxPruningStructure_Pod* self__pod) {
@@ -10371,32 +9837,6 @@ extern "C" {
         return return_val;
     }
 
-    physx_PxTetrahedronMeshDesc_Pod PxTetrahedronMeshDesc_new() {
-        PxTetrahedronMeshDesc return_val;
-        physx_PxTetrahedronMeshDesc_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxTetrahedronMeshDesc_isValid(physx_PxTetrahedronMeshDesc_Pod const* self__pod) {
-        physx::PxTetrahedronMeshDesc const* self_ = reinterpret_cast<physx::PxTetrahedronMeshDesc const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
-    physx_PxSoftBodySimulationDataDesc_Pod PxSoftBodySimulationDataDesc_new() {
-        PxSoftBodySimulationDataDesc return_val;
-        physx_PxSoftBodySimulationDataDesc_Pod return_val_pod;
-        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
-        return return_val_pod;
-    }
-
-    bool PxSoftBodySimulationDataDesc_isValid(physx_PxSoftBodySimulationDataDesc_Pod const* self__pod) {
-        physx::PxSoftBodySimulationDataDesc const* self_ = reinterpret_cast<physx::PxSoftBodySimulationDataDesc const*>(self__pod);
-        bool return_val = self_->isValid();
-        return return_val;
-    }
-
     void PxBVH34MidphaseDesc_setToDefault_mut(physx_PxBVH34MidphaseDesc_Pod* self__pod) {
         physx::PxBVH34MidphaseDesc* self_ = reinterpret_cast<physx::PxBVH34MidphaseDesc*>(self__pod);
         self_->setToDefault();
@@ -10685,9 +10125,7 @@ extern "C" {
         return return_val;
     }
 
-    void* phys_platformAlignedAlloc(size_t size_pod) {
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
+    void* phys_platformAlignedAlloc(uint64_t size) {
         void* return_val = platformAlignedAlloc(size);
         return return_val;
     }
@@ -10696,10 +10134,8 @@ extern "C" {
         platformAlignedFree(ptr);
     }
 
-    void* PxDefaultAllocator_allocate_mut(physx_PxDefaultAllocator_Pod* self__pod, size_t size_pod, char const* anon_param1, char const* anon_param2, int32_t anon_param3) {
+    void* PxDefaultAllocator_allocate_mut(physx_PxDefaultAllocator_Pod* self__pod, uint64_t size, char const* anon_param1, char const* anon_param2, int32_t anon_param3) {
         physx::PxDefaultAllocator* self_ = reinterpret_cast<physx::PxDefaultAllocator*>(self__pod);
-        size_t size;
-        memcpy(&size, &size_pod, sizeof(size));
         void* return_val = self_->allocate(size, anon_param1, anon_param2, anon_param3);
         return return_val;
     }
@@ -12796,22 +12232,6 @@ extern "C" {
         physx::PxTriangleMeshPoissonSampler* return_val = PxCreateTriangleMeshSampler(triangles, numTriangles, vertices, numVertices, initialSamplingRadius, numSampleAttemptsAroundPoint);
         auto return_val_pod = reinterpret_cast<physx_PxTriangleMeshPoissonSampler_Pod*>(return_val);
         return return_val_pod;
-    }
-
-    int32_t PxTetrahedronMeshExt_findTetrahedronContainingPoint(physx_PxTetrahedronMesh_Pod const* mesh_pod, physx_PxVec3_Pod const* point_pod, physx_PxVec4_Pod* bary_pod, float tolerance) {
-        physx::PxTetrahedronMesh const* mesh = reinterpret_cast<physx::PxTetrahedronMesh const*>(mesh_pod);
-        physx::PxVec3 const& point = reinterpret_cast<physx::PxVec3 const&>(*point_pod);
-        physx::PxVec4& bary = reinterpret_cast<physx::PxVec4&>(*bary_pod);
-        int32_t return_val = PxTetrahedronMeshExt::findTetrahedronContainingPoint(mesh, point, bary, tolerance);
-        return return_val;
-    }
-
-    int32_t PxTetrahedronMeshExt_findTetrahedronClosestToPoint(physx_PxTetrahedronMesh_Pod const* mesh_pod, physx_PxVec3_Pod const* point_pod, physx_PxVec4_Pod* bary_pod) {
-        physx::PxTetrahedronMesh const* mesh = reinterpret_cast<physx::PxTetrahedronMesh const*>(mesh_pod);
-        physx::PxVec3 const& point = reinterpret_cast<physx::PxVec3 const&>(*point_pod);
-        physx::PxVec4& bary = reinterpret_cast<physx::PxVec4&>(*bary_pod);
-        int32_t return_val = PxTetrahedronMeshExt::findTetrahedronClosestToPoint(mesh, point, bary);
-        return return_val;
     }
 
     bool phys_PxInitExtensions(physx_PxPhysics_Pod* physics_pod, physx_PxPvd_Pod* pvd_pod) {

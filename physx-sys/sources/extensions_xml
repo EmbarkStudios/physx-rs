@@ -1,6 +1,5 @@
 [
     "SnJointRepXSerializer",
     "SnRepXCoreSerializer",
-    "SnRepXUpgrader",
     "SnXmlSerialization",
 ]

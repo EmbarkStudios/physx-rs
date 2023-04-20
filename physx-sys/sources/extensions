@@ -33,11 +33,8 @@
     "ExtSceneQuerySystem",
     "ExtSimpleFactory",
     "ExtSmoothNormals",
-    "ExtSoftBodyExt",
     "ExtSphericalJoint",
     "ExtSqManager",
     "ExtSqQuery",
-    "ExtTetMakerExt",
-    "ExtTetrahedronMeshExt",
     "ExtTriangleMeshExt",
 ]

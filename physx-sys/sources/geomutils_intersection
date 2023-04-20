@@ -6,7 +6,6 @@
     "GuIntersectionRayCapsule",
     "GuIntersectionRaySphere",
     "GuIntersectionSphereBox",
-    "GuIntersectionTetrahedronBox",
     "GuIntersectionTriangleBox",
     "GuIntersectionTriangleTriangle",
 ]
