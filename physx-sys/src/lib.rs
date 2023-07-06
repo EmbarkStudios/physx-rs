@@ -239,14 +239,17 @@ impl Default for SimulationEventCallbackInfo {
     }
 }
 
-/// return 0 = `PxQueryHitType::eNONE`
-/// return 1 = `PxQueryHitType::eTOUCH`
-/// return 2 = `PxQueryHitType::eBLOCK`
 pub type RaycastHitCallback = unsafe extern "C" fn(
     *const PxRigidActor,
     *const PxFilterData,
     *const PxShape,
     hit_flags: u32,
+    *const c_void,
+) -> PxQueryHitType;
+
+pub type PostFilterCallback = unsafe extern "C" fn(
+    *const PxFilterData,
+    *const PxQueryHit,
     *const c_void,
 ) -> PxQueryHitType;
 
@@ -307,6 +310,13 @@ extern "C" {
     pub fn create_raycast_filter_callback_func(
         callback: RaycastHitCallback,
         userdata: *mut c_void,
+    ) -> *mut PxQueryFilterCallback;
+
+    /// Destroy the returned callback object using PxQueryFilterCallback_delete.
+    pub fn create_pre_and_post_raycast_filter_callback_func(
+         preFilter: RaycastHitCallback, 
+         postFilter: PostFilterCallback,
+         userdata: *mut c_void
     ) -> *mut PxQueryFilterCallback;
 
     pub fn create_raycast_buffer() -> *mut PxRaycastCallback;

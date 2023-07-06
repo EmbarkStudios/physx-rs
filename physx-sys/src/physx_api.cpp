@@ -149,6 +149,7 @@ class RaycastFilterCallback : public PxQueryFilterCallback
     }
 };
 
+// TODO: Shouldn't we rename this to PreFilterCallback?
 typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
 typedef uint32_t (*PostFilterCallback)(const PxFilterData *filterData, const PxQueryHit* hit, const void *userData);
 
@@ -423,9 +424,9 @@ extern "C"
         return new RaycastFilterTrampoline(callback, userData);
     }
 
-    PxQueryFilterCallback *create_pre_and_post_raycast_filter_callback_func(RaycastHitCallback callback, void *userData)
+    PxQueryFilterCallback *create_pre_and_post_raycast_filter_callback_func(RaycastHitCallback preFilter, PostFilterCallback postFilter, void *userData)
     {
-        return new RaycastFilterTrampoline(callback, userData);
+        return new RaycastFilterPrePostTrampoline(preFilter, postFilter, userData);
     }
 
     PxRaycastCallback *create_raycast_buffer()
