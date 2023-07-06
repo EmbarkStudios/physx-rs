@@ -150,6 +150,7 @@ class RaycastFilterCallback : public PxQueryFilterCallback
 };
 
 typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
+typedef uint32_t (*PostFilterCallback)(const PxFilterData *filterData, const PxQueryHit* hit, const void *userData);
 
 class RaycastFilterTrampoline : public PxQueryFilterCallback
 {
@@ -173,6 +174,38 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
     virtual PxQueryHitType::Enum postFilter(const PxFilterData &, const PxQueryHit &)
     {
         return PxQueryHitType::eNONE;
+    }
+};
+
+class RaycastFilterPrePostTrampoline : public PxQueryFilterCallback
+{
+  public:
+    RaycastFilterPrePostTrampoline(RaycastHitCallback preFilter, PostFilterCallback postFilter, const void *userdata)
+        : mPreFilter(preFilter), mPostFilter(postFilter), mUserData(userdata) {}
+
+    RaycastHitCallback mPreFilter;
+    PostFilterCallback mPostFilter;
+    
+    const void *mUserData;
+
+    virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
+    {
+        switch (mPreFilter(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
+        case 0: return PxQueryHitType::eNONE;
+        case 1: return PxQueryHitType::eTOUCH;
+        case 2: return PxQueryHitType::eBLOCK;
+        default: return PxQueryHitType::eNONE;
+        }
+    }
+
+    virtual PxQueryHitType::Enum postFilter(const PxFilterData &filterData, const PxQueryHit &hit)
+    {
+        switch (mPostFilter(&filterData, &hit, mUserData)) {
+        case 0: return PxQueryHitType::eNONE;
+        case 1: return PxQueryHitType::eTOUCH;
+        case 2: return PxQueryHitType::eBLOCK;
+        default: return PxQueryHitType::eNONE;
+        }
     }
 };
 
@@ -390,6 +423,11 @@ extern "C"
     }
 
     PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData)
+    {
+        return new RaycastFilterTrampoline(callback, userData);
+    }
+
+    PxQueryFilterCallback *create_pre_and_post_raycast_filter_callback_func(RaycastHitCallback callback, void *userData)
     {
         return new RaycastFilterTrampoline(callback, userData);
     }
