@@ -152,6 +152,15 @@ class RaycastFilterCallback : public PxQueryFilterCallback
 typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
 typedef uint32_t (*PostFilterCallback)(const PxFilterData *filterData, const PxQueryHit* hit, const void *userData);
 
+PxQueryHitType::Enum sanitize_hit_type(uint32_t hit_type) {
+    switch (hit_type) {
+        case PxQueryHitType::eNONE:
+        case PxQueryHitType::eTOUCH:
+        case PxQueryHitType::eBLOCK: return (PxQueryHitType::Enum)hit_type;
+        default: return PxQueryHitType::eNONE;
+    }
+}
+
 class RaycastFilterTrampoline : public PxQueryFilterCallback
 {
   public:
@@ -163,12 +172,7 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
 
     virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
     {
-        switch (mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
-        case 0: return PxQueryHitType::eNONE;
-        case 1: return PxQueryHitType::eTOUCH;
-        case 2: return PxQueryHitType::eBLOCK;
-        default: return PxQueryHitType::eNONE;
-        }
+        return sanitize_hit_type(mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData));
     }
 
     virtual PxQueryHitType::Enum postFilter(const PxFilterData &, const PxQueryHit &)
@@ -176,6 +180,7 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
         return PxQueryHitType::eNONE;
     }
 };
+
 
 class RaycastFilterPrePostTrampoline : public PxQueryFilterCallback
 {
@@ -190,22 +195,13 @@ class RaycastFilterPrePostTrampoline : public PxQueryFilterCallback
 
     virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
     {
-        switch (mPreFilter(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
-        case 0: return PxQueryHitType::eNONE;
-        case 1: return PxQueryHitType::eTOUCH;
-        case 2: return PxQueryHitType::eBLOCK;
-        default: return PxQueryHitType::eNONE;
-        }
+        return sanitize_hit_type(mPreFilter(actor, &filterData, shape, (uint32_t)hitFlags, mUserData));
+
     }
 
     virtual PxQueryHitType::Enum postFilter(const PxFilterData &filterData, const PxQueryHit &hit)
     {
-        switch (mPostFilter(&filterData, &hit, mUserData)) {
-        case 0: return PxQueryHitType::eNONE;
-        case 1: return PxQueryHitType::eTOUCH;
-        case 2: return PxQueryHitType::eBLOCK;
-        default: return PxQueryHitType::eNONE;
-        }
+        return sanitize_hit_type(mPostFilter(&filterData, &hit, mUserData));
     }
 };
 
