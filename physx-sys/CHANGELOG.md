@@ -4,6 +4,8 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+- [PR#201](https://github.com/EmbarkStudios/physx-rs/pull/201) Added `create_pre_and_post_raycast_filter_callback_func`, allowing custom pre and post filtering of query hits.
+
 ## [0.11.1] - 2023-04-18
 ### Fixed
 - [PR#193](https://github.com/EmbarkStudios/physx-rs/pull/193) fixed an issue where `physx-sys` would be needlessly recompiled due to an incorrect filepath.
