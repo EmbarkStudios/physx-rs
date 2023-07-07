@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.11.3] - 2023-07-07
 ### Fixed
 - 0.11.2 release was broken (wrong case in path names).
 
@@ -190,7 +191,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.2...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.3...HEAD
+[0.11.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.2...physx-sys-v0.11.3
 [0.11.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.1...physx-sys-v0.11.2
 [0.11.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.0...physx-sys-v0.11.1
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.10.0...physx-sys-v0.11.0
