@@ -208,7 +208,7 @@ where
                 drop_in_place(ptr as *mut _);
             }
             for ptr in self.get_actors(ActorTypeFlags::RigidDynamic | ActorTypeFlags::RigidStatic) {
-                ptr.cast_map(
+                ptr.cast_map_mut(
                     |ptr| drop_in_place(ptr as *mut _),
                     |ptr| drop_in_place(ptr as *mut _),
                     |_| (), // ArticulationLinks are dropped when the articulation they are in is dropped

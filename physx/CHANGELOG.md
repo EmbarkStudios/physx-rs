@@ -4,6 +4,14 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- [PR#206](https://github.com/EmbarkStudios/physx-rs/pull/206) split `ActorMap` functions
+into mutable and immutable variants.
+  - `ActorMap::cast_map` -> `ActorMap::cast_map_mut`
+  - `ActorMap::as_rigid_dynamic` -> `ActorMap::as_rigid_dynamic_mut`
+  - `ActorMap::as_rigid_static` -> `ActorMap::as_rigid_static_mut`
+  - `ActorMap::as_articulation_link` -> `ActorMap::as_articulation_link_mut`
+
 ## [0.18.0] - 2023-03-03
 ### Changed
 - [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) replaced `PxCooking` with regular functions as `PxCooking` is deprecated in the C++ code.
