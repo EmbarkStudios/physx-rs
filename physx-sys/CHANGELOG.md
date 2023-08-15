@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Added
+- [PR#209](https://github.com/EmbarkStudios/physx-rs/pull/209) Add support for `x86_64-linux-android`
+
 ## [0.11.3] - 2023-07-07
 ### Fixed
 - 0.11.2 release was broken (wrong case in path names).
