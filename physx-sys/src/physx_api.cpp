@@ -149,7 +149,18 @@ class RaycastFilterCallback : public PxQueryFilterCallback
     }
 };
 
+// TODO: Shouldn't we rename this to PreFilterCallback?
 typedef uint32_t (*RaycastHitCallback)(const PxRigidActor *actor, const PxFilterData *filterData, const PxShape *shape, uint32_t hitFlags, const void *userData);
+typedef uint32_t (*PostFilterCallback)(const PxFilterData *filterData, const PxQueryHit* hit, const void *userData);
+
+PxQueryHitType::Enum sanitize_hit_type(uint32_t hit_type) {
+    switch (hit_type) {
+        case PxQueryHitType::eNONE:
+        case PxQueryHitType::eTOUCH:
+        case PxQueryHitType::eBLOCK: return (PxQueryHitType::Enum)hit_type;
+        default: return PxQueryHitType::eNONE;
+    }
+}
 
 class RaycastFilterTrampoline : public PxQueryFilterCallback
 {
@@ -162,17 +173,36 @@ class RaycastFilterTrampoline : public PxQueryFilterCallback
 
     virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
     {
-        switch (mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData)) {
-        case 0: return PxQueryHitType::eNONE;
-        case 1: return PxQueryHitType::eTOUCH;
-        case 2: return PxQueryHitType::eBLOCK;
-        default: return PxQueryHitType::eNONE;
-        }
+        return sanitize_hit_type(mCallback(actor, &filterData, shape, (uint32_t)hitFlags, mUserData));
     }
 
     virtual PxQueryHitType::Enum postFilter(const PxFilterData &, const PxQueryHit &)
     {
         return PxQueryHitType::eNONE;
+    }
+};
+
+
+class RaycastFilterPrePostTrampoline : public PxQueryFilterCallback
+{
+  public:
+    RaycastFilterPrePostTrampoline(RaycastHitCallback preFilter, PostFilterCallback postFilter, const void *userdata)
+        : mPreFilter(preFilter), mPostFilter(postFilter), mUserData(userdata) {}
+
+    RaycastHitCallback mPreFilter;
+    PostFilterCallback mPostFilter;
+    
+    const void *mUserData;
+
+    virtual PxQueryHitType::Enum preFilter(const PxFilterData &filterData, const PxShape *shape, const PxRigidActor *actor, PxHitFlags &hitFlags)
+    {
+        return sanitize_hit_type(mPreFilter(actor, &filterData, shape, (uint32_t)hitFlags, mUserData));
+
+    }
+
+    virtual PxQueryHitType::Enum postFilter(const PxFilterData &filterData, const PxQueryHit &hit)
+    {
+        return sanitize_hit_type(mPostFilter(&filterData, &hit, mUserData));
     }
 };
 
@@ -392,6 +422,11 @@ extern "C"
     PxQueryFilterCallback *create_raycast_filter_callback_func(RaycastHitCallback callback, void *userData)
     {
         return new RaycastFilterTrampoline(callback, userData);
+    }
+
+    PxQueryFilterCallback *create_pre_and_post_raycast_filter_callback_func(RaycastHitCallback preFilter, PostFilterCallback postFilter, void *userData)
+    {
+        return new RaycastFilterPrePostTrampoline(preFilter, postFilter, userData);
     }
 
     PxRaycastCallback *create_raycast_buffer()

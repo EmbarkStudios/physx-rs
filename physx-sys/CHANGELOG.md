@@ -4,6 +4,13 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.11.3] - 2023-07-07
+### Fixed
+- 0.11.2 release was broken (wrong case in path names).
+
+## [0.11.2] - 2023-07-07
+- [PR#201](https://github.com/EmbarkStudios/physx-rs/pull/201) Added `create_pre_and_post_raycast_filter_callback_func`, allowing custom pre and post filtering of query hits.
+
 ## [0.11.1] - 2023-04-18
 ### Fixed
 - [PR#193](https://github.com/EmbarkStudios/physx-rs/pull/193) fixed an issue where `physx-sys` would be needlessly recompiled due to an incorrect filepath.
@@ -184,7 +191,9 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.1...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.3...HEAD
+[0.11.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.2...physx-sys-v0.11.3
+[0.11.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.1...physx-sys-v0.11.2
 [0.11.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.0...physx-sys-v0.11.1
 [0.11.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.10.0...physx-sys-v0.11.0
 [0.10.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.8.2...physx-sys-v0.10.0

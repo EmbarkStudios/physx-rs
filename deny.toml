@@ -22,6 +22,12 @@ skip = []
 skip-tree = [
     # window-sys duplicates, only used by pxbind, doesn't affect physx-sys/physx itself
     { name = "windows-sys" },
+
+
+    # rustix duplicates, 
+    # latest tempfile uses rustix v0.37.23, while latest env_logger v0.10.0 uses 0.38.3 
+    # only used by pxbind
+    { name = "rustix" },
 ]
 
 [licenses]
