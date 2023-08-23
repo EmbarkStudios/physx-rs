@@ -148,8 +148,35 @@ where
 {
     /// Cast to the most-derived type as determined by `get_type`, which returns the ActorType.
     /// Because this does not use `get_concrete_type`, this method does not have the safety
-    /// concerns of the other `cast_map`s, and a `try_cast_map` method is unneded.
+    /// concerns of the other `cast_map`s, and a `try_cast_map` method is not needed.
     pub fn cast_map<'a, Ret, ALFn, RSFn, RDFn>(
+        &'a self,
+        mut articulation_link_fn: ALFn,
+        mut rigid_static_fn: RSFn,
+        mut rigid_dynamic_fn: RDFn,
+    ) -> Ret
+    where
+        ALFn: FnMut(&'a L) -> Ret,
+        RSFn: FnMut(&'a S) -> Ret,
+        RDFn: FnMut(&'a D) -> Ret,
+    {
+        // This uses get_type instead of get_concrete_type because get_concrete_type does not seem to
+        // work for actors retrieved via get_active_actors.
+        match self.get_type() {
+            ActorType::RigidDynamic => {
+                rigid_dynamic_fn(unsafe { &*(self as *const _ as *const D) })
+            }
+            ActorType::RigidStatic => rigid_static_fn(unsafe { &*(self as *const _ as *const S) }),
+            ActorType::ArticulationLink => {
+                articulation_link_fn(unsafe { &*(self as *const _ as *const L) })
+            }
+        }
+    }
+
+    /// Cast to the most-derived type as determined by `get_type`, which returns the ActorType.
+    /// Because this does not use `get_concrete_type`, this method does not have the safety
+    /// concerns of the other `cast_map`s, and a `try_cast_map` method is not needed.
+    pub fn cast_map_mut<'a, Ret, ALFn, RSFn, RDFn>(
         &'a mut self,
         mut articulation_link_fn: ALFn,
         mut rigid_static_fn: RSFn,
@@ -160,7 +187,7 @@ where
         RSFn: FnMut(&'a mut S) -> Ret,
         RDFn: FnMut(&'a mut D) -> Ret,
     {
-        // This uses get_type not get_concrete_type because get_concrete_type does not seem to
+        // This uses get_type instead of get_concrete_type because get_concrete_type does not seem to
         // work for actors retrieved via get_active_actors.
         match self.get_type() {
             ActorType::RigidDynamic => {
@@ -173,24 +200,48 @@ where
         }
     }
 
-    /// Tries to cast to RigidDynamic.
-    pub fn as_rigid_dynamic(&mut self) -> Option<&mut D> {
+    /// Tries to cast reference to RigidDynamic.
+    pub fn as_rigid_dynamic(&self) -> Option<&D> {
+        match self.get_type() {
+            ActorType::RigidDynamic => unsafe { Some(&*(self as *const _ as *const D)) },
+            _ => None,
+        }
+    }
+
+    /// Tries to cast mutable reference to RigidDynamic.
+    pub fn as_rigid_dynamic_mut(&mut self) -> Option<&mut D> {
         match self.get_type() {
             ActorType::RigidDynamic => unsafe { Some(&mut *(self as *mut _ as *mut D)) },
             _ => None,
         }
     }
 
-    /// Tries to cast to RigidStatic.
-    pub fn as_rigid_static(&mut self) -> Option<&mut S> {
+    /// Tries to cast reference to RigidStatic.
+    pub fn as_rigid_static(&self) -> Option<&S> {
+        match self.get_type() {
+            ActorType::RigidStatic => unsafe { Some(&*(self as *const _ as *const S)) },
+            _ => None,
+        }
+    }
+
+    /// Tries to cast mutable reference to RigidStatic.
+    pub fn as_rigid_static_mut(&mut self) -> Option<&mut S> {
         match self.get_type() {
             ActorType::RigidStatic => unsafe { Some(&mut *(self as *mut _ as *mut S)) },
             _ => None,
         }
     }
 
-    /// Tries to cast to ArticulationLink.
-    pub fn as_articulation_link(&mut self) -> Option<&mut L> {
+    /// Tries to cast reference to ArticulationLink.
+    pub fn as_articulation_link(&self) -> Option<&L> {
+        match self.get_type() {
+            ActorType::ArticulationLink => unsafe { Some(&*(self as *const _ as *const L)) },
+            _ => None,
+        }
+    }
+
+    /// Tries to cast mutable reference to ArticulationLink.
+    pub fn as_articulation_link_mut(&mut self) -> Option<&mut L> {
         match self.get_type() {
             ActorType::ArticulationLink => unsafe { Some(&mut *(self as *mut _ as *mut L)) },
             _ => None,
