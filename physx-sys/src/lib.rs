@@ -154,6 +154,13 @@ include!("generated/unix/structgen.rs");
 #[cfg(all(
     not(feature = "structgen"),
     target_os = "android",
+    target_arch = "x86_64",
+))]
+include!("generated/unix/structgen.rs");
+
+#[cfg(all(
+    not(feature = "structgen"),
+    target_os = "android",
     target_arch = "aarch64",
 ))]
 include!("generated/unix/structgen.rs");
