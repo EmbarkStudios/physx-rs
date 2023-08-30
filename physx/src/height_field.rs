@@ -145,9 +145,8 @@ impl HeightField {
     pub fn get_sample(&self, row: u32, column: u32) -> Option<&HeightFieldSample> {
         // need to do bound checks, otherwise C++ code will crash with assertion error
         if row < self.get_nb_rows() || column < self.get_nb_columns() {
-            // SAFETY: HeightFieldSample is repr(transparent) of PxHeightFieldSample
             Some(unsafe {
-                std::mem::transmute(&*PxHeightField_getSample(self.as_ptr(), row, column))
+                &*(PxHeightField_getSample(self.as_ptr(), row, column) as *const HeightFieldSample)
             })
         } else {
             None

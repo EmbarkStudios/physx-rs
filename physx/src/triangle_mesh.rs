@@ -56,28 +56,22 @@ impl TriangleMesh {
 
     /// Returns the vertices.
     pub fn get_vertices(&self) -> &[PxVec3] {
-        let vertices = unsafe {
+        unsafe {
             std::slice::from_raw_parts(
-                PxTriangleMesh_getVertices(self.as_ptr()),
+                PxTriangleMesh_getVertices(self.as_ptr()) as *const PxVec3,
                 self.get_nb_vertices() as usize,
             )
-        };
-
-        // SAFETY: PxVec3 is repr(transparent) wrapper of physx_sys::PxVec3
-        unsafe { std::mem::transmute(vertices) }
+        }
     }
 
     /// Returns all mesh vertices for modification.
-    pub fn get_vertices_for_modification(&mut self) -> &mut [PxVec3] {
-        let vertices = unsafe {
+    pub fn get_vertices_mut(&mut self) -> &mut [PxVec3] {
+        unsafe {
             std::slice::from_raw_parts_mut(
-                PxTriangleMesh_getVerticesForModification_mut(self.as_mut_ptr()),
+                PxTriangleMesh_getVerticesForModification_mut(self.as_mut_ptr()) as *mut PxVec3,
                 self.get_nb_vertices() as usize,
             )
-        };
-
-        // SAFETY: PxVec3 is repr(transparent) wrapper of physx_sys::PxVec3
-        unsafe { std::mem::transmute(vertices) }
+        }
     }
 
     /// Refits BVH for mesh vertices.

@@ -47,15 +47,12 @@ impl ConvexMesh {
 
     /// Returns the vertices.
     pub fn get_vertices(&self) -> &[PxVec3] {
-        let vertices = unsafe {
+        unsafe {
             std::slice::from_raw_parts(
-                PxConvexMesh_getVertices(self.as_ptr()),
+                PxConvexMesh_getVertices(self.as_ptr()) as *const PxVec3,
                 self.get_nb_vertices() as usize,
             )
-        };
-
-        // SAFETY: PxVec3 is repr(transparent) wrapper of physx_sys::PxVec3
-        unsafe { std::mem::transmute(vertices) }
+        }
     }
 
     /// Returns the index buffer.
