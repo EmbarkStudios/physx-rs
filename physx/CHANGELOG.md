@@ -12,6 +12,9 @@ into mutable and immutable variants.
   - `ActorMap::as_rigid_static` -> `ActorMap::as_rigid_static_mut`
   - `ActorMap::as_articulation_link` -> `ActorMap::as_articulation_link_mut`
 
+### Fixed
+- [PR#211](https://github.com/EmbarkStudios/physx-rs/pull/211) fixed misaligned pointer dereference when using `UserData` with small-size values.
+
 ## [0.18.0] - 2023-03-03
 ### Changed
 - [PR#191](https://github.com/EmbarkStudios/physx-rs/pull/191) replaced `PxCooking` with regular functions as `PxCooking` is deprecated in the C++ code.

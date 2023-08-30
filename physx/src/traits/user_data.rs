@@ -21,14 +21,11 @@ pub unsafe trait UserData: Sized {
     unsafe fn init_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
         if size_of::<Self::UserData>() > size_of::<*mut c_void>() {
             // Too big to pack into a *mut c_void, kick it to the heap.
-            let data = Box::new(user_data);
-            *self.user_data_ptr_mut() = Box::into_raw(data) as *mut c_void;
+            let data = Box::into_raw(Box::new(user_data));
+            *(self.user_data_ptr_mut() as *mut *mut c_void as *mut *mut Self::UserData) = data;
         } else {
             // DATA_SIZE <= VOID_SIZE
-            unsafe {
-                *self.user_data_ptr_mut() =
-                    *(&user_data as *const Self::UserData as *const *mut c_void)
-            }
+            *(self.user_data_ptr_mut() as *mut *mut c_void as *mut Self::UserData) = user_data;
         }
         self
     }
@@ -49,6 +46,7 @@ pub unsafe trait UserData: Sized {
     }
 
     /// # Safety
+    ///
     /// The user data field must have previously been initialized via `init_user_data`.
     unsafe fn get_user_data_mut(this: &mut Self) -> &mut Self::UserData {
         unsafe {
@@ -61,5 +59,56 @@ pub unsafe trait UserData: Sized {
                 &mut *(this.user_data_ptr_mut() as *mut *mut c_void as *mut Self::UserData)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{ffi::c_void, fmt::Debug, marker::PhantomData, ptr::null_mut};
+
+    use super::UserData;
+
+    struct TestUserData<U> {
+        user_data: *mut c_void,
+        phantom: PhantomData<U>,
+    }
+
+    impl<U> Default for TestUserData<U> {
+        fn default() -> Self {
+            Self {
+                user_data: null_mut(),
+                phantom: PhantomData,
+            }
+        }
+    }
+
+    unsafe impl<U> UserData for TestUserData<U> {
+        type UserData = U;
+
+        fn user_data_ptr(&self) -> &*mut c_void {
+            &self.user_data
+        }
+
+        fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+            &mut self.user_data
+        }
+    }
+
+    fn do_test<U: PartialEq + Clone + Debug>(user_data: U) {
+        unsafe {
+            let mut object: TestUserData<U> = TestUserData::default();
+            object.init_user_data(user_data.clone());
+
+            assert_eq!(UserData::get_user_data(&object), &user_data);
+            assert_eq!(UserData::get_user_data_mut(&mut object), &user_data);
+        }
+    }
+
+    #[test]
+    fn test_user_data() {
+        do_test(()); // unit type
+        do_test(100u8); // smaller than pointer
+        do_test(100usize); // same size as pointer
+        do_test([100usize; 4]); // larger than pointer
     }
 }

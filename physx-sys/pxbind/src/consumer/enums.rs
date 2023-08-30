@@ -182,7 +182,9 @@ impl<'ast> super::AstConsumer<'ast> {
         // PhysX uses a PxFlags<> template typedef to create a bitfield type for
         // a specific enum, we use this typedef to also generate an appropriate
         // bitflags that can be transparently passed between the FFI boundary
-        let Some(flags) = super::no_physx(&td.kind.qual_type).strip_prefix("PxFlags<") else { return Ok(()) };
+        let Some(flags) = super::no_physx(&td.kind.qual_type).strip_prefix("PxFlags<") else {
+            return Ok(());
+        };
         // Get rid of `>`
         let flags = &flags[..flags.len() - 1];
 

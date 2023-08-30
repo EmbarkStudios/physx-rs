@@ -58,7 +58,9 @@ impl Constructor {
             }
         });
 
-        let Some(first) = iter.next() else { return false };
+        let Some(first) = iter.next() else {
+            return false;
+        };
 
         if first.ends_with(" &&") {
             return true;
@@ -443,7 +445,9 @@ impl<'ast> super::AstConsumer<'ast> {
             return Ok(());
         }
 
-        let Some(rname) = rec.name.as_deref() else { return Ok(()) };
+        let Some(rname) = rec.name.as_deref() else {
+            return Ok(());
+        };
 
         anyhow::ensure!(
             rec.definition_data.is_some(),
@@ -674,7 +678,9 @@ impl<'ast> super::AstConsumer<'ast> {
         template_types: &[(&str, &super::TemplateArg<'ast>)],
         fields: &mut Vec<FieldBinding<'ast>>,
     ) -> anyhow::Result<()> {
-        let Some(rname) = rec.name.as_deref() else { return Ok(()) };
+        let Some(rname) = rec.name.as_deref() else {
+            return Ok(());
+        };
         let mut is_public = !matches!(rec.tag_used, Some(Tag::Class));
 
         for inn in &node.inner {

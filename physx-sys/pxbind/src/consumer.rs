@@ -299,7 +299,9 @@ impl<'ast> AstConsumer<'ast> {
                     // If a record decl doesn't have any inner nodes, it's just
                     // a foreward declaration and we can skip it
                     if inn.inner.is_empty() || rec.definition_data.is_none() {
-                        let Some(name) = rec.name.as_deref() else { continue; };
+                        let Some(name) = rec.name.as_deref() else {
+                            continue;
+                        };
 
                         if !self.classes.contains_key(name) {
                             self.recs
