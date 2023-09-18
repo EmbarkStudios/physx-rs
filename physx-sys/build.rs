@@ -346,6 +346,8 @@ fn add_common(ctx: &mut Context) {
             "-std=c++14",
             // Disable all warnings
             "-w",
+            // Many reinterpret_cast tricks in physx break down if we do not disable strict-aliasing
+            "-fno-strict-aliasing",
         ]
     } else if builder.get_compiler().is_like_msvc() {
         // Disable defaults since we disagree with cc in some cases, this
