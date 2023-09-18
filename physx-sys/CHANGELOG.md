@@ -5,6 +5,7 @@
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 ### Added
+- [PR#212](https://github.com/EmbarkStudios/physx-rs/pull/212) Build physx with -fno-strict-aliasing.
 - [PR#209](https://github.com/EmbarkStudios/physx-rs/pull/209) Add support for `x86_64-linux-android`
 
 ## [0.11.3] - 2023-07-07
