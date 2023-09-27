@@ -140,7 +140,7 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     }
 
     /// Set the restitution.
-    /// - Restitution must be in [0.0 ..= 1.0], values outside tyhe range are clamped.
+    /// - Restitution must be in [0.0 ..= 1.0], values outside the range are clamped.
     /// - A reitution of 0.0 minimizes bouncing, higher values mean more bounce.
     #[inline]
     fn set_restitution(&mut self, mut restitution: f32) {
