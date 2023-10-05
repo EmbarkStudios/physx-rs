@@ -62,9 +62,6 @@ unsafe impl<U, M: Material> UserData for PxShape<U, M> {
 impl<U, M: Material> Drop for PxShape<U, M> {
     fn drop(&mut self) {
         unsafe {
-            for material in self.get_materials_mut() {
-                drop_in_place(material as *mut _);
-            }
             drop_in_place(self.get_user_data_mut());
             use crate::base::RefCounted;
             self.release();
