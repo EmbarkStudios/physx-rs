@@ -4,6 +4,9 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Added
+- [PR#216](https://github.com/EmbarkStudios/physx-rs/pull/216) Support building for Android on aarch64 macOS hosts
+
 ## [0.11.4] - 2023-09-18
 ### Added
 - [PR#212](https://github.com/EmbarkStudios/physx-rs/pull/212) Build physx with -fno-strict-aliasing.
