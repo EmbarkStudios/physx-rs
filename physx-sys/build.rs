@@ -273,7 +273,7 @@ fn add_common(ctx: &mut Context) {
         let ndk_toolchain = match host_str {
             "x86_64-pc-windows-msvc" => "windows-x86_64",
             "x86_64-unknown-linux-gnu" => "linux-x86_64",
-            "x86_64-apple-darwin" => "darwin-x86_64",
+            "x86_64-apple-darwin" | "aarch64-apple-darwin" => "darwin-x86_64",
             _ => panic!(
                 "Host triple {} is unsupported for cross-compilation to Android",
                 host_str
