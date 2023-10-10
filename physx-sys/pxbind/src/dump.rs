@@ -67,7 +67,7 @@ pub fn get_ast(header: impl AsRef<std::path::Path>) -> anyhow::Result<Vec<u8>> {
         captured.status.success(),
         "clang++ failed to gather AST {:?}\n{}",
         captured.status,
-        String::from_utf8(captured.stderr).unwrap_or(String::new()),
+        String::from_utf8(captured.stderr).unwrap_or_default(),
     );
 
     Ok(captured.stdout)
