@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.19.0] - 2023-10-11
 ### Changed
 - [PR#206](https://github.com/EmbarkStudios/physx-rs/pull/206) split `ActorMap` functions
 into mutable and immutable variants.
@@ -205,7 +206,8 @@ into mutable and immutable variants.
 - Fix for triangle mesh data when using glam with SSE enabled
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.18.0...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.19.0...HEAD
+[0.19.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.18.0...physx-v0.19.0
 [0.18.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.17.0...physx-v0.18.0
 [0.17.0]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.1...physx-v0.17.0
 [0.16.1]: https://github.com/EmbarkStudios/physx-rs/compare/physx-v0.16.0...physx-v0.16.1
