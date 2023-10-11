@@ -4,6 +4,7 @@
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+## [0.11.5] - 2023-10-11
 ### Added
 - [PR#216](https://github.com/EmbarkStudios/physx-rs/pull/216) Support building for Android on aarch64 macOS hosts
 
@@ -199,7 +200,8 @@
 - Ability to not run the default filter shader before the callback.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.4...HEAD
+[Unreleased]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.5...HEAD
+[0.11.5]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.4...physx-sys-v0.11.5
 [0.11.4]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.3...physx-sys-v0.11.4
 [0.11.3]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.2...physx-sys-v0.11.3
 [0.11.2]: https://github.com/EmbarkStudios/physx-rs/compare/physx-sys-v0.11.1...physx-sys-v0.11.2
