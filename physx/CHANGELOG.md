@@ -14,6 +14,7 @@ into mutable and immutable variants.
 
 ### Fixed
 - [PR#211](https://github.com/EmbarkStudios/physx-rs/pull/211) fixed misaligned pointer dereference when using `UserData` with small-size values.
+- [PR#215](https://github.com/EmbarkStudios/physx-rs/pull/215) fixed double free of materials used by shapes
 
 ## [0.18.0] - 2023-03-03
 ### Changed
