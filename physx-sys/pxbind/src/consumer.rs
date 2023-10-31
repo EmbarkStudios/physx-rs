@@ -100,6 +100,31 @@ pub enum Item {
         kind: Type,
     },
     ConstantExpr {
+        value: Option<String>,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    CXXBoolLiteralExpr {
+        value: bool,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    IntegerLiteral {
+        value: String,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    FloatingLiteral {
+        value: String,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    StringLiteral {
+        value: String,
+        #[serde(rename = "type")]
+        kind: Type,
+    },
+    UserDefinedLiteral {
         value: String,
         #[serde(rename = "type")]
         kind: Type,
@@ -111,7 +136,7 @@ pub enum Item {
     TemplateArgument {
         #[serde(rename = "type")]
         kind: Option<Type>,
-        value: Option<i32>,
+        value: Option<i64>,
     },
     RecordType {
         #[serde(rename = "type")]

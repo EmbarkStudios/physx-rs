@@ -190,8 +190,20 @@ impl<'ast> FuncBinding<'ast> {
         }
 
         let indent = Indent(level);
-
         let mut acc = String::new();
+
+        // write default values of params
+        let mut first_param = true;
+        for param in self.params.iter() {
+            if let Some(v) = &param.default_value {
+                if first_param {
+                    writesln!(acc, "{indent}///");
+                    first_param = false;
+                }
+                writesln!(acc, "{indent}/// {} = {}", param.name, v);
+            }
+        }
+
         writes!(acc, "{indent}pub fn {}(", self.name);
 
         for (i, param) in self.params.iter().enumerate() {
