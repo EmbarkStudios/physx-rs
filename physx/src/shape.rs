@@ -10,8 +10,9 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{marker::PhantomData, ptr::drop_in_place};
+use std::marker::PhantomData;
 
+use physx_sys::UserDataField;
 #[rustfmt::skip]
 use physx_sys::{
     PxFilterData,
@@ -50,11 +51,11 @@ pub struct PxShape<U, M: Material> {
 unsafe impl<U, M: Material> UserData for PxShape<U, M> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -62,7 +63,7 @@ unsafe impl<U, M: Material> UserData for PxShape<U, M> {
 impl<U, M: Material> Drop for PxShape<U, M> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(self.get_user_data_mut());
+            self.drop_and_dealloc_user_data();
             use crate::base::RefCounted;
             self.release();
         }

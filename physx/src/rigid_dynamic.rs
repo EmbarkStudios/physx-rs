@@ -13,8 +13,9 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{marker::PhantomData, ptr::drop_in_place};
+use std::marker::PhantomData;
 
+use physx_sys::UserDataField;
 #[rustfmt::skip]
 use physx_sys::{
     phys_PxCreateDynamic,
@@ -57,11 +58,11 @@ pub struct PxRigidDynamic<D, Geom: Shape> {
 unsafe impl<U, Geom: Shape> UserData for PxRigidDynamic<U, Geom> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -69,7 +70,7 @@ unsafe impl<U, Geom: Shape> UserData for PxRigidDynamic<U, Geom> {
 impl<D, Geom: Shape> Drop for PxRigidDynamic<D, Geom> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             PxRigidActor_release_mut(self.as_mut_ptr());
         }
     }

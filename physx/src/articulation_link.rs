@@ -10,8 +10,9 @@ use crate::{
     traits::{Class, UserData},
 };
 
-use std::{marker::PhantomData, ptr::drop_in_place};
+use std::marker::PhantomData;
 
+use physx_sys::UserDataField;
 #[rustfmt::skip]
 use physx_sys::{
     PxArticulationLink_getChildren,
@@ -34,12 +35,12 @@ unsafe impl<L, Geom: Shape> UserData for PxArticulationLink<L, Geom> {
     type UserData = L;
 
     #[inline]
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
     #[inline]
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -47,7 +48,7 @@ unsafe impl<L, Geom: Shape> UserData for PxArticulationLink<L, Geom> {
 impl<L, Geom: Shape> Drop for PxArticulationLink<L, Geom> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             PxArticulationLink_release_mut(self.as_mut_ptr());
         }
     }

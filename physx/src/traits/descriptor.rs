@@ -23,8 +23,9 @@ use crate::{
 };
 
 pub use physx_sys::PxSceneFlags as SceneFlags;
+use physx_sys::UserDataField;
 
-use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::null_mut};
+use std::{marker::PhantomData, ptr::null_mut};
 
 pub trait Descriptor<P> {
     type Target;
@@ -182,13 +183,7 @@ impl<
                 frictionOffsetThreshold: self.friction_offset_threshold,
                 ccdMaxSeparation: self.ccd_max_separation,
                 flags: self.flags,
-                userData: if size_of::<U>() > size_of::<*mut c_void>() {
-                    // Too big to pack into a *mut c_void, kick it to the heap.
-                    Box::into_raw(Box::new(self.user_data)) as *mut c_void
-                } else {
-                    // DATA_SIZE <= VOID_SIZE
-                    *(&self.user_data as *const U as *const *mut c_void)
-                },
+                userData: UserDataField::new_with_data(self.user_data),
                 solverBatchSize: self.solver_batch_size,
                 solverArticulationBatchSize: self.solver_articulation_batch_size,
                 maxBiasCoefficient: self.max_bias_coefficient,

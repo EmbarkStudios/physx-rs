@@ -5,6 +5,7 @@ use crate::{
 
 use std::marker::PhantomData;
 
+use physx_sys::UserDataField;
 #[rustfmt::skip]
 use physx_sys::{
     PxMaterial_getDynamicFriction,
@@ -39,11 +40,11 @@ pub struct PxMaterial<U> {
 unsafe impl<U> UserData for PxMaterial<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -51,6 +52,7 @@ unsafe impl<U> UserData for PxMaterial<U> {
 impl<U> Drop for PxMaterial<U> {
     fn drop(&mut self) {
         use crate::base::RefCounted;
+        unsafe { self.drop_and_dealloc_user_data() };
         self.release();
     }
 }

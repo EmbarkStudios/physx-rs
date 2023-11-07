@@ -15,6 +15,7 @@ use super::{
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
+use physx_sys::UserDataField;
 #[rustfmt::skip]
 use physx_sys::{
     PxArticulationReducedCoordinate_applyCache_mut,
@@ -68,11 +69,11 @@ pub struct PxArticulationReducedCoordinate<U, Link: ArticulationLink> {
 unsafe impl<U, Link: ArticulationLink> UserData for PxArticulationReducedCoordinate<U, Link> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -84,7 +85,7 @@ impl<U, Link: ArticulationLink> Drop for PxArticulationReducedCoordinate<U, Link
             for link in self.get_links_mut().drain(..).rev() {
                 drop_in_place(link as *mut _);
             }
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             PxArticulationReducedCoordinate_release_mut(self.as_mut_ptr());
         }
     }

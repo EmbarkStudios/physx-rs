@@ -9,6 +9,7 @@ use crate::{
 
 use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
 
+use physx_sys::UserDataField;
 use thiserror::Error;
 
 #[rustfmt::skip]
@@ -236,11 +237,11 @@ impl<U> PxCapsuleControllerDesc<U> {
 unsafe impl<U> UserData for PxCapsuleControllerDesc<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -248,7 +249,7 @@ unsafe impl<U> UserData for PxCapsuleControllerDesc<U> {
 impl<U> Drop for PxCapsuleControllerDesc<U> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(UserData::get_user_data_mut(self) as *mut _);
+            self.drop_and_dealloc_user_data();
             PxCapsuleControllerDesc_delete(self.as_mut_ptr());
         }
     }
@@ -396,11 +397,11 @@ impl<U> PxBoxControllerDesc<U> {
 unsafe impl<U> UserData for PxBoxControllerDesc<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -408,7 +409,7 @@ unsafe impl<U> UserData for PxBoxControllerDesc<U> {
 impl<U> Drop for PxBoxControllerDesc<U> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(UserData::get_user_data_mut(self) as *mut _);
+            self.drop_and_dealloc_user_data();
             PxBoxControllerDesc_delete(self.as_mut_ptr())
         }
     }

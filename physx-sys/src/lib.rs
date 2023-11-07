@@ -189,12 +189,152 @@ include!("generated/x86_64-pc-windows-msvc/structgen.rs");
 
 include!("physx_generated.rs");
 
+use core::mem::MaybeUninit;
 use std::ffi::c_void;
 
 pub const fn version(major: u32, minor: u32, patch: u32) -> u32 {
     (major << 24) + (minor << 16) + (patch << 8)
 }
 
+const fn can_pack_into_pointer<T>() -> bool {
+    core::mem::size_of::<T>() <= core::mem::size_of::<*mut c_void>() && core::mem::align_of::<T>() <= core::mem::align_of::<*mut c_void>()
+}
+
+/// The type of `userData` fields, which is a `void*` pointer in the PhysX api, but which
+/// we turn into this `union` on the Rust side to be able to pack small user data types inline into
+/// the space of the pointer itself when possible.
+//
+// NOTE: In a world where cross-language C-to-Rust link-time optimization existed and we statically
+// linked PhysX, this could possibly break since on the PhsyX side it's a `void*` which is
+// `noundef` under Clang whereas we explicitly allow types with arbitrary layout (including
+// padding) to be packed as long as they have the necessary size an alignment. But, cross-lang
+// LTO like that does not currently exist and is unlikely to happen, so it's probably Fine TM.
+#[repr(C)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "debug-structs", derive(Debug))]
+pub union UserDataField {
+    heap_pointer: *mut c_void,
+    packed_data: MaybeUninit<*mut c_void>,
+}
+
+impl Default for UserDataField {
+    #[inline(always)]
+    fn default() -> Self {
+        Self::new_uninit()
+    }
+}
+
+impl UserDataField {
+    /// Create a new `UserDataField` which is immediately initialized with the given `data`. See
+    /// [`UserDataField::initialize_with_data`] for more details.
+    pub fn new_with_data<T>(data: T) -> Self {
+        let mut ret = Self::new_uninit();
+        ret.initialize_with_data(data);
+        ret
+    }
+
+    /// Create a new `UserDataField` which is uninitialized. Initialized it before use!
+    #[inline(always)]
+    pub fn new_uninit() -> Self {
+        UserDataField { packed_data: MaybeUninit::uninit() }
+
+    }
+    /// Initialize the field with arbitrary user data of type `T`.
+    ///
+    /// If the data can be packed into the space of a `*mut c_void` (its size and alignement are
+    /// both less than or equal to the size and alignment of a pointer on your platform), then
+    /// it will be written inline into the space of the pointer. If it cannot, it will be placed
+    /// on the heap and a pointer to it will be written to this field.
+    ///
+    /// You can access data you've initialized using the other functions available on this type.
+    /// If `T` could not be packed and was put on the heap, you must call
+    /// [`UserDataField::drop_and_dealloc`] with the same `T` in order to drop and deallocate it,
+    /// if you care about it being dropped or dealloced (if not, the memory will leak).
+    ///
+    /// If you call this when data has already been initialized, it will be clobbered if
+    /// it was written inline and if it was on the heap the old data will be leaked and replaced
+    /// with the new data.
+    #[inline]
+    pub fn initialize_with_data<T>(&mut self, data: T) {
+        if can_pack_into_pointer::<T>() {
+            // SAFETY: We've checked T's size and align are both < *mut c_void, which `self` must
+            // be at least size/align of
+            unsafe {
+                core::ptr::write(core::ptr::addr_of_mut!(self.packed_data).cast::<T>(), data);
+            }
+        } else {
+            let heap_ptr = Box::into_raw(Box::new(data));
+            self.heap_pointer = heap_ptr.cast();
+        }
+    }
+
+    /// Get a reference to previously-initialized data of type `T`.
+    ///
+    /// # Safety
+    ///
+    /// You must have previously initialized `self` by calling `initialize_with_data` with data
+    /// of the same exact `T`, and not have already called `drop_and_dealloc` on `self` since
+    /// doing so.
+    #[inline(always)]
+    pub unsafe fn data_ref<T>(&self) -> &T {
+        if can_pack_into_pointer::<T>() {
+            // SAFETY: if function level safety is true, we must have initialized a valid T inside
+            // self as packed, since we use the same check in `initialize_with_data`
+            unsafe { &*(core::ptr::addr_of!(self.packed_data).cast::<T>()) }
+        } else {
+            // SAFETY: if function level safety is true, we must have initialized a valid T on
+            // the heap which we point to, since we use the same check in `initialize_with_data`
+            unsafe { &*(self.heap_pointer.cast::<T>().cast_const()) }
+        }
+    }
+
+    /// Get a reference to previously-initialized data of type `T`.
+    ///
+    /// # Safety
+    ///
+    /// You must have previously initialized `self` by calling `initialize_with_data` with data
+    /// of the same exact `T`, and not have already called `drop_and_dealloc` on `self` since
+    /// doing so.
+    #[inline(always)]
+    pub unsafe fn data_ref_mut<T>(&mut self) -> &mut T {
+        if can_pack_into_pointer::<T>() {
+            // SAFETY: if function level safety is true, we must have initialized a valid T inside
+            // self as packed, since we use the same check in `initialize_with_data`
+            unsafe { &mut *(core::ptr::addr_of_mut!(self.packed_data).cast::<T>()) }
+        } else {
+            // SAFETY: if function level safety is true, we must have initialized a valid T on
+            // the heap which we point to, since we use the same check in `initialize_with_data`
+            unsafe { &mut *(self.heap_pointer.cast::<T>()) }
+        }
+    }
+
+    /// Drop and deallocate the space that was allocated for the data on the heap, if there was
+    /// any.
+    ///
+    /// For types that were packed inline, it runs `drop`, if it exists for `T`, or otherwise does
+    /// nothing.
+    ///
+    /// # Safety
+    ///
+    /// You must have previously initialized `self` by calling `initialize_with_data` with data
+    /// of the same exact `T`, and not have already called `drop_and_dealloc` on `self` since
+    /// doing so.
+    #[inline]
+    pub unsafe fn drop_and_dealloc<T>(&mut self) {
+        if !can_pack_into_pointer::<T>() {
+            // SAFETY: self is a heap_pointer and must have been initialized due to function safety
+            let ptr = unsafe { self.heap_pointer }.cast::<T>();
+            // SAFETY: we must have constructed the value pointed to by `ptr` by putting it in a box
+            // if the function level safety is met.
+            let reconsructed_box = unsafe { Box::from_raw(ptr) };
+            drop(reconsructed_box);
+        } else {
+            unsafe {
+                core::ptr::drop_in_place(self.data_ref_mut::<T>())
+            }
+        }
+    }
+}
 pub type CollisionCallback =
     unsafe extern "C" fn(*mut c_void, *const PxContactPairHeader, *const PxContactPair, u32);
 

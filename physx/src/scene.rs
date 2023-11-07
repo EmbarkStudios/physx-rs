@@ -32,6 +32,7 @@ use std::{
     ptr::{drop_in_place, null, null_mut},
 };
 
+use physx_sys::UserDataField;
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
 #[rustfmt::skip]
@@ -175,11 +176,11 @@ where
 {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserDataField {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
         &mut self.obj.userData
     }
 }
@@ -214,7 +215,7 @@ where
                     |_| (), // ArticulationLinks are dropped when the articulation they are in is dropped
                 )
             }
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             drop_in_place(PxScene_getSimulationEventCallback(self.as_ptr())
                 as *mut PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>);
             PxScene_release_mut(self.as_mut_ptr());
