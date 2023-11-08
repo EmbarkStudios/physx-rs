@@ -714,11 +714,15 @@ impl<'ast> super::AstConsumer<'ast> {
                         }
 
                         let kind = if name == "userData" || name == "mUserData" {
-                            QualType::Builtin(Builtin::UserData)
+                            if kind.qual_type.contains("const") {
+                                QualType::Builtin(Builtin::ConstUserData)
+                            } else {
+                                QualType::Builtin(Builtin::UserData)
+                            }
                         } else {
-                            self
-                                .parse_type(kind, template_types)
-                                .with_context(|| format!("failed to parse type for {rname}::{name}"))?
+                            self.parse_type(kind, template_types).with_context(|| {
+                                format!("failed to parse type for {rname}::{name}")
+                            })?
                         };
 
                         // if matches!(&kind, QualType::FunctionPointer) {
@@ -726,7 +730,6 @@ impl<'ast> super::AstConsumer<'ast> {
                         // }
 
                         let is_reference = matches!(kind, QualType::Reference { .. });
-
 
                         fields.push(FieldBinding {
                             name,

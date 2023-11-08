@@ -10,12 +10,12 @@ use super::{
     owner::Owner,
     rigid_actor::RigidActor,
     shape::CollisionLayers,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
 use std::{marker::PhantomData, ptr::drop_in_place};
 
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     PxArticulationReducedCoordinate_applyCache_mut,
@@ -66,14 +66,14 @@ pub struct PxArticulationReducedCoordinate<U, Link: ArticulationLink> {
     phantom_user_data: PhantomData<(U, Link)>,
 }
 
-unsafe impl<U, Link: ArticulationLink> UserData for PxArticulationReducedCoordinate<U, Link> {
+impl<U, Link: ArticulationLink> HasUserData for PxArticulationReducedCoordinate<U, Link> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &UserDataField {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -120,7 +120,7 @@ impl<U, L: ArticulationLink> ArticulationReducedCoordinate
 }
 
 pub trait ArticulationReducedCoordinate:
-    Class<physx_sys::PxArticulationReducedCoordinate> + UserData
+    Class<physx_sys::PxArticulationReducedCoordinate> + HasUserData
 {
     type ArticulationLink: ArticulationLink;
 
@@ -143,13 +143,13 @@ pub trait ArticulationReducedCoordinate:
     /// Get a reference to the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get a mutable reference to the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: construction must go through `from_raw` which calls `init_user_data`
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     #[inline]

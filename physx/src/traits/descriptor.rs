@@ -19,11 +19,11 @@ use crate::{
         AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
         TriggerCallback, WakeSleepCallback,
     },
-    traits::UserData,
+    traits::HasUserData,
 };
 
 pub use physx_sys::PxSceneFlags as SceneFlags;
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 
 use std::{marker::PhantomData, ptr::null_mut};
 
@@ -183,7 +183,7 @@ impl<
                 frictionOffsetThreshold: self.friction_offset_threshold,
                 ccdMaxSeparation: self.ccd_max_separation,
                 flags: self.flags,
-                userData: UserDataField::new_with_data(self.user_data),
+                userData: UserData::new_maybe_packed(self.user_data),
                 solverBatchSize: self.solver_batch_size,
                 solverArticulationBatchSize: self.solver_articulation_batch_size,
                 maxBiasCoefficient: self.max_bias_coefficient,
@@ -278,7 +278,7 @@ pub struct MaterialDescriptor<U> {
 }
 
 impl<P: Physics> Descriptor<P>
-    for MaterialDescriptor<<<<P as Physics>::Shape as Shape>::Material as UserData>::UserData>
+    for MaterialDescriptor<<<<P as Physics>::Shape as Shape>::Material as HasUserData>::UserData>
 {
     type Target = Option<Owner<<<P as Physics>::Shape as Shape>::Material>>;
     fn create(self, physics: &mut P) -> Self::Target {
@@ -300,7 +300,7 @@ pub struct ShapeDescriptor<'a, U, G: Geometry, M: Material> {
 }
 
 impl<P: Physics, G: Geometry> Descriptor<P>
-    for ShapeDescriptor<'_, <P::Shape as UserData>::UserData, G, <P::Shape as Shape>::Material>
+    for ShapeDescriptor<'_, <P::Shape as HasUserData>::UserData, G, <P::Shape as Shape>::Material>
 {
     type Target = Option<Owner<P::Shape>>;
 

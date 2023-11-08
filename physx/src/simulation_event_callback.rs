@@ -1,4 +1,4 @@
-use std::{ffi::c_void, marker::PhantomData, ptr::null_mut, slice};
+use std::{marker::PhantomData, slice};
 
 #[rustfmt::skip]
 use crate::{
@@ -12,6 +12,7 @@ use crate::{
     traits::Class,
 };
 
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     create_simulation_event_callbacks,
@@ -97,15 +98,15 @@ where
     {
         unsafe {
             let (collision_callback, collision_user_data) =
-                on_collide.map_or((None, null_mut()), OC::into_cb_user_data);
+                on_collide.map_or((None, UserData::null()), OC::into_cb_user_data);
             let (trigger_callback, trigger_user_data) =
-                on_trigger.map_or((None, null_mut()), OT::into_cb_user_data);
+                on_trigger.map_or((None, UserData::null()), OT::into_cb_user_data);
             let (constraint_break_callback, constraint_break_user_data) =
-                on_constraint_break.map_or((None, null_mut()), OCB::into_cb_user_data);
+                on_constraint_break.map_or((None, UserData::null()), OCB::into_cb_user_data);
             let (wake_sleep_callback, wake_sleep_user_data) =
-                on_wake_sleep.map_or((None, null_mut()), OWS::into_cb_user_data);
+                on_wake_sleep.map_or((None, UserData::null()), OWS::into_cb_user_data);
             let (advance_callback, advance_user_data) =
-                on_advance.map_or((None, null_mut()), OA::into_cb_user_data);
+                on_advance.map_or((None, UserData::null()), OA::into_cb_user_data);
 
             Owner::from_raw(
                 create_simulation_event_callbacks(&SimulationEventCallbackInfo {
@@ -142,20 +143,21 @@ where
         unsafe {
             let info = &mut *get_simulation_event_info(self.as_mut_ptr());
             {
-                if !info.collision_user_data.is_null() {
-                    drop(Box::from_raw(info.collision_user_data as *mut OC));
+                if info.collision_callback.is_some() {
+                    info.collision_user_data.heap_drop_and_dealloc::<OC>();
                 };
-                if !info.trigger_user_data.is_null() {
-                    drop(Box::from_raw(info.trigger_user_data as *mut OT));
+                if info.trigger_callback.is_some() {
+                    info.trigger_user_data.heap_drop_and_dealloc::<OT>();
                 };
-                if !info.constraint_break_user_data.is_null() {
-                    drop(Box::from_raw(info.constraint_break_user_data as *mut OCB));
+                if info.constraint_break_callback.is_some() {
+                    info.constraint_break_user_data
+                        .heap_drop_and_dealloc::<OCB>();
                 };
-                if !info.wake_sleep_user_data.is_null() {
-                    drop(Box::from_raw(info.wake_sleep_user_data as *mut OWS));
+                if info.wake_sleep_callback.is_some() {
+                    info.wake_sleep_user_data.heap_drop_and_dealloc::<OWS>();
                 };
-                if !info.advance_user_data.is_null() {
-                    drop(Box::from_raw(info.advance_user_data as *mut OA));
+                if info.advance_callback.is_some() {
+                    info.advance_user_data.heap_drop_and_dealloc::<OA>();
                 };
             }
             destroy_simulation_event_callbacks(self.as_mut_ptr());
@@ -172,25 +174,22 @@ impl<T> CollisionCallbackRaw for T where T: CollisionCallback {}
 
 trait CollisionCallbackRaw: CollisionCallback {
     unsafe extern "C" fn callback(
-        user_data: *mut c_void,
+        mut user_data: UserData,
         header: *const physx_sys::PxContactPairHeader,
         pairs: *const physx_sys::PxContactPair,
         nb_pairs: u32,
     ) {
         unsafe {
             Self::on_collision(
-                &mut *(user_data as *mut Self),
+                user_data.heap_data_mut::<Self>(),
                 &*header,
                 slice::from_raw_parts(pairs, nb_pairs as usize),
             )
         }
     }
 
-    fn into_cb_user_data(self) -> (Option<physx_sys::CollisionCallback>, *mut c_void) {
-        (
-            Some(Self::callback),
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    fn into_cb_user_data(self) -> (Option<physx_sys::CollisionCallback>, UserData) {
+        (Some(Self::callback), UserData::new_on_heap(self))
     }
 }
 
@@ -203,23 +202,20 @@ impl<T> TriggerCallbackRaw for T where T: TriggerCallback {}
 
 trait TriggerCallbackRaw: TriggerCallback {
     unsafe extern "C" fn callback(
-        user_data: *mut c_void,
+        mut user_data: UserData,
         pairs: *const physx_sys::PxTriggerPair,
         nb_pairs: u32,
     ) {
         unsafe {
             Self::on_trigger(
-                &mut *(user_data as *mut Self),
+                user_data.heap_data_mut::<Self>(),
                 slice::from_raw_parts(pairs, nb_pairs as usize),
             )
         }
     }
 
-    fn into_cb_user_data(self) -> (Option<physx_sys::TriggerCallback>, *mut c_void) {
-        (
-            Some(Self::callback),
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    fn into_cb_user_data(self) -> (Option<physx_sys::TriggerCallback>, UserData) {
+        (Some(Self::callback), UserData::new_on_heap(self))
     }
 }
 
@@ -232,23 +228,20 @@ impl<T> ConstraintBreakCallbackRaw for T where T: ConstraintBreakCallback {}
 
 trait ConstraintBreakCallbackRaw: ConstraintBreakCallback {
     unsafe extern "C" fn callback(
-        this: *mut c_void,
+        mut user_data: UserData,
         constraints: *const physx_sys::PxConstraintInfo,
         nb_constraints: u32,
     ) {
         unsafe {
             Self::on_constraint_break(
-                &mut *(this as *mut Self),
+                user_data.heap_data_mut::<Self>(),
                 slice::from_raw_parts(constraints, nb_constraints as usize),
             )
         }
     }
 
-    fn into_cb_user_data(self) -> (Option<physx_sys::ConstraintBreakCallback>, *mut c_void) {
-        (
-            Some(Self::callback),
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    fn into_cb_user_data(self) -> (Option<physx_sys::ConstraintBreakCallback>, UserData) {
+        (Some(Self::callback), UserData::new_on_heap(self))
     }
 }
 
@@ -274,25 +267,22 @@ where
     D: RigidDynamic,
 {
     unsafe extern "C" fn callback(
-        this: *mut c_void,
+        mut user_data: UserData,
         actors: *const *const physx_sys::PxActor,
         nb_actors: u32,
         is_waking: bool,
     ) {
         unsafe {
             Self::on_wake_sleep(
-                &mut *(this as *mut Self),
+                user_data.heap_data_mut::<Self>(),
                 slice::from_raw_parts(actors as *const &ActorMap<L, S, D>, nb_actors as usize),
                 is_waking,
             );
         }
     }
 
-    fn into_cb_user_data(self) -> (Option<physx_sys::WakeSleepCallback>, *mut c_void) {
-        (
-            Some(Self::callback),
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    fn into_cb_user_data(self) -> (Option<physx_sys::WakeSleepCallback>, UserData) {
+        (Some(Self::callback), UserData::new_on_heap(self))
     }
 }
 
@@ -319,24 +309,21 @@ where
     D: RigidDynamic,
 {
     unsafe extern "C" fn callback(
-        this: *mut c_void,
+        user_data: UserData,
         bodies: *const *const physx_sys::PxRigidBody,
         transforms: *const physx_sys::PxTransform,
         nb_actors: u32,
     ) {
         unsafe {
             Self::on_advance(
-                &*(this as *const _ as *const Self),
+                user_data.heap_data_ref::<Self>(),
                 slice::from_raw_parts(bodies as *const &RigidBodyMap<L, D>, nb_actors as usize),
                 slice::from_raw_parts(transforms as *const PxTransform, nb_actors as usize),
             )
         }
     }
 
-    fn into_cb_user_data(self) -> (Option<physx_sys::AdvanceCallback>, *mut c_void) {
-        (
-            Some(Self::callback),
-            Box::into_raw(Box::new(self)) as *mut c_void,
-        )
+    fn into_cb_user_data(self) -> (Option<physx_sys::AdvanceCallback>, UserData) {
+        (Some(Self::callback), UserData::new_on_heap(self))
     }
 }

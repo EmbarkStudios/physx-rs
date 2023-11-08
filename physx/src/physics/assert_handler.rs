@@ -1,6 +1,6 @@
-use std::ffi::{c_void, CStr};
+use std::ffi::CStr;
 
-use physx_sys::{create_assert_handler, PxAssertHandler};
+use physx_sys::{create_assert_handler, ConstUserData, PxAssertHandler, UserData};
 
 /// This represents the (deprecated) PxAssertHandler interface.
 pub trait AssertHandler: Sized {
@@ -18,25 +18,20 @@ pub trait AssertHandler: Sized {
             file: *const i8,
             line: u32,
             should_ignore: *mut bool,
-            this: *const c_void,
+            user_data: ConstUserData,
         ) {
             unsafe {
-                let this = &*this.cast::<L>();
                 let expr = CStr::from_ptr(expr.cast());
                 let expr = expr.to_string_lossy();
 
                 let file = CStr::from_ptr(file.cast());
                 let file = file.to_string_lossy();
 
+                let this = user_data.heap_data_ref::<L>();
                 this.on_assert(&expr, &file, line, &mut *should_ignore);
             }
         }
 
-        unsafe {
-            create_assert_handler(
-                on_message_shim::<Self>,
-                Box::into_raw(Box::new(self)) as *mut c_void,
-            )
-        }
+        unsafe { create_assert_handler(on_message_shim::<Self>, UserData::new_on_heap(self)) }
     }
 }

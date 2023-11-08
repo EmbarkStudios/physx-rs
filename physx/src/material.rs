@@ -1,11 +1,11 @@
 use crate::{
     owner::Owner,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
 use std::marker::PhantomData;
 
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     PxMaterial_getDynamicFriction,
@@ -37,14 +37,14 @@ pub struct PxMaterial<U> {
     phantom_user_data: PhantomData<U>,
 }
 
-unsafe impl<U> UserData for PxMaterial<U> {
+impl<U> HasUserData for PxMaterial<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &UserDataField {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -75,7 +75,7 @@ unsafe impl<U: Sync> Sync for PxMaterial<U> {}
 
 impl<M> Material for PxMaterial<M> {}
 
-pub trait Material: Class<physx_sys::PxMaterial> + UserData {
+pub trait Material: Class<physx_sys::PxMaterial> + HasUserData {
     /// # Safety
     ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
@@ -92,14 +92,14 @@ pub trait Material: Class<physx_sys::PxMaterial> + UserData {
     #[inline]
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all constructors go through from_raw which calls init_user_data
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get a mutable reference to the user data.
     #[inline]
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all constructors go through from_raw which calls init_user_data
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Set the dynamic friction.

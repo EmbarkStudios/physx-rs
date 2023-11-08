@@ -1,53 +1,77 @@
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 
-/// UserData allows easy access and initialization of userData *mut c_void fields on Px objects.
-/// Not all Px objects with user data expose them as a field, so not all objects with user data can use this.
+/// `HasUserData` allows easy access and initialization of `void* userData` (in Rust, `UserData`)
+/// fields on Px objects.
 ///
-/// # Safety
+/// Not all Px objects with user data expose them as a field, so not all
+/// objects with user data can use this. Objects which only allow getting the user data through
+/// an accessor function cannot use this trait because returning a (mutable) reference to the
+/// user data field itself isn't possible.
 ///
-/// all constructors of implementing types must call `init_user_data` during construction.
-/// If this does not happen, calling get_user_data or get_user_data_mut may return garbage data, or
-/// dereference an invalid pointer.  If UserData is larger than a *mut ptr it will be stored on the heap,
-/// and it may need to be explicitly dropped by turning the field back into a Box and dropping it.
-/// If UserData implements Drop, this may be as simple as calling `get_user_data_mut` and then calling drop(),
-/// but implementation is left to the concrete type's Drop impl.
-pub unsafe trait UserData: Sized {
+/// The default implementations try to exploit packing `UserData` into the space of the pointer
+/// field itself. If `UserData` has larger size or alignment than a pointer, it will be stored
+/// on the heap. Other implementations may modify this behavior to, for example, always store the
+/// data on the heap, if it suits them. An example of this are the `Px__ControllerDesc` objects,
+/// which will be used to create `Px__Controller`s that implement the `Controller` trait. That
+/// `Controller` trait expects the user data to always be on the heap because it is one of the
+/// objects for which user data is only accessible through an acessor method. As such, the
+/// `Desc` objects must follow suit and always place the data on the heap.
+pub trait HasUserData: Sized {
     type UserData;
     /// Returns a reference to the userData field
-    fn user_data_ptr(&self) -> &UserDataField;
+    fn user_data_ptr(&self) -> &UserData;
 
     /// Returns a mutable reference to the userData field.
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField;
+    fn user_data_ptr_mut(&mut self) -> &mut UserData;
 
+    /// Initialize the user data
     #[inline(always)]
     fn init_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
-        self.user_data_ptr_mut().initialize_with_data::<Self::UserData>(user_data);
+        self.user_data_ptr_mut()
+            .initialize_maybe_packed::<Self::UserData>(user_data);
         self
     }
 
+    /// Drop and dealloc the user data
+    ///
     /// # Safety
     ///
     /// The user data field must have previously been initialized via `init_user_data`
     #[inline(always)]
     unsafe fn drop_and_dealloc_user_data(&mut self) {
         // SAFETY: same as function-level safety
-        unsafe { self.user_data_ptr_mut().drop_and_dealloc::<Self::UserData>() }
+        unsafe {
+            self.user_data_ptr_mut()
+                .maybe_packed_drop_and_dealloc::<Self::UserData>()
+        }
     }
 
+    /// Get a shared ref to the user data, whether packed in the pointer or on the heap.
+    ///
     /// # Safety
     ///
     /// The user data field must have previously been initialized via `init_user_data`.
     #[inline(always)]
     unsafe fn get_user_data(&self) -> &Self::UserData {
-        unsafe { self.user_data_ptr().data_ref::<Self::UserData>() }
+        // SAFETY: same as function-level safety
+        unsafe {
+            self.user_data_ptr()
+                .maybe_packed_data_ref::<Self::UserData>()
+        }
     }
 
+    /// Get a mutable ref to the user data, whether packed in the pointer or on the heap.
+    ///
     /// # Safety
     ///
     /// The user data field must have previously been initialized via `init_user_data`.
     #[inline(always)]
     unsafe fn get_user_data_mut(&mut self) -> &mut Self::UserData {
-        unsafe { self.user_data_ptr_mut().data_ref_mut::<Self::UserData>() }
+        // SAFETY: same as function-level safety
+        unsafe {
+            self.user_data_ptr_mut()
+                .maybe_packed_data_mut::<Self::UserData>()
+        }
     }
 }
 
@@ -55,12 +79,12 @@ pub unsafe trait UserData: Sized {
 mod tests {
     use std::{fmt::Debug, marker::PhantomData};
 
-    use physx_sys::UserDataField;
+    use physx_sys::UserData;
 
-    use super::UserData;
+    use super::HasUserData;
 
     struct TestUserData<U> {
-        user_data: UserDataField,
+        user_data: UserData,
         phantom: PhantomData<U>,
     }
 
@@ -73,14 +97,14 @@ mod tests {
         }
     }
 
-    unsafe impl<U> UserData for TestUserData<U> {
+    impl<U> HasUserData for TestUserData<U> {
         type UserData = U;
 
-        fn user_data_ptr(&self) -> &UserDataField {
+        fn user_data_ptr(&self) -> &UserData {
             &self.user_data
         }
 
-        fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+        fn user_data_ptr_mut(&mut self) -> &mut UserData {
             &mut self.user_data
         }
     }
@@ -90,8 +114,8 @@ mod tests {
             let mut object: TestUserData<U> = TestUserData::default();
             object.init_user_data(user_data.clone());
 
-            assert_eq!(UserData::get_user_data(&object), &user_data);
-            assert_eq!(UserData::get_user_data_mut(&mut object), &user_data);
+            assert_eq!(HasUserData::get_user_data(&object), &user_data);
+            assert_eq!(HasUserData::get_user_data_mut(&mut object), &user_data);
 
             object.drop_and_dealloc_user_data();
         }

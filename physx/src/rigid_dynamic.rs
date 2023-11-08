@@ -10,12 +10,12 @@ use crate::{
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
     shape::Shape,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
 use std::marker::PhantomData;
 
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     phys_PxCreateDynamic,
@@ -55,14 +55,14 @@ pub struct PxRigidDynamic<D, Geom: Shape> {
     phantom_user_data: PhantomData<(D, Geom)>,
 }
 
-unsafe impl<U, Geom: Shape> UserData for PxRigidDynamic<U, Geom> {
+impl<U, Geom: Shape> HasUserData for PxRigidDynamic<U, Geom> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &UserDataField {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -98,7 +98,7 @@ impl<D, Geom: Shape> RigidActor for PxRigidDynamic<D, Geom> {
 
 impl<D, Geom: Shape> RigidDynamic for PxRigidDynamic<D, Geom> {}
 
-pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData {
+pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + HasUserData {
     /// Create a new RigidDynamic.
     #[inline]
     fn new(
@@ -148,14 +148,14 @@ pub trait RigidDynamic: Class<physx_sys::PxRigidDynamic> + RigidBody + UserData 
     #[inline]
     fn get_user_data(&self) -> &Self::UserData {
         // SAFETY: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get the user data.
     #[inline]
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // SAFETY: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Set the linear velocity.

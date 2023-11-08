@@ -274,7 +274,7 @@ pub struct PxGeometryHolder {
 #[repr(C)]
 pub struct PxShape {
     pub structgen_pad0: [u8; 16],
-    pub userData: *mut std::ffi::c_void,
+    pub userData: UserData,
 }
 #[cfg(test)]
 mod sizes {

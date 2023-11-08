@@ -653,14 +653,14 @@ pub struct PxSimulationTetrahedronMeshData {
 #[repr(C)]
 pub struct PxActor {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxAggregate {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1007,35 +1007,35 @@ pub struct PxArticulationTendonLimit {
 #[repr(C)]
 pub struct PxArticulationAttachment {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationTendonJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationTendon {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationSpatialTendon {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationFixedTendon {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1093,35 +1093,35 @@ pub struct PxArticulationCache {
 #[repr(C)]
 pub struct PxArticulationSensor {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationReducedCoordinate {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationJointReducedCoordinate {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxShape {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRigidActor {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1134,14 +1134,14 @@ pub struct PxNodeIndex {
 #[repr(C)]
 pub struct PxRigidBody {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField
+    pub userData: UserData
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxArticulationLink {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1174,7 +1174,7 @@ pub struct PxConstraintShaderTable {
 #[repr(C)]
 pub struct PxConstraint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1293,14 +1293,14 @@ pub struct PxContactModifyPair {
 #[repr(C)]
 pub struct PxBaseMaterial {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxFEMMaterial {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1323,7 +1323,7 @@ pub struct PxParticleRigidFilterPair {
 #[repr(C)]
 pub struct PxMaterial {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1372,7 +1372,7 @@ pub struct PxParticleSpring {
 #[repr(C)]
 pub struct PxParticleMaterial {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1514,14 +1514,14 @@ pub struct PxQueryFilterData {
 #[repr(C)]
 pub struct PxRigidDynamic {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRigidStatic {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1542,7 +1542,7 @@ pub struct PxSceneQueryDesc {
 #[repr(C)]
 pub struct PxBroadPhaseRegion {
     pub mBounds: PxBounds3,
-    pub mUserData: UserDataField,
+    pub mUserData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1677,7 +1677,7 @@ pub struct PxSceneDesc {
     pub flags: PxSceneFlags,
     pub cpuDispatcher: *mut PxCpuDispatcher,
     pub structgen_pad2: [u8; 8],
-    pub userData: UserDataField,
+    pub userData: UserData,
     pub solverBatchSize: u32,
     pub solverArticulationBatchSize: u32,
     pub nbContactDataBlocks: u32,
@@ -1787,7 +1787,7 @@ pub struct PxDominanceGroupPair {
 #[repr(C)]
 pub struct PxScene {
     pub structgen_pad0: [u8; 8],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -1936,7 +1936,7 @@ pub struct PxExtendedVec3 {
 #[repr(C)]
 pub struct PxObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: UserDataField,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
 }
@@ -1945,7 +1945,7 @@ pub struct PxObstacle {
 #[repr(C)]
 pub struct PxBoxObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: UserDataField,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfExtents: PxVec3,
@@ -1956,7 +1956,7 @@ pub struct PxBoxObstacle {
 #[repr(C)]
 pub struct PxCapsuleObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: UserDataField,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfHeight: f32,
@@ -2034,7 +2034,7 @@ pub struct PxControllerObstacleHit {
     pub dir: PxVec3,
     pub length: f32,
     pub structgen_pad0: [u8; 4],
-    pub userData: *const std::ffi::c_void,
+    pub userData: ConstUserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2070,7 +2070,7 @@ pub struct PxControllerDesc {
     pub registerDeletionListener: bool,
     pub clientID: u8,
     pub structgen_pad3: [u8; 6],
-    pub userData: UserDataField,
+    pub userData: UserData,
     pub structgen_pad4: [u8; 8],
 }
 #[derive(Clone, Copy)]
@@ -2097,7 +2097,7 @@ pub struct PxBoxControllerDesc {
     pub registerDeletionListener: bool,
     pub clientID: u8,
     pub structgen_pad3: [u8; 6],
-    pub userData: UserDataField,
+    pub userData: UserData,
     pub structgen_pad4: [u8; 4],
     pub halfHeight: f32,
     pub halfSideExtent: f32,
@@ -2127,7 +2127,7 @@ pub struct PxCapsuleControllerDesc {
     pub registerDeletionListener: bool,
     pub clientID: u8,
     pub structgen_pad3: [u8; 6],
-    pub userData: UserDataField,
+    pub userData: UserData,
     pub structgen_pad4: [u8; 4],
     pub radius: f32,
     pub height: f32,
@@ -2272,7 +2272,7 @@ pub struct PxDefaultFileInputData {
 #[repr(C)]
 pub struct PxJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2286,7 +2286,7 @@ pub struct PxSpring {
 #[repr(C)]
 pub struct PxDistanceJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2302,14 +2302,14 @@ pub struct PxJacobianRow {
 #[repr(C)]
 pub struct PxContactJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxFixedJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2387,21 +2387,21 @@ pub struct PxJointLimitPyramid {
 #[repr(C)]
 pub struct PxPrismaticJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRevoluteJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxSphericalJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
@@ -2417,21 +2417,21 @@ pub struct PxD6JointDrive {
 #[repr(C)]
 pub struct PxD6Joint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxGearJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
 #[repr(C)]
 pub struct PxRackAndPinionJoint {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserDataField,
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]

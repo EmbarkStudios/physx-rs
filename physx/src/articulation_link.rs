@@ -7,12 +7,12 @@ use crate::{
     rigid_actor::RigidActor,
     rigid_body::RigidBody,
     shape::{Shape, ShapeFlag},
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
 use std::marker::PhantomData;
 
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     PxArticulationLink_getChildren,
@@ -31,16 +31,16 @@ pub struct PxArticulationLink<L, Geom: Shape> {
     phantom_user_data: PhantomData<(L, Geom)>,
 }
 
-unsafe impl<L, Geom: Shape> UserData for PxArticulationLink<L, Geom> {
+impl<L, Geom: Shape> HasUserData for PxArticulationLink<L, Geom> {
     type UserData = L;
 
     #[inline]
-    fn user_data_ptr(&self) -> &UserDataField {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
     #[inline]
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -78,7 +78,7 @@ impl<L, Geom: Shape> RigidActor for PxArticulationLink<L, Geom> {
 
 impl<L, Geom: Shape> ArticulationLink for PxArticulationLink<L, Geom> {}
 
-pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + UserData {
+pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + HasUserData {
     /// # Safety
     ///
     /// Owner's own the pointer they wrap, using the pointer after dropping the Owner,
@@ -96,14 +96,14 @@ pub trait ArticulationLink: Class<physx_sys::PxArticulationLink> + RigidBody + U
     #[inline]
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get the user data.
     #[inline]
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Enable collisions for this link. Equivalent to setting SimulationShape to false for all attached shapes.

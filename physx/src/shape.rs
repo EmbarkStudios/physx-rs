@@ -7,12 +7,12 @@
 use crate::{
     material::Material,
     owner::Owner,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
 use std::marker::PhantomData;
 
-use physx_sys::UserDataField;
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     PxFilterData,
@@ -48,14 +48,14 @@ pub struct PxShape<U, M: Material> {
     phantom_user_data: PhantomData<(U, M)>,
 }
 
-unsafe impl<U, M: Material> UserData for PxShape<U, M> {
+impl<U, M: Material> HasUserData for PxShape<U, M> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &UserDataField {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut UserDataField {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -90,7 +90,7 @@ impl<U, M: Material> Shape for PxShape<U, M> {
     type Material = M;
 }
 
-pub trait Shape: Class<physx_sys::PxShape> + UserData {
+pub trait Shape: Class<physx_sys::PxShape> + HasUserData {
     type Material: Material;
 
     /// # Safety
@@ -110,13 +110,13 @@ pub trait Shape: Class<physx_sys::PxShape> + UserData {
     /// Get a reference to the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get a mutable reference to the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Set the simulation (collision) filter of this shape
