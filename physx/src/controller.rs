@@ -48,14 +48,14 @@ pub trait Controller: Class<PxController> + Sized {
 
     /// Sets the controller's user data.
     fn set_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
-        let user_data = UserData::new_maybe_packed(user_data);
+        let user_data = UserData::new_on_heap(user_data);
         // SAFETY: self is not null and is Class<PxController> user_data is valid
         unsafe { PxController_setUserData_mut(self.as_mut_ptr(), user_data) }
         self
     }
 
     /// Retrieve the user data from the controller. Must have been already created with
-    /// `set_user_data` or will return `None`
+    /// `set_user_data` or in the `Desc` this came from or will return `None`
     fn get_user_data(&self) -> Option<&Self::UserData> {
         // SAFETY: self is a valid reference and is Class<PxController>
         let user_data = unsafe { PxController_getUserData(self.as_ptr()) };
@@ -66,7 +66,7 @@ pub trait Controller: Class<PxController> + Sized {
     }
 
     /// Retrieve a mutable reference to the user data from the controller. Must have been already
-    /// created with `set_user_data` or will return `None`.
+    /// created with `set_user_data` or in the `Desc` this came from or will return `None`.
     fn get_user_data_mut(&mut self) -> Option<&mut Self::UserData> {
         // SAFETY: self is a valid reference and is Class<PxController>
         let mut user_data = unsafe { PxController_getUserData(self.as_ptr()) };
