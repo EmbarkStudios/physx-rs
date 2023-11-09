@@ -244,7 +244,7 @@ impl ConstUserData {
 /// If not, use the `heap` family of methods.
 ///
 /// NOTE: In a world where cross-language C-to-Rust link-time optimization existed and we statically
-/// linked PhysX, this could possibly break since on the PhsyX side it's a `void*` which is
+/// linked PhysX, this could possibly break since on the PhysX side it's a `void*` which is
 /// `noundef` under Clang whereas we explicitly allow types with arbitrary layout (including
 /// padding) to be packed as long as they have the necessary size an alignment. But, cross-lang
 /// LTO like that does not currently exist and is unlikely to happen, so it's Fine TM.
