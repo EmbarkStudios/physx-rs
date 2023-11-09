@@ -1374,7 +1374,7 @@ pub struct PxSceneQueryDesc {
 #[repr(C)]
 pub struct PxBroadPhaseRegion {
     pub mBounds: PxBounds3,
-    pub mUserData: *mut std::ffi::c_void,
+    pub mUserData: UserData,
 }
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -1737,7 +1737,7 @@ pub struct PxExtendedVec3 {
 #[repr(C)]
 pub struct PxObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: *mut std::ffi::c_void,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
 }
@@ -1745,7 +1745,7 @@ pub struct PxObstacle {
 #[repr(C)]
 pub struct PxBoxObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: *mut std::ffi::c_void,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfExtents: PxVec3,
@@ -1755,7 +1755,7 @@ pub struct PxBoxObstacle {
 #[repr(C)]
 pub struct PxCapsuleObstacle {
     pub structgen_pad0: [u8; 8],
-    pub mUserData: *mut std::ffi::c_void,
+    pub mUserData: UserData,
     pub mPos: PxExtendedVec3,
     pub mRot: PxQuat,
     pub mHalfHeight: f32,

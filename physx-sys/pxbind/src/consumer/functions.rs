@@ -1,4 +1,4 @@
-use super::{Comment, Item, Method, QualType, TemplateArg};
+use super::{Builtin, Comment, Item, Method, QualType, TemplateArg};
 use crate::Node;
 use anyhow::Context as _;
 use std::borrow::Cow;
@@ -197,14 +197,22 @@ impl<'ast> super::AstConsumer<'ast> {
                 .name
                 .as_deref()
                 .map_or_else(|| format!("anon_param{i}").into(), Cow::Borrowed);
-            let kind = self
-                .parse_type(&param.kind, template_types)
-                .with_context(|| {
-                    format!(
-                        "failed to parse parameter '{pname} ({})' for function '{name}'",
-                        param.kind.qual_type,
-                    )
-                })?;
+
+            let kind = if param.name.as_ref().map_or(false, |name| name == "userData") {
+                if param.kind.qual_type.contains("const") {
+                    QualType::Builtin(Builtin::ConstUserData)
+                } else {
+                    QualType::Builtin(Builtin::UserData)
+                }
+            } else {
+                self.parse_type(&param.kind, template_types)
+                    .with_context(|| {
+                        format!(
+                            "failed to parse parameter '{pname} ({})' for function '{name}'",
+                            param.kind.qual_type,
+                        )
+                    })?
+            };
 
             func.params.push(Param { name: pname, kind });
         }
@@ -229,7 +237,21 @@ impl<'ast> super::AstConsumer<'ast> {
                 .with_context(|| format!("function signature for '{name}' doesn't have a '('"))?;
 
             let ret = sig[..open_ind].trim();
-            if ret != "void" {
+            if name.contains("getUserData") {
+                if ret == "void*" || ret == "void *" {
+                    func.ret = Some(QualType::Builtin(Builtin::UserData));
+                } else {
+                    log::warn!(
+                        "found function with name containing getUserData that had unexpected return type: {ret}"
+                    );
+                    if ret != "void" {
+                        func.ret =
+                            Some(self.parse_type(ret, template_types).with_context(|| {
+                                format!("failed to parse return type for '{name}'")
+                            })?);
+                    }
+                }
+            } else if ret != "void" {
                 func.ret = Some(
                     self.parse_type(ret, template_types)
                         .with_context(|| format!("failed to parse return type for '{name}'"))?,

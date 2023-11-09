@@ -801,7 +801,7 @@ impl Builtin {
             Self::Mat44V => "physx_Mat44V_Pod",
             Self::Mat44 => "physx_PxMat44_Pod",
             Self::UserData => "void*",
-            Self::ConstUserData => "const void*",
+            Self::ConstUserData => "void const*",
         }
     }
 
@@ -838,7 +838,7 @@ impl Builtin {
             Self::Mat44V => "physx::PxMat44V",
             Self::Mat44 => "physx::PxMat44",
             Self::UserData => "void*",
-            Self::ConstUserData => "const void*",
+            Self::ConstUserData => "void const*",
         }
     }
 
@@ -858,6 +858,8 @@ impl Builtin {
                 | Self::UInt
                 | Self::Long
                 | Self::ULong
+                | Self::UserData
+                | Self::ConstUserData
         )
     }
 }

@@ -205,7 +205,7 @@ const fn can_pack_into_pointer<T>() -> bool {
 /// underlying data. Modification is still possible for data on the heap by using internal
 /// mutability.
 #[repr(transparent)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct ConstUserData(UserData);
 
 impl ConstUserData {
@@ -259,6 +259,12 @@ impl Default for UserData {
     #[inline(always)]
     fn default() -> Self {
         Self::null()
+    }
+}
+
+impl std::fmt::Debug for UserData {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("<opaque UserData>")
     }
 }
 

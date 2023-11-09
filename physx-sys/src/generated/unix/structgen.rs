@@ -1134,7 +1134,7 @@ pub struct PxNodeIndex {
 #[repr(C)]
 pub struct PxRigidBody {
     pub structgen_pad0: [u8; 16],
-    pub userData: UserData
+    pub userData: UserData,
 }
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "debug-structs", derive(Debug))]
