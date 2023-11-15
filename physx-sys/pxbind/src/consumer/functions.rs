@@ -15,7 +15,7 @@ pub struct Function {
 pub struct Param<'ast> {
     pub name: Cow<'ast, str>,
     pub kind: QualType<'ast>,
-    pub default_value: Option<&'ast str>,
+    pub default_value: Option<String>,
 }
 
 impl<'ast> Param<'ast> {
@@ -189,16 +189,21 @@ impl<'ast> super::AstConsumer<'ast> {
             .filter_map(|inn| {
                 if let Item::ParmVarDecl(param) = &inn.kind {
                     if inn.inner.len() > 0 {
-                        let default_value: Option<&str> = match &inn.inner[0].kind {
-                            Item::IntegerLiteral { value, kind: _ } => Some(value),
+                        let default_value: Option<String> = match &inn.inner[0].kind {
+                            Item::IntegerLiteral { value, kind: _ } => Some(value.to_owned()),
                             Item::FloatingLiteral { value, kind: _ } => {
-                                Some(if value == "1.00999999" { "1.01" } else { value })
+                                // Clang ast-dump float formatting is not human-friendly
+                                // i.e. "1.01" formats as "1.00999999"
+                                // rust format! fixes this
+                                value.parse::<f32>().ok().map(|value| format!("{value}"))
                             }
-                            Item::StringLiteral { value, kind: _ } => Some(value),
-                            Item::UserDefinedLiteral { value, kind: _ } => Some(value),
-                            Item::CXXBoolLiteralExpr { value, kind: _ } => {
-                                Some(if *value { "true" } else { "false" })
-                            }
+                            Item::StringLiteral { value, kind: _ } => Some(value.to_owned()),
+                            Item::UserDefinedLiteral { value, kind: _ } => Some(value.to_owned()),
+                            Item::CXXBoolLiteralExpr { value, kind: _ } => Some(if *value {
+                                "true".to_owned()
+                            } else {
+                                "false".to_owned()
+                            }),
                             _ => None,
                         };
 
