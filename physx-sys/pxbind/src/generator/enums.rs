@@ -127,7 +127,7 @@ impl<'ast> crate::consumer::FlagsBinding<'ast> {
                     })
                     .enumerate()
                 {
-                    remainder &= !bit;                    
+                    remainder &= !bit;
                     is_combo = true;
                     if i > 0 {
                         writes!(w, " | ");
@@ -140,11 +140,10 @@ impl<'ast> crate::consumer::FlagsBinding<'ast> {
                 // emit the raw value
                 if !is_combo {
                     writes!(w, "0x{val:08x}");
-                }
-                else if remainder != 0 {
+                } else if remainder != 0 {
                     if remainder & (remainder - 1) == 0 {
                         writes!(w, "| 1 << {}", remainder.ilog2());
-                    } else {                    
+                    } else {
                         writes!(w, "| 0x{remainder:08x}");
                     }
                 }
