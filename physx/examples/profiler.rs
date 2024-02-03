@@ -9,7 +9,7 @@ type PxRigidDynamic = physx::rigid_dynamic::PxRigidDynamic<(), PxShape>;
 type PxArticulationReducedCoordinate =
     physx::articulation_reduced_coordinate::PxArticulationReducedCoordinate<(), PxArticulationLink>;
 type PxScene = physx::scene::PxScene<
-    (),
+    *const std::ffi::c_void,
     PxArticulationLink,
     PxRigidStatic,
     PxRigidDynamic,
@@ -111,7 +111,7 @@ fn main() {
         .create(SceneDescriptor {
             gravity: PxVec3::new(0.0, -9.81, 0.0),
             on_advance: Some(OnAdvance),
-            ..SceneDescriptor::new(())
+            ..SceneDescriptor::new(std::ptr::null())
         })
         .unwrap();
 
