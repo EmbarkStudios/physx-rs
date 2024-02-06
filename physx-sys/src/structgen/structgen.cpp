@@ -73,22 +73,6 @@ int main() {
 
     sg.pass_thru("struct physx_PxLogTwo_Pod;\n");
     sg.pass_thru("struct physx_PxUnConst_Pod;\n");
-    struct physx_PxBitAndByte_Pod: public physx::PxBitAndByte {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxBitAndByte_Pod", "PxBitAndByte");
-            sg.end_struct(sizeof(physx::PxBitAndByte));
-        }
-    };
-    physx_PxBitAndByte_Pod::dump_layout(sg);
-
-    struct physx_PxBitMap_Pod: public physx::PxBitMap {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxBitMap_Pod", "PxBitMap");
-            sg.end_struct(sizeof(physx::PxBitMap));
-        }
-    };
-    physx_PxBitMap_Pod::dump_layout(sg);
-
     struct physx_PxVec3_Pod: public physx::PxVec3 {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxVec3_Pod", "PxVec3");
@@ -1120,8 +1104,8 @@ int main() {
             sg.add_field("physx_PxSolverBodyData_Pod const* data1", "data1", "*const PxSolverBodyData", sizeof(physx::PxSolverBodyData const*), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, data1));
             sg.add_field("physx_PxTransform_Pod bodyFrame0", "bodyFrame0", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyFrame0));
             sg.add_field("physx_PxTransform_Pod bodyFrame1", "bodyFrame1", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyFrame1));
-            sg.add_field("int32_t bodyState0", "bodyState0", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyState0));
-            sg.add_field("int32_t bodyState1", "bodyState1", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyState1));
+            sg.add_field("physx_BodyState_Pod bodyState0", "bodyState0", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyState0));
+            sg.add_field("physx_BodyState_Pod bodyState1", "bodyState1", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDescBase_Pod, bodyState1));
             sg.end_struct(sizeof(physx::PxSolverConstraintPrepDescBase));
         }
     };
@@ -1138,8 +1122,8 @@ int main() {
             sg.add_field("physx_PxSolverBodyData_Pod const* data1", "data1", "*const PxSolverBodyData", sizeof(physx::PxSolverBodyData const*), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, data1));
             sg.add_field("physx_PxTransform_Pod bodyFrame0", "bodyFrame0", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyFrame0));
             sg.add_field("physx_PxTransform_Pod bodyFrame1", "bodyFrame1", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyFrame1));
-            sg.add_field("int32_t bodyState0", "bodyState0", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyState0));
-            sg.add_field("int32_t bodyState1", "bodyState1", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyState1));
+            sg.add_field("physx_BodyState_Pod bodyState0", "bodyState0", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyState0));
+            sg.add_field("physx_BodyState_Pod bodyState1", "bodyState1", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, bodyState1));
             sg.add_field("physx_Px1DConstraint_Pod* rows", "rows", "*mut Px1DConstraint", sizeof(physx::Px1DConstraint*), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, rows));
             sg.add_field("uint32_t numRows", "numRows", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, numRows));
             sg.add_field("float linBreakForce", "linBreakForce", "f32", sizeof(float), unsafe_offsetof(physx_PxSolverConstraintPrepDesc_Pod, linBreakForce));
@@ -1168,8 +1152,8 @@ int main() {
             sg.add_field("physx_PxSolverBodyData_Pod const* data1", "data1", "*const PxSolverBodyData", sizeof(physx::PxSolverBodyData const*), unsafe_offsetof(physx_PxSolverContactDesc_Pod, data1));
             sg.add_field("physx_PxTransform_Pod bodyFrame0", "bodyFrame0", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyFrame0));
             sg.add_field("physx_PxTransform_Pod bodyFrame1", "bodyFrame1", "PxTransform", sizeof(physx::PxTransform), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyFrame1));
-            sg.add_field("int32_t bodyState0", "bodyState0", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyState0));
-            sg.add_field("int32_t bodyState1", "bodyState1", "BodyState", sizeof(physx::PxSolverConstraintPrepDescBase::BodyState), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyState1));
+            sg.add_field("physx_BodyState_Pod bodyState0", "bodyState0", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyState0));
+            sg.add_field("physx_BodyState_Pod bodyState1", "bodyState1", "BodyState", sizeof(physx::BodyState), unsafe_offsetof(physx_PxSolverContactDesc_Pod, bodyState1));
             sg.add_field("void* shapeInteraction", "shapeInteraction", "*mut std::ffi::c_void", sizeof(void*), unsafe_offsetof(physx_PxSolverContactDesc_Pod, shapeInteraction));
             sg.add_field("physx_PxContactPoint_Pod* contacts", "contacts", "*mut PxContactPoint", sizeof(physx::PxContactPoint*), unsafe_offsetof(physx_PxSolverContactDesc_Pod, contacts));
             sg.add_field("uint32_t numContacts", "numContacts", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSolverContactDesc_Pod, numContacts));
@@ -1675,7 +1659,7 @@ int main() {
             sg.add_field("uint32_t nextPatchIndex", "nextPatchIndex", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxContactStreamIterator_Pod, nextPatchIndex));
             sg.add_field("uint32_t contactPatchHeaderSize", "contactPatchHeaderSize", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxContactStreamIterator_Pod, contactPatchHeaderSize));
             sg.add_field("uint32_t contactPointSize", "contactPointSize", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxContactStreamIterator_Pod, contactPointSize));
-            sg.add_field("int32_t mStreamFormat", "mStreamFormat", "StreamFormat", sizeof(physx::PxContactStreamIterator::StreamFormat), unsafe_offsetof(physx_PxContactStreamIterator_Pod, mStreamFormat));
+            sg.add_field("physx_StreamFormat_Pod mStreamFormat", "mStreamFormat", "StreamFormat", sizeof(physx::StreamFormat), unsafe_offsetof(physx_PxContactStreamIterator_Pod, mStreamFormat));
             sg.add_field("uint32_t forceNoResponse", "forceNoResponse", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxContactStreamIterator_Pod, forceNoResponse));
             sg.add_field("bool pointStepped", "pointStepped", "bool", sizeof(bool), unsafe_offsetof(physx_PxContactStreamIterator_Pod, pointStepped));
             sg.add_field("uint32_t hasFaceIndices", "hasFaceIndices", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxContactStreamIterator_Pod, hasFaceIndices));
@@ -1897,84 +1881,6 @@ int main() {
         }
     };
     physx_PxSweepHit_Pod::dump_layout(sg);
-
-    struct physx_PxRaycastCallback_Pod: public physx::PxRaycastCallback {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxRaycastCallback_Pod", "PxRaycastCallback");
-            sg.add_field("physx_PxRaycastHit_Pod block", "block", "PxRaycastHit", sizeof(physx::PxRaycastHit), unsafe_offsetof(physx_PxRaycastCallback_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxRaycastCallback_Pod, hasBlock));
-            sg.add_field("physx_PxRaycastHit_Pod* touches", "touches", "*mut PxRaycastHit", sizeof(physx::PxRaycastHit*), unsafe_offsetof(physx_PxRaycastCallback_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxRaycastCallback_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxRaycastCallback_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxRaycastCallback));
-        }
-    };
-    physx_PxRaycastCallback_Pod::dump_layout(sg);
-
-    struct physx_PxOverlapCallback_Pod: public physx::PxOverlapCallback {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxOverlapCallback_Pod", "PxOverlapCallback");
-            sg.add_field("physx_PxOverlapHit_Pod block", "block", "PxOverlapHit", sizeof(physx::PxOverlapHit), unsafe_offsetof(physx_PxOverlapCallback_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxOverlapCallback_Pod, hasBlock));
-            sg.add_field("physx_PxOverlapHit_Pod* touches", "touches", "*mut PxOverlapHit", sizeof(physx::PxOverlapHit*), unsafe_offsetof(physx_PxOverlapCallback_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxOverlapCallback_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxOverlapCallback_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxOverlapCallback));
-        }
-    };
-    physx_PxOverlapCallback_Pod::dump_layout(sg);
-
-    struct physx_PxSweepCallback_Pod: public physx::PxSweepCallback {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxSweepCallback_Pod", "PxSweepCallback");
-            sg.add_field("physx_PxSweepHit_Pod block", "block", "PxSweepHit", sizeof(physx::PxSweepHit), unsafe_offsetof(physx_PxSweepCallback_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxSweepCallback_Pod, hasBlock));
-            sg.add_field("physx_PxSweepHit_Pod* touches", "touches", "*mut PxSweepHit", sizeof(physx::PxSweepHit*), unsafe_offsetof(physx_PxSweepCallback_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSweepCallback_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSweepCallback_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxSweepCallback));
-        }
-    };
-    physx_PxSweepCallback_Pod::dump_layout(sg);
-
-    struct physx_PxRaycastBuffer_Pod: public physx::PxRaycastBuffer {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxRaycastBuffer_Pod", "PxRaycastBuffer");
-            sg.add_field("physx_PxRaycastHit_Pod block", "block", "PxRaycastHit", sizeof(physx::PxRaycastHit), unsafe_offsetof(physx_PxRaycastBuffer_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxRaycastBuffer_Pod, hasBlock));
-            sg.add_field("physx_PxRaycastHit_Pod* touches", "touches", "*mut PxRaycastHit", sizeof(physx::PxRaycastHit*), unsafe_offsetof(physx_PxRaycastBuffer_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxRaycastBuffer_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxRaycastBuffer_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxRaycastBuffer));
-        }
-    };
-    physx_PxRaycastBuffer_Pod::dump_layout(sg);
-
-    struct physx_PxOverlapBuffer_Pod: public physx::PxOverlapBuffer {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxOverlapBuffer_Pod", "PxOverlapBuffer");
-            sg.add_field("physx_PxOverlapHit_Pod block", "block", "PxOverlapHit", sizeof(physx::PxOverlapHit), unsafe_offsetof(physx_PxOverlapBuffer_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxOverlapBuffer_Pod, hasBlock));
-            sg.add_field("physx_PxOverlapHit_Pod* touches", "touches", "*mut PxOverlapHit", sizeof(physx::PxOverlapHit*), unsafe_offsetof(physx_PxOverlapBuffer_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxOverlapBuffer_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxOverlapBuffer_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxOverlapBuffer));
-        }
-    };
-    physx_PxOverlapBuffer_Pod::dump_layout(sg);
-
-    struct physx_PxSweepBuffer_Pod: public physx::PxSweepBuffer {
-        static void dump_layout(PodStructGen& sg) {
-            sg.begin_struct("physx_PxSweepBuffer_Pod", "PxSweepBuffer");
-            sg.add_field("physx_PxSweepHit_Pod block", "block", "PxSweepHit", sizeof(physx::PxSweepHit), unsafe_offsetof(physx_PxSweepBuffer_Pod, block));
-            sg.add_field("bool hasBlock", "hasBlock", "bool", sizeof(bool), unsafe_offsetof(physx_PxSweepBuffer_Pod, hasBlock));
-            sg.add_field("physx_PxSweepHit_Pod* touches", "touches", "*mut PxSweepHit", sizeof(physx::PxSweepHit*), unsafe_offsetof(physx_PxSweepBuffer_Pod, touches));
-            sg.add_field("uint32_t maxNbTouches", "maxNbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSweepBuffer_Pod, maxNbTouches));
-            sg.add_field("uint32_t nbTouches", "nbTouches", "u32", sizeof(uint32_t), unsafe_offsetof(physx_PxSweepBuffer_Pod, nbTouches));
-            sg.end_struct(sizeof(physx::PxSweepBuffer));
-        }
-    };
-    physx_PxSweepBuffer_Pod::dump_layout(sg);
 
     struct physx_PxQueryCache_Pod: public physx::PxQueryCache {
         static void dump_layout(PodStructGen& sg) {

@@ -100,7 +100,10 @@ impl<'ast> super::AstConsumer<'ast> {
                     Item::ImplicitCastExpr { .. } => {
                         return get_value(inn, current, repr);
                     }
-                    Item::ConstantExpr { value, kind } => {
+                    Item::ConstantExpr {
+                        value: Some(value),
+                        kind,
+                    } => {
                         // There are a couple of cases where clang will emit
                         // unsigned int for some variants and int for others,
                         // so we need to just ignore changes once it's not the default

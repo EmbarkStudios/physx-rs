@@ -251,6 +251,8 @@ impl<'ast> super::AstConsumer<'ast> {
             return None;
         }
 
+        println!("Found template we care about {}", td.name);
+
         node.inner.iter().find_map(|inn| {
             if let Item::TemplateSpecializationType { template_name } = &inn.kind {
                 Some(template_name.as_str())
@@ -382,17 +384,30 @@ impl<'ast> super::AstConsumer<'ast> {
         rec: &'ast Record,
     ) -> impl Iterator<Item = anyhow::Result<(&ClassDef<'ast>, &RecBindingDef<'ast>)>> {
         rec.bases.iter().filter_map(|base| {
-            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::") else {
+            let Some(base_name) = base.kind.qual_type.strip_prefix("physx::").or_else(|| {
+                base.kind
+                    .qual_type
+                    .starts_with("Px")
+                    .then(|| base.kind.qual_type.as_str())
+            }) else {
                 log::debug!("skipping non-physx base class '{}'", base.kind.qual_type);
+                println!("skipping non-physx base class '{}'", base.kind.qual_type);
                 return None;
             };
+
+            if base_name.contains("<") {
+                // there are no template bases we need
+                // Is there a better way?
+                return None;
+            }
 
             let get = || {
                 let base_rec = self.classes.get(base_name).with_context(|| {
                     format!(
-                        "failed to find base '{}' for '{}'",
+                        "failed to find base '{}' for '{}'\nall classes: {:?}",
                         base.kind.qual_type,
                         rec.name.as_deref().unwrap(),
+                        self.classes.keys()
                     )
                 })?;
 

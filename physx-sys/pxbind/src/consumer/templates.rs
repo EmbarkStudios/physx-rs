@@ -78,7 +78,7 @@ impl<'ast> Template<'ast> {
 
 impl<'ast> AstConsumer<'ast> {
     pub(super) fn consume_template_instance(
-        &mut self,
+        &self,
         qual_type: &'ast str,
         name: Option<&'ast str>,
     ) -> anyhow::Result<Cow<'ast, str>> {

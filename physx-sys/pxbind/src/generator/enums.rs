@@ -142,9 +142,9 @@ impl<'ast> crate::consumer::FlagsBinding<'ast> {
                     writes!(w, "0x{val:08x}");
                 } else if remainder != 0 {
                     if remainder & (remainder - 1) == 0 {
-                        writes!(w, "| 1 << {}", remainder.ilog2());
+                        writes!(w, " | 1 << {}", remainder.ilog2());
                     } else {
-                        writes!(w, "| 0x{remainder:08x}");
+                        writes!(w, " | 0x{remainder:08x}");
                     }
                 }
             }

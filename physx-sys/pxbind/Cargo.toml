@@ -7,7 +7,7 @@ publish = false
 
 [dependencies]
 anyhow = "1.0"
-clang-ast = "0.1"
+clang-ast = "0.1.22"
 env_logger = "0.10"
 heck = "0.4"
 log = "0.4"

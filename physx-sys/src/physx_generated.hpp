@@ -11,8 +11,6 @@ static_assert(sizeof(physx::PxVirtualAllocator) == sizeof(physx_PxVirtualAllocat
 static_assert(sizeof(physx::PxUserAllocated) == sizeof(physx_PxUserAllocated_Pod), "POD wrapper for `physx::PxUserAllocated` has incorrect size");
 static_assert(sizeof(physx::PxTempAllocatorChunk) == sizeof(physx_PxTempAllocatorChunk_Pod), "POD wrapper for `physx::PxTempAllocatorChunk` has incorrect size");
 static_assert(sizeof(physx::PxTempAllocator) == sizeof(physx_PxTempAllocator_Pod), "POD wrapper for `physx::PxTempAllocator` has incorrect size");
-static_assert(sizeof(physx::PxBitAndByte) == sizeof(physx_PxBitAndByte_Pod), "POD wrapper for `physx::PxBitAndByte` has incorrect size");
-static_assert(sizeof(physx::PxBitMap) == sizeof(physx_PxBitMap_Pod), "POD wrapper for `physx::PxBitMap` has incorrect size");
 static_assert(sizeof(physx::PxVec3) == sizeof(physx_PxVec3_Pod), "POD wrapper for `physx::PxVec3` has incorrect size");
 static_assert(sizeof(physx::PxVec3Padded) == sizeof(physx_PxVec3Padded_Pod), "POD wrapper for `physx::PxVec3Padded` has incorrect size");
 static_assert(sizeof(physx::PxQuat) == sizeof(physx_PxQuat_Pod), "POD wrapper for `physx::PxQuat` has incorrect size");
@@ -192,12 +190,6 @@ static_assert(sizeof(physx::PxActorShape) == sizeof(physx_PxActorShape_Pod), "PO
 static_assert(sizeof(physx::PxRaycastHit) == sizeof(physx_PxRaycastHit_Pod), "POD wrapper for `physx::PxRaycastHit` has incorrect size");
 static_assert(sizeof(physx::PxOverlapHit) == sizeof(physx_PxOverlapHit_Pod), "POD wrapper for `physx::PxOverlapHit` has incorrect size");
 static_assert(sizeof(physx::PxSweepHit) == sizeof(physx_PxSweepHit_Pod), "POD wrapper for `physx::PxSweepHit` has incorrect size");
-static_assert(sizeof(physx::PxRaycastCallback) == sizeof(physx_PxRaycastCallback_Pod), "POD wrapper for `physx::PxRaycastCallback` has incorrect size");
-static_assert(sizeof(physx::PxOverlapCallback) == sizeof(physx_PxOverlapCallback_Pod), "POD wrapper for `physx::PxOverlapCallback` has incorrect size");
-static_assert(sizeof(physx::PxSweepCallback) == sizeof(physx_PxSweepCallback_Pod), "POD wrapper for `physx::PxSweepCallback` has incorrect size");
-static_assert(sizeof(physx::PxRaycastBuffer) == sizeof(physx_PxRaycastBuffer_Pod), "POD wrapper for `physx::PxRaycastBuffer` has incorrect size");
-static_assert(sizeof(physx::PxOverlapBuffer) == sizeof(physx_PxOverlapBuffer_Pod), "POD wrapper for `physx::PxOverlapBuffer` has incorrect size");
-static_assert(sizeof(physx::PxSweepBuffer) == sizeof(physx_PxSweepBuffer_Pod), "POD wrapper for `physx::PxSweepBuffer` has incorrect size");
 static_assert(sizeof(physx::PxQueryCache) == sizeof(physx_PxQueryCache_Pod), "POD wrapper for `physx::PxQueryCache` has incorrect size");
 static_assert(sizeof(physx::PxQueryFilterData) == sizeof(physx_PxQueryFilterData_Pod), "POD wrapper for `physx::PxQueryFilterData` has incorrect size");
 static_assert(sizeof(physx::PxQueryFilterCallback) == sizeof(physx_PxQueryFilterCallback_Pod), "POD wrapper for `physx::PxQueryFilterCallback` has incorrect size");
@@ -8642,9 +8634,10 @@ extern "C" {
         return return_val;
     }
 
-    uint32_t PxSimulationStatistics_getRbPairStats(physx_PxSimulationStatistics_Pod const* self__pod, int32_t pairType_pod, int32_t g0_pod, int32_t g1_pod) {
+    uint32_t PxSimulationStatistics_getRbPairStats(physx_PxSimulationStatistics_Pod const* self__pod, physx_RbPairStatsType_Pod pairType_pod, int32_t g0_pod, int32_t g1_pod) {
         physx::PxSimulationStatistics const* self_ = reinterpret_cast<physx::PxSimulationStatistics const*>(self__pod);
-        auto pairType = static_cast<physx::PxSimulationStatistics::RbPairStatsType>(pairType_pod);
+        physx::RbPairStatsType pairType;
+        memcpy(&pairType, &pairType_pod, sizeof(pairType));
         auto g0 = static_cast<physx::PxGeometryType::Enum>(g0_pod);
         auto g1 = static_cast<physx::PxGeometryType::Enum>(g1_pod);
         uint32_t return_val = self_->getRbPairStats(pairType, g0, g1);
@@ -12899,6 +12892,14 @@ extern "C" {
         physx::PxRepXInstantiationArgs& inArgs = reinterpret_cast<physx::PxRepXInstantiationArgs&>(*inArgs_pod);
         physx::PxCollection* inCollection = reinterpret_cast<physx::PxCollection*>(inCollection_pod);
         physx::PxRepXObject return_val = self_->fileToObject(inReader, inAllocator, inArgs, inCollection);
+        physx_PxRepXObject_Pod return_val_pod;
+        memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
+        return return_val_pod;
+    }
+
+    physx_PxRepXObject_Pod phys_PxCreateRepXObject(physx_PxBase_Pod const* inType_pod, uint64_t inId) {
+        physx::PxBase const* inType = reinterpret_cast<physx::PxBase const*>(inType_pod);
+        physx::PxRepXObject return_val = PxCreateRepXObject(inType, inId);
         physx_PxRepXObject_Pod return_val_pod;
         memcpy(&return_val_pod, &return_val, sizeof(return_val_pod));
         return return_val_pod;

@@ -1522,7 +1522,7 @@ bitflags::bitflags! {
         const Kill = 1 << 0;
         const Suppress = 1 << 1;
         const Callback = 1 << 2;
-        const Notify = Self::Callback.bits;
+        const Notify = Self::Callback.bits | 1 << 3;
     }
 }
 
@@ -1749,7 +1749,7 @@ bitflags::bitflags! {
     #[repr(transparent)]
     pub struct PxParticlePhaseFlags: u32 {
         const ParticlePhaseGroupMask = 0x000fffff;
-        const ParticlePhaseFlagsMask = Self::ParticlePhaseSelfCollide.bits | Self::ParticlePhaseSelfCollideFilter.bits | Self::ParticlePhaseFluid.bits;
+        const ParticlePhaseFlagsMask = Self::ParticlePhaseSelfCollide.bits | Self::ParticlePhaseSelfCollideFilter.bits | Self::ParticlePhaseFluid.bits | 0xff800000;
         const ParticlePhaseSelfCollide = 1 << 20;
         const ParticlePhaseSelfCollideFilter = 1 << 21;
         const ParticlePhaseFluid = 1 << 22;
@@ -2777,7 +2777,7 @@ bitflags::bitflags! {
         const TemporalBv = 1 << 0;
         const CachedBv = 1 << 1;
         const Obstacles = 1 << 2;
-        const All = Self::TemporalBv.bits | Self::CachedBv.bits | Self::Obstacles.bits;
+        const All = Self::TemporalBv.bits | Self::CachedBv.bits | Self::Obstacles.bits | 0xfffffff8;
     }
 }
 
@@ -14190,6 +14190,9 @@ extern "C" {
     ///
     /// The new live object.  It can be an invalid object if the instantiation cannot take place.
     pub fn PxRepXSerializer_fileToObject_mut(self_: *mut PxRepXSerializer, inReader: *mut XmlReader, inAllocator: *mut XmlMemoryAllocator, inArgs: *mut PxRepXInstantiationArgs, inCollection: *mut PxCollection) -> PxRepXObject;
+
+    /// Inline helper function to create PxRepXObject from a PxBase instance.
+    pub fn phys_PxCreateRepXObject(inType: *const PxBase, inId: u64) -> PxRepXObject;
 
     /// Connects the SDK to the PhysX Visual Debugger application.
     pub fn PxPvd_connect_mut(self_: *mut PxPvd, transport: *mut PxPvdTransport, flags: PxPvdInstrumentationFlags) -> bool;

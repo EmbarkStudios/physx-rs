@@ -100,7 +100,7 @@ pub enum Item {
         kind: Type,
     },
     ConstantExpr {
-        value: String,
+        value: Option<String>,
         #[serde(rename = "type")]
         kind: Type,
     },
@@ -111,7 +111,7 @@ pub enum Item {
     TemplateArgument {
         #[serde(rename = "type")]
         kind: Option<Type>,
-        value: Option<i32>,
+        value: Option<i64>,
     },
     RecordType {
         #[serde(rename = "type")]
@@ -319,7 +319,7 @@ impl<'ast> AstConsumer<'ast> {
                     self.consume_typedef(inn, td, root)?;
                 }
                 Item::FunctionDecl(func) => {
-                    if in_physx || (in_c && func.name.starts_with("Px")) {
+                    if in_physx || func.name.starts_with("Px") {
                         self.consume_function(inn, func, &[], in_c)?;
                     }
                 }
@@ -579,6 +579,23 @@ impl<'ast> AstConsumer<'ast> {
             return Ok(QualType::Array { element, len });
         }
 
+        let desugared_physx_kind = if let AstType::Qualified(kind) = kind {
+            kind.desugared_qual_type
+                .as_ref()
+                .and_then(|type_str| type_str.strip_prefix("physx::"))
+                .map(|_| type_str)
+        } else {
+            None
+        };
+
+        let in_physx_namespace = if let Some(type_str) = desugared_physx_kind {
+            Some(type_str)
+        } else if type_str.starts_with("Px") {
+            Some(type_str)
+        } else {
+            type_str.strip_prefix("physx::")
+        };
+
         // Check if it's an enum, we'll always know the enum by the time we hit
         // a reference to it, since physx doesn't do forward declaration of
         // enums, just old school
@@ -588,7 +605,7 @@ impl<'ast> AstConsumer<'ast> {
                 cxx_qt: type_str,
                 repr: *repr,
             })
-        } else if let Some(name) = type_str.strip_prefix("physx::") {
+        } else if let Some(name) = in_physx_namespace {
             let qt = if let Some((repr, unqualified)) = self.enum_map.get(name) {
                 QualType::Enum {
                     name: unqualified,
@@ -598,7 +615,15 @@ impl<'ast> AstConsumer<'ast> {
             } else if let Some(repr) = self.flags_map.get(name) {
                 QualType::Flags { name, repr: *repr }
             } else if let Some(qt) = self.type_defs.get(name) {
-                qt.clone()
+                println!("Resolving typedef {:?}: {:?}", name, qt);
+
+                if qt.is_template_instance() {
+                    // The few typedefs we have that resolves to template specializations
+                    // we just want to resolve to the name as we manually instance them.
+                    QualType::Record { name }
+                } else {
+                    qt.clone()
+                }
             } else {
                 QualType::Record { name }
             };
@@ -608,6 +633,8 @@ impl<'ast> AstConsumer<'ast> {
             Ok(QualType::Record { name })
         } else if let Some(name) = type_str.strip_prefix("struct ") {
             Ok(QualType::Record { name })
+        } else if self.classes.contains_key(type_str) {
+            Ok(QualType::Record { name: type_str })
         } else {
             anyhow::bail!("Unknown type '{kind:?}'");
         }
@@ -621,7 +648,7 @@ impl<'ast> AstConsumer<'ast> {
             // See PxSimpleTypes for where the physx typedefs come from
             "bool" => Builtin::Bool,
             "float" | "PxReal" | "PxF32" => Builtin::Float,
-            "double" => Builtin::Double,
+            "double" | "PxF64" => Builtin::Double,
             "int8_t" | "char" | "PxI8" => Builtin::Char,
             "uint8_t" | "unsigned char" | "PxU8" => Builtin::UChar,
             "int16_t" | "short" | "PxI16" => Builtin::Short,
@@ -629,9 +656,10 @@ impl<'ast> AstConsumer<'ast> {
             "int32_t" | "int" | "PxI32" => Builtin::Int,
             "uint32_t" | "unsigned int" | "PxU32" => Builtin::UInt,
             // Signed 64-bit integers are essentially unused in Physx
-            "int64_t" | "long" | "PxI64" => Builtin::Long,
-            "uint64_t" | "unsigned long" | "PxU64" => Builtin::ULong,
+            "int64_t" | "long" | "long long" | "PxI64" => Builtin::Long,
+            "uint64_t" | "unsigned long" | "unsigned long long" | "PxU64" => Builtin::ULong,
             "size_t" => Builtin::USize,
+            "PxVec2" => Builtin::Vec2,
             "PxVec3" => Builtin::Vec3,
             "PxVec4" => Builtin::Vec4,
             "PxMat33" => Builtin::Mat33,
@@ -719,6 +747,7 @@ pub enum Builtin {
     Mat34V,
     Mat44V,
     // Non-SIMD
+    Vec2,
     Vec3,
     Vec3p,
     Vec4,
@@ -746,6 +775,7 @@ impl Builtin {
             Self::ULong => "u64",
             Self::USize => "usize",
             Self::Vec3V => "glam::Vec3A",
+            Self::Vec2 => "PxVec2",
             Self::Vec3 => "PxVec3",
             Self::Vec3p => "PxVec3Padded",
             Self::Vec4V | Self::Vec4 => "PxVec4",
@@ -778,6 +808,7 @@ impl Builtin {
             Self::ULong => "uint64_t",
             Self::USize => "size_t",
             Self::Vec3V => "physx_Vec3V_Pod",
+            Self::Vec2 => "physx_PxVec2_Pod",
             Self::Vec3 => "physx_PxVec3_Pod",
             Self::Vec3p => "physx_Vec3p_Pod",
             Self::Vec4V => "physx_Vec4V_Pod",
@@ -812,6 +843,7 @@ impl Builtin {
             Self::Long => "int64_t",
             Self::ULong => "uint64_t",
             Self::USize => "size_t",
+            Self::Vec2 => "physx::PxVec2",
             Self::Vec3V => "physx::PxVec3V",
             Self::Vec3 => "physx::PxVec3",
             Self::Vec3p => "physx::PxVec3p",
@@ -1021,6 +1053,22 @@ impl<'ast> QualType<'ast> {
             | QualType::Flags { .. }
             | QualType::Record { .. }
             | QualType::Reference { .. }
+            | QualType::TemplateTypedef { .. } => true,
+        }
+    }
+
+    #[inline]
+    pub fn is_template_instance(&self) -> bool {
+        match self {
+            QualType::Pointer { pointee, .. } => pointee.is_template_instance(),
+            QualType::Builtin(bi) => false,
+            QualType::FunctionPointer => false,
+            QualType::Array { element, .. } => element.is_template_instance(),
+            QualType::Enum { .. }
+            | QualType::Flags { .. }            
+            => false,
+            | QualType::Reference { pointee, .. } => pointee.is_template_instance(),
+            QualType::Record { name } =>  name.contains("<"),
             | QualType::TemplateTypedef { .. } => true,
         }
     }

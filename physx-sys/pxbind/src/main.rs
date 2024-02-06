@@ -10,6 +10,10 @@ fn main() -> anyhow::Result<()> {
     } else {
         // This is the root API include that includes all the other public APIs
         let api_h = format!("{}/PxPhysicsAPI.h", pxbind::get_include_dir()?);
+
+        let raw = pxbind::get_ast(api_h.clone())?;
+        std::fs::write("ast-dump.json", raw).context("failed to write ast-dump.json")?;
+
         let (root, raw) = pxbind::get_parsed_ast(api_h)?;
 
         std::fs::write("ast-dump.json", raw).context("failed to write ast-dump.json")?;
