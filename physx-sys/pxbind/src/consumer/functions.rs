@@ -15,6 +15,7 @@ pub struct Function {
 pub struct Param<'ast> {
     pub name: Cow<'ast, str>,
     pub kind: QualType<'ast>,
+    pub default_value: Option<String>,
 }
 
 impl<'ast> Param<'ast> {
@@ -27,6 +28,7 @@ impl<'ast> Param<'ast> {
                 is_pointee_const: is_const,
                 pointee: Box::new(rec_type),
             },
+            default_value: None,
         }
     }
 }
@@ -181,12 +183,34 @@ impl<'ast> super::AstConsumer<'ast> {
         template_types: &[(&str, &TemplateArg<'ast>)],
         func: &mut FuncBinding<'ast>,
     ) -> anyhow::Result<()> {
-        for (i, param) in node
+        for (i, (param, default_value)) in node
             .inner
             .iter()
             .filter_map(|inn| {
                 if let Item::ParmVarDecl(param) = &inn.kind {
-                    Some(param)
+                    if inn.inner.len() > 0 {
+                        let default_value: Option<String> = match &inn.inner[0].kind {
+                            Item::IntegerLiteral { value, kind: _ } => Some(value.to_owned()),
+                            Item::FloatingLiteral { value, kind: _ } => {
+                                // Clang ast-dump float formatting is not human-friendly
+                                // i.e. "1.01" formats as "1.00999999"
+                                // rust format! fixes this
+                                value.parse::<f32>().ok().map(|value| format!("{value}"))
+                            }
+                            Item::StringLiteral { value, kind: _ } => Some(value.to_owned()),
+                            Item::UserDefinedLiteral { value, kind: _ } => Some(value.to_owned()),
+                            Item::CXXBoolLiteralExpr { value, kind: _ } => Some(if *value {
+                                "true".to_owned()
+                            } else {
+                                "false".to_owned()
+                            }),
+                            _ => None,
+                        };
+
+                        Some((param, default_value))
+                    } else {
+                        Some((param, None))
+                    }
                 } else {
                     None
                 }
@@ -206,7 +230,11 @@ impl<'ast> super::AstConsumer<'ast> {
                     )
                 })?;
 
-            func.params.push(Param { name: pname, kind });
+            func.params.push(Param {
+                name: pname,
+                kind,
+                default_value: default_value,
+            });
         }
 
         Ok(())

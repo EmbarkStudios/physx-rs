@@ -110,7 +110,9 @@ impl<'ast> super::AstConsumer<'ast> {
                             }
                         }
 
-                        return value.parse().context("failed to parse enum constant");
+                        if let Some(v) = value {
+                            return v.parse().context("failed to parse enum constant");
+                        }
                     }
                     _ => continue,
                 }
