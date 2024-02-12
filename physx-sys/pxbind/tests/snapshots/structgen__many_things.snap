@@ -477,7 +477,7 @@ int main() {
     struct physx_PxShape_Pod: public physx::PxShape {
         static void dump_layout(PodStructGen& sg) {
             sg.begin_struct("physx_PxShape_Pod", "PxShape");
-            sg.add_field("void* userData", "userData", "*mut std::ffi::c_void", sizeof(void*), unsafe_offsetof(physx_PxShape_Pod, userData));
+            sg.add_field("void* userData", "userData", "UserData", sizeof(void*), unsafe_offsetof(physx_PxShape_Pod, userData));
             sg.end_struct(sizeof(physx::PxShape));
         }
     };

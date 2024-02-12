@@ -713,9 +713,17 @@ impl<'ast> super::AstConsumer<'ast> {
                             continue;
                         }
 
-                        let kind = self
-                            .parse_type(kind, template_types)
-                            .with_context(|| format!("failed to parse type for {rname}::{name}"))?;
+                        let kind = if name == "userData" || name == "mUserData" {
+                            if kind.qual_type.contains("const") {
+                                QualType::Builtin(Builtin::ConstUserData)
+                            } else {
+                                QualType::Builtin(Builtin::UserData)
+                            }
+                        } else {
+                            self.parse_type(kind, template_types).with_context(|| {
+                                format!("failed to parse type for {rname}::{name}")
+                            })?
+                        };
 
                         // if matches!(&kind, QualType::FunctionPointer) {
                         //     continue;

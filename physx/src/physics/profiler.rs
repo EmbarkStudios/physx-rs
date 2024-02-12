@@ -1,4 +1,4 @@
-use physx_sys::{create_profiler_callback, PxProfilerCallback};
+use physx_sys::{create_profiler_callback, ConstUserData, PxProfilerCallback, UserData};
 use std::ffi::c_void;
 
 /// A trait for creating profiler callbacks for PhysX.
@@ -13,7 +13,7 @@ pub unsafe trait ProfilerCallback: Sized {
         name: *const i8,
         detached: bool,
         context_id: u64,
-        user_data: *const c_void,
+        user_data: ConstUserData,
     ) -> *mut c_void;
 
     /// # Safety
@@ -25,7 +25,7 @@ pub unsafe trait ProfilerCallback: Sized {
         name: *const i8,
         detached: bool,
         context_id: u64,
-        user_data: *const c_void,
+        user_data: ConstUserData,
     );
 
     /// # Safety
@@ -36,7 +36,7 @@ pub unsafe trait ProfilerCallback: Sized {
             create_profiler_callback(
                 Self::zone_start,
                 Self::zone_end,
-                Box::into_raw(Box::new(self)) as *mut c_void,
+                UserData::new_on_heap(self),
             )
         }
     }

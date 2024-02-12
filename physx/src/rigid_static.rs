@@ -2,7 +2,7 @@
 // Copyright © 2019, Embark Studios, all rights reserved.
 // Created: 15 April 2019
 
-use std::{marker::PhantomData, ptr::drop_in_place};
+use std::marker::PhantomData;
 
 use crate::{
     geometry::PxGeometry,
@@ -11,9 +11,10 @@ use crate::{
     physics::Physics,
     rigid_actor::RigidActor,
     shape::Shape,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
+use physx_sys::UserData;
 #[rustfmt::skip]
 use physx_sys::{
     phys_PxCreateStatic,
@@ -29,14 +30,14 @@ pub struct PxRigidStatic<S, Geom: Shape> {
     phantom_user_data: PhantomData<(S, Geom)>,
 }
 
-unsafe impl<U, Geom: Shape> UserData for PxRigidStatic<U, Geom> {
+impl<U, Geom: Shape> HasUserData for PxRigidStatic<U, Geom> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -44,7 +45,7 @@ unsafe impl<U, Geom: Shape> UserData for PxRigidStatic<U, Geom> {
 impl<S, Geom: Shape> Drop for PxRigidStatic<S, Geom> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             PxRigidActor_release_mut(self.as_mut_ptr())
         }
     }
@@ -72,7 +73,7 @@ impl<S, Geom: Shape> RigidActor for PxRigidStatic<S, Geom> {
 
 impl<S, Geom: Shape> RigidStatic for PxRigidStatic<S, Geom> {}
 
-pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
+pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + HasUserData {
     /// Create a new RigidStatic.
     fn new(
         physics: &mut impl Physics,
@@ -114,13 +115,13 @@ pub trait RigidStatic: Class<physx_sys::PxRigidStatic> + RigidActor + UserData {
     /// Get the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get the user data.
     fn get_user_data_mut(&mut self) -> &mut Self::UserData {
         // Safety: all construction goes through from_raw, which calls init_user_data
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Get the name of the real type referenced by this pointer, or None if the returned string is not valid

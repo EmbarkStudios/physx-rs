@@ -4,11 +4,12 @@ use crate::{
     material::Material,
     math::{PxExtendedVec3, PxVec3},
     owner::Owner,
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
 };
 
-use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::drop_in_place};
+use std::marker::PhantomData;
 
+use physx_sys::UserData;
 use thiserror::Error;
 
 #[rustfmt::skip]
@@ -45,41 +46,49 @@ pub trait Controller: Class<PxController> + Sized {
     type UserData;
     type Descriptor: Class<physx_sys::PxControllerDesc>;
 
-    /// Retrieve the user data from the controller.
-    // Due to the size trick employed and the API decision to expose this userData via method calls,
-    // get_user_data_mut will not work for small sizes of U, since getUserData returns a copy of the field,
-    // rather than being able to write a method that returns a pointer to the field or the field itself.
-    fn get_user_data(&self) -> &Self::UserData {
-        unsafe {
-            if size_of::<Self::UserData>() > size_of::<*mut c_void>() {
-                // Cast *mut c_void to appropriate type and reborrow
-                &*(PxController_getUserData(self.as_ptr()) as *const Self::UserData)
-            } else {
-                // DATA_SIZE < VOID_SIZE
-                // The data is packed into the "*mut c_void"
-                &*(&PxController_getUserData(self.as_ptr()) as *const *mut c_void
-                    as *const Self::UserData)
-            }
-        }
+    /// Sets the controller's user data.
+    fn set_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
+        let user_data = UserData::new_on_heap(user_data);
+        // SAFETY: self is not null and is Class<PxController> user_data is valid
+        unsafe { PxController_setUserData_mut(self.as_mut_ptr(), user_data) }
+        self
     }
 
-    /// Sets the controllers user data.  If U is larger than a *mut _, it is heap allocated in a box.
-    /// Otherwise, it is packed directly into the *mut c_void userData field.
-    fn set_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
-        unsafe {
-            let user_data: *mut c_void = if size_of::<Self::UserData>() > size_of::<*mut c_void>() {
-                // Allocate on heap since it is too large to pack into *mut c_void field
-                let user_data = Box::new(user_data);
-                // Cast to *mut c_void
-                Box::into_raw(user_data) as *mut c_void
-            } else {
-                // DATA_SIZE < VOID_SIZE
-                // The data is small enough to be packed directly into the "*mut c_void"
-                *(&user_data as *const Self::UserData as *const *mut c_void)
-            };
-            PxController_setUserData_mut(self.as_mut_ptr(), user_data);
+    /// Retrieve the user data from the controller. Must have been already created with
+    /// `set_user_data` or in the `Desc` this came from or will return `None`
+    fn get_user_data(&self) -> Option<&Self::UserData> {
+        // SAFETY: self is a valid reference and is Class<PxController>
+        let user_data = unsafe { PxController_getUserData(self.as_ptr()) };
+        // SAFETY: we only ever init the user data as a pointer, so if it's nonnull we know we have
+        // valid data, and it will live on the heap at least as long as we have a borrow of self
+        // since it only will go out of scope by being able to have a mut ref to self
+        unsafe { user_data.as_ptr::<Self::UserData>().as_ref() }
+    }
+
+    /// Retrieve a mutable reference to the user data from the controller. Must have been already
+    /// created with `set_user_data` or in the `Desc` this came from or will return `None`.
+    fn get_user_data_mut(&mut self) -> Option<&mut Self::UserData> {
+        // SAFETY: self is a valid reference and is Class<PxController>
+        let mut user_data = unsafe { PxController_getUserData(self.as_ptr()) };
+        // SAFETY: we only ever init the user data as a pointer, so if it's nonnull we know we have
+        // valid data, and it will live on the heap at least as long as we have a borrow of self
+        // since it only will go out of scope by being able to have a mut ref to self
+        unsafe { user_data.as_mut_ptr::<Self::UserData>().as_mut() }
+    }
+
+    /// If it exists, drop and dealloc associated user data.
+    fn drop_and_dealloc_user_data(&mut self) {
+        // SAFETY: self is a valid reference and is Class<PxController>
+        let mut user_data = unsafe { PxController_getUserData(self.as_ptr()) };
+        // SAFETY: we only initialize user_data as a pointer ever
+        let is_null = unsafe { user_data.is_null() };
+        if !is_null {
+            // SAFETY: if the user_data is not null, we must have allocated it as on the heap
+            // and it may be drop and dealloced
+            unsafe {
+                user_data.heap_drop_and_dealloc::<Self::UserData>();
+            }
         }
-        self
     }
 
     /// Set the position of teh controller
@@ -118,13 +127,7 @@ where
 impl<U> Drop for PxCapsuleController<U> {
     fn drop(&mut self) {
         unsafe {
-            if size_of::<U>() > size_of::<*mut c_void>() {
-                drop_in_place(PxController_getUserData(self.as_ptr()) as *mut U);
-            } else {
-                drop_in_place(
-                    (&mut PxController_getUserData(self.as_ptr())) as *mut *mut c_void as *mut U,
-                );
-            };
+            self.drop_and_dealloc_user_data();
             PxController_release_mut(self.as_mut_ptr())
         }
     }
@@ -233,22 +236,48 @@ impl<U> PxCapsuleControllerDesc<U> {
     }
 }
 
-unsafe impl<U> UserData for PxCapsuleControllerDesc<U> {
+// override default behavior because we need the `userData` that gets passed along to the
+// `Controller` this creates to be on the heap, which expects it to be so (see implementation
+// of `Controller` trait)
+impl<U> HasUserData for PxCapsuleControllerDesc<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut c_void {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
+    }
+
+    fn init_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
+        self.user_data_ptr_mut()
+            .initialize_on_heap::<Self::UserData>(user_data);
+        self
+    }
+
+    unsafe fn drop_and_dealloc_user_data(&mut self) {
+        // SAFETY: same as function-level safety
+        unsafe {
+            self.user_data_ptr_mut()
+                .heap_drop_and_dealloc::<Self::UserData>()
+        }
+    }
+
+    unsafe fn get_user_data(&self) -> &Self::UserData {
+        unsafe { self.user_data_ptr().heap_data_ref::<Self::UserData>() }
+    }
+
+    unsafe fn get_user_data_mut(&mut self) -> &mut Self::UserData {
+        unsafe { self.user_data_ptr_mut().heap_data_mut::<Self::UserData>() }
     }
 }
 
 impl<U> Drop for PxCapsuleControllerDesc<U> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(UserData::get_user_data_mut(self) as *mut _);
+            // SAFETY: we always initialize this in the only public constructors
+            self.drop_and_dealloc_user_data();
             PxCapsuleControllerDesc_delete(self.as_mut_ptr());
         }
     }
@@ -276,13 +305,7 @@ where
 impl<U> Drop for PxBoxController<U> {
     fn drop(&mut self) {
         unsafe {
-            if size_of::<U>() > size_of::<*mut c_void>() {
-                drop_in_place(PxController_getUserData(self.as_ptr()) as *mut U);
-            } else {
-                drop_in_place(
-                    (&mut PxController_getUserData(self.as_ptr())) as *mut *mut c_void as *mut U,
-                );
-            };
+            self.drop_and_dealloc_user_data();
             PxController_release_mut(self.as_mut_ptr())
         }
     }
@@ -393,22 +416,48 @@ impl<U> PxBoxControllerDesc<U> {
     }
 }
 
-unsafe impl<U> UserData for PxBoxControllerDesc<U> {
+// override default behavior because we need the `userData` that gets passed along to the
+// `Controller` this creates to be on the heap, which expects it to be so (see implementation
+// of `Controller` trait)
+impl<U> HasUserData for PxBoxControllerDesc<U> {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut c_void {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
+    }
+
+    fn init_user_data(&mut self, user_data: Self::UserData) -> &mut Self {
+        self.user_data_ptr_mut()
+            .initialize_on_heap::<Self::UserData>(user_data);
+        self
+    }
+
+    unsafe fn drop_and_dealloc_user_data(&mut self) {
+        // SAFETY: same as function-level safety
+        unsafe {
+            self.user_data_ptr_mut()
+                .heap_drop_and_dealloc::<Self::UserData>()
+        }
+    }
+
+    unsafe fn get_user_data(&self) -> &Self::UserData {
+        unsafe { self.user_data_ptr().heap_data_ref::<Self::UserData>() }
+    }
+
+    unsafe fn get_user_data_mut(&mut self) -> &mut Self::UserData {
+        unsafe { self.user_data_ptr_mut().heap_data_mut::<Self::UserData>() }
     }
 }
 
 impl<U> Drop for PxBoxControllerDesc<U> {
     fn drop(&mut self) {
         unsafe {
-            drop_in_place(UserData::get_user_data_mut(self) as *mut _);
+            // SAFETY: we always initialize this in the only public constructors
+            self.drop_and_dealloc_user_data();
             PxBoxControllerDesc_delete(self.as_mut_ptr())
         }
     }

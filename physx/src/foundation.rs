@@ -6,6 +6,7 @@
 
 use crate::{owner::Owner, traits::Class};
 
+use physx_sys::{ConstUserData, UserData};
 #[rustfmt::skip]
 use physx_sys::{
     create_alloc_callback,
@@ -152,10 +153,21 @@ pub trait Foundation: Class<physx_sys::PxFoundation> + Sized {
 
     /// Get the allocator callback.
     fn get_allocator_callback(&mut self) -> Option<&mut Self::Allocator> {
-        unsafe {
-            (get_alloc_callback_user_data(PxFoundation_getAllocatorCallback_mut(self.as_mut_ptr()))
-                as *mut Self::Allocator)
-                .as_mut()
+        let px_allocatorcallback =
+            unsafe { PxFoundation_getAllocatorCallback_mut(self.as_mut_ptr()) };
+        if px_allocatorcallback.is_null() {
+            None
+        } else {
+            // SAFETY: we know px_allocatorcallback is not null, and the only way for that to happen when using
+            // the safe wrapper is if we initialized it properly
+            let mut userdata = unsafe { get_alloc_callback_user_data(px_allocatorcallback) };
+            // SAFETY: if we got a non-null allocatorcallback object back, then we must also have a non-null pointer
+            // to a `Self::Allocator` in the userdata because we initialize it ourselves in the implementation of `AllocatorCallback`,
+            // which `Self::Allocator` implements and uses to initialize itself.
+            //
+            // we assert the lifetime of `allocator_mut` to be at least as long as the borrow of `self`, which is true since it's on the heap
+            // and we don't clean it up
+            Some(unsafe { &mut *userdata.as_mut_ptr::<Self::Allocator>() })
         }
     }
 
@@ -199,8 +211,17 @@ impl ScratchBuffer {
 ///
 /// Reporting the name, file and line is not enabled by default.
 /// Use [`Foundation::set_report_allocation_names`] to toggle this on or off.
+///
+/// When you use `AllocatorCallback::into_px(self)`, the `self` you pass in will be
+/// placed on the heap and a pointer to it will be passed into the `user_data` in the
+/// `allocate` and `deallocate` functions. Keep in mind the threading context you're using and
+/// ensure that the type you're implementing this on is sufficiently thread-safe for the kinds
+/// of access you are doing.
 #[allow(clippy::missing_safety_doc)]
 pub unsafe trait AllocatorCallback: Sized {
+    /// `user_data` will be a forced-heap-pointer to a `Self`. So you can access the `self` that
+    /// `into_px` was called on by calling `user_data.heap_data_ref::<Self>()`.
+    ///
     /// # Safety
     ///
     /// Allocations must be aligned 16. This should not panic, since it is
@@ -210,13 +231,16 @@ pub unsafe trait AllocatorCallback: Sized {
         name: *const c_void,
         file: *const c_void,
         line: u32,
-        user_data: *const c_void,
+        user_data: ConstUserData,
     ) -> *mut c_void;
 
+    /// `user_data` will be a forced-heap-pointer to a `Self`. So you can access the `self` that
+    /// `into_px` was called on by calling `user_data.heap_data_ref::<Self>()`.
+    ///
     /// # Safety
     ///
     /// Must not panic.
-    unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void);
+    unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: ConstUserData);
 
     /// # Safety
     ///
@@ -226,7 +250,7 @@ pub unsafe trait AllocatorCallback: Sized {
             create_alloc_callback(
                 Self::allocate,
                 Self::deallocate,
-                Box::into_raw(Box::new(self)) as *mut c_void,
+                UserData::new_on_heap(self),
             )
         }
     }
@@ -241,7 +265,7 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
         _name: *const c_void,
         _file: *const c_void,
         _line: u32,
-        _user_data: *const c_void,
+        _user_data: ConstUserData,
     ) -> *mut c_void {
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
@@ -252,7 +276,7 @@ unsafe impl AllocatorCallback for GlobalAllocCallback {
         }
     }
 
-    unsafe extern "C" fn deallocate(ptr: *const c_void, _user_data: *const c_void) {
+    unsafe extern "C" fn deallocate(ptr: *const c_void, _user_data: ConstUserData) {
         let ptr = (ptr as usize - 16) as *mut u64;
         unsafe {
             let size = *ptr;
@@ -285,12 +309,12 @@ unsafe impl AllocatorCallback for TrackingAllocator {
         _name: *const c_void,
         _file: *const c_void,
         _line: u32,
-        user_data: *const c_void,
+        user_data: ConstUserData,
     ) -> *mut c_void {
-        let user_data = unsafe { &*(user_data as *const Self) };
         let alloc_size = size as usize + 16;
         let layout = std::alloc::Layout::from_size_align(alloc_size, 16).unwrap();
-        user_data.allocated.fetch_add(layout.size(), SeqCst);
+        let this = unsafe { user_data.heap_data_ref::<Self>() };
+        this.allocated.fetch_add(layout.size(), SeqCst);
         unsafe {
             let allocation = alloc(layout) as *mut u64;
             *allocation = alloc_size as u64;
@@ -298,12 +322,12 @@ unsafe impl AllocatorCallback for TrackingAllocator {
         }
     }
 
-    unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: *const c_void) {
-        let user_data = unsafe { &*(user_data as *const Self) };
+    unsafe extern "C" fn deallocate(ptr: *const c_void, user_data: ConstUserData) {
         let ptr = (ptr as usize - 16) as *mut u64;
         let size = unsafe { *ptr };
         let layout = Layout::from_size_align(size as usize, 16).unwrap();
-        user_data.deallocated.fetch_add(layout.size(), SeqCst);
+        let this = unsafe { user_data.heap_data_ref::<Self>() };
+        this.deallocated.fetch_add(layout.size(), SeqCst);
         unsafe { dealloc(ptr as *mut u8, layout) }
     }
 }
@@ -321,12 +345,12 @@ unsafe impl AllocatorCallback for DefaultAllocator {
         _name: *const c_void,
         _file: *const c_void,
         _line: u32,
-        _user_data: *const c_void,
+        _user_data: ConstUserData,
     ) -> *mut c_void {
         unreachable!()
     }
 
-    unsafe extern "C" fn deallocate(_ptr: *const c_void, _user_data: *const c_void) {
+    unsafe extern "C" fn deallocate(_ptr: *const c_void, _user_data: ConstUserData) {
         unreachable!()
     }
 }

@@ -9099,7 +9099,7 @@ extern "C" {
     /// be referenced by other objects or the simulation might still be running and accessing the object state. In such cases the destructor will be called
     /// as soon as it is safe to do so. After the destruction of the object and its memory, an eMEMORY_RELEASE event will get fired. In this case it is not
     /// allowed to dereference the object pointer in the callback.
-    pub fn PxDeletionListener_onRelease_mut(self_: *mut PxDeletionListener, observed: *const PxBase, userData: *mut std::ffi::c_void, deletionEvent: PxDeletionEventFlag);
+    pub fn PxDeletionListener_onRelease_mut(self_: *mut PxDeletionListener, observed: *const PxBase, userData: UserData, deletionEvent: PxDeletionEventFlag);
 
     pub fn PxBaseMaterial_isKindOf(self_: *const PxBaseMaterial, name: *const std::ffi::c_char) -> bool;
 
@@ -11818,10 +11818,10 @@ extern "C" {
     /// Returns the user data associated with this controller.
     ///
     /// The user pointer associated with the controller.
-    pub fn PxController_getUserData(self_: *const PxController) -> *mut std::ffi::c_void;
+    pub fn PxController_getUserData(self_: *const PxController) -> UserData;
 
     /// Sets the user data associated with this controller.
-    pub fn PxController_setUserData_mut(self_: *mut PxController, userData: *mut std::ffi::c_void);
+    pub fn PxController_setUserData_mut(self_: *mut PxController, userData: UserData);
 
     /// Returns information about the controller's internal state.
     pub fn PxController_getState(self_: *const PxController, state: *mut PxControllerState);

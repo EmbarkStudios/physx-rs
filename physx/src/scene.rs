@@ -23,7 +23,7 @@ use crate::{
         AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
         TriggerCallback, WakeSleepCallback,
     },
-    traits::{Class, UserData},
+    traits::{Class, HasUserData},
     visual_debugger::PvdSceneClient,
 };
 
@@ -32,6 +32,7 @@ use std::{
     ptr::{drop_in_place, null, null_mut},
 };
 
+use physx_sys::UserData;
 // A glob import is super tempting, but the wrappers shadow the names of the physx_sys types,
 // so those types cannot be in scope.  Plus, it easier to see what's been implemented.
 #[rustfmt::skip]
@@ -160,7 +161,7 @@ where
     phantom_user_data: PhantomData<(U, L, S, D, C, OC, OT, OCB, OWS, OA)>,
 }
 
-unsafe impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> UserData
+impl<U, L, S, D, C, OC, OT, OCB, OWS, OA> HasUserData
     for PxScene<U, L, S, D, C, OC, OT, OCB, OWS, OA>
 where
     L: ArticulationLink,
@@ -175,11 +176,11 @@ where
 {
     type UserData = U;
 
-    fn user_data_ptr(&self) -> &*mut std::ffi::c_void {
+    fn user_data_ptr(&self) -> &UserData {
         &self.obj.userData
     }
 
-    fn user_data_ptr_mut(&mut self) -> &mut *mut std::ffi::c_void {
+    fn user_data_ptr_mut(&mut self) -> &mut UserData {
         &mut self.obj.userData
     }
 }
@@ -214,7 +215,7 @@ where
                     |_| (), // ArticulationLinks are dropped when the articulation they are in is dropped
                 )
             }
-            drop_in_place(self.get_user_data_mut() as *mut _);
+            self.drop_and_dealloc_user_data();
             drop_in_place(PxScene_getSimulationEventCallback(self.as_ptr())
                 as *mut PxSimulationEventCallback<L, S, D, OC, OT, OCB, OWS, OA>);
             PxScene_release_mut(self.as_mut_ptr());
@@ -295,7 +296,7 @@ where
     type Aggregate = PxAggregate<L, S, D, C>;
 }
 
-pub trait Scene: Class<physx_sys::PxScene> + UserData {
+pub trait Scene: Class<physx_sys::PxScene> + HasUserData {
     type ArticulationLink: ArticulationLink;
     type RigidStatic: RigidStatic;
     type RigidDynamic: RigidDynamic;
@@ -315,13 +316,13 @@ pub trait Scene: Class<physx_sys::PxScene> + UserData {
     /// Get the user data.
     fn get_user_data(&self) -> &Self::UserData {
         // Safety: Scenes are constructed from SceneDescriptor which sets up user data appropriately
-        unsafe { UserData::get_user_data(self) }
+        unsafe { HasUserData::get_user_data(self) }
     }
 
     /// Get the user data.
     fn get_user_data_mut(&mut self) -> *mut Self::UserData {
         // Safety: Scenes are constructed from SceneDescriptor which sets up user data appropriately
-        unsafe { UserData::get_user_data_mut(self) }
+        unsafe { HasUserData::get_user_data_mut(self) }
     }
 
     /// Get the visual debugger client

@@ -19,12 +19,13 @@ use crate::{
         AdvanceCallback, CollisionCallback, ConstraintBreakCallback, PxSimulationEventCallback,
         TriggerCallback, WakeSleepCallback,
     },
-    traits::UserData,
+    traits::HasUserData,
 };
 
 pub use physx_sys::PxSceneFlags as SceneFlags;
+use physx_sys::UserData;
 
-use std::{ffi::c_void, marker::PhantomData, mem::size_of, ptr::null_mut};
+use std::{marker::PhantomData, ptr::null_mut};
 
 pub trait Descriptor<P> {
     type Target;
@@ -182,13 +183,7 @@ impl<
                 frictionOffsetThreshold: self.friction_offset_threshold,
                 ccdMaxSeparation: self.ccd_max_separation,
                 flags: self.flags,
-                userData: if size_of::<U>() > size_of::<*mut c_void>() {
-                    // Too big to pack into a *mut c_void, kick it to the heap.
-                    Box::into_raw(Box::new(self.user_data)) as *mut c_void
-                } else {
-                    // DATA_SIZE <= VOID_SIZE
-                    *(&self.user_data as *const U as *const *mut c_void)
-                },
+                userData: UserData::new_maybe_packed(self.user_data),
                 solverBatchSize: self.solver_batch_size,
                 solverArticulationBatchSize: self.solver_articulation_batch_size,
                 maxBiasCoefficient: self.max_bias_coefficient,
@@ -283,7 +278,7 @@ pub struct MaterialDescriptor<U> {
 }
 
 impl<P: Physics> Descriptor<P>
-    for MaterialDescriptor<<<<P as Physics>::Shape as Shape>::Material as UserData>::UserData>
+    for MaterialDescriptor<<<<P as Physics>::Shape as Shape>::Material as HasUserData>::UserData>
 {
     type Target = Option<Owner<<<P as Physics>::Shape as Shape>::Material>>;
     fn create(self, physics: &mut P) -> Self::Target {
@@ -305,7 +300,7 @@ pub struct ShapeDescriptor<'a, U, G: Geometry, M: Material> {
 }
 
 impl<P: Physics, G: Geometry> Descriptor<P>
-    for ShapeDescriptor<'_, <P::Shape as UserData>::UserData, G, <P::Shape as Shape>::Material>
+    for ShapeDescriptor<'_, <P::Shape as HasUserData>::UserData, G, <P::Shape as Shape>::Material>
 {
     type Target = Option<Owner<P::Shape>>;
 

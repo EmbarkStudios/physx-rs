@@ -1,4 +1,5 @@
 use physx::{physics::ProfilerCallback, prelude::*};
+use physx_sys::ConstUserData;
 use std::ffi::CStr;
 
 type PxMaterial = physx::material::PxMaterial<()>;
@@ -72,9 +73,9 @@ unsafe impl ProfilerCallback for PrintProfilerCallback {
         _name: *const i8,
         _detached: bool,
         _context_id: u64,
-        user_data: *const std::ffi::c_void,
+        user_data: ConstUserData,
     ) -> *mut std::ffi::c_void {
-        let this = &*user_data.cast::<Self>();
+        let this = user_data.heap_data_ref::<Self>();
         let start = this.start.elapsed().as_micros() as u64;
 
         start as *mut std::ffi::c_void
@@ -85,10 +86,10 @@ unsafe impl ProfilerCallback for PrintProfilerCallback {
         name: *const i8,
         _detached: bool,
         _context_id: u64,
-        user_data: *const std::ffi::c_void,
+        user_data: ConstUserData,
     ) {
         let name: &'static str = std::mem::transmute(CStr::from_ptr(name).to_str().unwrap());
-        let this = &*user_data.cast::<Self>();
+        let this = user_data.heap_data_ref::<Self>();
         let end = this.start.elapsed().as_micros() as u64;
 
         let start = context as u64;

@@ -30,7 +30,7 @@ use crate::{
     scene::PxScene,
     shape::{Shape, ShapeFlags},
     simulation_event_callback::*,
-    traits::{Class, Descriptor, SceneDescriptor, UserData},
+    traits::{Class, Descriptor, HasUserData, SceneDescriptor},
     triangle_mesh::TriangleMesh,
     visual_debugger::VisualDebugger,
 };
@@ -394,7 +394,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         static_friction: f32,
         dynamic_friction: f32,
         restitution: f32,
-        user_data: <<Self::Shape as Shape>::Material as UserData>::UserData,
+        user_data: <<Self::Shape as Shape>::Material as HasUserData>::UserData,
     ) -> Option<Owner<<Self::Shape as Shape>::Material>> {
         unsafe {
             Material::from_raw(
@@ -460,7 +460,7 @@ pub trait Physics: Class<physx_sys::PxPhysics> + Sized {
         materials: &mut [&mut <Self::Shape as Shape>::Material],
         is_exclusive: bool,
         shape_flags: ShapeFlags,
-        user_data: <Self::Shape as UserData>::UserData,
+        user_data: <Self::Shape as HasUserData>::UserData,
     ) -> Option<Owner<Self::Shape>> {
         unsafe {
             Shape::from_raw(

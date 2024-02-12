@@ -726,6 +726,11 @@ pub enum Builtin {
     Mat33,
     Mat34,
     Mat44,
+    // on the C++ side, `void*`, but we want to be able to pack arbitrary data into the space
+    // available so we treat it as a separate type so we can do that properly in the Rust side
+    UserData,
+    // same as above but `const void*
+    ConstUserData,
 }
 
 impl Builtin {
@@ -758,6 +763,8 @@ impl Builtin {
             Self::Mat34V => "glam::Affine3A",
             Self::Mat34 => "Affine",
             Self::Mat44V | Self::Mat44 => "PxMat44",
+            Self::UserData => "UserData",
+            Self::ConstUserData => "ConstUserData",
         }
     }
 
@@ -793,6 +800,8 @@ impl Builtin {
             Self::Mat34 => "physx_Mat34_Pod",
             Self::Mat44V => "physx_Mat44V_Pod",
             Self::Mat44 => "physx_PxMat44_Pod",
+            Self::UserData => "void*",
+            Self::ConstUserData => "void const*",
         }
     }
 
@@ -828,6 +837,8 @@ impl Builtin {
             Self::Mat34 => "physx::PxMat34",
             Self::Mat44V => "physx::PxMat44V",
             Self::Mat44 => "physx::PxMat44",
+            Self::UserData => "void*",
+            Self::ConstUserData => "void const*",
         }
     }
 
@@ -847,6 +858,8 @@ impl Builtin {
                 | Self::UInt
                 | Self::Long
                 | Self::ULong
+                | Self::UserData
+                | Self::ConstUserData
         )
     }
 }
