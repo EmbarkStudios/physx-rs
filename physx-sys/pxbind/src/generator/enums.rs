@@ -110,17 +110,24 @@ impl<'ast> crate::consumer::FlagsBinding<'ast> {
                 writes!(w, "1 << {}", val.ilog2());
             } else {
                 let mut is_combo = false;
-                // If we're not a power of 2, we're a combination of flags,
+
+                // If we're not a power of 2, we're a combination of flags (or constants),
                 // find which ones and emit them in a friendly way
-                for (i, which) in enum_binding
+
+                // We keep track of what remaining flag(s) we have to mask into the bitmask
+                // by removing the bits that have been found as named flags.
+                let mut remainder = val;
+
+                for (i, (which, bit)) in enum_binding
                     .variants
                     .iter()
                     .filter_map(|var| {
                         let prev = var.value as u64;
-                        (prev & (prev - 1) == 0 && (prev & val) != 0).then_some(var.name)
+                        (prev & (prev - 1) == 0 && (prev & val) != 0).then_some((var.name, prev))
                     })
                     .enumerate()
                 {
+                    remainder &= !bit;
                     is_combo = true;
                     if i > 0 {
                         writes!(w, " | ");
@@ -133,6 +140,12 @@ impl<'ast> crate::consumer::FlagsBinding<'ast> {
                 // emit the raw value
                 if !is_combo {
                     writes!(w, "0x{val:08x}");
+                } else if remainder != 0 {
+                    if remainder & (remainder - 1) == 0 {
+                        writes!(w, "| 1 << {}", remainder.ilog2());
+                    } else {
+                        writes!(w, "| 0x{remainder:08x}");
+                    }
                 }
             }
 
