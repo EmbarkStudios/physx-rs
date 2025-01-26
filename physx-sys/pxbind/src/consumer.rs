@@ -133,11 +133,9 @@ pub enum Item {
     TypedefDecl(Typedef),
     /// The deprecated declspec has been defined on the item (PX_DEPRECATED)
     DeprecatedAttr,
+    FullComment,
     /// We don't care about other items
-    Other {
-        kind: Option<clang_ast::Kind>,
-        name: Option<String>,
-    },
+    Other,
 }
 
 impl fmt::Display for Item {
@@ -392,15 +390,10 @@ impl<'ast> AstConsumer<'ast> {
 
     /// Walks the AST of a node and attempts to retrieve a comment for it
     fn get_comment(node: &Node) -> Option<Comment<'_>> {
-        let full_comment = node.inner.iter().find(|inner| {
-            matches!(
-                inner.kind,
-                Item::Other {
-                    kind: Some(clang_ast::Kind::FullComment),
-                    name: _,
-                }
-            )
-        })?;
+        let full_comment = node
+            .inner
+            .iter()
+            .find(|inner| matches!(inner.kind, Item::FullComment))?;
 
         fn gather<'ast>(
             node: &'ast Node,
