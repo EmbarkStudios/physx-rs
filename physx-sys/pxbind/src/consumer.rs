@@ -135,10 +135,7 @@ pub enum Item {
     DeprecatedAttr,
     FullComment,
     /// We don't care about other items
-    Other {
-        kind: Option<clang_ast::Kind>,
-        name: Option<String>,
-    },
+    Other,
 }
 
 impl fmt::Display for Item {
